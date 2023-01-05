@@ -2,11 +2,10 @@ package service
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/PriyavKaneria/PureML/service/config"
 	"github.com/PriyavKaneria/PureML/service/datastore"
 	"github.com/PriyavKaneria/PureML/service/models"
+	"net/http"
 )
 
 func GetAllAdminOrgs(request *models.Request) *models.Response {

@@ -9,6 +9,9 @@ import (
 func main() {
 	e := echo.New()
 
+	//Health API
+	e.GET("/health", handlers.Health)
+
 	//Org APIs
 	group := e.Group("/org")
 	group.GET("/all", handlers.GetAllAdminOrgs, middlewares.AuthenticateJWT)

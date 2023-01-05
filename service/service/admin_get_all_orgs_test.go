@@ -3,13 +3,13 @@ package service_test
 import "testing"
 
 func TestForValidUserName(t *testing.T) {
-	//Todo
+	//TODO
 }
 
 func TestForInvalidUserName(t *testing.T) {
-	//Todo
+	//TODO
 }
 
 func TestForInternalServerError(t *testing.T) {
-	//Todo
+	//TODO
 }

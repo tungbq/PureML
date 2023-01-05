@@ -8,7 +8,7 @@ import (
 var ds Datastore = nil
 
 func init() {
-	ds = &impl.TestDatastore{} //Todo to switch with real datastrore
+	ds = &impl.TestDatastore{} //TODO to switch with real datastrore
 }
 
 func GetAllAdminOrgs() ([]models.Organization, error) {

@@ -5,6 +5,7 @@ var adminAccess = map[string]bool{
 	"kaneriakesha7@gmail.com":  true,
 	"akshilvthumar@gmail.com":  true,
 	"test.pureml@gmail.com":    true,
+	"demo@aztlan.in":           true,
 }
 
 func HasAdminAccess(userName string) bool {
