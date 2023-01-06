@@ -14,6 +14,7 @@ from urllib.parse import urljoin
 from . import get_token, get_project_id, get_org_id, convert_values_to_string
 from pureml.utils.constants import BASE_URL, PATH_USER_PROJECT_DIR
 from pureml.utils.pipeline import add_metrics_to_config
+from pureml.utils.log_utils import merge_step_with_value
 
 
 def post_metrics(metrics, model_name: str, model_version:str):
@@ -43,7 +44,7 @@ def post_metrics(metrics, model_name: str, model_version:str):
 
     return response
 
-def add(metrics, model_name: str=None, model_version:str='latest') -> str:
+def add(metrics, model_name: str=None, model_version:str='latest', step=1) -> str:
     '''`add()` takes a dictionary of metrics and a model name as input and returns a string
     
     Parameters
@@ -62,8 +63,10 @@ def add(metrics, model_name: str=None, model_version:str='latest') -> str:
     '''
 
     metrics = convert_values_to_string(logged_dict=metrics)
+    metrics = merge_step_with_value(values_dict=metrics, step=step)
 
     add_metrics_to_config(values=metrics, model_name=model_name, model_version=model_version)
+    
 
     if model_name is not None and model_version is not None:
         response = post_metrics(metrics=metrics, model_name=model_name, model_version=model_version)

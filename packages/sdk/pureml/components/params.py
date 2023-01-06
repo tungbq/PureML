@@ -14,6 +14,7 @@ from urllib.parse import urljoin
 from . import get_token, get_project_id, get_org_id, convert_values_to_string
 from pureml.utils.constants import BASE_URL, PATH_USER_PROJECT_DIR
 from pureml.utils.pipeline import add_params_to_config
+from pureml.utils.log_utils import merge_step_with_value
 
 
 def post_params(params, model_name: str, model_version:str):
@@ -45,7 +46,7 @@ def post_params(params, model_name: str, model_version:str):
     return response
 
 
-def add(params, model_name: str=None, model_version:str='latest') -> str:
+def add(params, model_name: str=None, model_version:str='latest', step=1) -> str:
     '''`add()` takes a dictionary of parameters and a model name as input and returns a string
     
     Parameters
@@ -64,6 +65,7 @@ def add(params, model_name: str=None, model_version:str='latest') -> str:
     '''
 
     params = convert_values_to_string(logged_dict=params)
+    params = merge_step_with_value(values_dict=params, step=step)
 
     add_params_to_config(values=params, model_name=model_name, model_version=model_version)
 

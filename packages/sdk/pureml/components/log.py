@@ -14,7 +14,7 @@ from pureml.components import params as pure_params
 #     if 'params' in kwargs.keys():
 #         params.add(kwargs['params'])
 
-def log(metrics = None, params=None, model_name=None, model_version=None):
+def log(metrics = None, params=None, model_name=None, model_version=None, step=1):
 
 
     if metrics is not None:
@@ -26,6 +26,8 @@ def log(metrics = None, params=None, model_name=None, model_version=None):
             func_params['model_version'] = model_version
 
         func_params['metrics'] = metrics.copy()
+
+        func_params['step']  = step
         
         pure_metrics.add(**func_params)
 
@@ -38,4 +40,7 @@ def log(metrics = None, params=None, model_name=None, model_version=None):
             func_params['model_version'] = model_version
 
         func_params['params'] = params.copy()
+
+        func_params['step']  = step
+
         pure_params.add(**func_params)
