@@ -14,7 +14,7 @@ func extractRequest(context echo.Context) *models.Request {
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)
 	request.QueryParams = extractQueryParams(context)
-	request.UserName = extractUserName(context)
+	request.User = extractUser(context)
 	return request
 }
 
@@ -62,18 +62,19 @@ func extractPathParams(context echo.Context) map[string]string {
 	return pathParams
 }
 
-func extractUserName(context echo.Context) string {
-	return context.Request().URL.User.Username()
+func extractUser(context echo.Context) models.User {
+	// TODO: Extract user from context
+	return models.User{}
 }
 
 func convertToBytes(object interface{}) []byte {
-	switch object.(type) {
+	switch obj := object.(type) {
 	case string:
-		return []byte(object.(string))
+		return []byte(obj)
 	case []byte:
-		return object.([]byte)
+		return obj
 	default:
-		bytes, err := json.Marshal(object)
+		bytes, err := json.Marshal(obj)
 		if err != nil {
 			panic(err)
 		}

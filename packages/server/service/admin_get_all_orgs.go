@@ -10,7 +10,7 @@ import (
 
 func GetAllAdminOrgs(request *models.Request) *models.Response {
 	response := &models.Response{}
-	if config.HasAdminAccess(request.UserName) {
+	if config.HasAdminAccess(request.User) {
 		allOrgs, err := datastore.GetAllAdminOrgs()
 		if err != nil {
 			fmt.Println(err)
