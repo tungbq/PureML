@@ -71,6 +71,30 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/org/create": {
+            "post": {
+                "description": "Create a test organization.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "root"
+                ],
+                "summary": "Create a test organization.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     }
 }`

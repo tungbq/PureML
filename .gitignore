@@ -5,5 +5,7 @@ poetry.lock
 catboost_info/
 experiments/
 
+packages/server/db/
+
 __pycache__/
 *.pyc

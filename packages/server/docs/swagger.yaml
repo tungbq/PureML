@@ -43,6 +43,22 @@ paths:
       summary: Get all organizations and their details.
       tags:
       - root
+  /org/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Create a test organization.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a test organization.
+      tags:
+      - root
 schemes:
 - http
 swagger: "2.0"

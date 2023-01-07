@@ -1,9 +1,12 @@
 package main
 
 import (
+	"github.com/PriyavKaneria/PureML/service/config"
+	"github.com/PriyavKaneria/PureML/service/datastore"
 	_ "github.com/PriyavKaneria/PureML/service/docs"
 	"github.com/PriyavKaneria/PureML/service/handlers"
 	"github.com/PriyavKaneria/PureML/service/middlewares"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -30,6 +33,7 @@ func main() {
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
+	e.Use(echojwt.JWT([]byte(config.Environment()["JWT_SECRET"])))
 
 	//Health API
 	e.GET("/health", handlers.Health)
@@ -39,6 +43,7 @@ func main() {
 	//Org APIs
 	group := e.Group("/org")
 	group.GET("/all", handlers.GetAllAdminOrgs, middlewares.AuthenticateJWT)
+	group.POST("/create", handlers.CreateOrganization, middlewares.AuthenticateJWT)
 
 	//Project APIs
 	// group := e.Group("")
@@ -46,6 +51,7 @@ func main() {
 	//User APIs
 	// group = e.Group("user")
 
-	e.Logger.Fatal(e.Start(":8080"))
+	datastore.Init()
+	e.Logger.Fatal(e.Start("localhost:8080"))
 
 }

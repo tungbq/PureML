@@ -8,8 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewTestSQLiteDatastore() *TestSQLiteDatastore {
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+func NewSQLiteDatastore() *SQLiteDatastore {
+	db, err := gorm.Open(sqlite.Open("db/pureml.db"), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 		panic("Error connecting to database")
@@ -34,17 +34,27 @@ func NewTestSQLiteDatastore() *TestSQLiteDatastore {
 		&models.UserOrganizations{},
 	)
 	if err != nil {
-		return &TestSQLiteDatastore{}
+		return &SQLiteDatastore{}
 	}
-	return &TestSQLiteDatastore{
+	return &SQLiteDatastore{
 		DB: db,
 	}
 }
 
-type TestSQLiteDatastore struct {
+type SQLiteDatastore struct {
 	DB *gorm.DB
 }
 
-func (ds *TestSQLiteDatastore) GetAllAdminOrgs() ([]models.Organization, error) {
-	return []models.Organization{}, nil
+func (ds *SQLiteDatastore) GetAllAdminOrgs() ([]models.Organization, error) {
+	var organizations []models.Organization
+	ds.DB.Find(&organizations)
+	return organizations, nil
+}
+
+func (ds *SQLiteDatastore) CreateOrganization(org models.Organization) error {
+	result := ds.DB.Create(&org)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

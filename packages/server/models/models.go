@@ -21,19 +21,25 @@ type Request struct {
 	QueryParams map[string]string
 }
 
+type ResponseBody struct {
+	Status  int
+	Data    interface{}
+	Message string
+}
+
 type Response struct {
 	Error      error
-	Body       interface{}
+	Body       ResponseBody
 	StatusCode int
 }
 
 // Database Models
 type User struct {
 	BaseModel
-	Name     string `json:"name" not null`
-	Email    string `json:"email" gorm:"uniqueIndex" not null`
-	Handle   string `json:"handle" gorm:"uniqueIndex" not null`
-	Password string `json:"password" not null`
+	Name     string `json:"name" gorm:"not null"`
+	Email    string `json:"email" gorm:"unique;not null"`
+	Handle   string `json:"handle" gorm:"unique;not null"`
+	Password string `json:"password" gorm:"not null"`
 	Bio      string `json:"bio"`
 	Avatar   string `json:"avatar"`
 
@@ -43,27 +49,27 @@ type User struct {
 type UserOrganizations struct {
 	UserID uint   `json:"user_id" gorm:"primaryKey"`
 	OrgID  uint   `json:"org_id" gorm:"primaryKey"`
-	Role   string `json:"role" not null default:"member"`
+	Role   string `json:"role" gorm:"not null;default:member"`
 }
 
 type Organization struct {
 	BaseModel
-	Name         string `json:"name" not null`
-	Handle       string `json:"handle",gorm:"uniqueIndex"`
+	Name         string `json:"name" gorm:"not null"`
+	Handle       string `json:"handle" gorm:"unique"`
 	Avatar       string `json:"avatar"`
 	Description  string `json:"description"`
 	APITokenHash string `json:"api_token_hash"`
-	JoinCode     string `json:"join_code" not null`
+	JoinCode     string `json:"join_code" gorm:"not null"`
 }
 
 type Dataset struct {
 	BaseModel
-	Name      string `json:"name" gorm:"uniqueIndex"`
+	Name      string `json:"name" gorm:"unique"`
 	Wiki      string `json:"wiki"`
-	OrgID     uint   `json:"org_id" not null`
-	CreatedBy uint   `json:"created_by" not null`
-	UpdateBy  uint   `json:"updated_by" not null`
-	IsPublic  bool   `json:"is_public" not null default:"false"`
+	OrgID     uint   `json:"org_id" gorm:"not null"`
+	CreatedBy uint   `json:"created_by" gorm:"not null"`
+	UpdatedBy uint   `json:"updated_by" gorm:"not null"`
+	IsPublic  bool   `json:"is_public" gorm:"not null;default:false"`
 
 	Org           Organization `gorm:"foreignKey:OrgID"`
 	CreatedByUser User         `gorm:"foreignKey:CreatedBy"`
@@ -76,13 +82,13 @@ type Dataset struct {
 type DatasetUser struct {
 	DatasetID uint   `json:"dataset_id" gorm:"primaryKey"`
 	UserID    uint   `json:"user_id" gorm:"primaryKey"`
-	Role      string `json:"role" not null default:"member"`
+	Role      string `json:"role" gorm:"not null default:member"`
 }
 
 type DatasetBranch struct {
 	BaseModel
-	Name      string `json:"name" not null uniqueIndex:"idx_dataset_branch"`
-	DatasetID uint   `json:"dataset_id" not null uniqueIndex:"idx_dataset_branch"`
+	Name      string `json:"name" gorm:"not null;unique:idx_dataset_branch"`
+	DatasetID uint   `json:"dataset_id" gorm:"not null;unique:idx_dataset_branch"`
 	IsDefault bool   `json:"is_default" default:"false"`
 
 	Dataset Dataset `gorm:"foreignKey:DatasetID"`
@@ -92,10 +98,10 @@ type DatasetBranch struct {
 
 type DatasetVersion struct {
 	BaseModel
-	Version   string `json:"version" not null uniqueIndex:"idx_branch_version"`
-	BranchID  uint   `json:"branch_id" not null uniqueIndex:"idx_branch_version"`
+	Version   string `json:"version" gorm:"not null;unique:idx_branch_version"`
+	BranchID  uint   `json:"branch_id" gorm:"not null;unique:idx_branch_version"`
 	LineageID uint   `json:"lineage_id"`
-	Hash      string `json:"hash" not null`
+	Hash      string `json:"hash" gorm:"not null"`
 	PathID    uint   `json:"path_id"`
 
 	Branch  DatasetBranch `gorm:"foreignKey:BranchID"`
@@ -110,11 +116,11 @@ type Lineage struct {
 
 type DatasetReview struct {
 	BaseModel
-	FromBranchID uint   `json:"from_branch_id" not null`
-	ToBranchID   uint   `json:"to_branch_id" not null`
-	Title        string `json:"title" not null`
+	FromBranchID uint   `json:"from_branch_id" gorm:"not null"`
+	ToBranchID   uint   `json:"to_branch_id" gorm:"not null"`
+	Title        string `json:"title" gorm:"not null"`
 	Description  string `json:"description"`
-	CreatedBy    uint   `json:"created_by" not null`
+	CreatedBy    uint   `json:"created_by" gorm:"not null"`
 	AssignedTo   uint   `json:"assigned_to"`
 	IsComplete   bool   `json:"is_complete" default:"false"`
 	IsAccepted   bool   `json:"is_accepted" default:"false"`
@@ -127,11 +133,11 @@ type DatasetReview struct {
 
 type Model struct {
 	BaseModel
-	Name      string `json:"name" not null uniqueIndex:"idx_org_model_name"`
+	Name      string `json:"name" gorm:"not null;unique:idx_org_model_name"`
 	Wiki      string `json:"wiki"`
-	OrgID     uint   `json:"org_id not null uniqueIndex:"idx_org_model_name"`
-	CreatedBy uint   `json:"created_by" not null`
-	UpdateBy  uint   `json:"updated_by"`
+	OrgID     uint   `json:"org_id" gorm:"not null;unique:idx_org_model_name"`
+	CreatedBy uint   `json:"created_by" gorm:"not null"`
+	UpdatedBy uint   `json:"updated_by"`
 	IsPublic  bool   `json:"is_public" default:"false"`
 
 	Org           Organization `gorm:"foreignKey:OrgID"`
@@ -150,8 +156,8 @@ type ModelUser struct {
 
 type ModelBranch struct {
 	BaseModel
-	Name      string `json:"name" not null uniqueIndex:"idx_model_branch"`
-	ModelID   uint   `json:"model_id" not null uniqueIndex:"idx_model_branch"`
+	Name      string `json:"name" gorm:"not null;unique:idx_model_branch"`
+	ModelID   uint   `json:"model_id" gorm:"not null;unique:idx_model_branch"`
 	IsDefault bool   `json:"is_default" default:"false"`
 
 	Model Model `gorm:"foreignKey:ModelID"`
@@ -161,9 +167,9 @@ type ModelBranch struct {
 
 type ModelVersion struct {
 	BaseModel
-	Version  string `json:"version" not null uniqueIndex:idx_branch_version`
-	BranchID uint   `json:"branch_id" not null uniqueIndex:idx_branch_version`
-	Hash     string `json:"hash" not null uniqueIndex`
+	Version  string `json:"version" gorm:"not null;unique:idx_branch_version"`
+	BranchID uint   `json:"branch_id" gorm:"not null;unique:idx_branch_version"`
+	Hash     string `json:"hash" gorm:"not null;unique"`
 	PathID   uint   `json:"path_id"`
 
 	Branch ModelBranch `gorm:"foreignKey:BranchID"`
@@ -172,11 +178,11 @@ type ModelVersion struct {
 
 type ModelReview struct {
 	BaseModel
-	FromBranchID uint   `json:"from_branch_id" not null`
-	ToBranchID   uint   `json:"to_branch_id" not null`
-	Title        string `json:"title" not null`
+	FromBranchID uint   `json:"from_branch_id" gorm:"not null"`
+	ToBranchID   uint   `json:"to_branch_id" gorm:"not null"`
+	Title        string `json:"title" gorm:"not null"`
 	Description  string `json:"description"`
-	CreatedBy    uint   `json:"created_by" not null`
+	CreatedBy    uint   `json:"created_by" gorm:"not null"`
 	AssignedTo   uint   `json:"assigned_to"`
 	IsComplete   bool   `json:"is_complete" default:"false"`
 	IsAccepted   bool   `json:"is_accepted" default:"false"`
@@ -189,21 +195,21 @@ type ModelReview struct {
 
 type Path struct {
 	BaseModel
-	SourceTypeID string `json:"source_type_id" not null`
-	SourcePath   string `json:"source_path" gorm:"uniqueIndex" not null`
+	SourceTypeID string `json:"source_type_id" gorm:"not null"`
+	SourcePath   string `json:"source_path" gorm:"unique;not null"`
 
 	SourceType SourceType `gorm:"foreignKey:SourceTypeID"`
 }
 
 type SourceType struct {
 	BaseModel
-	Name      string `json:"name" not null`
+	Name      string `json:"name" gorm:"not null"`
 	PublicURL string `json:"public_url"`
 }
 
 type Activity struct {
 	BaseModel
-	UserID    uint   `json:"user_id" not null`
+	UserID    uint   `json:"user_id" gorm:"not null"`
 	Activity  string `json:"activity"`
 	ModelID   uint   `json:"model_id"`
 	DatasetID uint   `json:"dataset_id"`
@@ -216,8 +222,8 @@ type Activity struct {
 type Tag struct {
 	ModelID   uint   `json:"model_id" gorm:"primaryKey"`
 	DatasetID uint   `json:"dataset_id" gorm:"primaryKey"`
-	OrgID     uint   `json:"org_id" uniqueIndex: "idx_org_tag" not null`
-	Tag       string `json:"tag" uniqueIndex: "idx_org_tag" not null`
+	OrgID     uint   `json:"org_id" gorm:"not null;unique:idx_org_tag"`
+	Tag       string `json:"tag" gorm:"not null;unique:idx_org_tag"`
 
 	Model   Model        `gorm:"foreignKey:ModelID"`
 	Dataset Dataset      `gorm:"foreignKey:DatasetID"`
