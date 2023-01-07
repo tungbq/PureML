@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"bytes"
@@ -10,11 +10,11 @@ import (
 
 func extractRequest(context echo.Context) *models.Request {
 	request := &models.Request{}
+	request.User = context.Get("User").(*models.UserDetails) //Todo
 	request.Body = extractBody(context)
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)
 	request.QueryParams = extractQueryParams(context)
-	request.UserName = extractUserName(context)
 	return request
 }
 
@@ -60,10 +60,6 @@ func extractPathParams(context echo.Context) map[string]string {
 		pathParams[pathParam] = context.Param(pathParam)
 	}
 	return pathParams
-}
-
-func extractUserName(context echo.Context) string {
-	return context.Request().URL.User.Username()
 }
 
 func convertToBytes(object interface{}) []byte {

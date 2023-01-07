@@ -11,3 +11,7 @@ func HasAdminAccess(userName string) bool {
 	_, ok := adminAccess[userName]
 	return ok
 }
+
+func TokenSigningSecret() string {
+	return "PureSecret"
+}

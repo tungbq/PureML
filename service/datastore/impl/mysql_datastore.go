@@ -27,3 +27,11 @@ func (ds *MySQLDatastore) GetAllAdminOrgs() ([]models.Organization, error) {
 	//Todo Interact with DB via GORM
 	return []models.Organization{}, nil
 }
+
+func (ds *MySQLDatastore) GetOrgByID(orgId string) (*models.Organization, error) {
+	return nil, nil
+}
+
+func (ds *MySQLDatastore) GetOrgsByUserMail(mailId string) ([]models.OrgAccess, error) {
+	return []models.OrgAccess{}, nil
+}

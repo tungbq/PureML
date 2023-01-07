@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/PriyavKaneria/PureML/service/config"
@@ -11,17 +10,13 @@ import (
 
 func GetAllAdminOrgs(request *models.Request) *models.Response {
 	response := &models.Response{}
-	if config.HasAdminAccess(request.UserName) {
+	if config.HasAdminAccess(request.User.MailId) {
 		allOrgs, err := datastore.GetAllAdminOrgs()
 		if err != nil {
-			fmt.Println(err)
-			response.Error = err
-			response.StatusCode = http.StatusInternalServerError
-			response.Body = "Internal server error"
-		} else {
-			response.StatusCode = http.StatusOK
-			response.Body = allOrgs
+			return models.NewErrorResponse(err)
 		}
+		response.StatusCode = http.StatusOK
+		response.Body = allOrgs
 	} else {
 		response.StatusCode = http.StatusForbidden
 		response.Body = "Forbidden"
