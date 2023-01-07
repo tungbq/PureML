@@ -9,7 +9,7 @@ import (
 )
 
 func NewMSQLDatastore() *MySQLDatastore {
-	db, err := gorm.Open(mysql.Open(""), &gorm.Config{}) //Todo
+	db, err := gorm.Open(mysql.Open(""), &gorm.Config{}) //TODO
 	if err != nil {
 		fmt.Println(err)
 		panic("Error connecting to database")
@@ -24,7 +24,7 @@ type MySQLDatastore struct {
 }
 
 func (ds *MySQLDatastore) GetAllAdminOrgs() ([]models.Organization, error) {
-	//Todo Interact with DB via GORM
+	//TODO Interact with DB via GORM
 	return []models.Organization{}, nil
 }
 
