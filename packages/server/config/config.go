@@ -29,3 +29,7 @@ func HasAdminAccess(user models.User) bool {
 	_, ok := adminAccess[user.Email]
 	return ok
 }
+
+func TokenSigningSecret() string {
+	return "PureSecret"
+}

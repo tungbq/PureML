@@ -1,20 +1,20 @@
-package handlers
+package handler
 
 import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/PriyavKaneria/PureML/service/models"
+	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/labstack/echo/v4"
 )
 
 func extractRequest(context echo.Context) *models.Request {
 	request := &models.Request{}
+	request.User = context.Get("User").(*models.UserDetails) //Todo
 	request.Body = extractBody(context)
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)
 	request.QueryParams = extractQueryParams(context)
-	request.User = extractUser(context)
 	return request
 }
 
@@ -62,19 +62,14 @@ func extractPathParams(context echo.Context) map[string]string {
 	return pathParams
 }
 
-func extractUser(context echo.Context) models.User {
-	// TODO: Extract user from context
-	return models.User{}
-}
-
 func convertToBytes(object interface{}) []byte {
-	switch obj := object.(type) {
+	switch object.(type) {
 	case string:
-		return []byte(obj)
+		return []byte(object.(string))
 	case []byte:
-		return obj
+		return object.([]byte)
 	default:
-		bytes, err := json.Marshal(obj)
+		bytes, err := json.Marshal(object)
 		if err != nil {
 			panic(err)
 		}
