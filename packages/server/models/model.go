@@ -61,3 +61,62 @@ type ModelReview struct {
 	CreatedByUser  User        `gorm:"foreignKey:CreatedBy"`
 	AssignedToUser User        `gorm:"foreignKey:AssignedTo"`
 }
+
+// Response models
+
+type ModelNameResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type ModelResponse struct {
+	ID        uint                 `json:"id"`
+	Name      string               `json:"name"`
+	Wiki      string               `json:"wiki"`
+	Org       OrganizationResponse `json:"org"`
+	CreatedBy UserHandleResponse   `json:"created_by"`
+	UpdatedBy UserHandleResponse   `json:"updated_by"`
+	IsPublic  bool                 `json:"is_public"`
+}
+
+type ModelUserResponse struct {
+	User UserHandleResponse `json:"user"`
+	Role string             `json:"role"`
+}
+
+type ModelBranchNameResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type ModelBranchResponse struct {
+	ID        uint              `json:"id"`
+	Name      string            `json:"name"`
+	Model     ModelNameResponse `json:"model"`
+	IsDefault bool              `json:"is_default"`
+}
+
+type ModelVersionNameResponse struct {
+	ID      uint   `json:"id"`
+	Version string `json:"version"`
+}
+
+type ModelVersionResponse struct {
+	ID      uint                    `json:"id"`
+	Version string                  `json:"version"`
+	Branch  ModelBranchNameResponse `json:"branch"`
+	Hash    string                  `json:"hash"`
+	Path    PathResponse            `json:"path"`
+}
+
+type ModelReviewResponse struct {
+	ID          uint                `json:"id"`
+	FromBranch  ModelBranchResponse `json:"from_branch"`
+	ToBranch    ModelBranchResponse `json:"to_branch"`
+	Title       string              `json:"title"`
+	Description string              `json:"description"`
+	CreatedBy   UserHandleResponse  `json:"created_by"`
+	AssignedTo  UserHandleResponse  `json:"assigned_to"`
+	IsComplete  bool                `json:"is_complete"`
+	IsAccepted  bool                `json:"is_accepted"`
+}

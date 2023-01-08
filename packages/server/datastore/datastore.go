@@ -20,7 +20,7 @@ func init() {
 	}
 }
 
-func GetAllAdminOrgs() ([]models.Organization, error) {
+func GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	return ds.GetAllAdminOrgs()
 }
 

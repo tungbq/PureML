@@ -13,3 +13,16 @@ type SourceType struct {
 	Name      string `json:"name" gorm:"not null"`
 	PublicURL string `json:"public_url"`
 }
+
+// Response models
+
+type PathResponse struct {
+	ID         uint               `json:"id"`
+	SourcePath string             `json:"source_path"`
+	SourceType SourceTypeResponse `json:"source_type"`
+}
+
+type SourceTypeResponse struct {
+	Name      string `json:"name"`
+	PublicURL string `json:"public_url"`
+}

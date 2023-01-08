@@ -9,3 +9,19 @@ type Organization struct {
 	APITokenHash string `json:"api_token_hash"`
 	JoinCode     string `json:"join_code" gorm:"not null"`
 }
+
+// Response models
+
+type OrganizationHandleResponse struct {
+	Handle string `json:"handle"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
+}
+
+type OrganizationResponse struct {
+	Name        string `json:"name"`
+	Handle      string `json:"handle"`
+	Avatar      string `json:"avatar"`
+	Description string `json:"description"`
+	JoinCode    string `json:"join_code"`
+}

@@ -17,3 +17,24 @@ type UserOrganizations struct {
 	OrgID  uint   `json:"org_id" gorm:"primaryKey"`
 	Role   string `json:"role" gorm:"not null;default:member"`
 }
+
+// Response models
+
+type UserHandleResponse struct {
+	Handle string `json:"handle"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
+}
+
+type UserResponse struct {
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Handle string `json:"handle"`
+	Bio    string `json:"bio"`
+	Avatar string `json:"avatar"`
+}
+
+type UserOrganizationsResponse struct {
+	Org  OrganizationHandleResponse `json:"org"`
+	Role string                     `json:"role"`
+}

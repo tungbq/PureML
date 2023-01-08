@@ -45,8 +45,8 @@ type SQLiteDatastore struct {
 	DB *gorm.DB
 }
 
-func (ds *SQLiteDatastore) GetAllAdminOrgs() ([]models.Organization, error) {
-	var organizations []models.Organization
+func (ds *SQLiteDatastore) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
+	var organizations []models.OrganizationResponse
 	ds.DB.Find(&organizations)
 	return organizations, nil
 }

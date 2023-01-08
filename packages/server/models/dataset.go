@@ -68,3 +68,68 @@ type DatasetReview struct {
 	CreatedByUser  User          `gorm:"foreignKey:CreatedBy"`
 	AssignedToUser User          `gorm:"foreignKey:AssignedTo"`
 }
+
+// Response models
+
+type DatasetNameResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type DatasetResponse struct {
+	ID        uint                 `json:"id"`
+	Name      string               `json:"name"`
+	Wiki      string               `json:"wiki"`
+	Org       OrganizationResponse `json:"org"`
+	CreatedBy UserHandleResponse   `json:"created_by"`
+	UpdatedBy UserHandleResponse   `json:"updated_by"`
+	IsPublic  bool                 `json:"is_public"`
+}
+
+type DatasetUserResponse struct {
+	User UserHandleResponse `json:"user"`
+	Role string             `json:"role"`
+}
+
+type DatasetBranchNameResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type DatasetBranchResponse struct {
+	ID        uint                `json:"id"`
+	Name      string              `json:"name"`
+	Dataset   DatasetNameResponse `json:"dataset"`
+	IsDefault bool                `json:"is_default"`
+}
+
+type DatasetVersionNameResponse struct {
+	ID      uint   `json:"id"`
+	Version string `json:"version"`
+}
+
+type DatasetVersionResponse struct {
+	ID      uint                      `json:"id"`
+	Version string                    `json:"version"`
+	Branch  DatasetBranchNameResponse `json:"branch"`
+	Lineage LineageResponse           `json:"lineage"`
+	Hash    string                    `json:"hash"`
+	Path    PathResponse              `json:"path"`
+}
+
+type LineageResponse struct {
+	ID      uint   `json:"id"`
+	Lineage string `json:"lineage"`
+}
+
+type DatasetReviewResponse struct {
+	ID          uint                  `json:"id"`
+	FromBranch  DatasetBranchResponse `json:"from_branch"`
+	ToBranch    DatasetBranchResponse `json:"to_branch"`
+	Title       string                `json:"title"`
+	Description string                `json:"description"`
+	CreatedBy   UserHandleResponse    `json:"created_by"`
+	AssignedTo  UserHandleResponse    `json:"assigned_to"`
+	IsComplete  bool                  `json:"is_complete"`
+	IsAccepted  bool                  `json:"is_accepted"`
+}
