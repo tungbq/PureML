@@ -11,7 +11,7 @@ func LeaveOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)
 	orgId := request.GetOrgId()
-	_, err := datastore.DeleteUserOrganizationFromEmailAndOrgId(email, orgId)
+	err := datastore.DeleteUserOrganizationFromEmailAndOrgId(email, orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

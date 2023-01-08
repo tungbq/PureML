@@ -36,37 +36,32 @@ func CreateOrgFromEmail(email string, orgName string, orgDesc string, orgHandle 
 	return ds.CreateOrgFromEmail(email, orgName, orgDesc, orgHandle)
 }
 
-func GetUserOrganizationsByEmail(email string) ([]models.UserOrganizations, error) {
-	// return ds.GetOrgsByUserMail(email)
-	return nil, nil
+func GetUserOrganizationsByEmail(email string) ([]models.UserOrganizationsResponse, error) {
+	return ds.GetUserOrganizationsByEmail(email)
 }
 
-func GetUserOrganizationByOrgIdAndEmail(orgId string, email string) (*models.UserOrganizations, error) {
-	return nil, nil
+func GetUserOrganizationByOrgIdAndEmail(orgId string, email string) (*models.UserOrganizationsResponse, error) {
+	return ds.GetUserOrganizationByOrgIdAndEmail(orgId, email)
 }
 
-func CreateUserOrganizationFromEmailAndOrgId(email string, orgId string) (*models.UserOrganizations, error) {
-	return nil, nil
+func CreateUserOrganizationFromEmailAndOrgId(email string, orgId string) (*models.UserOrganizationsResponse, error) {
+	return ds.CreateUserOrganizationFromEmailAndOrgId(email, orgId)
 }
 
-func DeleteUserOrganizationFromEmailAndOrgId(email string, orgId string) (*models.UserOrganizations, error) {
-	return nil, nil
+func DeleteUserOrganizationFromEmailAndOrgId(email string, orgId string) error {
+	return ds.DeleteUserOrganizationFromEmailAndOrgId(email, orgId)
 }
 
-func CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizations, error) {
-	return nil, nil
+func CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizationsResponse, error) {
+	return ds.CreateUserOrganizationFromEmailAndJoinCode(email, joinCode)
 }
 
-func UpdateOrg(orgId string, orgName string) (*models.Organization, error) {
-	return nil, nil
+func UpdateOrg(orgId string, orgName string, orgDesc string, orgAvatar string) (*models.OrganizationResponse, error) {
+	return ds.UpdateOrg(orgId, orgName, orgDesc, orgAvatar)
 }
 
-func GetUser(email string) (*models.User, error) {
-	return nil, nil
-}
-
-func GetUserWithUserOrganization(email string, orgId string) (*models.User, error) {
-	return nil, nil
+func GetUser(email string) (*models.UserResponse, error) {
+	return ds.GetUser(email)
 }
 
 type Datastore interface {
