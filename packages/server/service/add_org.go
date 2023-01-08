@@ -10,7 +10,7 @@ import (
 func AddOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)
-	user, err := datastore.GetUser(email)
+	user, err := datastore.GetUserByEmail(email)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

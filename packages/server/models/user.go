@@ -27,11 +27,13 @@ type UserHandleResponse struct {
 }
 
 type UserResponse struct {
-	Name   string `json:"name"`
-	Email  string `json:"email"`
-	Handle string `json:"handle"`
-	Bio    string `json:"bio"`
-	Avatar string `json:"avatar"`
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Handle   string `json:"handle"`
+	Bio      string `json:"bio"`
+	Avatar   string `json:"avatar"`
+	Password string `json:"-"`
 }
 
 type UserOrganizationsResponse struct {

@@ -60,8 +60,16 @@ func UpdateOrg(orgId string, orgName string, orgDesc string, orgAvatar string) (
 	return ds.UpdateOrg(orgId, orgName, orgDesc, orgAvatar)
 }
 
-func GetUser(email string) (*models.UserResponse, error) {
+func GetUserByEmail(email string) (*models.UserResponse, error) {
 	return ds.GetUser(email)
+}
+
+func UpdateUser(email string, updatedAttributes map[string]string) (*models.UserResponse, error) {
+	return nil, nil
+}
+
+func CreateUser(name string, email string, hashedPassword string, shortId string) (*models.UserResponse, error) {
+	return nil, nil
 }
 
 type Datastore interface {
