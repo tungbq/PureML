@@ -16,11 +16,14 @@ func GetOrgByID(request *models.Request) *models.Response {
 	}
 	if organization == nil {
 		response.StatusCode = http.StatusNotFound
-		response.Message = "Organization not found"
+		response.Body.Status = response.StatusCode
+		response.Body.Message = "Organization not found"
+		response.Body.Data = nil
 	} else {
 		response.StatusCode = http.StatusOK
-		response.Message = "Organization Details"
-		response.Body = []models.Organization{*organization}
+		response.Body.Status = response.StatusCode
+		response.Body.Message = "Organization Details"
+		response.Body.Data = []models.Organization{*organization}
 	}
 	return response
 }

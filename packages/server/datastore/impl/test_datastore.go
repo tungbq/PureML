@@ -3,12 +3,12 @@ package impl
 import (
 	"fmt"
 
-	"github.com/PriyavKaneria/PureML/service/models"
+	"github.com/PureML-Inc/PureML/server/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func NewTestSQLiteDatastore() *TestSQLiteDatastore {
+func NewTestSQLiteDatastore() *SQLiteDatastore {
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -34,25 +34,21 @@ func NewTestSQLiteDatastore() *TestSQLiteDatastore {
 		&models.UserOrganizations{},
 	)
 	if err != nil {
-		return &TestSQLiteDatastore{}
+		return &SQLiteDatastore{}
 	}
-	return &TestSQLiteDatastore{
+	return &SQLiteDatastore{
 		DB: db,
 	}
 }
 
-type TestSQLiteDatastore struct {
-	DB *gorm.DB
-}
-
-func (ds *TestSQLiteDatastore) GetAllAdminOrgs() ([]models.Organization, error) {
+func (ds *SQLiteDatastore) TestGetAllAdminOrgs() ([]models.Organization, error) {
 	return []models.Organization{}, nil
 }
 
-func (ds *TestDatastore) GetOrgByID(orgId string) (*models.Organization, error) {
+func (ds *SQLiteDatastore) TestGetOrgByID(orgId string) (*models.Organization, error) {
 	return nil, nil
 }
 
-func (ds *TestDatastore) GetOrgsByUserMail(mailId string) ([]models.OrgAccess, error) {
-	return []models.OrgAccess{}, nil
+func (ds *SQLiteDatastore) TestGetOrgsByUserMail(email string) ([]models.UserOrganizations, error) {
+	return []models.UserOrganizations{}, nil
 }

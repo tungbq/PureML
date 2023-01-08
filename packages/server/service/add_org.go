@@ -9,23 +9,27 @@ import (
 
 func AddOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
-	mailId := request.GetParsedBodyAttribute("email").(string)
-	user, err := datastore.GetUser(mailId)
+	email := request.GetParsedBodyAttribute("email").(string)
+	user, err := datastore.GetUser(email)
 	if err != nil {
 		return models.NewErrorResponse(err)
 	}
 	response := &models.Response{}
 	if user == nil {
 		response.StatusCode = http.StatusNotFound
-		response.Message = "User not found"
+		response.Body.Status = http.StatusNotFound
+		response.Body.Message = "User not found"
+		response.Body.Data = nil
 		return response
 	}
 	orgId := request.GetOrgId()
-	_, err = datastore.CreateOrgAccessFromMailIdAndOrgId(mailId, orgId)
+	_, err = datastore.CreateUserOrganizationFromEmailAndOrgId(email, orgId)
 	if err != nil {
 		return models.NewErrorResponse(err)
 	}
 	response.StatusCode = http.StatusOK
-	response.Message = "User added to organization"
+	response.Body.Status = response.StatusCode
+	response.Body.Data = nil
+	response.Body.Message = "User added to organization"
 	return response
 }

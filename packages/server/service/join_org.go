@@ -17,16 +17,19 @@ func JoinOrg(request *models.Request) *models.Response {
 	response := &models.Response{}
 	if org == nil {
 		response.StatusCode = http.StatusNotFound
-		response.Message = "Organization not found"
+		response.Body.Status = http.StatusNotFound
+		response.Body.Message = "Organization not found"
+		response.Body.Data = nil
 		return response
 	}
-	mailId := request.GetUserMail()
-	_, err = datastore.CreateOrgAcessFromMailIdAndJoinCode(mailId, joinCode)
+	email := request.GetUserMail()
+	_, err = datastore.CreateOrgAcessFromEmailAndJoinCode(email, joinCode)
 	if err != nil {
 		return models.NewErrorResponse(err)
 	}
 	response.StatusCode = http.StatusOK
-	response.Message = "User joined organization"
+	response.Body.Status = response.StatusCode
+	response.Body.Message = "User joined organization"
+	response.Body.Data = nil
 	return response
-
 }

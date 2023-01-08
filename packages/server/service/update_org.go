@@ -11,23 +11,26 @@ func UpdateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetPathParam("orgId")
 	orgName := request.GetParsedBodyAttribute("name").(string)
-	mailId := request.User.MailId
-	orgAccess, err := datastore.GetOrgAccessByOrgIdAndMailId(orgId, mailId)
+	email := request.User.Email
+	UserOrganization, err := datastore.GetUserOrganizationByOrgIdAndEmail(orgId, email)
 	if err != nil {
 		return models.NewErrorResponse(err)
 	}
 	response := &models.Response{}
-	if orgAccess.Role != "owner" {
+	if UserOrganization.Role != "owner" {
 		response.StatusCode = http.StatusForbidden
-		response.Message = "You are not authorized to update this organization"
+		response.Body.Status = response.StatusCode
+		response.Body.Message = "You are not authorized to update this organization"
+		response.Body.Data = nil
 	}
 	updatedOrg, err := datastore.UpdateOrg(orgId, orgName)
 	if err != nil {
 		return models.NewErrorResponse(err)
 	}
 	response.StatusCode = http.StatusOK
-	response.Message = "Organization updated"
-	response.Body = []models.Organization{*updatedOrg}
+	response.Body.Status = response.StatusCode
+	response.Body.Message = "Organization updated"
+	response.Body.Data = []models.Organization{*updatedOrg}
 	return response
 
 }

@@ -8,13 +8,15 @@ import (
 )
 
 func GetOrgsForUser(request *models.Request) *models.Response {
-	mailId := request.User.MailId
+	email := request.User.Email
 	response := &models.Response{}
-	orgAccess, err := datastore.GetOrgAccessesByMailId(mailId)
+	UserOrganization, err := datastore.GetUserOrganizationsByEmail(email)
 	if err != nil {
 		return models.NewErrorResponse(err)
 	}
 	response.StatusCode = http.StatusAccepted
-	response.Body = orgAccess
+	response.Body.Status = response.StatusCode
+	response.Body.Message = "User Organizations"
+	response.Body.Data = UserOrganization
 	return response
 }

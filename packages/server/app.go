@@ -1,8 +1,7 @@
 package main
 
 import (
-	"github.com/PriyavKaneria/PureML/service/config"
-	"github.com/PriyavKaneria/PureML/service/datastore"
+	"github.com/PureML-Inc/PureML/server/config"
 	_ "github.com/PureML-Inc/PureML/server/docs"
 	"github.com/PureML-Inc/PureML/server/handler"
 	"github.com/PureML-Inc/PureML/server/middlewares"
@@ -59,7 +58,6 @@ func main() {
 	//User APIs
 	// group = e.Group("user")
 
-	datastore.Init()
 	e.Logger.Fatal(e.Start("localhost:8080"))
 
 }

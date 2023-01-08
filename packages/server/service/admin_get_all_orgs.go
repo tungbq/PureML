@@ -1,10 +1,7 @@
 package service
 
 import (
-	"fmt"
-	// "github.com/PriyavKaneria/PureML/service/config"
-	"github.com/PriyavKaneria/PureML/service/datastore"
-	"github.com/PriyavKaneria/PureML/service/models"
+	// "fmt"
 	"net/http"
 
 	"github.com/PureML-Inc/PureML/server/config"
@@ -14,7 +11,7 @@ import (
 
 func GetAllAdminOrgs(request *models.Request) *models.Response {
 	response := &models.Response{}
-	if config.HasAdminAccess(request.User.MailId) {
+	if config.HasAdminAccess(request.User.Email) {
 		allOrgs, err := datastore.GetAllAdminOrgs()
 		if err != nil {
 			return models.NewErrorResponse(err)
@@ -26,35 +23,9 @@ func GetAllAdminOrgs(request *models.Request) *models.Response {
 		}
 	} else {
 		response.StatusCode = http.StatusForbidden
-		response.Body = "Forbidden"
-	}
-	return response
-}
-
-func CreateOrganization(request *models.Request) *models.Response {
-	response := &models.Response{}
-	org := models.Organization{
-		Name:         "TestOrg",
-		Handle:       "testorg",
-		Avatar:       "",
-		Description:  "Test org",
-		APITokenHash: "",
-		JoinCode:     "testjoincode",
-	}
-	err := datastore.CreateOrganization(org)
-	if err != nil {
-		fmt.Println(err)
-		response.Error = err
-		response.StatusCode = http.StatusInternalServerError
 		response.Body.Status = response.StatusCode
-		response.Body.Message = fmt.Sprintf("Internal server error - %s", err.Error())
-		response.Body.Data = nil
-	} else {
-		response.StatusCode = http.StatusOK
-		response.Body.Status = response.StatusCode
-		response.Body.Message = "Organization created"
+		response.Body.Message = "Forbidden"
 		response.Body.Data = nil
 	}
-
 	return response
 }

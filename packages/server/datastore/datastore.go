@@ -25,34 +25,36 @@ func GetAllAdminOrgs() ([]models.Organization, error) {
 }
 
 func GetOrgById(orgId string) (*models.Organization, error) {
-	return ds.GetOrgByID(orgId)
+	// return ds.GetOrgByID(orgId)
+	return nil, nil
 }
 
 func GetOrgByJoinCode(joinCode string) (*models.Organization, error) {
 	return nil, nil
 }
 
-func CreateOrgFromMailId(mailId string, orgName string) (*models.Organization, error) {
+func CreateOrgFromEmail(email string, orgName string) (*models.Organization, error) {
 	return nil, nil
 }
 
-func GetOrgAccessesByMailId(mailId string) ([]models.OrgAccess, error) {
-	return ds.GetOrgsByUserMail(mailId)
-}
-
-func GetOrgAccessByOrgIdAndMailId(orgId string, mailId string) (*models.OrgAccess, error) {
+func GetUserOrganizationsByEmail(email string) ([]models.UserOrganizations, error) {
+	// return ds.GetOrgsByUserMail(email)
 	return nil, nil
 }
 
-func CreateOrgAccessFromMailIdAndOrgId(mailId string, orgId string) (*models.OrgAccess, error) {
+func GetUserOrganizationByOrgIdAndEmail(orgId string, email string) (*models.UserOrganizations, error) {
 	return nil, nil
 }
 
-func DeleteOrgAccessFromMailIdAndOrgId(mailId string, orgId string) (*models.OrgAccess, error) {
+func CreateUserOrganizationFromEmailAndOrgId(email string, orgId string) (*models.UserOrganizations, error) {
 	return nil, nil
 }
 
-func CreateOrgAcessFromMailIdAndJoinCode(mailId string, joinCode string) (*models.OrgAccess, error) {
+func DeleteUserOrganizationFromEmailAndOrgId(email string, orgId string) (*models.UserOrganizations, error) {
+	return nil, nil
+}
+
+func CreateOrgAcessFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizations, error) {
 	return nil, nil
 }
 
@@ -60,16 +62,16 @@ func UpdateOrg(orgId string, orgName string) (*models.Organization, error) {
 	return nil, nil
 }
 
-func GetUser(mailId string) (*models.User, error) {
+func GetUser(email string) (*models.User, error) {
 	return nil, nil
 }
 
-func GetUserWithOrgAccess(mailId string, orgId string) (*models.User, error) {
+func GetUserWithUserOrganization(email string, orgId string) (*models.User, error) {
 	return nil, nil
 }
 
 type Datastore interface {
 	GetAllAdminOrgs() ([]models.Organization, error)
 	GetOrgByID(orgId string) (*models.Organization, error)
-	GetOrgsByUserMail(mailId string) ([]models.OrgAccess, error)
+	GetOrgsByUserMail(email string) ([]models.UserOrganizations, error)
 }

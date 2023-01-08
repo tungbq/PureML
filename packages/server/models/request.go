@@ -13,7 +13,7 @@ type Request struct {
 }
 
 type UserDetails struct {
-	MailId string
+	Email string
 }
 
 type OrgDetails struct {
@@ -21,7 +21,7 @@ type OrgDetails struct {
 }
 
 func (r *Request) GetUserMail() string {
-	return r.User.MailId
+	return r.User.Email
 }
 
 func (r *Request) GetOrgId() string {

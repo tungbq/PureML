@@ -9,7 +9,10 @@ import (
 func HealthCheck(request *models.Request) *models.Response {
 	return &models.Response{
 		StatusCode: http.StatusOK,
-		Body:       "Congratulations!",
-		Message:    "Server is up and running🚀🎉",
+		Body: models.ResponseBody{
+			Status:  http.StatusOK,
+			Message: "Server is up and running🚀🎉",
+			Data:    nil,
+		},
 	}
 }

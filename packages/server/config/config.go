@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/PriyavKaneria/PureML/service/models"
+	// "github.com/PureML-Inc/PureML/server/models"
 	"github.com/joho/godotenv"
 )
 
@@ -25,11 +25,12 @@ func Environment() map[string]string {
 	return myEnv
 }
 
-func HasAdminAccess(user models.User) bool {
-	_, ok := adminAccess[user.Email]
+func HasAdminAccess(email string) bool {
+	_, ok := adminAccess[email]
 	return ok
 }
 
 func TokenSigningSecret() string {
-	return "PureSecret"
+	env := Environment()
+	return env["JWT_SECRET"]
 }

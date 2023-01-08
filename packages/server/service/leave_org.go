@@ -9,14 +9,16 @@ import (
 
 func LeaveOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
-	mailId := request.GetParsedBodyAttribute("email").(string)
+	email := request.GetParsedBodyAttribute("email").(string)
 	orgId := request.GetOrgId()
-	_, err := datastore.DeleteOrgAccessFromMailIdAndOrgId(mailId, orgId)
+	_, err := datastore.DeleteUserOrganizationFromEmailAndOrgId(email, orgId)
 	if err != nil {
 		return models.NewErrorResponse(err)
 	}
 	response := &models.Response{}
 	response.StatusCode = http.StatusOK
-	response.Message = "User left organization"
+	response.Body.Status = response.StatusCode
+	response.Body.Message = "User left organization"
+	response.Body.Data = nil
 	return response
 }

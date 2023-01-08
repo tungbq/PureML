@@ -10,55 +10,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: PureML API Documentation
   version: "1.0"
-paths:
-  /health:
-    get:
-      consumes:
-      - '*/*'
-      description: Get the status of server.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Show the status of server.
-      tags:
-      - root
-  /org/all:
-    get:
-      consumes:
-      - '*/*'
-      description: Get all organizations and their details. Only accessible by admins.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get all organizations and their details.
-      tags:
-      - root
-  /org/create:
-    post:
-      consumes:
-      - '*/*'
-      description: Create a test organization.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Create a test organization.
-      tags:
-      - root
+paths: {}
 schemes:
 - http
 swagger: "2.0"

@@ -3,7 +3,7 @@ package impl
 import (
 	"fmt"
 
-	"github.com/PriyavKaneria/PureML/service/models"
+	"github.com/PureML-Inc/PureML/server/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
