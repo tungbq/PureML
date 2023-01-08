@@ -20,7 +20,7 @@ func HealthCheck(request *models.Request) *models.Response {
 		Body: models.ResponseBody{
 			Status:  http.StatusOK,
 			Message: "Server is up and running🚀🎉",
-			Data:    nil,
+			Data:    interface{}(nil),
 		},
 	}
 }

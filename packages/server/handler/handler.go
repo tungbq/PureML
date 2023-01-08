@@ -26,9 +26,7 @@ func DefaultHandler(f ServiceFunc) echo.HandlerFunc {
 
 func populateSuccessResponse(context echo.Context, response *models.Response, responseWriter http.ResponseWriter) {
 	context.Response().WriteHeader(response.StatusCode)
-	_, err := responseWriter.Write(convertToBytes(map[string]interface{}{
-		"error": "Internal server error - " + response.Error.Error(),
-	}))
+	_, err := responseWriter.Write(convertToBytes(response.Body))
 	if err != nil {
 		panic(fmt.Sprintf("Error writing response: %v \n", err.Error()))
 	}
@@ -36,7 +34,9 @@ func populateSuccessResponse(context echo.Context, response *models.Response, re
 
 func populateErrorResponse(context echo.Context, response *models.Response, responseWriter http.ResponseWriter) {
 	context.Response().WriteHeader(http.StatusInternalServerError)
-	_, err := responseWriter.Write(convertToBytes(response.Body))
+	_, err := responseWriter.Write(convertToBytes(map[string]interface{}{
+		"error": "Internal server error - " + response.Error.Error(),
+	}))
 	if err != nil {
 		panic(fmt.Sprintf("Error writing response: %v \n", err.Error()))
 	}

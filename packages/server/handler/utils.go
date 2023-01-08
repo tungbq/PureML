@@ -67,13 +67,13 @@ func extractPathParams(context echo.Context) map[string]string {
 }
 
 func convertToBytes(object interface{}) []byte {
-	switch object.(type) {
+	switch objectType := object.(type) {
 	case string:
-		return []byte(object.(string))
+		return []byte(objectType)
 	case []byte:
-		return object.([]byte)
+		return objectType
 	default:
-		bytes, err := json.Marshal(object)
+		bytes, err := json.Marshal(objectType)
 		if err != nil {
 			panic(err)
 		}
