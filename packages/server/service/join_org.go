@@ -20,7 +20,7 @@ func JoinOrg(request *models.Request) *models.Response {
 		return response
 	}
 	email := request.GetUserMail()
-	_, err = datastore.CreateOrgAcessFromEmailAndJoinCode(email, joinCode)
+	_, err = datastore.CreateUserOrganizationFromEmailAndJoinCode(email, joinCode)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

@@ -8,17 +8,21 @@ type Organization struct {
 	Description  string `json:"description"`
 	APITokenHash string `json:"api_token_hash"`
 	JoinCode     string `json:"join_code" gorm:"not null"`
+
+	Users []User `gorm:"many2many:user_organizations;"` // many to many
 }
 
 // Response models
 
 type OrganizationHandleResponse struct {
+	ID     uint   `json:"id"`
 	Handle string `json:"handle"`
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
 }
 
 type OrganizationResponse struct {
+	ID          uint   `json:"id"`
 	Name        string `json:"name"`
 	Handle      string `json:"handle"`
 	Avatar      string `json:"avatar"`

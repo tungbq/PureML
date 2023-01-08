@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/teris-io/shortid"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -51,10 +52,49 @@ func (ds *SQLiteDatastore) GetAllAdminOrgs() ([]models.OrganizationResponse, err
 	return organizations, nil
 }
 
-func (ds *SQLiteDatastore) CreateOrganization(org models.Organization) error {
+func (ds *SQLiteDatastore) GetOrgByID(orgId string) (*models.OrganizationResponse, error) {
+	var org models.OrganizationResponse
+	result := ds.DB.First(&org, orgId)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &org, nil
+}
+
+func (ds *SQLiteDatastore) GetOrgByJoinCode(joinCode string) (*models.OrganizationResponse, error) {
+	var org models.OrganizationResponse
+	result := ds.DB.Where("join_code = ?", joinCode).First(&org)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &org, nil
+}
+
+func (ds *SQLiteDatastore) CreateOrgFromEmail(email string, orgName string, orgDesc string, orgHandle string) (*models.OrganizationResponse, error) {
+	org := models.Organization{
+		Name:         orgName,
+		Handle:       orgHandle,
+		Avatar:       "",
+		Description:  orgDesc,
+		JoinCode:     shortid.MustGenerate(),
+		APITokenHash: "",
+
+		Users: []models.User{
+			{
+				Email: email,
+			},
+		},
+	}
 	result := ds.DB.Create(&org)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
-	return nil
+	return &models.OrganizationResponse{
+		ID:          org.ID,
+		Name:        org.Name,
+		Handle:      org.Handle,
+		Avatar:      org.Avatar,
+		Description: org.Description,
+		JoinCode:    org.JoinCode,
+	}, nil
 }

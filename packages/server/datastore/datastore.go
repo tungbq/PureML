@@ -24,17 +24,16 @@ func GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	return ds.GetAllAdminOrgs()
 }
 
-func GetOrgById(orgId string) (*models.Organization, error) {
-	// return ds.GetOrgByID(orgId)
-	return nil, nil
+func GetOrgById(orgId string) (*models.OrganizationResponse, error) {
+	return ds.GetOrgByID(orgId)
 }
 
-func GetOrgByJoinCode(joinCode string) (*models.Organization, error) {
-	return nil, nil
+func GetOrgByJoinCode(joinCode string) (*models.OrganizationResponse, error) {
+	return ds.GetOrgByJoinCode(joinCode)
 }
 
-func CreateOrgFromEmail(email string, orgName string) (*models.Organization, error) {
-	return nil, nil
+func CreateOrgFromEmail(email string, orgName string, orgDesc string, orgHandle string) (*models.OrganizationResponse, error) {
+	return ds.CreateOrgFromEmail(email, orgName, orgDesc, orgHandle)
 }
 
 func GetUserOrganizationsByEmail(email string) ([]models.UserOrganizations, error) {
@@ -54,7 +53,7 @@ func DeleteUserOrganizationFromEmailAndOrgId(email string, orgId string) (*model
 	return nil, nil
 }
 
-func CreateOrgAcessFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizations, error) {
+func CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizations, error) {
 	return nil, nil
 }
 
