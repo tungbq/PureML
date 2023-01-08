@@ -1,12 +1,10 @@
 package main
 
 import (
-	"github.com/PureML-Inc/PureML/server/config"
 	_ "github.com/PureML-Inc/PureML/server/docs"
 	"github.com/PureML-Inc/PureML/server/handler"
 	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/service"
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -33,7 +31,6 @@ func main() {
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
-	e.Use(echojwt.JWT([]byte(config.Environment()["JWT_SECRET"])))
 
 	//Health API
 	e.GET("/health", handler.DefaultHandler(service.HealthCheck))
