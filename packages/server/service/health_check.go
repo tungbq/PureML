@@ -3,7 +3,7 @@ package service
 import (
 	"net/http"
 
-	"github.com/PriyavKaneria/PureML/service/models"
+	"github.com/PureML-Inc/PureML/server/models"
 )
 
 func HealthCheck(request *models.Request) *models.Response {

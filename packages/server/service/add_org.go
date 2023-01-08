@@ -3,8 +3,8 @@ package service
 import (
 	"net/http"
 
-	"github.com/PriyavKaneria/PureML/service/datastore"
-	"github.com/PriyavKaneria/PureML/service/models"
+	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/models"
 )
 
 func AddOrg(request *models.Request) *models.Response {
