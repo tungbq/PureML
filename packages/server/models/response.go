@@ -14,7 +14,7 @@ type Response struct {
 	StatusCode int
 }
 
-func NewErrorResponse(err error) *Response {
+func NewServerErrorResponse(err error) *Response {
 	return &Response{
 		Error: err,
 		Body: ResponseBody{
@@ -23,5 +23,29 @@ func NewErrorResponse(err error) *Response {
 			Data:    nil,
 		},
 		StatusCode: http.StatusInternalServerError,
+	}
+}
+
+func NewErrorResponse(statusCode int, message string) *Response {
+	return &Response{
+		Error: nil,
+		Body: ResponseBody{
+			Status:  statusCode,
+			Message: message,
+			Data:    nil,
+		},
+		StatusCode: statusCode,
+	}
+}
+
+func NewDataResponse(statusCode int, data interface{}, message string) *Response {
+	return &Response{
+		Error: nil,
+		Body: ResponseBody{
+			Status:  statusCode,
+			Message: message,
+			Data:    data,
+		},
+		StatusCode: statusCode,
 	}
 }

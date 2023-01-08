@@ -18,22 +18,20 @@ import (
 // @Success 200 {object} map[string]interface{}
 // @Router /org/all [get]
 func GetAllAdminOrgs(request *models.Request) *models.Response {
-	response := &models.Response{}
+	var response *models.Response
+	if request.User == nil {
+		response = models.NewErrorResponse(http.StatusUnauthorized, "Unauthorized")
+		return response
+	}
 	if config.HasAdminAccess(request.User.Email) {
 		allOrgs, err := datastore.GetAllAdminOrgs()
 		if err != nil {
-			return models.NewErrorResponse(err)
+			return models.NewServerErrorResponse(err)
 		} else {
-			response.StatusCode = http.StatusOK
-			response.Body.Status = response.StatusCode
-			response.Body.Message = "All organizations"
-			response.Body.Data = allOrgs
+			response = models.NewDataResponse(http.StatusOK, allOrgs, "All organizations")
 		}
 	} else {
-		response.StatusCode = http.StatusForbidden
-		response.Body.Status = response.StatusCode
-		response.Body.Message = "Forbidden"
-		response.Body.Data = nil
+		response = models.NewErrorResponse(http.StatusForbidden, "Forbidden")
 	}
 	return response
 }

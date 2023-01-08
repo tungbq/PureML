@@ -8,22 +8,16 @@ import (
 )
 
 func GetOrgByID(request *models.Request) *models.Response {
-	response := &models.Response{}
+	var response *models.Response
 	orgId := request.PathParams["orgId"]
 	organization, err := datastore.GetOrgById(orgId)
 	if err != nil {
-		return models.NewErrorResponse(err)
+		return models.NewServerErrorResponse(err)
 	}
 	if organization == nil {
-		response.StatusCode = http.StatusNotFound
-		response.Body.Status = response.StatusCode
-		response.Body.Message = "Organization not found"
-		response.Body.Data = nil
+		response = models.NewErrorResponse(http.StatusNotFound, "Organization not found")
 	} else {
-		response.StatusCode = http.StatusOK
-		response.Body.Status = response.StatusCode
-		response.Body.Message = "Organization Details"
-		response.Body.Data = []models.Organization{*organization}
+		response = models.NewDataResponse(http.StatusOK, []models.Organization{*organization}, "Organization Details")
 	}
 	return response
 }

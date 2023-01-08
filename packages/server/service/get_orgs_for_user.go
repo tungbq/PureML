@@ -9,14 +9,10 @@ import (
 
 func GetOrgsForUser(request *models.Request) *models.Response {
 	email := request.User.Email
-	response := &models.Response{}
 	UserOrganization, err := datastore.GetUserOrganizationsByEmail(email)
 	if err != nil {
-		return models.NewErrorResponse(err)
+		return models.NewServerErrorResponse(err)
 	}
-	response.StatusCode = http.StatusAccepted
-	response.Body.Status = response.StatusCode
-	response.Body.Message = "User Organizations"
-	response.Body.Data = UserOrganization
+	response := models.NewDataResponse(http.StatusAccepted, UserOrganization, "User Organizations")
 	return response
 }

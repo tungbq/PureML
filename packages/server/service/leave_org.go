@@ -13,12 +13,8 @@ func LeaveOrg(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	_, err := datastore.DeleteUserOrganizationFromEmailAndOrgId(email, orgId)
 	if err != nil {
-		return models.NewErrorResponse(err)
+		return models.NewServerErrorResponse(err)
 	}
-	response := &models.Response{}
-	response.StatusCode = http.StatusOK
-	response.Body.Status = response.StatusCode
-	response.Body.Message = "User left organization"
-	response.Body.Data = nil
+	response := models.NewDataResponse(http.StatusOK, nil, "User left organization")
 	return response
 }

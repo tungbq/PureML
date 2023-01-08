@@ -13,12 +13,8 @@ func CreateOrg(request *models.Request) *models.Response {
 	email := request.User.Email
 	org, err := datastore.CreateOrgFromEmail(email, orgName)
 	if err != nil {
-		return models.NewErrorResponse(err)
+		return models.NewServerErrorResponse(err)
 	}
-	response := &models.Response{}
-	response.StatusCode = http.StatusOK
-	response.Body.Status = response.StatusCode
-	response.Body.Message = "Organization created"
-	response.Body.Data = []models.Organization{*org}
+	response := models.NewDataResponse(http.StatusOK, []models.Organization{*org}, "Organization created")
 	return response
 }

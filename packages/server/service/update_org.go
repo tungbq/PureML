@@ -14,23 +14,17 @@ func UpdateOrg(request *models.Request) *models.Response {
 	email := request.User.Email
 	UserOrganization, err := datastore.GetUserOrganizationByOrgIdAndEmail(orgId, email)
 	if err != nil {
-		return models.NewErrorResponse(err)
+		return models.NewServerErrorResponse(err)
 	}
-	response := &models.Response{}
+	var response *models.Response
 	if UserOrganization.Role != "owner" {
-		response.StatusCode = http.StatusForbidden
-		response.Body.Status = response.StatusCode
-		response.Body.Message = "You are not authorized to update this organization"
-		response.Body.Data = nil
+		response = models.NewErrorResponse(http.StatusForbidden, "You are not authorized to update this organization")
 	}
 	updatedOrg, err := datastore.UpdateOrg(orgId, orgName)
 	if err != nil {
-		return models.NewErrorResponse(err)
+		return models.NewServerErrorResponse(err)
 	}
-	response.StatusCode = http.StatusOK
-	response.Body.Status = response.StatusCode
-	response.Body.Message = "Organization updated"
-	response.Body.Data = []models.Organization{*updatedOrg}
+	response = models.NewDataResponse(http.StatusOK, []models.Organization{*updatedOrg}, "Organization updated")
 	return response
 
 }
