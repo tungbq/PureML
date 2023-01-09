@@ -5,11 +5,22 @@ import (
 
 	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
+	uuid "github.com/satori/go.uuid"
 )
 
-func AddOrg(request *models.Request) *models.Response {
+// AddUsersToOrg godoc
+// @Summary Add a user to an organization.
+// @Description Add a user to an organization. Only accessible by owners of the organization.
+// @Tags Organization
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /org/:orgId/add [post]
+// @Param email path string true "User email"
+func AddUsersToOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)
+	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))
 	user, err := datastore.GetUser(email)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
@@ -19,7 +30,6 @@ func AddOrg(request *models.Request) *models.Response {
 		response = models.NewErrorResponse(http.StatusNotFound, "User not found")
 		return response
 	}
-	orgId := request.GetOrgId()
 	_, err = datastore.CreateUserOrganizationFromEmailAndOrgId(email, orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)

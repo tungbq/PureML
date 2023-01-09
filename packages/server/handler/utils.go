@@ -10,11 +10,11 @@ import (
 
 func extractRequest(context echo.Context) *models.Request {
 	request := &models.Request{}
-	// if context.Get("User") != nil {
-	// 	request.User = context.Get("User").(*models.UserDetails) //TODO
-	// } else {
-	// 	request.User = &models.UserDetails{}
-	// }
+	if context.Get("User") != nil {
+		request.User = context.Get("User").(*models.UserHandleResponse) //TODO : check if this is correct
+	} else {
+		request.User = &models.UserHandleResponse{}
+	}
 	request.Body = extractBody(context)
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)

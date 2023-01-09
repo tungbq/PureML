@@ -9,7 +9,7 @@ import (
 // HealthCheck godoc
 // @Summary Show the status of server.
 // @Description Get the status of server.
-// @Tags root
+// @Tags Root
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}

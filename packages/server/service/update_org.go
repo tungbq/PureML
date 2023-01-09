@@ -5,11 +5,22 @@ import (
 
 	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
+	uuid "github.com/satori/go.uuid"
 )
 
+// UpdateOrg godoc
+// @Summary Update organization details.
+// @Description Update organization details by ID.
+// @Tags Organization
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /org/:orgId/update [post]
+// @Param orgId path string true "Organization ID"
+// @Param org body models.CreateOrUpdateOrgRequest true "Organization details"
 func UpdateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
-	orgId := request.GetPathParam("orgId")
+	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))
 	orgName := request.GetParsedBodyAttribute("name").(string)
 	orgDesc := request.GetParsedBodyAttribute("description").(string)
 	orgAvatar := request.GetParsedBodyAttribute("avatar").(string)

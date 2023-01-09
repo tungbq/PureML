@@ -6,6 +6,6 @@ import (
 
 func ValidateOrg(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return next(c) //TODO
+		return next(c) //TODO : validate org
 	}
 }

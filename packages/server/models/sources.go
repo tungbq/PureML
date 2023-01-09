@@ -1,23 +1,11 @@
 package models
 
-type Path struct {
-	BaseModel
-	SourceTypeID string `json:"source_type_id" gorm:"not null"`
-	SourcePath   string `json:"source_path" gorm:"unique;not null"`
-
-	SourceType SourceType `gorm:"foreignKey:SourceTypeID"`
-}
-
-type SourceType struct {
-	BaseModel
-	Name      string `json:"name" gorm:"not null"`
-	PublicURL string `json:"public_url"`
-}
+import uuid "github.com/satori/go.uuid"
 
 // Response models
 
 type PathResponse struct {
-	ID         uint               `json:"id"`
+	UUID       uuid.UUID          `json:"uuid"`
 	SourcePath string             `json:"source_path"`
 	SourceType SourceTypeResponse `json:"source_type"`
 }

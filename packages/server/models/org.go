@@ -1,31 +1,30 @@
 package models
 
-type Organization struct {
-	BaseModel
-	Name         string `json:"name" gorm:"not null"`
-	Handle       string `json:"handle" gorm:"unique"`
-	Avatar       string `json:"avatar"`
-	Description  string `json:"description"`
-	APITokenHash string `json:"api_token_hash"`
-	JoinCode     string `json:"join_code" gorm:"not null"`
+import uuid "github.com/satori/go.uuid"
 
-	Users []User `gorm:"many2many:user_organizations;"` // many to many
+// Request models
+
+type CreateOrUpdateOrgRequest struct {
+	Name        string `json:"name"`
+	Handle      string `json:"handle"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar"`
 }
 
 // Response models
 
 type OrganizationHandleResponse struct {
-	ID     uint   `json:"id"`
-	Handle string `json:"handle"`
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
+	UUID   uuid.UUID `json:"uuid"`
+	Handle string    `json:"handle"`
+	Name   string    `json:"name"`
+	Avatar string    `json:"avatar"`
 }
 
 type OrganizationResponse struct {
-	ID          uint   `json:"id"`
-	Name        string `json:"name"`
-	Handle      string `json:"handle"`
-	Avatar      string `json:"avatar"`
-	Description string `json:"description"`
-	JoinCode    string `json:"join_code"`
+	UUID        uuid.UUID `json:"uuid"`
+	Name        string    `json:"name"`
+	Handle      string    `json:"handle"`
+	Avatar      string    `json:"avatar"`
+	Description string    `json:"description"`
+	JoinCode    string    `json:"join_code"`
 }

@@ -7,7 +7,9 @@ import (
 
 	// "github.com/PureML-Inc/PureML/server/config"
 	// "github.com/golang-jwt/jwt/v4"
+	"github.com/PureML-Inc/PureML/server/models" // temporary
 	"github.com/labstack/echo/v4"
+	uuid "github.com/satori/go.uuid"
 )
 
 const AuthHeaderName = "authorization"
@@ -29,7 +31,13 @@ func AuthenticateJWT(next echo.HandlerFunc) echo.HandlerFunc {
 		// })
 		// if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		// 	context.Set("User", claims["user"]) //Todo to create User object
-		context.Set("User", "priyav")
+		context.Set("User", &models.UserHandleResponse{
+			UUID:   uuid.UUID{},
+			Name:   "Priyav",
+			Handle: "priyav",
+			Avatar: "",
+			Email:  "priyavkkaneria@gmail.com",
+		})
 		next(context)
 		// } else {
 		// 	context.Response().WriteHeader(http.StatusForbidden)

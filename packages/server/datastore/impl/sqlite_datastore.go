@@ -3,7 +3,9 @@ package impl
 import (
 	"fmt"
 
+	"github.com/PureML-Inc/PureML/server/datastore/dbmodels"
 	"github.com/PureML-Inc/PureML/server/models"
+	uuid "github.com/satori/go.uuid"
 	"github.com/teris-io/shortid"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -16,23 +18,23 @@ func NewSQLiteDatastore() *SQLiteDatastore {
 		panic("Error connecting to database")
 	}
 	err = db.AutoMigrate(
-		&models.Activity{},
-		&models.Dataset{},
-		&models.DatasetBranch{},
-		&models.DatasetReview{},
-		&models.DatasetUser{},
-		&models.DatasetVersion{},
-		&models.Lineage{},
-		&models.Log{},
-		&models.Model{},
-		&models.ModelBranch{},
-		&models.ModelReview{},
-		&models.ModelUser{},
-		&models.ModelVersion{},
-		&models.Organization{},
-		&models.Path{},
-		&models.User{},
-		&models.UserOrganizations{},
+		&dbmodels.Activity{},
+		&dbmodels.Dataset{},
+		&dbmodels.DatasetBranch{},
+		&dbmodels.DatasetReview{},
+		&dbmodels.DatasetUser{},
+		&dbmodels.DatasetVersion{},
+		&dbmodels.Lineage{},
+		&dbmodels.Log{},
+		&dbmodels.Model{},
+		&dbmodels.ModelBranch{},
+		&dbmodels.ModelReview{},
+		&dbmodels.ModelUser{},
+		&dbmodels.ModelVersion{},
+		&dbmodels.Organization{},
+		&dbmodels.Path{},
+		&dbmodels.User{},
+		&dbmodels.UserOrganizations{},
 	)
 	if err != nil {
 		return &SQLiteDatastore{}
@@ -51,50 +53,95 @@ type SQLiteDatastore struct {
 //////////////////////////////////////////////////////////////////////////////
 
 func (ds *SQLiteDatastore) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
-	var organizations []models.OrganizationResponse
+	var organizations []dbmodels.Organization
 	ds.DB.Find(&organizations)
-	return organizations, nil
+	var responseOrganizations []models.OrganizationResponse
+	for _, org := range organizations {
+		responseOrganizations = append(responseOrganizations, models.OrganizationResponse{
+			UUID:        org.UUID,
+			Name:        org.Name,
+			Handle:      org.Handle,
+			Avatar:      org.Avatar,
+			Description: org.Description,
+			JoinCode:    org.JoinCode,
+		})
+	}
+	return responseOrganizations, nil
 }
 
-func (ds *SQLiteDatastore) GetOrgByID(orgId string) (*models.OrganizationResponse, error) {
-	var org models.OrganizationResponse
-	result := ds.DB.First(&org, orgId)
+func (ds *SQLiteDatastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error) {
+	org := dbmodels.Organization{
+		BaseModel: dbmodels.BaseModel{
+			UUID: orgId,
+		},
+	}
+	result := ds.DB.First(&org)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &org, nil
+	return &models.OrganizationResponse{
+		UUID:        org.UUID,
+		Name:        org.Name,
+		Handle:      org.Handle,
+		Avatar:      org.Avatar,
+		Description: org.Description,
+		JoinCode:    org.JoinCode,
+	}, nil
 }
 
 func (ds *SQLiteDatastore) GetOrgByJoinCode(joinCode string) (*models.OrganizationResponse, error) {
-	var org models.OrganizationResponse
+	var org dbmodels.Organization
 	result := ds.DB.Where("join_code = ?", joinCode).First(&org)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &org, nil
+	return &models.OrganizationResponse{
+		UUID:        org.UUID,
+		Name:        org.Name,
+		Handle:      org.Handle,
+		Avatar:      org.Avatar,
+		Description: org.Description,
+		JoinCode:    org.JoinCode,
+	}, nil
 }
 
 func (ds *SQLiteDatastore) CreateOrgFromEmail(email string, orgName string, orgDesc string, orgHandle string) (*models.OrganizationResponse, error) {
-	org := models.Organization{
+	org := dbmodels.Organization{
 		Name:         orgName,
 		Handle:       orgHandle,
 		Avatar:       "",
 		Description:  orgDesc,
 		JoinCode:     shortid.MustGenerate(),
 		APITokenHash: "",
-
-		Users: []models.User{
-			{
-				Email: email,
-			},
-		},
 	}
-	result := ds.DB.Create(&org)
-	if result.Error != nil {
-		return nil, result.Error
+	user := dbmodels.User{
+		Email: email,
+	}
+	err := ds.DB.Transaction(func(tx *gorm.DB) error {
+		result := tx.Create(&org)
+		if result.Error != nil {
+			return result.Error
+		}
+		result = tx.Where("email = ?", email).First(&user)
+		if result.Error != nil {
+			return result.Error
+		}
+		userOrg := dbmodels.UserOrganizations{
+			UserUUID:         user.UUID,
+			OrganizationUUID: org.UUID,
+			Role:             "owner",
+		}
+		result = tx.Create(&userOrg)
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	return &models.OrganizationResponse{
-		ID:          org.ID,
+		UUID:        org.UUID,
 		Name:        org.Name,
 		Handle:      org.Handle,
 		Avatar:      org.Avatar,
@@ -104,47 +151,72 @@ func (ds *SQLiteDatastore) CreateOrgFromEmail(email string, orgName string, orgD
 }
 
 func (ds *SQLiteDatastore) GetOrgByHandle(handle string) (*models.OrganizationResponse, error) {
-	var org models.OrganizationResponse
+	var org dbmodels.Organization
 	result := ds.DB.Where("handle = ?", handle).First(&org)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &org, nil
+	return &models.OrganizationResponse{
+		UUID:        org.UUID,
+		Name:        org.Name,
+		Handle:      org.Handle,
+		Avatar:      org.Avatar,
+		Description: org.Description,
+		JoinCode:    org.JoinCode,
+	}, nil
 }
 
 func (ds *SQLiteDatastore) GetUserOrganizationsByEmail(email string) ([]models.UserOrganizationsResponse, error) {
 	var orgs []models.UserOrganizationsResponse
-	result := ds.DB.Table("organizations").Select("organizations.id, organizations.handle, organizations.name, organizations.avatar, user_organizations.role").Joins("JOIN user_organizations ON user_organizations.organization_id = organizations.id").Joins("JOIN users ON users.id = user_organizations.user_id").Where("users.email = ?", email).Scan(&orgs)
+	var tableOrgs []struct {
+		UUID   uuid.UUID
+		Handle string
+		Name   string
+		Avatar string
+		Role   string
+	}
+	result := ds.DB.Table("organizations").Select("organizations.uuid, organizations.handle, organizations.name, organizations.avatar, user_organizations.role").Joins("JOIN user_organizations ON user_organizations.organization_uuid = organizations.uuid").Joins("JOIN users ON users.uuid = user_organizations.user_uuid").Where("users.email = ?", email).Scan(&tableOrgs)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+	for _, org := range tableOrgs {
+		orgs = append(orgs, models.UserOrganizationsResponse{
+			Org: models.OrganizationHandleResponse{
+				UUID:   org.UUID,
+				Handle: org.Handle,
+				Name:   org.Name,
+				Avatar: org.Avatar,
+			},
+			Role: org.Role,
+		})
 	}
 	return orgs, nil
 }
 
-func (ds *SQLiteDatastore) GetUserOrganizationByOrgIdAndEmail(orgId string, email string) (*models.UserOrganizationsResponse, error) {
+func (ds *SQLiteDatastore) GetUserOrganizationByOrgIdAndEmail(orgId uuid.UUID, email string) (*models.UserOrganizationsResponse, error) {
 	var org models.UserOrganizationsResponse
-	result := ds.DB.Table("organizations").Select("organizations.id, organizations.handle, organizations.name, organizations.avatar").Joins("JOIN user_organizations ON user_organizations.organization_id = organizations.id").Joins("JOIN users ON users.id = user_organizations.user_id").Where("users.email = ?", email).Where("organizations.id = ?", orgId).Scan(&org)
+	result := ds.DB.Table("organizations").Select("organizations.uuid, organizations.handle, organizations.name, organizations.avatar, user_organization.role").Joins("JOIN user_organizations ON user_organizations.organization_uuid = organizations.uuid").Joins("JOIN users ON users.uuid = user_organizations.user_uuid").Where("users.email = ?", email).Where("organizations.uuid = ?", orgId).Scan(&org)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return &org, nil
 }
 
-func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndOrgId(email string, orgId string) (*models.UserOrganizationsResponse, error) {
-	var org models.Organization
+func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) (*models.UserOrganizationsResponse, error) {
+	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	var user models.User
+	var user dbmodels.User
 	result = ds.DB.Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	userOrganization := models.UserOrganizations{
-		OrgID:  org.ID,
-		UserID: user.ID,
-		Role:   "owner",
+	userOrganization := dbmodels.UserOrganizations{
+		OrganizationUUID: org.UUID,
+		UserUUID:         user.UUID,
+		Role:             "member",
 	}
 	result = ds.DB.Create(&userOrganization)
 	if result.Error != nil {
@@ -152,7 +224,7 @@ func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndOrgId(email string,
 	}
 	return &models.UserOrganizationsResponse{
 		Org: models.OrganizationHandleResponse{
-			ID:     org.ID,
+			UUID:   org.UUID,
 			Name:   org.Name,
 			Handle: org.Handle,
 			Avatar: org.Avatar,
@@ -161,18 +233,18 @@ func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndOrgId(email string,
 	}, nil
 }
 
-func (ds *SQLiteDatastore) DeleteUserOrganizationFromEmailAndOrgId(email string, orgId string) error {
-	var org models.Organization
+func (ds *SQLiteDatastore) DeleteUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) error {
+	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
 	if result.Error != nil {
 		return result.Error
 	}
-	var user models.User
+	var user dbmodels.User
 	result = ds.DB.Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		return result.Error
 	}
-	result = ds.DB.Where("organization_id = ?", org.ID).Where("user_id = ?", user.ID).Delete(&models.UserOrganizations{})
+	result = ds.DB.Where("organization_uuid = ?", org.UUID).Where("user_uuid = ?", user.UUID).Delete(&dbmodels.UserOrganizations{})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -180,20 +252,20 @@ func (ds *SQLiteDatastore) DeleteUserOrganizationFromEmailAndOrgId(email string,
 }
 
 func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizationsResponse, error) {
-	var org models.Organization
+	var org dbmodels.Organization
 	result := ds.DB.Where("join_code = ?", joinCode).First(&org)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	var user models.User
+	var user dbmodels.User
 	result = ds.DB.Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	userOrganization := models.UserOrganizations{
-		OrgID:  org.ID,
-		UserID: user.ID,
-		Role:   "member",
+	userOrganization := dbmodels.UserOrganizations{
+		OrganizationUUID: org.UUID,
+		UserUUID:         user.UUID,
+		Role:             "member",
 	}
 	result = ds.DB.Create(&userOrganization)
 	if result.Error != nil {
@@ -201,7 +273,7 @@ func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndJoinCode(email stri
 	}
 	return &models.UserOrganizationsResponse{
 		Org: models.OrganizationHandleResponse{
-			ID:     org.ID,
+			UUID:   org.UUID,
 			Name:   org.Name,
 			Handle: org.Handle,
 			Avatar: org.Avatar,
@@ -210,8 +282,8 @@ func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndJoinCode(email stri
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UpdateOrg(orgId string, orgName string, orgDesc string, orgAvatar string) (*models.OrganizationResponse, error) {
-	var org models.Organization
+func (ds *SQLiteDatastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, orgAvatar string) (*models.OrganizationResponse, error) {
+	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
 	if result.Error != nil {
 		return nil, result.Error
@@ -224,7 +296,7 @@ func (ds *SQLiteDatastore) UpdateOrg(orgId string, orgName string, orgDesc strin
 		return nil, result.Error
 	}
 	return &models.OrganizationResponse{
-		ID:          org.ID,
+		UUID:        org.UUID,
 		Name:        org.Name,
 		Handle:      org.Handle,
 		Avatar:      org.Avatar,
@@ -238,7 +310,7 @@ func (ds *SQLiteDatastore) UpdateOrg(orgId string, orgName string, orgDesc strin
 //////////////////////////////////////////////////////////////////////////////
 
 func (ds *SQLiteDatastore) GetUser(email string) (*models.UserResponse, error) {
-	var user models.User
+	var user dbmodels.User
 	result := ds.DB.Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		return nil, result.Error

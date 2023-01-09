@@ -1,10 +1,14 @@
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	uuid "github.com/satori/go.uuid"
+)
 
 type Request struct {
-	User        *UserDetails
-	Org         *OrgDetails
+	User        *UserHandleResponse
+	Org         *OrganizationHandleResponse
 	Body        []byte
 	ParsedBody  map[string]interface{}
 	Headers     map[string]string
@@ -12,20 +16,12 @@ type Request struct {
 	QueryParams map[string]string
 }
 
-type UserDetails struct {
-	Email string
-}
-
-type OrgDetails struct {
-	Id string
-}
-
 func (r *Request) GetUserMail() string {
 	return r.User.Email
 }
 
-func (r *Request) GetOrgId() string {
-	return r.Org.Id
+func (r *Request) GetOrgId() uuid.UUID {
+	return r.Org.UUID
 }
 
 func (r *Request) GetPathParam(param string) string {
