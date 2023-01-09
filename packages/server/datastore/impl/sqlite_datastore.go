@@ -48,9 +48,7 @@ type SQLiteDatastore struct {
 	DB *gorm.DB
 }
 
-//////////////////////////////////////////////////////////////////////////////
 //////////////////////////// ORGANIZATION METHODS ////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 
 func (ds *SQLiteDatastore) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	var organizations []dbmodels.Organization
@@ -305,9 +303,7 @@ func (ds *SQLiteDatastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc st
 	}, nil
 }
 
-//////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// USER METHODS /////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 
 func (ds *SQLiteDatastore) GetUserByEmail(email string) (*models.UserResponse, error) {
 	var user dbmodels.User
@@ -319,12 +315,12 @@ func (ds *SQLiteDatastore) GetUserByEmail(email string) (*models.UserResponse, e
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:   user.UUID,
-		Name:   user.Name,
-		Email:  user.Email,
-		Handle: user.Handle,
-		Bio:    user.Bio,
-		Avatar: user.Avatar,
+		UUID:     user.UUID,
+		Name:     user.Name,
+		Email:    user.Email,
+		Handle:   user.Handle,
+		Bio:      user.Bio,
+		Avatar:   user.Avatar,
 		Password: user.Password,
 	}, nil
 }
@@ -339,12 +335,12 @@ func (ds *SQLiteDatastore) GetUserByHandle(handle string) (*models.UserResponse,
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:   user.UUID,
-		Name:   user.Name,
-		Email:  user.Email,
-		Handle: user.Handle,
-		Bio:    user.Bio,
-		Avatar: user.Avatar,
+		UUID:     user.UUID,
+		Name:     user.Name,
+		Email:    user.Email,
+		Handle:   user.Handle,
+		Bio:      user.Bio,
+		Avatar:   user.Avatar,
 		Password: user.Password,
 	}, nil
 }
@@ -418,5 +414,51 @@ func (ds *SQLiteDatastore) UpdateUser(email string, name string, bio string, ava
 		Handle: user.Handle,
 		Bio:    user.Bio,
 		Avatar: user.Avatar,
+	}, nil
+}
+
+//////////////////////////////// LOG METHODS /////////////////////////////////
+
+func (ds *SQLiteDatastore) CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	log := dbmodels.Log{
+		Data: data,
+		ModelVersion: dbmodels.ModelVersion{
+			BaseModel: dbmodels.BaseModel{
+				UUID: modelVersionUUID,
+			},
+		},
+	}
+	err := ds.DB.Create(&log).Association("ModelVersion").Find(&log.ModelVersion)
+	if err != nil {
+		return nil, err
+	}
+	return &models.LogResponse{
+		Data: log.Data,
+		ModelVersion: models.ModelVersionNameResponse{
+			UUID:    log.ModelVersion.UUID,
+			Version: log.ModelVersion.Version,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	log := dbmodels.Log{
+		Data: data,
+		DatasetVersion: dbmodels.DatasetVersion{
+			BaseModel: dbmodels.BaseModel{
+				UUID: datasetVersionUUID,
+			},
+		},
+	}
+	err := ds.DB.Create(&log).Association("DatasetVersion").Find(&log.DatasetVersion)
+	if err != nil {
+		return nil, err
+	}
+	return &models.LogResponse{
+		Data: log.Data,
+		DatasetVersion: models.DatasetVersionNameResponse{
+			UUID:    log.DatasetVersion.UUID,
+			Version: log.DatasetVersion.Version,
+		},
 	}, nil
 }

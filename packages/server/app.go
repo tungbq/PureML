@@ -41,16 +41,16 @@ func main() {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	//Org APIs
-	projectGroup := e.Group("/org")
-	projectGroup.GET("/all", handler.DefaultHandler(service.GetAllAdminOrgs), middlewares.AuthenticateJWT)
-	projectGroup.GET("/id/:orgId", handler.DefaultHandler(service.GetOrgByID), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	projectGroup.GET("/", handler.DefaultHandler(service.GetOrgsForUser), middlewares.AuthenticateJWT)
-	projectGroup.POST("/create", handler.DefaultHandler(service.CreateOrg), middlewares.AuthenticateJWT)
-	projectGroup.POST("/:orgId/update", handler.DefaultHandler(service.UpdateOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	projectGroup.POST("/:orgId/add", handler.DefaultHandler(service.AddUsersToOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	projectGroup.POST("/join", handler.DefaultHandler(service.JoinOrg), middlewares.AuthenticateJWT)
-	projectGroup.POST("/:orgId/remove", handler.DefaultHandler(service.RemoveOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	projectGroup.POST("/:orgId/leave", handler.DefaultHandler(service.LeaveOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	orgGroup := e.Group("/org")
+	orgGroup.GET("/all", handler.DefaultHandler(service.GetAllAdminOrgs), middlewares.AuthenticateJWT)
+	orgGroup.GET("/id/:orgId", handler.DefaultHandler(service.GetOrgByID), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	orgGroup.GET("/", handler.DefaultHandler(service.GetOrgsForUser), middlewares.AuthenticateJWT)
+	orgGroup.POST("/create", handler.DefaultHandler(service.CreateOrg), middlewares.AuthenticateJWT)
+	orgGroup.POST("/:orgId/update", handler.DefaultHandler(service.UpdateOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	orgGroup.POST("/:orgId/add", handler.DefaultHandler(service.AddUsersToOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	orgGroup.POST("/join", handler.DefaultHandler(service.JoinOrg), middlewares.AuthenticateJWT)
+	orgGroup.POST("/:orgId/remove", handler.DefaultHandler(service.RemoveOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	orgGroup.POST("/:orgId/leave", handler.DefaultHandler(service.LeaveOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
 
 	//Project APIs
 	// group := e.Group("")
@@ -65,6 +65,10 @@ func main() {
 	userGroup.POST("/forgot-password", handler.DefaultHandler(service.UserForgotPassword))
 	userGroup.POST("/reset-password", handler.DefaultHandler(service.UserResetPassword)) //TODO To complete the logic here and update middlewares
 
+	// Log APIs
+	e.POST("/log", handler.DefaultHandler(service.Log), middlewares.AuthenticateJWT)
+
+	// Start server
 	e.Logger.Fatal(e.Start("localhost:8080"))
 
 }

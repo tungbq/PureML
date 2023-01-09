@@ -77,6 +77,14 @@ func UpdateUser(email string, name string, avatar string, bio string) (*models.U
 	return ds.UpdateUser(email, name, avatar, bio)
 }
 
+func CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	return ds.CreateLogForModelVersion(data, modelVersionUUID)
+}
+
+func CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	return ds.CreateLogForDatasetVersion(data, datasetVersionUUID)
+}
+
 type Datastore interface {
 	GetAllAdminOrgs() ([]models.OrganizationResponse, error)
 	GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error)
@@ -92,4 +100,6 @@ type Datastore interface {
 	GetUserByHandle(email string) (*models.UserResponse, error)
 	CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error)
 	UpdateUser(email string, name string, avatar string, bio string) (*models.UserResponse, error)
+	CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error)
+	CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error)
 }
