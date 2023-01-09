@@ -7,8 +7,9 @@ from .fastapi import create_fastapi_file
 
 
 
-def create_docker_file():
+def create_docker_file(org_id, access_token):
     # os.makedirs(PATH_DOCKER_DIR, exist_ok=True)
+    os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
 
     req_pos = PATH_PREDICT_REQUIREMENTS.find(PATH_PREDICT_DIR_RELATIVE)
     req_path = PATH_PREDICT_REQUIREMENTS[req_pos:]
@@ -20,6 +21,9 @@ def create_docker_file():
     docker = """
     
 FROM {BASE_IMAGE}
+
+ENV ORG_ID={ORG_ID}
+ENV ACCESS_TOKEN={ACCESS_TOKEN}
 
 RUN mkdir -p {PREDICT_DIR}
 
@@ -41,7 +45,9 @@ CMD ["python", "{API_PATH}"]
         PORT=PORT_FASTAPI ,
         PREDICT_DIR = PATH_PREDICT_DIR_RELATIVE,
         API_PATH=api_path,
-        REQUIREMENTS_PATH=req_path
+        REQUIREMENTS_PATH=req_path,
+        ORG_ID = org_id,
+        ACCESS_TOKEN = access_token
     )
 
 
@@ -100,26 +106,31 @@ def create_docker_image(image_tag=None):
 
 
 
-def run_docker_container(image):
+def run_docker_container(image, name):
   client = docker.from_env()
 
   docker_port = '{port}/tcp'.format(port=PORT_FASTAPI)
-  print(docker_port)
+  # print(docker_port)
 
-  container = client.containers.run(image=image, ports={docker_port: PORT_HOST}, detach=True)
+  container = client.containers.run(image=image, ports={docker_port: PORT_HOST}, 
+                                    detach=True, name=name)
 
   return container
 
 
-def create(model_name, model_version, image_tag=None, predict_path=None, requirements_path=None):
-  create_fastapi_file(model_name=model_name, model_version=model_version, predict_path=predict_path, requirements_path=requirements_path)
+def create(model_name, model_version, org_id, access_token, image_tag=None, 
+            predict_path=None, requirements_path=None, container_name=None):
 
-  create_docker_file()
+  create_fastapi_file(model_name=model_name, model_version=model_version,
+                      predict_path=predict_path, requirements_path=requirements_path,
+                      org_id=org_id, access_token=access_token)
+
+  create_docker_file(org_id=org_id, access_token=access_token)
 
   image = create_docker_image(image_tag)
 
   if image is not None:
-    container = run_docker_container(image=image)
+    container = run_docker_container(image=image, name=container_name)
 
     print('Created Docker container')
     print(container)

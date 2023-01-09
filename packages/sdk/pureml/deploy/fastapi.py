@@ -1,7 +1,27 @@
-from pureml.utils.constants import PATH_PREDICT_DIR, PORT_FASTAPI, API_IP_DOCKER, PATH_FASTAPI_FILE
+from pureml.utils.constants import PATH_PREDICT_DIR, PORT_FASTAPI, API_IP_DOCKER, PATH_FASTAPI_FILE, PATH_USER_PROJECT
 from pureml.utils.constants import PATH_PREDICT_USER, PATH_PREDICT, PATH_PREDICT_REQUIREMENTS_USER, PATH_PREDICT_REQUIREMENTS
 import os
 import shutil
+
+
+def get_project_file():
+    os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
+
+
+    project_dir_name = PATH_USER_PROJECT.split(os.path.sep)[-2]
+    predict_project_dir = os.path.join(PATH_PREDICT_DIR, project_dir_name)
+
+    os.makedirs(predict_project_dir, exist_ok=True)
+
+
+    project_file_name = PATH_USER_PROJECT.split(os.path.sep)[-1]
+    predict_project_file_name = os.path.join(predict_project_dir, project_file_name)
+
+
+    shutil.copy(PATH_USER_PROJECT, predict_project_file_name)
+    
+
+
 
 def get_predict_file(predict_path):
 
@@ -37,7 +57,10 @@ def get_requirements_file(requirements_path):
         raise Exception(requirements_path, 'doesnot exists!!!')
 
 
-def create_fastapi_file(model_name, model_version, predict_path, requirements_path):
+def create_fastapi_file(model_name, model_version, predict_path, 
+                        requirements_path, org_id, access_token):
+
+    get_project_file()
     
     get_predict_file(predict_path)
 
@@ -49,8 +72,15 @@ from fastapi import FastAPI, Depends
 import uvicorn
 import pureml
 from predict import model_predict
+import os
+from dotenv import load_dotenv
 
-#import modules needed for predict function
+load_dotenv()
+
+org_id = os.getenv('ORG_ID')
+access_token = os.getenv('ACCESS_TOKEN')
+
+pureml.login(org_id=org_id, access_token=access_token)
 
 model = pureml.model.fetch('{MODEL_NAME}', '{MODEL_VERSION}')
 
