@@ -5,6 +5,7 @@ import requests
 import json
 from rich import print
 from pureml.cli.auth import save_auth
+from . import get_org_id, get_token
 
 def login(org_id:str, access_token:str) -> str:
     ''' The function takes in a user API token and logs in a user for a session.
@@ -54,5 +55,11 @@ def login(org_id:str, access_token:str) -> str:
 
 
 
-            
+    
+def details():
+    token = get_token()
+    org_id = get_org_id()
+
+    print('Org Id: ', org_id)
+    print('Access Token: ', token)        
 
