@@ -10,13 +10,14 @@ import (
 )
 
 // UserForgotPassword godoc
+// @Security ApiKeyAuth
 // @Summary User forgot password.
 // @Description User can reset password by providing email id to send reset password link.
 // @Tags User
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /user/reset-password [post]
+// @Router /user/forgot-password [post]
 // @Param org body models.UserResetPasswordRequest true "User email"
 func UserForgotPassword(request *models.Request) *models.Response {
 	request.ParseJsonBody()

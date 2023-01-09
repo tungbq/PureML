@@ -30,7 +30,7 @@ func HasAdminAccess(email string) bool {
 	return ok
 }
 
-func TokenSigningSecret() string {
+func TokenSigningSecret() []byte {
 	env := Environment()
-	return env["JWT_SECRET"]
+	return []byte(env["JWT_SECRET"])
 }

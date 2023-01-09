@@ -8,6 +8,7 @@ import (
 )
 
 // JoinOrg godoc
+// @Security ApiKeyAuth
 // @Summary Join organization by join code.
 // @Description Join organization by join code.
 // @Tags Organization

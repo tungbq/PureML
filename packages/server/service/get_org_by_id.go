@@ -9,6 +9,7 @@ import (
 )
 
 // GetOrgByID godoc
+// @Security ApiKeyAuth
 // @Summary Get organization details by ID.
 // @Description Get organization details by ID.
 // @Tags Organization

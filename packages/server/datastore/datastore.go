@@ -69,12 +69,12 @@ func GetUserByHandle(email string) (*models.UserResponse, error) {
 	return ds.GetUserByHandle(email)
 }
 
-func UpdateUser(email string, updatedAttributes map[string]string) (*models.UserResponse, error) {
-	return nil, nil
+func CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
+	return ds.CreateUser(name, email, handle, bio, avatar, hashedPassword)
 }
 
-func CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string, shortId string) (*models.UserResponse, error) {
-	return nil, nil
+func UpdateUser(email string, name string, avatar string, bio string) (*models.UserResponse, error) {
+	return ds.UpdateUser(email, name, avatar, bio)
 }
 
 type Datastore interface {
@@ -88,5 +88,8 @@ type Datastore interface {
 	DeleteUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) error
 	CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizationsResponse, error)
 	UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, orgAvatar string) (*models.OrganizationResponse, error)
-	GetUser(email string) (*models.UserResponse, error)
+	GetUserByEmail(email string) (*models.UserResponse, error)
+	GetUserByHandle(email string) (*models.UserResponse, error)
+	CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error)
+	UpdateUser(email string, name string, avatar string, bio string) (*models.UserResponse, error)
 }

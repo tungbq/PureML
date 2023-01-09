@@ -8,6 +8,7 @@ import (
 )
 
 // LeaveOrg godoc
+// @Security ApiKeyAuth
 // @Summary Leave organization.
 // @Description Leave organization.
 // @Tags Organization

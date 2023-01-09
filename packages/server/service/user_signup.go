@@ -5,11 +5,11 @@ import (
 
 	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
-	"github.com/teris-io/shortid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // UserSignUp godoc
+// @Security ApiKeyAuth
 // @Summary User sign up.
 // @Description User sign up with email, name, handle and password.
 // @Tags User
@@ -39,8 +39,7 @@ func UserSignUp(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	shortId, _ := shortid.Generate()
-	user, err := datastore.CreateUser(name.(string), email, handle, bio.(string), avatar.(string), string(hashedPassword), shortId)
+	user, err := datastore.CreateUser(name.(string), email, handle, bio.(string), avatar.(string), string(hashedPassword))
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

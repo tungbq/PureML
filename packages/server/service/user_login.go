@@ -11,6 +11,7 @@ import (
 )
 
 // UserLogin godoc
+// @Security ApiKeyAuth
 // @Summary User login.
 // @Description User login with email and password.
 // @Tags User
@@ -42,24 +43,24 @@ func UserLogin(request *models.Request) *models.Response {
 	if user == nil {
 		return models.NewDataResponse(http.StatusNotFound, nil, "User not found")
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(user.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		token := jwt.NewWithClaims(&jwt.SigningMethodHMAC{}, jwt.MapClaims{
-			"uuid":   user.UUID,
-			"email":  user.Email,
-			"handle": user.Handle,
-		})
-		signedString, err := token.SignedString(config.TokenSigningSecret())
-		if err != nil {
-			panic(err)
-		}
-		data := []map[string]string{
-			{
-				"email":       user.Email,
-				"accessToken": signedString,
-			},
-		}
-		return models.NewDataResponse(http.StatusAccepted, data, "User logged in")
+		return models.NewDataResponse(http.StatusUnauthorized, nil, "Invalid credentials")
 	}
-	return models.NewDataResponse(http.StatusUnauthorized, nil, "Invalid credentials")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"uuid":   user.UUID,
+		"email":  user.Email,
+		"handle": user.Handle,
+	})
+	signedString, err := token.SignedString(config.TokenSigningSecret())
+	if err != nil {
+		panic(err)
+	}
+	data := []map[string]string{
+		{
+			"email":       user.Email,
+			"accessToken": signedString,
+		},
+	}
+	return models.NewDataResponse(http.StatusAccepted, data, "User logged in")
 }

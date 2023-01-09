@@ -50,6 +50,11 @@ const docTemplate = `{
         },
         "/org/": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all user organizations.",
                 "consumes": [
                     "*/*"
@@ -74,6 +79,11 @@ const docTemplate = `{
         },
         "/org/:orgId/add": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Add a user to an organization. Only accessible by owners of the organization.",
                 "consumes": [
                     "*/*"
@@ -107,6 +117,11 @@ const docTemplate = `{
         },
         "/org/:orgId/leave": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Leave organization.",
                 "consumes": [
                     "*/*"
@@ -149,6 +164,11 @@ const docTemplate = `{
         },
         "/org/:orgId/remove": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Remove user from organization.",
                 "consumes": [
                     "*/*"
@@ -191,6 +211,11 @@ const docTemplate = `{
         },
         "/org/:orgId/update": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update organization details by ID.",
                 "consumes": [
                     "*/*"
@@ -233,6 +258,11 @@ const docTemplate = `{
         },
         "/org/all": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all organizations and their details. Only accessible by admins.",
                 "consumes": [
                     "*/*"
@@ -257,6 +287,11 @@ const docTemplate = `{
         },
         "/org/create": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create an organization and add the user as the owner.",
                 "consumes": [
                     "*/*"
@@ -292,6 +327,11 @@ const docTemplate = `{
         },
         "/org/id/:orgId": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get organization details by ID.",
                 "consumes": [
                     "*/*"
@@ -325,6 +365,11 @@ const docTemplate = `{
         },
         "/org/join": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Join organization by join code.",
                 "consumes": [
                     "*/*"
@@ -360,6 +405,11 @@ const docTemplate = `{
         },
         "/user/delete": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete user profile.",
                 "consumes": [
                     "*/*"
@@ -384,6 +434,11 @@ const docTemplate = `{
         },
         "/user/login": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "User login with email and password.",
                 "consumes": [
                     "*/*"
@@ -419,6 +474,11 @@ const docTemplate = `{
         },
         "/user/profile": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get logged in user profile.",
                 "consumes": [
                     "*/*"
@@ -476,6 +536,11 @@ const docTemplate = `{
         },
         "/user/reset-password": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "User can reset password by providing old password and new password.",
                 "consumes": [
                     "*/*"
@@ -500,6 +565,11 @@ const docTemplate = `{
         },
         "/user/signup": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "User sign up with email, name, handle and password.",
                 "consumes": [
                     "*/*"
@@ -610,6 +680,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

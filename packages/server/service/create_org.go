@@ -8,6 +8,7 @@ import (
 )
 
 // CreateOrg godoc
+// @Security ApiKeyAuth
 // @Summary Create an organization.
 // @Description Create an organization and add the user as the owner.
 // @Tags Organization

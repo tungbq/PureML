@@ -8,13 +8,14 @@ import (
 )
 
 // UpdateProfile godoc
+// @Security ApiKeyAuth
 // @Summary User update profile.
 // @Description User can update profile by providing name, avatar, bio.
 // @Tags User
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /user/signup [post]
+// @Router /user/profile [post]
 // @Param org body models.UserUpdateRequest true "User details"
 func UpdateProfile(request *models.Request) *models.Response {
 	request.ParseJsonBody()
@@ -32,7 +33,7 @@ func UpdateProfile(request *models.Request) *models.Response {
 		updatedAttributes["bio"] = bio.(string)
 	}
 	email := request.GetUserMail()
-	user, err := datastore.UpdateUser(email, updatedAttributes)
+	user, err := datastore.UpdateUser(email, updatedAttributes["name"], updatedAttributes["avatar"], updatedAttributes["bio"])
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

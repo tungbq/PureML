@@ -90,6 +90,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all user organizations.
       tags:
       - Organization
@@ -113,6 +115,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Add a user to an organization.
       tags:
       - Organization
@@ -141,6 +145,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Leave organization.
       tags:
       - Organization
@@ -169,6 +175,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Remove user from organization.
       tags:
       - Organization
@@ -197,6 +205,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update organization details.
       tags:
       - Organization
@@ -213,6 +223,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all organizations and their details.
       tags:
       - Organization
@@ -236,6 +248,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create an organization.
       tags:
       - Organization
@@ -258,6 +272,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get organization details by ID.
       tags:
       - Organization
@@ -281,6 +297,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Join organization by join code.
       tags:
       - Organization
@@ -297,6 +315,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete user profile.
       tags:
       - User
@@ -320,6 +340,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: User login.
       tags:
       - User
@@ -336,6 +358,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get logged in user profile.
       tags:
       - User
@@ -374,6 +398,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: User reset password.
       tags:
       - User
@@ -397,9 +423,16 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: User sign up.
       tags:
       - User
 schemes:
 - http
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

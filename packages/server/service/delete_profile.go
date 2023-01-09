@@ -3,6 +3,7 @@ package service
 import "github.com/PureML-Inc/PureML/server/models"
 
 // DeleteProfile godoc
+// @Security ApiKeyAuth
 // @Summary Delete user profile.
 // @Description Delete user profile.
 // @Tags User

@@ -11,9 +11,9 @@ import (
 func extractRequest(context echo.Context) *models.Request {
 	request := &models.Request{}
 	if context.Get("User") != nil {
-		request.User = context.Get("User").(*models.UserHandleResponse) //TODO : check if this is correct
+		request.User = context.Get("User").(*models.UserClaims)
 	} else {
-		request.User = &models.UserHandleResponse{}
+		request.User = &models.UserClaims{}
 	}
 	request.Body = extractBody(context)
 	request.Headers = extractHeaders(context)

@@ -311,11 +311,79 @@ func (ds *SQLiteDatastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc st
 
 func (ds *SQLiteDatastore) GetUserByEmail(email string) (*models.UserResponse, error) {
 	var user dbmodels.User
-	result := ds.DB.Where("email = ?", email).First(&user)
+	result := ds.DB.Where("email = ?", email).Limit(1).Find(&user)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return &models.UserResponse{
+		UUID:   user.UUID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
+		Password: user.Password,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetUserByHandle(handle string) (*models.UserResponse, error) {
+	var user dbmodels.User
+	result := ds.DB.Where("handle = ?", handle).Limit(1).Find(&user)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.UserResponse{
+		UUID:   user.UUID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
+		Password: user.Password,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
+	user := dbmodels.User{
+		Name:     name,
+		Email:    email,
+		Password: hashedPassword,
+		Handle:   handle,
+		Bio:      bio,
+		Avatar:   avatar,
+
+		Orgs: []dbmodels.Organization{
+			{
+				Name:        "Private",
+				Handle:      handle,
+				Avatar:      avatar,
+				JoinCode:    shortid.MustGenerate(),
+				Description: fmt.Sprintf("Private Organization for %s", handle),
+			},
+		},
+	}
+	err := ds.DB.Transaction(func(tx *gorm.DB) error {
+		result := tx.Create(&user)
+		if result.Error != nil {
+			return result.Error
+		}
+		result = tx.Table("user_organizations").Where("user_uuid = ?", user.UUID).Where("organization_uuid = ?", user.Orgs[0].UUID).Update("role", "owner")
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &models.UserResponse{
+		UUID:   user.UUID,
 		Name:   user.Name,
 		Email:  user.Email,
 		Handle: user.Handle,
@@ -324,13 +392,27 @@ func (ds *SQLiteDatastore) GetUserByEmail(email string) (*models.UserResponse, e
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetUserByHandle(handle string) (*models.UserResponse, error) {
+func (ds *SQLiteDatastore) UpdateUser(email string, name string, bio string, avatar string) (*models.UserResponse, error) {
 	var user dbmodels.User
-	result := ds.DB.Where("handle = ?", handle).First(&user)
+	result := ds.DB.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if name != "" {
+		user.Name = name
+	}
+	if bio != "" {
+		user.Bio = bio
+	}
+	if avatar != "" {
+		user.Avatar = avatar
+	}
+	result = ds.DB.Save(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return &models.UserResponse{
+		UUID:   user.UUID,
 		Name:   user.Name,
 		Email:  user.Email,
 		Handle: user.Handle,

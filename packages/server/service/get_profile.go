@@ -8,6 +8,7 @@ import (
 )
 
 // GetProfile godoc
+// @Security ApiKeyAuth
 // @Summary Get logged in user profile.
 // @Description Get logged in user profile.
 // @Tags User

@@ -7,7 +7,7 @@ import (
 )
 
 type Request struct {
-	User        *UserHandleResponse
+	User        *UserClaims
 	Org         *OrganizationHandleResponse
 	Body        []byte
 	ParsedBody  map[string]interface{}

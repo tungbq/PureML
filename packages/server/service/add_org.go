@@ -9,6 +9,7 @@ import (
 )
 
 // AddUsersToOrg godoc
+// @Security ApiKeyAuth
 // @Summary Add a user to an organization.
 // @Description Add a user to an organization. Only accessible by owners of the organization.
 // @Tags Organization

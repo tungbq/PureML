@@ -3,6 +3,7 @@ package service
 import "github.com/PureML-Inc/PureML/server/models"
 
 // UserResetPassword godoc
+// @Security ApiKeyAuth
 // @Summary User reset password.
 // @Description User can reset password by providing old password and new password.
 // @Tags User

@@ -3,6 +3,7 @@ package service
 import "github.com/PureML-Inc/PureML/server/models"
 
 // RemoveOrg godoc
+// @Security ApiKeyAuth
 // @Summary Remove user from organization.
 // @Description Remove user from organization.
 // @Tags Organization

@@ -45,6 +45,11 @@
         },
         "/org/": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all user organizations.",
                 "consumes": [
                     "*/*"
@@ -69,6 +74,11 @@
         },
         "/org/:orgId/add": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Add a user to an organization. Only accessible by owners of the organization.",
                 "consumes": [
                     "*/*"
@@ -102,6 +112,11 @@
         },
         "/org/:orgId/leave": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Leave organization.",
                 "consumes": [
                     "*/*"
@@ -144,6 +159,11 @@
         },
         "/org/:orgId/remove": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Remove user from organization.",
                 "consumes": [
                     "*/*"
@@ -186,6 +206,11 @@
         },
         "/org/:orgId/update": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update organization details by ID.",
                 "consumes": [
                     "*/*"
@@ -228,6 +253,11 @@
         },
         "/org/all": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all organizations and their details. Only accessible by admins.",
                 "consumes": [
                     "*/*"
@@ -252,6 +282,11 @@
         },
         "/org/create": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create an organization and add the user as the owner.",
                 "consumes": [
                     "*/*"
@@ -287,6 +322,11 @@
         },
         "/org/id/:orgId": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get organization details by ID.",
                 "consumes": [
                     "*/*"
@@ -320,6 +360,11 @@
         },
         "/org/join": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Join organization by join code.",
                 "consumes": [
                     "*/*"
@@ -355,6 +400,11 @@
         },
         "/user/delete": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete user profile.",
                 "consumes": [
                     "*/*"
@@ -379,6 +429,11 @@
         },
         "/user/login": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "User login with email and password.",
                 "consumes": [
                     "*/*"
@@ -414,6 +469,11 @@
         },
         "/user/profile": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get logged in user profile.",
                 "consumes": [
                     "*/*"
@@ -471,6 +531,11 @@
         },
         "/user/reset-password": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "User can reset password by providing old password and new password.",
                 "consumes": [
                     "*/*"
@@ -495,6 +560,11 @@
         },
         "/user/signup": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "User sign up with email, name, handle and password.",
                 "consumes": [
                     "*/*"
@@ -605,6 +675,13 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

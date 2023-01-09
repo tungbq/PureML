@@ -8,6 +8,7 @@ import (
 )
 
 // GetOrgsForUser godoc
+// @Security ApiKeyAuth
 // @Summary Get all user organizations.
 // @Description Get all user organizations.
 // @Tags Organization

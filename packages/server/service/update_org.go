@@ -9,6 +9,7 @@ import (
 )
 
 // UpdateOrg godoc
+// @Security ApiKeyAuth
 // @Summary Update organization details.
 // @Description Update organization details by ID.
 // @Tags Organization

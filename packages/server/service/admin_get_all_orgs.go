@@ -10,6 +10,7 @@ import (
 )
 
 // GetAllAdminOrgs godoc
+// @Security ApiKeyAuth
 // @Summary Get all organizations and their details.
 // @Description Get all organizations and their details. Only accessible by admins.
 // @Tags Organization

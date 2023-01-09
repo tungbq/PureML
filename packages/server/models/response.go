@@ -13,6 +13,13 @@ type Response struct {
 	Body       ResponseBody
 	StatusCode int
 }
+func (r *Response) ToJson() map[string]interface{} {
+	return map[string]interface{}{
+		"status":  r.Body.Status,
+		"data":    r.Body.Data,
+		"message": r.Body.Message,
+	}
+}
 
 func NewServerErrorResponse(err error) *Response {
 	return &Response{
