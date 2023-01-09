@@ -62,14 +62,18 @@ func UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, orgAvatar string
 }
 
 func GetUserByEmail(email string) (*models.UserResponse, error) {
-	return ds.GetUser(email)
+	return ds.GetUserByEmail(email)
+}
+
+func GetUserByHandle(email string) (*models.UserResponse, error) {
+	return ds.GetUserByHandle(email)
 }
 
 func UpdateUser(email string, updatedAttributes map[string]string) (*models.UserResponse, error) {
 	return nil, nil
 }
 
-func CreateUser(name string, email string, hashedPassword string, shortId string) (*models.UserResponse, error) {
+func CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string, shortId string) (*models.UserResponse, error) {
 	return nil, nil
 }
 

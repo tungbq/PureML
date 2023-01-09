@@ -55,6 +55,7 @@ func main() {
 	//User APIs
 	userGroup := e.Group("user")
 	userGroup.GET("/profile", handler.DefaultHandler(service.GetProfile), middlewares.AuthenticateJWT)
+	userGroup.GET("/profile/:userHandle", handler.DefaultHandler(service.GetProfileByHandle))
 	userGroup.POST("/profile", handler.DefaultHandler(service.UpdateProfile), middlewares.AuthenticateJWT)
 	userGroup.POST("/signup", handler.DefaultHandler(service.UserSignUp))
 	userGroup.POST("/login", handler.DefaultHandler(service.UserLogin))

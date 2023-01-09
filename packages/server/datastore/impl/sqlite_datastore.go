@@ -309,9 +309,24 @@ func (ds *SQLiteDatastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc st
 /////////////////////////////// USER METHODS /////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-func (ds *SQLiteDatastore) GetUser(email string) (*models.UserResponse, error) {
+func (ds *SQLiteDatastore) GetUserByEmail(email string) (*models.UserResponse, error) {
 	var user dbmodels.User
 	result := ds.DB.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.UserResponse{
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetUserByHandle(handle string) (*models.UserResponse, error) {
+	var user dbmodels.User
+	result := ds.DB.Where("handle = ?", handle).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}

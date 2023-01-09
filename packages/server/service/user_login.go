@@ -10,11 +10,32 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// UserLogin godoc
+// @Summary User login.
+// @Description User login with email and password.
+// @Tags User
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /user/login [post]
+// @Param org body models.UserLoginRequest true "User details"
 func UserLogin(request *models.Request) *models.Response {
 	request.ParseJsonBody()
-	email := request.GetParsedBodyAttribute("email").(string)
+	email := request.GetParsedBodyAttribute("email")
+	handle := request.GetParsedBodyAttribute("handle")
+	if email == nil && handle == nil {
+		return models.NewDataResponse(http.StatusBadRequest, nil, "Email or handle is required")
+	}
 	password := request.GetParsedBodyAttribute("password").(string)
-	user, err := datastore.GetUserByEmail(email)
+	var user *models.UserResponse
+	var err error
+	if email != nil {
+		email := email.(string)
+		user, err = datastore.GetUserByEmail(email)
+	} else {
+		handle := handle.(string)
+		user, err = datastore.GetUserByHandle(handle)
+	}
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -24,8 +45,9 @@ func UserLogin(request *models.Request) *models.Response {
 	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(user.Password))
 	if err != nil {
 		token := jwt.NewWithClaims(&jwt.SigningMethodHMAC{}, jwt.MapClaims{
-			"id":    user.Id,
-			"email": user.Email,
+			"uuid":   user.UUID,
+			"email":  user.Email,
+			"handle": user.Handle,
 		})
 		signedString, err := token.SignedString(config.TokenSigningSecret())
 		if err != nil {

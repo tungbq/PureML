@@ -7,6 +7,14 @@ import (
 	"github.com/PureML-Inc/PureML/server/models"
 )
 
+// GetProfile godoc
+// @Summary Get logged in user profile.
+// @Description Get logged in user profile.
+// @Tags User
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /user/profile [get]
 func GetProfile(request *models.Request) *models.Response {
 	email := request.GetUserMail()
 	user, err := datastore.GetUserByEmail(email)

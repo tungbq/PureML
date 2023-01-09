@@ -11,6 +11,44 @@ definitions:
       name:
         type: string
     type: object
+  models.UserLoginRequest:
+    properties:
+      email:
+        type: string
+      handle:
+        type: string
+      password:
+        type: string
+    type: object
+  models.UserResetPasswordRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  models.UserSignupRequest:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      email:
+        type: string
+      handle:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  models.UserUpdateRequest:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      name:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -246,6 +284,122 @@ paths:
       summary: Join organization by join code.
       tags:
       - Organization
+  /user/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete user profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete user profile.
+      tags:
+      - User
+  /user/login:
+    post:
+      consumes:
+      - '*/*'
+      description: User login with email and password.
+      parameters:
+      - description: User details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User login.
+      tags:
+      - User
+  /user/profile:
+    get:
+      consumes:
+      - '*/*'
+      description: Get logged in user profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get logged in user profile.
+      tags:
+      - User
+  /user/profile/:userhandle:
+    post:
+      consumes:
+      - '*/*'
+      description: Get user profile by handle. Accessible without login.
+      parameters:
+      - description: User handle
+        in: path
+        name: userHandle
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user profile by handle.
+      tags:
+      - User
+  /user/reset-password:
+    post:
+      consumes:
+      - '*/*'
+      description: User can reset password by providing old password and new password.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User reset password.
+      tags:
+      - User
+  /user/signup:
+    post:
+      consumes:
+      - '*/*'
+      description: User sign up with email, name, handle and password.
+      parameters:
+      - description: User details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserSignupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User sign up.
+      tags:
+      - User
 schemes:
 - http
 swagger: "2.0"
