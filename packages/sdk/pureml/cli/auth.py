@@ -7,6 +7,7 @@ import typer
 from rich import print
 from rich.syntax import Syntax
 from pureml.utils.constants import BASE_URL, PATH_USER_TOKEN
+from pureml.components import get_org_id, get_token
 
 from urllib.parse import urljoin
 import json
@@ -32,6 +33,16 @@ def save_auth(org_id:str=None, access_token:str=None):
         token_file.write(token)
 
     print('[green]User token is stored')
+
+
+
+@app.command()
+def details():
+    token = get_token()
+    org_id = get_org_id()
+
+    print('Org Id: ', org_id)
+    print('Access Token: ', token)
 
 
 
