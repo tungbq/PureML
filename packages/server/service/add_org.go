@@ -21,7 +21,7 @@ func AddUsersToOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))
-	user, err := datastore.GetUser(email)
+	user, err := datastore.GetUserByEmail(email)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
