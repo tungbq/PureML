@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"mime/multipart"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -16,6 +17,8 @@ type Request struct {
 	Headers     map[string]string
 	PathParams  map[string]string
 	QueryParams map[string]string
+	FormFiles   map[string][]*multipart.FileHeader
+	FormValues  map[string][]string
 }
 
 func (r *Request) GetUserMail() string {
@@ -59,6 +62,14 @@ func (r *Request) GetParsedBodyAttribute(attributeName string) interface{} {
 		return val
 	}
 	return nil
+}
+
+func (r *Request) GetFormFile(formKeyName string) *multipart.FileHeader {
+	if val, ok := r.FormFiles[formKeyName]; !ok || len(val) == 0 {
+		return nil
+	} else {
+		return val[0]
+	}
 }
 
 func getValueFromMap(m map[string]string, param string) string {

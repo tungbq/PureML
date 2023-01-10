@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"mime/multipart"
 	"os"
 
 	"github.com/PureML-Inc/PureML/server/datastore/impl"
@@ -83,6 +84,22 @@ func CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.
 
 func CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
 	return ds.CreateLogForDatasetVersion(data, datasetVersionUUID)
+}
+
+func GetModelByName(orgId string, name string) (*models.ModelNameResponse, error) {
+	return nil, nil
+}
+
+func CreateModel(orgId string, name string) (*models.ModelNameResponse, error) {
+	return nil, nil
+}
+
+func CreateModelBranches(orgId string, modelName string, branchNames []string) ([]models.ModelBranchResponse, error) {
+	return nil, nil
+}
+
+func UploadModelFile(orgId string, modelBranchName string, file *multipart.FileHeader) error {
+	return nil
 }
 
 type Datastore interface {
