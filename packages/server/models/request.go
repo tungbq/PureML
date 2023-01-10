@@ -9,6 +9,8 @@ import (
 type Request struct {
 	User        *UserClaims
 	Org         *OrganizationHandleResponse
+	Model       *ModelNameResponse
+	Dataset     *DatasetNameResponse
 	Body        []byte
 	ParsedBody  map[string]interface{}
 	Headers     map[string]string
@@ -22,6 +24,14 @@ func (r *Request) GetUserMail() string {
 
 func (r *Request) GetOrgId() uuid.UUID {
 	return r.Org.UUID
+}
+
+func (r *Request) GetModelUUID() uuid.UUID {
+	return r.Model.UUID
+}
+
+func (r *Request) GetDatasetUUID() uuid.UUID {
+	return r.Dataset.UUID
 }
 
 func (r *Request) GetPathParam(param string) string {

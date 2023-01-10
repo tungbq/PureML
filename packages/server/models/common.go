@@ -4,8 +4,6 @@ package models
 
 type LogRequest struct {
 	Data               string `json:"data"`
-	ModelVersionUUID   string `json:"model_version_uuid"`
-	DatasetVersionUUID string `json:"dataset_version_uuid"`
 }
 
 // Response models

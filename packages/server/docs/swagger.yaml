@@ -11,6 +11,15 @@ definitions:
       name:
         type: string
     type: object
+  models.LogRequest:
+    properties:
+      data:
+        type: string
+      dataset_version_uuid:
+        type: string
+      model_version_uuid:
+        type: string
+    type: object
   models.UserLoginRequest:
     properties:
       email:
@@ -77,6 +86,31 @@ paths:
       summary: Show the status of server.
       tags:
       - Root
+  /log:
+    post:
+      consumes:
+      - '*/*'
+      description: Log data for dataset or model
+      parameters:
+      - description: Data to log
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Log data for dataset or model
+      tags:
+      - Common
   /org/:
     get:
       consumes:
@@ -320,6 +354,32 @@ paths:
       summary: Delete user profile.
       tags:
       - User
+  /user/forgot-password:
+    post:
+      consumes:
+      - '*/*'
+      description: User can reset password by providing email id to send reset password
+        link.
+      parameters:
+      - description: User email
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: User forgot password.
+      tags:
+      - User
   /user/login:
     post:
       consumes:
@@ -361,6 +421,30 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get logged in user profile.
+      tags:
+      - User
+    post:
+      consumes:
+      - '*/*'
+      description: User can update profile by providing name, avatar, bio.
+      parameters:
+      - description: User details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: User update profile.
       tags:
       - User
   /user/profile/:userhandle:

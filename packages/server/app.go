@@ -65,10 +65,21 @@ func main() {
 	userGroup.POST("/forgot-password", handler.DefaultHandler(service.UserForgotPassword))
 	userGroup.POST("/reset-password", handler.DefaultHandler(service.UserResetPassword)) //TODO To complete the logic here and update middlewares
 
-	// Log APIs
-	e.POST("/log", handler.DefaultHandler(service.Log), middlewares.AuthenticateJWT)
+	//Model APIs
+	modelGroup := e.Group("/org/:orgId/model")
+	modelGroup.GET("/:modelName/branches", handler.DefaultHandler(service.GetModelAllBranches), middlewares.AuthenticateJWT)
+	modelGroup.POST("/:modelName/branches/create", handler.DefaultHandler(service.CreateModelBranch), middlewares.AuthenticateJWT)
+	modelGroup.GET("/:modelName/branches/:branchName", handler.DefaultHandler(service.GetModelBranch), middlewares.AuthenticateJWT)
+	modelGroup.POST("/:modelName/branches/:branchName/update", handler.DefaultHandler(service.UpdateModelBranch), middlewares.AuthenticateJWT)
+	modelGroup.DELETE("/:modelName/branches/:branchName/delete", handler.DefaultHandler(service.DeleteModelBranch), middlewares.AuthenticateJWT)
+	modelGroup.GET("/:modelName/branches/:branchName/versions", handler.DefaultHandler(service.GetModelBranchVersions), middlewares.AuthenticateJWT)
+	modelGroup.GET("/:modelName/branches/:branchName/versions/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.AuthenticateJWT)
 
-	// Start server
+	//Log APIs
+	e.POST("/model/:modelName/log", handler.DefaultHandler(service.LogModel), middlewares.AuthenticateJWT)
+	e.POST("/dataset/:datasetName/log", handler.DefaultHandler(service.LogDataset), middlewares.AuthenticateJWT)
+
+	//Start server
 	e.Logger.Fatal(e.Start("localhost:8080"))
 
 }
