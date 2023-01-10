@@ -9,7 +9,7 @@ import "github.com/PureML-Inc/PureML/server/models"
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /user/profile/:userhandle [post]
+// @Router /user/profile/{userhandle} [get]
 // @Param userHandle path string true "User handle"
 func GetProfileByHandle(request *models.Request) *models.Response {
 	return nil

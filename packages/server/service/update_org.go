@@ -16,7 +16,7 @@ import (
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/:orgId/update [post]
+// @Router /org/{orgId}/update [post]
 // @Param orgId path string true "Organization ID"
 // @Param org body models.CreateOrUpdateOrgRequest true "Organization details"
 func UpdateOrg(request *models.Request) *models.Response {

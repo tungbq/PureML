@@ -16,7 +16,7 @@ import (
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/id/:orgId [get]
+// @Router /org/id/{orgId} [get]
 // @Param orgId path string true "Organization ID"
 func GetOrgByID(request *models.Request) *models.Response {
 	var response *models.Response

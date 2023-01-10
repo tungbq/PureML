@@ -5,13 +5,23 @@ import (
 
 	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
-	uuid "github.com/satori/go.uuid"
 )
 
+// GetModel godoc
+// @Security ApiKeyAuth
+// @Summary Get specific model of an organization
+// @Description Get specific model of an organization
+// @Tags Model
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /org/{orgId}/model/{modelName} [get]
+// @Param orgId path string true "Organization Id"
+// @Param modelName path string true "Model Name"
 func GetModel(request *models.Request) *models.Response {
-	orgId := request.GetPathParam("orgId")
-	modelName := request.GetPathParam("modelName")
-	model, err := datastore.GetModelByName(uuid.Must(uuid.FromString(orgId)), modelName)
+	orgId := request.GetOrgId()
+	modelName := request.GetModelName()
+	model, err := datastore.GetModelByName(orgId, modelName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

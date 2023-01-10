@@ -37,8 +37,16 @@ func (r *Request) GetModelUUID() uuid.UUID {
 	return r.Model.UUID
 }
 
+func (r *Request) GetModelName() string {
+	return r.Model.Name
+}
+
 func (r *Request) GetDatasetUUID() uuid.UUID {
 	return r.Dataset.UUID
+}
+
+func (r *Request) GetDatasetName() string {
+	return r.Dataset.Name
 }
 
 func (r *Request) GetPathParam(param string) string {

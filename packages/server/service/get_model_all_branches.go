@@ -15,7 +15,7 @@ import (
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/:orgId/model/:modelName/branches [get]
+// @Router /org/{orgId}/model/{modelName}/branches [get]
 // @Param orgId path string true "Organization Id"
 // @Param modelName path string true "Model Name"
 func GetModelAllBranches(request *models.Request) *models.Response {

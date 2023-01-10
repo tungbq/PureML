@@ -15,7 +15,7 @@ import (
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /model/:modelName/log [post]
+// @Router /model/{modelName}/log [post]
 // @Param data body models.LogRequest true "Data to log"
 func LogModel(request *models.Request) *models.Response {
 	request.ParseJsonBody()
@@ -37,7 +37,7 @@ func LogModel(request *models.Request) *models.Response {
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /dataset/:datasetName/log [post]
+// @Router /dataset/{datasetName}/log [post]
 // @Param data body models.LogRequest true "Data to log"
 func LogDataset(request *models.Request) *models.Response {
 	request.ParseJsonBody()

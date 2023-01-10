@@ -10,7 +10,7 @@ import "github.com/PureML-Inc/PureML/server/models"
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/:orgId/model/:modelName/branch/:branchName [get]
+// @Router /org/{orgId}/model/{modelName}/branch/{branchName} [get]
 // @Param orgId path string true "Organization Id"
 // @Param modelName path string true "Model Name"
 // @Param branchName path string true "Branch Name"

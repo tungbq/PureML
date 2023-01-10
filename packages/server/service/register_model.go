@@ -17,7 +17,8 @@ var defaultBranchNames = []string{"main", "developement"}
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/:orgId/model/:modelName/register [post]
+// @Router /org/{orgId}/model/{modelName}/register [post]
+// @Param file formData file true "Model file"
 // @Param orgId path string true "Organization UUID"
 // @Param modelName path string true "Model name"
 // @Param data body models.RegisterModelRequest true "Model details"
@@ -25,7 +26,7 @@ func RegisterModel(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()
 	userUUID := request.GetUserUUID()
-	modelName := request.GetPathParam("modelName")
+	modelName := request.GetModelName()
 	modelWiki := request.GetParsedBodyAttribute("wiki").(string)
 	modelHash := request.GetParsedBodyAttribute("hash").(string)
 	model, err := datastore.GetModelByName(orgId, modelName)

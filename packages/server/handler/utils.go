@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"mime/multipart"
 
 	"github.com/PureML-Inc/PureML/server/models"
@@ -16,11 +17,29 @@ func extractRequest(context echo.Context) *models.Request {
 	} else {
 		request.User = &models.UserClaims{}
 	}
+	if context.Get("Org") != nil {
+		request.Org = context.Get("Org").(*models.OrganizationHandleResponse)
+	} else {
+		request.Org = &models.OrganizationHandleResponse{}
+	}
+	if context.Get("Model") != nil {
+		request.Model = context.Get("Model").(*models.ModelNameResponse)
+	} else {
+		request.Model = &models.ModelNameResponse{}
+	}
+	if context.Get("Dataset") != nil {
+		request.Dataset = context.Get("Dataset").(*models.DatasetNameResponse)
+	} else {
+		request.Dataset = &models.DatasetNameResponse{}
+	}
 	request.Body = extractBody(context)
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)
 	request.QueryParams = extractQueryParams(context)
-	request.FormValues, request.FormFiles = extractFormData(context)
+	// if content type is multipart formdata
+	if context.Request().Header.Get("Content-Type") == "multipart/form-data" {
+		request.FormValues, request.FormFiles = extractFormData(context)
+	}
 	return request
 }
 
@@ -71,6 +90,7 @@ func extractPathParams(context echo.Context) map[string]string {
 func extractFormData(context echo.Context) (map[string][]string, map[string][]*multipart.FileHeader) {
 	formData, err := context.MultipartForm()
 	if err != nil {
+		fmt.Println(err)
 		panic("Could not process formdata for request")
 	}
 	if formData == nil {

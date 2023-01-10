@@ -76,7 +76,10 @@ func (ds *SQLiteDatastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResp
 			UUID: orgId,
 		},
 	}
-	result := ds.DB.First(&org)
+	result := ds.DB.Limit(1).Find(&org)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -92,7 +95,10 @@ func (ds *SQLiteDatastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResp
 
 func (ds *SQLiteDatastore) GetOrgByJoinCode(joinCode string) (*models.OrganizationResponse, error) {
 	var org dbmodels.Organization
-	result := ds.DB.Where("join_code = ?", joinCode).First(&org)
+	result := ds.DB.Where("join_code = ?", joinCode).Limit(1).Find(&org)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -153,7 +159,10 @@ func (ds *SQLiteDatastore) CreateOrgFromEmail(email string, orgName string, orgD
 
 func (ds *SQLiteDatastore) GetOrgByHandle(handle string) (*models.OrganizationResponse, error) {
 	var org dbmodels.Organization
-	result := ds.DB.Where("handle = ?", handle).First(&org)
+	result := ds.DB.Where("handle = ?", handle).Limit(1).Find(&org)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -424,7 +433,10 @@ func (ds *SQLiteDatastore) UpdateUser(email string, name string, bio string, ava
 
 func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
 	var model dbmodels.Model
-	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("name = ?", modelName).Where("organization_uuid = ?", orgId).First(&model)
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("name = ?", modelName).Where("organization_uuid = ?", orgId).Limit(1).Find(&model)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -446,7 +458,10 @@ func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*m
 
 func (ds *SQLiteDatastore) GetModelById(modelId string) (*models.ModelResponse, error) {
 	var model dbmodels.Model
-	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("uuid = ?", modelId).First(&model)
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("uuid = ?", modelId).Limit(1).Find(&model)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -594,7 +609,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID,
 		Path: models.PathResponse{
 			SourcePath: modelVersion.Path.SourcePath,
 			SourceType: models.SourceTypeResponse{
-				Name: modelVersion.Path.SourceType.Name,
+				Name:      modelVersion.Path.SourceType.Name,
 				PublicURL: modelVersion.Path.SourceType.PublicURL,
 			},
 		},

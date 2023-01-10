@@ -5,15 +5,29 @@ import (
 
 	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
-	uuid "github.com/satori/go.uuid"
 )
 
+// VerifyModelHashStatus godoc
+// @Security ApiKeyAuth
+// @Summary Verify model hash status
+// @Description Verify model hash status to determine if model is already uploaded
+// @Tags Model
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /org/{orgId}/model/{modelName}/hash-status [post]
+// @Param orgId path string true "Organization Id"
+// @Param modelName path string true "Model Name"
+// @Param hash body string true "Hash value"
 func VerifyModelHashStatus(request *models.Request) *models.Response {
-	orgId := request.GetPathParam("orgId")
-	modelName := request.GetPathParam("modelName")
+	orgId := request.GetOrgId()
+	modelName := request.GetModelName()
+	if modelName == "" {
+		return models.NewDataResponse(http.StatusOK, true, "Hash validity (True - does not exist in db)")
+	}
 	request.ParseJsonBody()
 	hashValue := request.GetParsedBodyAttribute("hash").(string)
-	versions, err := datastore.GetAllModelVersions(uuid.Must(uuid.FromString(orgId)), modelName)
+	versions, err := datastore.GetAllModelVersions(orgId, modelName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -24,5 +38,5 @@ func VerifyModelHashStatus(request *models.Request) *models.Response {
 			break
 		}
 	}
-	return models.NewDataResponse(http.StatusOK, response, "Hash value retrieved")
+	return models.NewDataResponse(http.StatusOK, response, "Hash validity (True - does not exist in db)")
 }

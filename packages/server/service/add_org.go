@@ -16,7 +16,7 @@ import (
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/:orgId/add [post]
+// @Router /org/{orgId}/add [post]
 // @Param email path string true "User email"
 func AddUsersToOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()

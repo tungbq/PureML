@@ -70,7 +70,7 @@ func main() {
 	modelGroup.GET("/all", handler.DefaultHandler(service.GetAllModels))
 	modelGroup.GET("/:modelName", handler.DefaultHandler(service.GetModel), middlewares.ValidateModel)
 	modelGroup.POST("/:modelName/register", handler.DefaultHandler(service.RegisterModel))
-	modelGroup.POST("/:modelName/hash-status", handler.DefaultHandler(service.VerifyModelHashStatus), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/hash-status", handler.DefaultHandler(service.VerifyModelHashStatus))
 	modelGroup.GET("/:modelName/branch", handler.DefaultHandler(service.GetModelAllBranches), middlewares.ValidateModel)
 	modelGroup.POST("/:modelName/branch/create", handler.DefaultHandler(service.CreateModelBranch), middlewares.ValidateModel)
 	modelGroup.GET("/:modelName/branch/:branchName", handler.DefaultHandler(service.GetModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)

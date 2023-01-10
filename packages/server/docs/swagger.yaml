@@ -73,7 +73,7 @@ info:
   title: PureML API Documentation
   version: "1.0"
 paths:
-  /dataset/:datasetName/log:
+  /dataset/{datasetName}/log:
     post:
       consumes:
       - '*/*'
@@ -114,7 +114,7 @@ paths:
       summary: Show the status of server.
       tags:
       - Root
-  /model/:modelName/log:
+  /model/{modelName}/log:
     post:
       consumes:
       - '*/*'
@@ -157,7 +157,7 @@ paths:
       summary: Get all user organizations.
       tags:
       - Organization
-  /org/:orgId/add:
+  /org/{orgId}/add:
     post:
       consumes:
       - '*/*'
@@ -182,7 +182,7 @@ paths:
       summary: Add a user to an organization.
       tags:
       - Organization
-  /org/:orgId/leave:
+  /org/{orgId}/leave:
     post:
       consumes:
       - '*/*'
@@ -212,7 +212,36 @@ paths:
       summary: Leave organization.
       tags:
       - Organization
-  /org/:orgId/model/:modelName/branch/:branchName:
+  /org/{orgId}/model/{modelName}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific model of an organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific model of an organization
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}:
     get:
       consumes:
       - '*/*'
@@ -246,7 +275,7 @@ paths:
       summary: Get specific branch of a model
       tags:
       - Model
-  /org/:orgId/model/:modelName/branch/:branchName/delete:
+  /org/{orgId}/model/{modelName}/branch/{branchName}/delete:
     delete:
       consumes:
       - '*/*'
@@ -280,7 +309,7 @@ paths:
       summary: Delete a branch of a model
       tags:
       - Model
-  /org/:orgId/model/:modelName/branch/:branchName/update:
+  /org/{orgId}/model/{modelName}/branch/{branchName}/update:
     post:
       consumes:
       - '*/*'
@@ -314,7 +343,7 @@ paths:
       summary: Update a branch of a model
       tags:
       - Model
-  /org/:orgId/model/:modelName/branch/:branchName/version:
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version:
     get:
       consumes:
       - '*/*'
@@ -348,7 +377,7 @@ paths:
       summary: Get all branch versions of a model
       tags:
       - Model
-  /org/:orgId/model/:modelName/branch/:branchName/version/:version:
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}:
     get:
       consumes:
       - '*/*'
@@ -387,7 +416,7 @@ paths:
       summary: Get specific branch version of a model
       tags:
       - Model
-  /org/:orgId/model/:modelName/branch/create:
+  /org/{orgId}/model/{modelName}/branch/create:
     post:
       consumes:
       - '*/*'
@@ -422,7 +451,7 @@ paths:
       summary: Create a new branch of a model
       tags:
       - Model
-  /org/:orgId/model/:modelName/branches:
+  /org/{orgId}/model/{modelName}/branches:
     get:
       consumes:
       - '*/*'
@@ -451,12 +480,52 @@ paths:
       summary: Get all branches of a model
       tags:
       - Model
-  /org/:orgId/model/:modelName/register:
+  /org/{orgId}/model/{modelName}/hash-status:
+    post:
+      consumes:
+      - '*/*'
+      description: Verify model hash status to determine if model is already uploaded
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Hash value
+        in: body
+        name: hash
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Verify model hash status
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/register:
     post:
       consumes:
       - '*/*'
       description: Register model file. Create model and default branches if not exists
       parameters:
+      - description: Model file
+        in: formData
+        name: file
+        required: true
+        type: file
       - description: Organization UUID
         in: path
         name: orgId
@@ -486,7 +555,31 @@ paths:
       summary: Register model
       tags:
       - Model
-  /org/:orgId/remove:
+  /org/{orgId}/model/all:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all models of an organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all models of an organization
+      tags:
+      - Model
+  /org/{orgId}/remove:
     post:
       consumes:
       - '*/*'
@@ -516,7 +609,7 @@ paths:
       summary: Remove user from organization.
       tags:
       - Organization
-  /org/:orgId/update:
+  /org/{orgId}/update:
     post:
       consumes:
       - '*/*'
@@ -589,7 +682,7 @@ paths:
       summary: Create an organization.
       tags:
       - Organization
-  /org/id/:orgId:
+  /org/id/{orgId}:
     get:
       consumes:
       - '*/*'
@@ -749,8 +842,8 @@ paths:
       summary: User update profile.
       tags:
       - User
-  /user/profile/:userhandle:
-    post:
+  /user/profile/{userhandle}:
+    get:
       consumes:
       - '*/*'
       description: Get user profile by handle. Accessible without login.
