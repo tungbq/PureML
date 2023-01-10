@@ -155,12 +155,12 @@ def add_metrics_to_config(values, model_name=None, model_version=None, func=None
     if len(config['metrics']) != 0:
         metric_values = config['metrics']['values']
         metric_values = update_step_dict(metric_values, values)
-        print('default',metric_values)
+        # print('default',metric_values)
     else:
         
         metric_values = values
 
-        print('not default',metric_values)
+        # print('not default',metric_values)
 
     hash = generate_hash_for_dict(values=metric_values)
 
@@ -199,7 +199,7 @@ def add_params_to_config(values, model_name=None, model_version=None, func=None)
 
     if len(config['params']) != 0:
         param_values = config['params']['values']
-        metric_values = update_step_dict(metric_values, values)
+        param_values = update_step_dict(param_values, values)
     else:
         param_values = values
 
