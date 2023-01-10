@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"mime/multipart"
 
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/labstack/echo/v4"
@@ -19,6 +20,7 @@ func extractRequest(context echo.Context) *models.Request {
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)
 	request.QueryParams = extractQueryParams(context)
+	request.FormValues, request.FormFiles = extractFormData(context)
 	return request
 }
 
@@ -64,6 +66,17 @@ func extractPathParams(context echo.Context) map[string]string {
 		pathParams[pathParam] = context.Param(pathParam)
 	}
 	return pathParams
+}
+
+func extractFormData(context echo.Context) (map[string][]string, map[string][]*multipart.FileHeader) {
+	formData, err := context.MultipartForm()
+	if err != nil {
+		panic("Could not process formdata for request")
+	}
+	if formData == nil {
+		return map[string][]string{}, map[string][]*multipart.FileHeader{}
+	}
+	return formData.Value, formData.File
 }
 
 func convertToBytes(object interface{}) []byte {
