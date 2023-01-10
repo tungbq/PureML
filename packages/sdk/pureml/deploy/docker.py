@@ -91,7 +91,7 @@ def create_docker_image(image_tag=None):
     try:
       image, build_log  = client.images.build(path=PATH_PREDICT_DIR, 
                                               dockerfile=docker_file_path_relative,
-                                              tag=image_tag,
+                                              tag=image_tag, nocache=True,
                                               rm=True)
       
       print('Docker image is created')
