@@ -7,6 +7,7 @@ import typer
 from rich import print
 from rich.syntax import Syntax
 from pureml.utils.constants import BASE_URL, PATH_USER_TOKEN
+from pureml.components import get_org_id, get_token
 
 from urllib.parse import urljoin
 import json
@@ -14,29 +15,36 @@ import json
 app = typer.Typer()
 
 
-def save_auth(response:requests.Response):
-    # token_path = "~/.pureml/token"
-    # token_path = os.path.expanduser(token_path)
+def save_auth(org_id:str=None, access_token:str=None):
     token_path = PATH_USER_TOKEN
 
     token_dir = os.path.dirname(token_path)
     os.makedirs(token_dir, exist_ok=True)
 
-    if response.status_code == 200:
-        with open(token_path, "w") as f:
-            token = response.text
-            token = json.loads(token)['data'][0]
 
-            accessToken = token['accessToken']
+    token = {
+                'email': org_id,
+                'accessToken': access_token
+            }
+        
+    token = json.dumps(token)
+    
+    with open(token_path, "w") as token_file:
+        token_file.write(token)
 
-            token = json.dumps(token)
-            f.write(token)
+    print('[green]User token is stored')
 
-            print('accessToken:', accessToken)
 
-        print(f"[bold green]Successfully logged in to your account!")
-    else:
-        print(f"[bold green]Unable to login to your account!")
+
+@app.command()
+def details():
+    token = get_token()
+    org_id = get_org_id()
+
+    print('Org Id: ', org_id)
+    print('Access Token: ', token)
+
+
 
 
 
@@ -70,8 +78,6 @@ def signup():
     response = requests.post(url,json=data)
 
 
-
-    # print(response.text)
     if not response.ok:
         print(f"[bold red]Could not create account! Please try again later")
         return
@@ -99,15 +105,28 @@ def login():
         print('[bold yellow] Please signup at https://app.pureml.com/auth/signup')
         return
 
-    save_auth(response=response)
+
+    if response.status_code == 200:
+        token = response.text
+        token = json.loads(token)['data'][0]
+
+        org_id = token['email']
+        access_token = token['accessToken']
+
+        save_auth(org_id=org_id, access_token=access_token)
+        print(f"[bold green]Successfully logged in to your account!")
+
+        print('org_id:', org_id)
+        print('accessToken:', access_token)
+
+    else:
+        print(f"[bold green]Unable to login to your account!")
 
  
 
 @app.command()
 def status():
     print()
-    # path = "~/.pureml/token"
-    # path = os.path.expanduser(path)
     path = PATH_USER_TOKEN
 
     curr_path = Path(__file__).parent.resolve()
@@ -120,8 +139,6 @@ def status():
         print("[bold red]You are not logged in!")
 
 def statusHelper():
-    # path = "~/.pureml/token"
-    # path = os.path.expanduser(path)
     path = PATH_USER_TOKEN
 
     if os.path.exists(path):
@@ -139,8 +156,6 @@ def auth_validate():
 @app.command()
 def logout():
     print()
-    # path = "~/.pureml/token"
-    # path = os.path.expanduser(path)
     path = PATH_USER_TOKEN
 
     if os.path.exists(path):
