@@ -41,16 +41,16 @@ func main() {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	//Org APIs
-	orgGroup := e.Group("/org")
-	orgGroup.GET("/all", handler.DefaultHandler(service.GetAllAdminOrgs), middlewares.AuthenticateJWT)
-	orgGroup.GET("/id/:orgId", handler.DefaultHandler(service.GetOrgByID), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	orgGroup.GET("/", handler.DefaultHandler(service.GetOrgsForUser), middlewares.AuthenticateJWT)
-	orgGroup.POST("/create", handler.DefaultHandler(service.CreateOrg), middlewares.AuthenticateJWT)
-	orgGroup.POST("/:orgId/update", handler.DefaultHandler(service.UpdateOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	orgGroup.POST("/:orgId/add", handler.DefaultHandler(service.AddUsersToOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	orgGroup.POST("/join", handler.DefaultHandler(service.JoinOrg), middlewares.AuthenticateJWT)
-	orgGroup.POST("/:orgId/remove", handler.DefaultHandler(service.RemoveOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	orgGroup.POST("/:orgId/leave", handler.DefaultHandler(service.LeaveOrg), middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	orgGroup := e.Group("/org", middlewares.AuthenticateJWT)
+	orgGroup.GET("/all", handler.DefaultHandler(service.GetAllAdminOrgs))
+	orgGroup.GET("/id/:orgId", handler.DefaultHandler(service.GetOrgByID), middlewares.ValidateOrg)
+	orgGroup.GET("/", handler.DefaultHandler(service.GetOrgsForUser))
+	orgGroup.POST("/create", handler.DefaultHandler(service.CreateOrg))
+	orgGroup.POST("/:orgId/update", handler.DefaultHandler(service.UpdateOrg), middlewares.ValidateOrg)
+	orgGroup.POST("/:orgId/add", handler.DefaultHandler(service.AddUsersToOrg), middlewares.ValidateOrg)
+	orgGroup.POST("/join", handler.DefaultHandler(service.JoinOrg))
+	orgGroup.POST("/:orgId/remove", handler.DefaultHandler(service.RemoveOrg), middlewares.ValidateOrg)
+	orgGroup.POST("/:orgId/leave", handler.DefaultHandler(service.LeaveOrg), middlewares.ValidateOrg)
 
 	//Project APIs
 	// group := e.Group("")
@@ -66,14 +66,18 @@ func main() {
 	userGroup.POST("/reset-password", handler.DefaultHandler(service.UserResetPassword)) //TODO To complete the logic here and update middlewares
 
 	//Model APIs
-	modelGroup := e.Group("/org/:orgId/model")
-	modelGroup.GET("/:modelName/branches", handler.DefaultHandler(service.GetModelAllBranches), middlewares.AuthenticateJWT)
-	modelGroup.POST("/:modelName/branches/create", handler.DefaultHandler(service.CreateModelBranch), middlewares.AuthenticateJWT)
-	modelGroup.GET("/:modelName/branches/:branchName", handler.DefaultHandler(service.GetModelBranch), middlewares.AuthenticateJWT)
-	modelGroup.POST("/:modelName/branches/:branchName/update", handler.DefaultHandler(service.UpdateModelBranch), middlewares.AuthenticateJWT)
-	modelGroup.DELETE("/:modelName/branches/:branchName/delete", handler.DefaultHandler(service.DeleteModelBranch), middlewares.AuthenticateJWT)
-	modelGroup.GET("/:modelName/branches/:branchName/versions", handler.DefaultHandler(service.GetModelBranchVersions), middlewares.AuthenticateJWT)
-	modelGroup.GET("/:modelName/branches/:branchName/versions/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.AuthenticateJWT)
+	modelGroup := e.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup.GET("/all", handler.DefaultHandler(service.GetAllModels))
+	modelGroup.GET("/:modelName", handler.DefaultHandler(service.GetModel), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/register", handler.DefaultHandler(service.RegisterModel), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/hash-status", handler.DefaultHandler(service.VerifyModelHashStatus), middlewares.ValidateModel)
+	modelGroup.GET("/:modelName/branch", handler.DefaultHandler(service.GetModelAllBranches), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/branch/create", handler.DefaultHandler(service.CreateModelBranch), middlewares.ValidateModel)
+	modelGroup.GET("/:modelName/branch/:branchName", handler.DefaultHandler(service.GetModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.POST("/:modelName/branch/:branchName/update", handler.DefaultHandler(service.UpdateModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.DELETE("/:modelName/branch/:branchName/delete", handler.DefaultHandler(service.DeleteModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.GET("/:modelName/branch/:branchName/version", handler.DefaultHandler(service.GetModelBranchAllVersions), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 
 	//Log APIs
 	e.POST("/model/:modelName/log", handler.DefaultHandler(service.LogModel), middlewares.AuthenticateJWT)

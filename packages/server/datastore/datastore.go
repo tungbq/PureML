@@ -98,7 +98,7 @@ func CreateModelBranches(orgId string, modelName string, branchNames []string) (
 	return nil, nil
 }
 
-func UploadModelFile(orgId string, modelBranchName string, file *multipart.FileHeader) error {
+func UploadAndRegisterModelFile(orgId string, modelBranchName string, file *multipart.FileHeader) error {
 	return nil
 }
 

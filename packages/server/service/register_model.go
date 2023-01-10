@@ -29,9 +29,10 @@ func RegisterModel(request *models.Request) *models.Response {
 		fileHeader := request.GetFormFile("file")
 		if fileHeader == nil {
 			//TODO mandatory file is missing return with appropriate response here
+			return models.NewErrorResponse(http.StatusBadRequest, "File is required")
 		}
 		for _, modelBranch := range modelBranches {
-			err = datastore.UploadModelFile(orgId, modelBranch.Name, fileHeader)
+			err = datastore.UploadAndRegisterModelFile(orgId, modelBranch.Name, fileHeader)
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}
