@@ -21,6 +21,10 @@ type Request struct {
 	FormValues  map[string][]string
 }
 
+func (r *Request) GetUserUUID() uuid.UUID {
+	return r.User.UUID
+}
+
 func (r *Request) GetUserMail() string {
 	return r.User.Email
 }

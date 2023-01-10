@@ -86,20 +86,38 @@ func CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*mod
 	return ds.CreateLogForDatasetVersion(data, datasetVersionUUID)
 }
 
-func GetModelByName(orgId string, name string) (*models.ModelNameResponse, error) {
-	return nil, nil
+func GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
+	return ds.GetModelByName(orgId, modelName)
 }
 
-func CreateModel(orgId string, name string) (*models.ModelNameResponse, error) {
-	return nil, nil
+func CreateModel(orgId uuid.UUID, name string, wiki string, userUUID uuid.UUID) (*models.ModelResponse, error) {
+	return ds.CreateModel(orgId, name, wiki, userUUID)
 }
 
-func CreateModelBranches(orgId string, modelName string, branchNames []string) ([]models.ModelBranchResponse, error) {
-	return nil, nil
+func CreateModelBranch(modelUUID uuid.UUID, branchName string) (*models.ModelBranchResponse, error) {
+	return ds.CreateModelBranch(modelUUID, branchName)
 }
 
-func UploadAndRegisterModelFile(orgId string, modelBranchName string, file *multipart.FileHeader) error {
-	return nil
+func CreateModelBranches(modelUUID uuid.UUID, branchNames []string) ([]models.ModelBranchResponse, error) {
+	var branches []models.ModelBranchResponse
+
+	for _, branchName := range branchNames {
+		branch, err := CreateModelBranch(modelUUID, branchName)
+		if err != nil {
+			return nil, err
+		}
+		branches = append(branches, *branch)
+	}
+
+	return branches, nil
+}
+
+func UploadAndRegisterModelFile(modelBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string) (*models.ModelVersionResponse, error) {
+	return ds.UploadAndRegisterModelFile(modelBranchUUID, file, hash, source)
+}
+
+func GetModelAllBranches(orgId uuid.UUID, modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
+	return nil, nil
 }
 
 type Datastore interface {

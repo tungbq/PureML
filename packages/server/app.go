@@ -69,7 +69,7 @@ func main() {
 	modelGroup := e.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
 	modelGroup.GET("/all", handler.DefaultHandler(service.GetAllModels))
 	modelGroup.GET("/:modelName", handler.DefaultHandler(service.GetModel), middlewares.ValidateModel)
-	modelGroup.POST("/:modelName/register", handler.DefaultHandler(service.RegisterModel), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/register", handler.DefaultHandler(service.RegisterModel))
 	modelGroup.POST("/:modelName/hash-status", handler.DefaultHandler(service.VerifyModelHashStatus), middlewares.ValidateModel)
 	modelGroup.GET("/:modelName/branch", handler.DefaultHandler(service.GetModelAllBranches), middlewares.ValidateModel)
 	modelGroup.POST("/:modelName/branch/create", handler.DefaultHandler(service.CreateModelBranch), middlewares.ValidateModel)

@@ -38,7 +38,7 @@ func LogModel(request *models.Request) *models.Response {
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Router /dataset/:datasetName/log [post]
-// @Param data body datasets.LogRequest true "Data to log"
+// @Param data body models.LogRequest true "Data to log"
 func LogDataset(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	data := request.GetParsedBodyAttribute("data").(string)

@@ -2,6 +2,9 @@ package impl
 
 import (
 	"fmt"
+	"mime/multipart"
+	"strconv"
+	"strings"
 
 	"github.com/PureML-Inc/PureML/server/datastore/dbmodels"
 	"github.com/PureML-Inc/PureML/server/models"
@@ -415,6 +418,195 @@ func (ds *SQLiteDatastore) UpdateUser(email string, name string, bio string, ava
 		Bio:    user.Bio,
 		Avatar: user.Avatar,
 	}, nil
+}
+
+/////////////////////////////// MODEL METHODS/////////////////////////////////
+
+func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
+	var model dbmodels.Model
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("name = ?", modelName).Where("organization_uuid = ?", orgId).First(&model)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.ModelResponse{
+		UUID: model.UUID,
+		Name: model.Name,
+		Wiki: model.Wiki,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   model.CreatedByUser.UUID,
+			Handle: model.CreatedByUser.Handle,
+		},
+		UpdatedBy: models.UserHandleResponse{
+			UUID:   model.UpdatedByUser.UUID,
+			Handle: model.UpdatedByUser.Handle,
+		},
+		IsPublic: model.IsPublic,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetModelById(modelId string) (*models.ModelResponse, error) {
+	var model dbmodels.Model
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("uuid = ?", modelId).First(&model)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.ModelResponse{
+		UUID: model.UUID,
+		Name: model.Name,
+		Wiki: model.Wiki,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   model.CreatedByUser.UUID,
+			Handle: model.CreatedByUser.Handle,
+		},
+		UpdatedBy: models.UserHandleResponse{
+			UUID:   model.UpdatedByUser.UUID,
+			Handle: model.UpdatedByUser.Handle,
+		},
+		IsPublic: model.IsPublic,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string, createdByUser uuid.UUID) (*models.ModelResponse, error) {
+	model := dbmodels.Model{
+		Name: name,
+		Wiki: wiki,
+		Org: dbmodels.Organization{
+			BaseModel: dbmodels.BaseModel{
+				UUID: orgId,
+			},
+		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: createdByUser,
+			},
+		},
+		UpdatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: createdByUser,
+			},
+		},
+		IsPublic: false,
+	}
+	err := ds.DB.Create(&model).Preload("Org").Preload("CreatedByUser").Preload("UpdatedByUser").Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelResponse{
+		UUID: model.UUID,
+		Name: model.Name,
+		Wiki: model.Wiki,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   model.CreatedByUser.UUID,
+			Handle: model.CreatedByUser.Handle,
+		},
+		UpdatedBy: models.UserHandleResponse{
+			UUID:   model.UpdatedByUser.UUID,
+			Handle: model.UpdatedByUser.Handle,
+		},
+		IsPublic: model.IsPublic,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateModelBranch(modelUUID uuid.UUID, branchName string) (*models.ModelBranchResponse, error) {
+	modelBranch := dbmodels.ModelBranch{
+		Name: branchName,
+		Model: dbmodels.Model{
+			BaseModel: dbmodels.BaseModel{
+				UUID: modelUUID,
+			},
+		},
+	}
+	err := ds.DB.Create(&modelBranch).Preload("Model").Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelBranchResponse{
+		UUID: modelBranch.UUID,
+		Name: modelBranch.Name,
+		Model: models.ModelNameResponse{
+			UUID: modelBranch.Model.UUID,
+			Name: modelBranch.Model.Name,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string) (*models.ModelVersionResponse, error) {
+	// For now source is R2 by default
+
+	var sourceType dbmodels.SourceType
+	var sourcePath dbmodels.Path
+	if source == "R2" {
+		sourceType.Name = "R2"
+		err := ds.DB.Where(&sourceType).First(&sourceType).Error
+		if err != nil {
+			return nil, err
+		}
+		updatedFilename := fmt.Sprintf("%s-%s", modelBranchUUID, file.Filename) //TODO: Split filename and add a shorId in between to prevent collisions
+		var uploadPath string
+		uploadPath = updatedFilename // TODO: Upload to R2 and set the path to uploadPath
+
+		sourcePath = dbmodels.Path{
+			SourcePath: uploadPath,
+			SourceType: sourceType,
+		}
+		err = ds.DB.Create(&sourcePath).Error
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	latestModelVersion := dbmodels.ModelVersion{
+		BranchUUID: modelBranchUUID,
+	}
+	res := ds.DB.Where(&latestModelVersion).Order("created_at desc").Limit(1).Find(&latestModelVersion)
+
+	var newVersion string
+	if res.RowsAffected == 0 {
+		newVersion = "v1"
+	} else {
+		latestVersion := latestModelVersion.Version
+		newVersion = IncrementVersion(latestVersion)
+	}
+
+	modelVersion := dbmodels.ModelVersion{
+		Hash:    hash,
+		Version: newVersion,
+		Branch: dbmodels.ModelBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: modelBranchUUID,
+			},
+		},
+		Path: sourcePath,
+	}
+	err := ds.DB.Create(&modelVersion).Preload("Branch").Preload("Path.SourceType").Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.ModelVersionResponse{
+		UUID:    modelVersion.UUID,
+		Hash:    modelVersion.Hash,
+		Version: modelVersion.Version,
+		Branch: models.ModelBranchNameResponse{
+			UUID: modelVersion.Branch.UUID,
+			Name: modelVersion.Branch.Name,
+		},
+		Path: models.PathResponse{
+			SourcePath: modelVersion.Path.SourcePath,
+			SourceType: models.SourceTypeResponse{
+				Name: modelVersion.Path.SourceType.Name,
+				PublicURL: modelVersion.Path.SourceType.PublicURL,
+			},
+		},
+	}, nil
+}
+
+func IncrementVersion(latestVersion string) string {
+	version := strings.Split(latestVersion, "v")
+	versionNumber, _ := strconv.Atoi(version[1])
+	newVersionNumber := versionNumber + 1
+	newVersion := fmt.Sprintf("v%d", newVersionNumber)
+	return newVersion
 }
 
 //////////////////////////////// LOG METHODS /////////////////////////////////

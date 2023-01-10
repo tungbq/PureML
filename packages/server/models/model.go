@@ -2,6 +2,13 @@ package models
 
 import uuid "github.com/satori/go.uuid"
 
+// Request models
+
+type RegisterModelRequest struct {
+	Wiki string `json:"wiki"`
+	Hash string `json:"hash"`
+}
+
 // Response models
 
 type ModelNameResponse struct {
@@ -10,13 +17,12 @@ type ModelNameResponse struct {
 }
 
 type ModelResponse struct {
-	UUID      uuid.UUID            `json:"uuid"`
-	Name      string               `json:"name"`
-	Wiki      string               `json:"wiki"`
-	Org       OrganizationResponse `json:"org"`
-	CreatedBy UserHandleResponse   `json:"created_by"`
-	UpdatedBy UserHandleResponse   `json:"updated_by"`
-	IsPublic  bool                 `json:"is_public"`
+	UUID      uuid.UUID          `json:"uuid"`
+	Name      string             `json:"name"`
+	Wiki      string             `json:"wiki"`
+	CreatedBy UserHandleResponse `json:"created_by"`
+	UpdatedBy UserHandleResponse `json:"updated_by"`
+	IsPublic  bool               `json:"is_public"`
 }
 
 type ModelUserResponse struct {

@@ -15,9 +15,12 @@ definitions:
     properties:
       data:
         type: string
-      dataset_version_uuid:
+    type: object
+  models.RegisterModelRequest:
+    properties:
+      hash:
         type: string
-      model_version_uuid:
+      wiki:
         type: string
     type: object
   models.UserLoginRequest:
@@ -70,27 +73,11 @@ info:
   title: PureML API Documentation
   version: "1.0"
 paths:
-  /health:
-    get:
-      consumes:
-      - '*/*'
-      description: Get the status of server.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Show the status of server.
-      tags:
-      - Root
-  /log:
+  /dataset/:datasetName/log:
     post:
       consumes:
       - '*/*'
-      description: Log data for dataset or model
+      description: Log data for dataset
       parameters:
       - description: Data to log
         in: body
@@ -108,7 +95,48 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Log data for dataset or model
+      summary: Log data for dataset
+      tags:
+      - Common
+  /health:
+    get:
+      consumes:
+      - '*/*'
+      description: Get the status of server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Show the status of server.
+      tags:
+      - Root
+  /model/:modelName/log:
+    post:
+      consumes:
+      - '*/*'
+      description: Log data for model
+      parameters:
+      - description: Data to log
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Log data for model
       tags:
       - Common
   /org/:
@@ -184,6 +212,280 @@ paths:
       summary: Leave organization.
       tags:
       - Organization
+  /org/:orgId/model/:modelName/branch/:branchName:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific branch of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific branch of a model
+      tags:
+      - Model
+  /org/:orgId/model/:modelName/branch/:branchName/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete a branch of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a branch of a model
+      tags:
+      - Model
+  /org/:orgId/model/:modelName/branch/:branchName/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update a branch of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a branch of a model
+      tags:
+      - Model
+  /org/:orgId/model/:modelName/branch/:branchName/version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branch versions of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branch versions of a model
+      tags:
+      - Model
+  /org/:orgId/model/:modelName/branch/:branchName/version/:version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific branch version of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific branch version of a model
+      tags:
+      - Model
+  /org/:orgId/model/:modelName/branch/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Create a new branch of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: body
+        name: branchName
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new branch of a model
+      tags:
+      - Model
+  /org/:orgId/model/:modelName/branches:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branches of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branches of a model
+      tags:
+      - Model
+  /org/:orgId/model/:modelName/register:
+    post:
+      consumes:
+      - '*/*'
+      description: Register model file. Create model and default branches if not exists
+      parameters:
+      - description: Organization UUID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Model details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterModelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Register model
+      tags:
+      - Model
   /org/:orgId/remove:
     post:
       consumes:
