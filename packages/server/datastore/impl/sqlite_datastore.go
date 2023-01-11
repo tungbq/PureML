@@ -1,13 +1,18 @@
 package impl
 
 import (
+	"context"
 	"fmt"
 	"mime/multipart"
 	"strconv"
 	"strings"
 
+	"github.com/PureML-Inc/PureML/server/config"
 	"github.com/PureML-Inc/PureML/server/datastore/dbmodels"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	uuid "github.com/satori/go.uuid"
 	"github.com/teris-io/shortid"
 	"gorm.io/driver/sqlite"
@@ -502,7 +507,7 @@ func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string
 		},
 		IsPublic: false,
 	}
-	err := ds.DB.Create(&model).Preload("Org").Preload("CreatedByUser").Preload("UpdatedByUser").Error
+	err := ds.DB.Create(&model).Error
 	if err != nil {
 		return nil, err
 	}
@@ -520,6 +525,26 @@ func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string
 		},
 		IsPublic: model.IsPublic,
 	}, nil
+}
+
+func (ds *SQLiteDatastore) GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
+	var modelBranches []dbmodels.ModelBranch
+	result := ds.DB.Preload("Model").Where("model_uuid = ?", modelUUID).Find(&modelBranches)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	branches := make([]models.ModelBranchResponse, len(modelBranches))
+	for i, branch := range modelBranches {
+		branches[i] = models.ModelBranchResponse{
+			UUID: branch.UUID,
+			Name: branch.Name,
+			Model: models.ModelNameResponse{
+				UUID: branch.Model.UUID,
+				Name: branch.Model.Name,
+			},
+		}
+	}
+	return branches, nil
 }
 
 func (ds *SQLiteDatastore) CreateModelBranch(modelUUID uuid.UUID, branchName string) (*models.ModelBranchResponse, error) {
@@ -556,9 +581,26 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID,
 		if err != nil {
 			return nil, err
 		}
-		updatedFilename := fmt.Sprintf("%s-%s", modelBranchUUID, file.Filename) //TODO: Split filename and add a shorId in between to prevent collisions
+		splitFile := strings.Split(file.Filename, ".")
+		updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
 		var uploadPath string
-		uploadPath = updatedFilename // TODO: Upload to R2 and set the path to uploadPath
+
+		fileData, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		s3Client := GetR2Client()
+		uploader := manager.NewUploader(s3Client)
+		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+			Bucket: aws.String(config.R2BucketName()),
+			Key:    aws.String(updatedFilename),
+			Body:   fileData,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		uploadPath = strings.Split(result.Location, "/")[3]
 
 		sourcePath = dbmodels.Path{
 			SourcePath: uploadPath,

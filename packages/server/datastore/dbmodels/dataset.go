@@ -3,7 +3,7 @@ package dbmodels
 import uuid "github.com/satori/go.uuid"
 
 type Dataset struct {
-	BaseModel
+	BaseModel        `gorm:"embedded"`
 	Name             string    `json:"name" gorm:"unique"`
 	Wiki             string    `json:"wiki"`
 	OrganizationUUID uuid.UUID `json:"org_uuid" gorm:"type:uuid;not null"`
@@ -26,9 +26,9 @@ type DatasetUser struct {
 }
 
 type DatasetBranch struct {
-	BaseModel
-	Name        string    `json:"name" gorm:"not null;unique:idx_dataset_branch"`
-	DatasetUUID uuid.UUID `json:"dataset_uuid" gorm:"type:uuid;not null;unique:idx_dataset_branch"`
+	BaseModel   `gorm:"embedded"`
+	Name        string    `json:"name" gorm:"not null;index:idx_dataset_branch,unique"`
+	DatasetUUID uuid.UUID `json:"dataset_uuid" gorm:"type:uuid;not null;index:idx_dataset_branch,unique"`
 	IsDefault   bool      `json:"is_default" default:"false"`
 
 	Dataset Dataset `gorm:"foreignKey:DatasetUUID"`
@@ -37,9 +37,9 @@ type DatasetBranch struct {
 }
 
 type DatasetVersion struct {
-	BaseModel
-	Version     string    `json:"version" gorm:"not null;unique:idx_branch_version"`
-	BranchUUID  uuid.UUID `json:"branch_uuid" gorm:"type:uuid;not null;unique:idx_branch_version"`
+	BaseModel   `gorm:"embedded"`
+	Version     string    `json:"version" gorm:"not null;index:idx_dataset_branch_version,unique"`
+	BranchUUID  uuid.UUID `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_dataset_branch_version,unique"`
 	LineageUUID uuid.UUID `json:"lineage_uuid"`
 	Hash        string    `json:"hash" gorm:"not null"`
 	PathUUID    uuid.UUID `json:"path_uuid" gorm:"type:uuid;"`
@@ -50,12 +50,12 @@ type DatasetVersion struct {
 }
 
 type Lineage struct {
-	BaseModel
-	Lineage string `json:"lineage"`
+	BaseModel `gorm:"embedded"`
+	Lineage   string `json:"lineage"`
 }
 
 type DatasetReview struct {
-	BaseModel
+	BaseModel      `gorm:"embedded"`
 	FromBranchUUID uuid.UUID `json:"from_branch_uuid" gorm:"type:uuid;not null"`
 	ToBranchUUID   uuid.UUID `json:"to_branch_uuid" gorm:"type:uuid;not null"`
 	Title          string    `json:"title" gorm:"not null"`

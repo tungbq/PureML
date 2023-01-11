@@ -3,7 +3,7 @@ package dbmodels
 import uuid "github.com/satori/go.uuid"
 
 type Activity struct {
-	BaseModel
+	BaseModel   `gorm:"embedded"`
 	UserUUID    uuid.UUID `json:"user_uuid" gorm:"type:uuid;not null"`
 	Activity    string    `json:"activity"`
 	ModelUUID   uuid.UUID `json:"model_uuid" gorm:"type:uuid;"`
@@ -17,8 +17,8 @@ type Activity struct {
 type Tag struct {
 	ModelUUID        uuid.UUID `json:"model_uuid" gorm:"type:uuid;primaryKey"`
 	DatasetUUID      uuid.UUID `json:"dataset_uuid" gorm:"type:uuid;primaryKey"`
-	OrganizationUUID uuid.UUID `json:"organization_uuid" gorm:"type:uuid;not null;unique:idx_org_tag"`
-	Tag              string    `json:"tag" gorm:"not null;unique:idx_org_tag"`
+	OrganizationUUID uuid.UUID `json:"organization_uuid" gorm:"type:uuid;not null;index:idx_org_tag,unique"`
+	Tag              string    `json:"tag" gorm:"not null;index:idx_org_tag,unique"`
 
 	Model   Model        `gorm:"foreignKey:ModelUUID"`
 	Dataset Dataset      `gorm:"foreignKey:DatasetUUID"`
@@ -26,7 +26,7 @@ type Tag struct {
 }
 
 type Log struct {
-	BaseModel
+	BaseModel          `gorm:"embedded"`
 	Data               string    `json:"data"`
 	ModelVersionUUID   uuid.UUID `json:"model_version_uuid" gorm:"type:uuid;"`
 	DatasetVersionUUID uuid.UUID `json:"dataset_version_uuid" gorm:"type:uuid;"`

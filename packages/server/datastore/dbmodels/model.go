@@ -3,10 +3,10 @@ package dbmodels
 import uuid "github.com/satori/go.uuid"
 
 type Model struct {
-	BaseModel
-	Name             string    `json:"name" gorm:"not null;unique:idx_org_model_name"`
+	BaseModel        `gorm:"embedded"`
+	Name             string    `json:"name" gorm:"not null;index:idx_org_model_name,unique"`
 	Wiki             string    `json:"wiki"`
-	OrganizationUUID uuid.UUID `json:"org_uuid" gorm:"not null;unique:idx_org_model_name"`
+	OrganizationUUID uuid.UUID `json:"org_uuid" gorm:"not null;index:idx_org_model_name,unique"`
 	CreatedBy        uuid.UUID `json:"created_by" gorm:"not null"`
 	UpdatedBy        uuid.UUID `json:"updated_by"`
 	IsPublic         bool      `json:"is_public" default:"false"`
@@ -26,9 +26,9 @@ type ModelUser struct {
 }
 
 type ModelBranch struct {
-	BaseModel
-	Name      string    `json:"name" gorm:"not null;unique:idx_model_branch"`
-	ModelUUID uuid.UUID `json:"model_uuid" gorm:"not null;unique:idx_model_branch"`
+	BaseModel `gorm:"embedded"`
+	Name      string    `json:"name" gorm:"not null;index:idx_model_branch,unique"`
+	ModelUUID uuid.UUID `json:"model_uuid" gorm:"not null;index:idx_model_branch,unique"`
 	IsDefault bool      `json:"is_default" default:"false"`
 
 	Model Model `gorm:"foreignKey:ModelUUID"`
@@ -37,9 +37,9 @@ type ModelBranch struct {
 }
 
 type ModelVersion struct {
-	BaseModel
-	Version    string    `json:"version" gorm:"not null;unique:idx_branch_version"`
-	BranchUUID uuid.UUID `json:"branch_uuid" gorm:"not null;unique:idx_branch_version"`
+	BaseModel  `gorm:"embedded"`
+	Version    string    `json:"version" gorm:"not null;index:idx_model_branch_version,unique"`
+	BranchUUID uuid.UUID `json:"branch_uuid" gorm:"not null;index:idx_model_branch_version,unique"`
 	Hash       string    `json:"hash" gorm:"not null;unique"`
 	PathUUID   uuid.UUID `json:"path_uuid"`
 
@@ -48,7 +48,7 @@ type ModelVersion struct {
 }
 
 type ModelReview struct {
-	BaseModel
+	BaseModel      `gorm:"embedded"`
 	FromBranchUUID uuid.UUID `json:"from_branch_uuid" gorm:"not null"`
 	ToBranchUUID   uuid.UUID `json:"to_branch_uuid" gorm:"not null"`
 	Title          string    `json:"title" gorm:"not null"`

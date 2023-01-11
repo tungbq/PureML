@@ -1,7 +1,7 @@
 package dbmodels
 
 type Organization struct {
-	BaseModel
+	BaseModel    `gorm:"embedded"`
 	Name         string `json:"name" gorm:"not null"`
 	Handle       string `json:"handle" gorm:"unique"`
 	Avatar       string `json:"avatar"`

@@ -120,8 +120,8 @@ func UploadAndRegisterModelFile(modelBranchUUID uuid.UUID, file *multipart.FileH
 	return ds.UploadAndRegisterModelFile(modelBranchUUID, file, hash, source)
 }
 
-func GetModelAllBranches(orgId uuid.UUID, modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
-	return nil, nil
+func GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
+	return ds.GetModelAllBranches(modelUUID)
 }
 
 func GetAllModelVersions(orgId uuid.UUID, modelName string) ([]models.ModelVersionResponse, error) {

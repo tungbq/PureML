@@ -43,6 +43,10 @@ func NewTestSQLiteDatastore() *SQLiteDatastore {
 	}
 }
 
+type TestDatastore struct {
+	DB *gorm.DB
+}
+
 func (ds *SQLiteDatastore) TestGetAllAdminOrgs() ([]dbmodels.Organization, error) {
 	return []dbmodels.Organization{}, nil
 }

@@ -16,13 +16,6 @@ definitions:
       data:
         type: string
     type: object
-  models.RegisterModelRequest:
-    properties:
-      hash:
-        type: string
-      wiki:
-        type: string
-    type: object
   models.UserLoginRequest:
     properties:
       email:
@@ -536,12 +529,12 @@ paths:
         name: modelName
         required: true
         type: string
-      - description: Model details
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.RegisterModelRequest'
+      - in: formData
+        name: hash
+        type: string
+      - in: formData
+        name: wiki
+        type: string
       produces:
       - application/json
       responses:

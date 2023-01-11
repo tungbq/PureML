@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
+	"strings"
 
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/labstack/echo/v4"
@@ -32,13 +33,15 @@ func extractRequest(context echo.Context) *models.Request {
 	} else {
 		request.Dataset = &models.DatasetNameResponse{}
 	}
-	request.Body = extractBody(context)
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)
 	request.QueryParams = extractQueryParams(context)
 	// if content type is multipart formdata
-	if context.Request().Header.Get("Content-Type") == "multipart/form-data" {
+	contentType := strings.Split(context.Request().Header.Get("Content-Type"), ";")[0]
+	if contentType == "multipart/form-data" {
 		request.FormValues, request.FormFiles = extractFormData(context)
+	} else {
+		request.Body = extractBody(context)
 	}
 	return request
 }

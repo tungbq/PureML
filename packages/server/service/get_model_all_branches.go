@@ -21,7 +21,7 @@ import (
 func GetModelAllBranches(request *models.Request) *models.Response {
 	var response *models.Response
 	modelUUID := request.GetModelUUID()
-	allOrgs, err := datastore.GetModelAllBranches(request.Org.UUID, modelUUID)
+	allOrgs, err := datastore.GetModelAllBranches(modelUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {

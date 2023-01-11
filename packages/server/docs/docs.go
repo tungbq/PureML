@@ -933,13 +933,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Model details",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.RegisterModelRequest"
-                        }
+                        "type": "string",
+                        "name": "hash",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "wiki",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1348,17 +1349,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.RegisterModelRequest": {
-            "type": "object",
-            "properties": {
-                "hash": {
-                    "type": "string"
-                },
-                "wiki": {
                     "type": "string"
                 }
             }
