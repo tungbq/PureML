@@ -78,6 +78,12 @@ func main() {
 	modelGroup.DELETE("/:modelName/branch/:branchName/delete", handler.DefaultHandler(service.DeleteModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.GET("/:modelName/branch/:branchName/version", handler.DefaultHandler(service.GetModelBranchAllVersions), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	//Activity APIs
+	//TODO : Need to correct URL, url might give a wrong impression that dataset is part of model
+	modelGroup.GET("/:modelName/dataset/:datasetName/activity/:acivityName", handler.DefaultHandler(service.GetActivity))
+	modelGroup.POST("/:modelName/dataset/:datasetName/activity/:acivityName", handler.DefaultHandler(service.CreateActivity))
+	modelGroup.POST("/:modelName/dataset/:datasetName/activity/:acivityName/update", handler.DefaultHandler(service.UpdateActivity))
+	modelGroup.DELETE("/:modelName/dataset/:datasetName/activity/:acivityName/delete", handler.DefaultHandler(service.DeleteActivity))
 
 	//Log APIs
 	e.POST("/model/:modelName/log", handler.DefaultHandler(service.LogModel), middlewares.AuthenticateJWT)

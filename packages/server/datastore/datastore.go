@@ -136,6 +136,10 @@ func GetBranchByUUID(branchUUID uuid.UUID) (*models.ModelBranchResponse, error) 
 	return ds.GetBranchByUUID(branchUUID)
 }
 
+func GetActivity(activityName string, modelName string, datasetName string) (*models.ActivityResponse, error) {
+	return nil, nil
+}
+
 type Datastore interface {
 	GetAllAdminOrgs() ([]models.OrganizationResponse, error)
 	GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error)

@@ -1,14 +1,18 @@
 package models
 
+import uuid "github.com/satori/go.uuid"
+
 // Request models
 
 type LogRequest struct {
-	Data               string `json:"data"`
+	Data string `json:"data"`
 }
 
 // Response models
 
 type ActivityResponse struct {
+	UUID     uuid.UUID           `json:"uuid"`
+	Name     string              `json:"name"`
 	Activity string              `json:"activity"`
 	User     UserHandleResponse  `json:"user"`
 	Model    ModelNameResponse   `json:"model"`
