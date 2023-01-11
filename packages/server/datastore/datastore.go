@@ -87,7 +87,7 @@ func CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*mod
 }
 
 func GetAllModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
-	return []models.ModelResponse{}, nil
+	return ds.GetAllModels(orgId)
 }
 
 func GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
@@ -124,8 +124,16 @@ func GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, err
 	return ds.GetModelAllBranches(modelUUID)
 }
 
-func GetAllModelVersions(orgId uuid.UUID, modelName string) ([]models.ModelVersionResponse, error) {
-	return []models.ModelVersionResponse{}, nil
+func GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+	return ds.GetModelAllVersions(modelUUID)
+}
+
+func GetBranchByName(modelName string, branchName string) (*models.ModelBranchResponse, error) {
+	return ds.GetBranchByName(modelName, branchName)
+}
+
+func GetBranchByUUID(branchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
+	return ds.GetBranchByUUID(branchUUID)
 }
 
 type Datastore interface {

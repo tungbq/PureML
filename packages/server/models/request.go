@@ -8,17 +8,19 @@ import (
 )
 
 type Request struct {
-	User        *UserClaims
-	Org         *OrganizationHandleResponse
-	Model       *ModelNameResponse
-	Dataset     *DatasetNameResponse
-	Body        []byte
-	ParsedBody  map[string]interface{}
-	Headers     map[string]string
-	PathParams  map[string]string
-	QueryParams map[string]string
-	FormFiles   map[string][]*multipart.FileHeader
-	FormValues  map[string][]string
+	User          *UserClaims
+	Org           *OrganizationHandleResponse
+	Model         *ModelNameResponse
+	ModelBranch   *ModelBranchNameResponse
+	Dataset       *DatasetNameResponse
+	DatasetBranch *DatasetBranchNameResponse
+	Body          []byte
+	ParsedBody    map[string]interface{}
+	Headers       map[string]string
+	PathParams    map[string]string
+	QueryParams   map[string]string
+	FormFiles     map[string][]*multipart.FileHeader
+	FormValues    map[string][]string
 }
 
 func (r *Request) GetUserUUID() uuid.UUID {

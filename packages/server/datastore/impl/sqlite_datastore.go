@@ -527,6 +527,32 @@ func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string
 	}, nil
 }
 
+func (ds *SQLiteDatastore) GetAllModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
+	var mymodels []dbmodels.Model
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("organization_uuid = ?", orgId).Find(&mymodels)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	modelResponses := make([]models.ModelResponse, len(mymodels))
+	for i, model := range mymodels {
+		modelResponses[i] = models.ModelResponse{
+			UUID: model.UUID,
+			Name: model.Name,
+			Wiki: model.Wiki,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   model.CreatedByUser.UUID,
+				Handle: model.CreatedByUser.Handle,
+			},
+			UpdatedBy: models.UserHandleResponse{
+				UUID:   model.UpdatedByUser.UUID,
+				Handle: model.UpdatedByUser.Handle,
+			},
+			IsPublic: model.IsPublic,
+		}
+	}
+	return modelResponses, nil
+}
+
 func (ds *SQLiteDatastore) GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
 	var modelBranches []dbmodels.ModelBranch
 	result := ds.DB.Preload("Model").Where("model_uuid = ?", modelUUID).Find(&modelBranches)
@@ -664,6 +690,68 @@ func IncrementVersion(latestVersion string) string {
 	newVersionNumber := versionNumber + 1
 	newVersion := fmt.Sprintf("v%d", newVersionNumber)
 	return newVersion
+}
+
+func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+	var modelVersions []dbmodels.ModelVersion
+	err := ds.DB.Where("model_uuid = ?", modelUUID).Preload("Branch").Preload("Path.SourceType").Find(&modelVersions).Error
+	if err != nil {
+		return nil, err
+	}
+	var modelVersionsResponse []models.ModelVersionResponse
+	for _, modelVersion := range modelVersions {
+		modelVersionsResponse = append(modelVersionsResponse, models.ModelVersionResponse{
+			UUID:    modelVersion.UUID,
+			Hash:    modelVersion.Hash,
+			Version: modelVersion.Version,
+			Branch: models.ModelBranchNameResponse{
+				UUID: modelVersion.Branch.UUID,
+				Name: modelVersion.Branch.Name,
+			},
+			Path: models.PathResponse{
+				SourcePath: modelVersion.Path.SourcePath,
+				SourceType: models.SourceTypeResponse{
+					Name:      modelVersion.Path.SourceType.Name,
+					PublicURL: modelVersion.Path.SourceType.PublicURL,
+				},
+			},
+		})
+	}
+	return modelVersionsResponse, nil
+}
+
+func (ds *SQLiteDatastore) GetBranchByName(modelName string, branchName string) (*models.ModelBranchResponse, error) {
+	var modelBranch dbmodels.ModelBranch
+	err := ds.DB.Where("name = ?", branchName).Preload("Model").Find(&modelBranch).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelBranchResponse{
+		UUID: modelBranch.UUID,
+		Name: modelBranch.Name,
+		Model: models.ModelNameResponse{
+			UUID: modelBranch.Model.UUID,
+			Name: modelBranch.Model.Name,
+		},
+		IsDefault: modelBranch.IsDefault,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetBranchByUUID(branchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
+	var modelBranch dbmodels.ModelBranch
+	err := ds.DB.Where("uuid = ?", branchUUID).Preload("Model").Find(&modelBranch).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelBranchResponse{
+		UUID: modelBranch.UUID,
+		Name: modelBranch.Name,
+		Model: models.ModelNameResponse{
+			UUID: modelBranch.Model.UUID,
+			Name: modelBranch.Model.Name,
+		},
+		IsDefault: modelBranch.IsDefault,
+	}, nil
 }
 
 //////////////////////////////// LOG METHODS /////////////////////////////////

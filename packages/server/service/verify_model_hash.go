@@ -20,14 +20,14 @@ import (
 // @Param modelName path string true "Model Name"
 // @Param hash body string true "Hash value"
 func VerifyModelHashStatus(request *models.Request) *models.Response {
-	orgId := request.GetOrgId()
 	modelName := request.GetModelName()
+	modelUUID := request.GetModelUUID()
 	if modelName == "" {
 		return models.NewDataResponse(http.StatusOK, true, "Hash validity (True - does not exist in db)")
 	}
 	request.ParseJsonBody()
 	hashValue := request.GetParsedBodyAttribute("hash").(string)
-	versions, err := datastore.GetAllModelVersions(orgId, modelName)
+	versions, err := datastore.GetModelAllVersions(modelUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

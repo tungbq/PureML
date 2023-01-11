@@ -28,10 +28,20 @@ func extractRequest(context echo.Context) *models.Request {
 	} else {
 		request.Model = &models.ModelNameResponse{}
 	}
+	if context.Get("ModelBranch") != nil {
+		request.ModelBranch = context.Get("ModelBranch").(*models.ModelBranchNameResponse)
+	} else {
+		request.ModelBranch = &models.ModelBranchNameResponse{}
+	}
 	if context.Get("Dataset") != nil {
 		request.Dataset = context.Get("Dataset").(*models.DatasetNameResponse)
 	} else {
 		request.Dataset = &models.DatasetNameResponse{}
+	}
+	if context.Get("DatasetBranch") != nil {
+		request.DatasetBranch = context.Get("DatasetBranch").(*models.DatasetBranchNameResponse)
+	} else {
+		request.DatasetBranch = &models.DatasetBranchNameResponse{}
 	}
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)
