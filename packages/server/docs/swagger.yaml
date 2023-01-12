@@ -234,6 +234,35 @@ paths:
       summary: Get specific model of an organization
       tags:
       - Model
+  /org/{orgId}/model/{modelName}/branch:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branches of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branches of a model
+      tags:
+      - Model
   /org/{orgId}/model/{modelName}/branch/{branchName}:
     get:
       consumes:
@@ -442,35 +471,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create a new branch of a model
-      tags:
-      - Model
-  /org/{orgId}/model/{modelName}/branches:
-    get:
-      consumes:
-      - '*/*'
-      description: Get all branches of a model
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: string
-      - description: Model Name
-        in: path
-        name: modelName
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all branches of a model
       tags:
       - Model
   /org/{orgId}/model/{modelName}/hash-status:

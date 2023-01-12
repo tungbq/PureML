@@ -20,8 +20,8 @@ import (
 // @Param modelName path string true "Model Name"
 // @Param branchName path string true "Branch Name"
 func GetModelBranch(request *models.Request) *models.Response {
-	branchUUID := request.ModelBranch.UUID
-	branch, err := datastore.GetBranchByUUID(branchUUID)
+	modelBranchUUID := request.ModelBranch.UUID
+	branch, err := datastore.GetBranchByUUID(modelBranchUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}

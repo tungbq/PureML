@@ -128,12 +128,20 @@ func GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, er
 	return ds.GetModelAllVersions(modelUUID)
 }
 
-func GetBranchByName(modelName string, branchName string) (*models.ModelBranchResponse, error) {
-	return ds.GetBranchByName(modelName, branchName)
+func GetBranchByName(orgId uuid.UUID, modelName string, branchName string) (*models.ModelBranchResponse, error) {
+	return ds.GetBranchByName(orgId, modelName, branchName)
 }
 
-func GetBranchByUUID(branchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
-	return ds.GetBranchByUUID(branchUUID)
+func GetBranchByUUID(modelbranchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
+	return ds.GetBranchByUUID(modelbranchUUID)
+}
+
+func GetModelBranchAllVersions(modelbranchUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+	return ds.GetModelBranchAllVersions(modelbranchUUID)
+}
+
+func GetModelBranchVersion(modelbranchUUID uuid.UUID, version string) (*models.ModelVersionResponse, error) {
+	return ds.GetModelBranchVersion(modelbranchUUID, version)
 }
 
 type Datastore interface {

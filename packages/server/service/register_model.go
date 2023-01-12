@@ -9,7 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var defaultBranchNames = []string{"main", "developement"}
+var defaultBranchNames = []string{"main", "development"}
 
 // RegisterModel godoc
 // @Security ApiKeyAuth

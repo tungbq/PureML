@@ -1,6 +1,11 @@
 package service
 
-import "github.com/PureML-Inc/PureML/server/models"
+import (
+	"net/http"
+
+	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/models"
+)
 
 // GetModelBranchVersion godoc
 // @Security ApiKeyAuth
@@ -16,5 +21,14 @@ import "github.com/PureML-Inc/PureML/server/models"
 // @Param branchName path string true "Branch Name"
 // @Param version path string true "Version"
 func GetModelBranchVersion(request *models.Request) *models.Response {
-	return nil
+	branchUUID := request.ModelBranch.UUID
+	versionName := request.PathParams["version"]
+	version, err := datastore.GetModelBranchVersion(branchUUID, versionName)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+	if version == nil {
+		return models.NewErrorResponse(http.StatusNotFound, "Version not found")
+	}
+	return models.NewDataResponse(http.StatusOK, version, "Model branch details")
 }

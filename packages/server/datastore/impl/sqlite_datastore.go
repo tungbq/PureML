@@ -675,6 +675,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID,
 			Name: modelVersion.Branch.Name,
 		},
 		Path: models.PathResponse{
+			UUID: 	modelVersion.Path.UUID,
 			SourcePath: modelVersion.Path.SourcePath,
 			SourceType: models.SourceTypeResponse{
 				Name:      modelVersion.Path.SourceType.Name,
@@ -709,6 +710,7 @@ func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.Mo
 				Name: modelVersion.Branch.Name,
 			},
 			Path: models.PathResponse{
+				UUID: 	modelVersion.Path.UUID,
 				SourcePath: modelVersion.Path.SourcePath,
 				SourceType: models.SourceTypeResponse{
 					Name:      modelVersion.Path.SourceType.Name,
@@ -720,9 +722,30 @@ func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.Mo
 	return modelVersionsResponse, nil
 }
 
-func (ds *SQLiteDatastore) GetBranchByName(modelName string, branchName string) (*models.ModelBranchResponse, error) {
+func (ds *SQLiteDatastore) GetBranchByName(orgId uuid.UUID, modelName string, branchName string) (*models.ModelBranchResponse, error) {
 	var modelBranch dbmodels.ModelBranch
-	err := ds.DB.Where("name = ?", branchName).Preload("Model").Find(&modelBranch).Error
+	model, err := ds.GetModelByName(orgId, modelName)
+	if err != nil {
+		return nil, err
+	}
+	res := ds.DB.Where("name = ?", branchName).Where("model_uuid = ?", model.UUID).Preload("Model").Limit(1).Find(&modelBranch)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	return &models.ModelBranchResponse{
+		UUID: modelBranch.UUID,
+		Name: modelBranch.Name,
+		Model: models.ModelNameResponse{
+			UUID: modelBranch.Model.UUID,
+			Name: modelBranch.Model.Name,
+		},
+		IsDefault: modelBranch.IsDefault,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
+	var modelBranch dbmodels.ModelBranch
+	err := ds.DB.Where("uuid = ?", modelBranchUUID).Preload("Model").Find(&modelBranch).Error
 	if err != nil {
 		return nil, err
 	}
@@ -737,20 +760,60 @@ func (ds *SQLiteDatastore) GetBranchByName(modelName string, branchName string) 
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetBranchByUUID(branchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
-	var modelBranch dbmodels.ModelBranch
-	err := ds.DB.Where("uuid = ?", branchUUID).Preload("Model").Find(&modelBranch).Error
+func (ds *SQLiteDatastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+	var modelVersions []dbmodels.ModelVersion
+	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	return &models.ModelBranchResponse{
-		UUID: modelBranch.UUID,
-		Name: modelBranch.Name,
-		Model: models.ModelNameResponse{
-			UUID: modelBranch.Model.UUID,
-			Name: modelBranch.Model.Name,
+	var modelVersionsResponse []models.ModelVersionResponse
+	for _, modelVersion := range modelVersions {
+		modelVersionsResponse = append(modelVersionsResponse, models.ModelVersionResponse{
+			UUID:    modelVersion.UUID,
+			Hash:    modelVersion.Hash,
+			Version: modelVersion.Version,
+			Branch: models.ModelBranchNameResponse{
+				UUID: modelVersion.Branch.UUID,
+				Name: modelVersion.Branch.Name,
+			},
+			Path: models.PathResponse{
+				UUID: 	modelVersion.Path.UUID,
+				SourcePath: modelVersion.Path.SourcePath,
+				SourceType: models.SourceTypeResponse{
+					Name:      modelVersion.Path.SourceType.Name,
+					PublicURL: modelVersion.Path.SourceType.PublicURL,
+				},
+			},
+		})
+	}
+	return modelVersionsResponse, nil
+}
+
+func (ds *SQLiteDatastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelVersionResponse, error) {
+	var modelVersion dbmodels.ModelVersion
+	res := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Where("version = ?", version).Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	return &models.ModelVersionResponse{
+		UUID:    modelVersion.UUID,
+		Hash:    modelVersion.Hash,
+		Version: modelVersion.Version,
+		Branch: models.ModelBranchNameResponse{
+			UUID: modelVersion.Branch.UUID,
+			Name: modelVersion.Branch.Name,
 		},
-		IsDefault: modelBranch.IsDefault,
+		Path: models.PathResponse{
+			UUID:       modelVersion.Path.UUID,
+			SourcePath: modelVersion.Path.SourcePath,
+			SourceType: models.SourceTypeResponse{
+				Name:      modelVersion.Path.SourceType.Name,
+				PublicURL: modelVersion.Path.SourceType.PublicURL,
+			},
+		},
 	}, nil
 }
 
