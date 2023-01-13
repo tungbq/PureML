@@ -7,16 +7,16 @@ import (
 	"github.com/PureML-Inc/PureML/server/models"
 )
 
-func GetActivity(request *models.Request) *models.Response {
+func GetModelActivity(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
 	modelName := request.GetPathParam("modelName")
-	datasetName := request.GetPathParam("datasetName")
 	activityName := request.GetPathParam("activityName")
-	activity, err := datastore.GetActivity(activityName, modelName, datasetName)
+	activity, err := datastore.GetModelActivity(orgId, modelName, activityName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	if activity == nil {
 		return models.NewDataResponse(http.StatusNotFound, nil, "Activity not found")
 	}
-	return models.NewDataResponse(http.StatusOK, activity, "Activity found")
+	return models.NewDataResponse(http.StatusOK, []models.ActivityResponse{*activity}, "Activity found")
 }

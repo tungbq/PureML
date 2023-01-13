@@ -202,7 +202,19 @@ func GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*mode
 	return ds.GetDatasetBranchVersion(datasetBranchUUID, version)
 }
 
-func GetActivity(activityName string, modelName string, datasetName string) (*models.ActivityResponse, error) {
+func GetModelActivity(orgId uuid.UUID, modelName string, activityName string) (*models.ActivityResponse, error) {
+	return nil, nil
+}
+
+func CreateModelActivity(orgId uuid.UUID, modelName string, activityName string) (*models.ActivityResponse, error) {
+	return nil, nil
+}
+
+func UpdateModelActivity(orgId uuid.UUID, modelName string, activityName string, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
+	return nil, nil
+}
+
+func DeleteModelActivity(orgId uuid.UUID, modelName string, acctivityName string) (*models.ActivityResponse, error) {
 	return nil, nil
 }
 

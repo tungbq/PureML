@@ -79,11 +79,10 @@ func main() {
 	modelGroup.GET("/:modelName/branch/:branchName/version", handler.DefaultHandler(service.GetModelBranchAllVersions), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	//Activity APIs
-	//TODO : Need to correct URL, url might give a wrong impression that dataset is part of model
-	modelGroup.GET("/:modelName/dataset/:datasetName/activity/:acivityName", handler.DefaultHandler(service.GetActivity))
-	modelGroup.POST("/:modelName/dataset/:datasetName/activity/:acivityName", handler.DefaultHandler(service.CreateActivity))
-	modelGroup.POST("/:modelName/dataset/:datasetName/activity/:acivityName/update", handler.DefaultHandler(service.UpdateActivity))
-	modelGroup.DELETE("/:modelName/dataset/:datasetName/activity/:acivityName/delete", handler.DefaultHandler(service.DeleteActivity))
+	modelGroup.GET("/:modelName/dataset/activity/:acivityName", handler.DefaultHandler(service.GetModelActivity))
+	modelGroup.POST("/:modelName/dataset/activity/:acivityName", handler.DefaultHandler(service.CreateModelActivity))
+	modelGroup.POST("/:modelName/dataset/activity/:acivityName/update", handler.DefaultHandler(service.UpdateModelActivity))
+	modelGroup.DELETE("/:modelName/dataset/activity/:acivityName/delete", handler.DefaultHandler(service.DeleteModelActivity))
 
 	//Dataset APIs
 	datasetGroup := e.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
