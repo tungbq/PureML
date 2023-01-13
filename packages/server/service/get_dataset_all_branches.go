@@ -7,21 +7,21 @@ import (
 	"github.com/PureML-Inc/PureML/server/models"
 )
 
-// GetModelAllBranches godoc
+// GetDatasetAllBranches godoc
 // @Security ApiKeyAuth
-// @Summary Get all branches of a model
-// @Description Get all branches of a model
-// @Tags Model
+// @Summary Get all branches of a dataset
+// @Description Get all branches of a dataset
+// @Tags Dataset
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/{orgId}/model/{modelName}/branch [get]
+// @Router /org/{orgId}/dataset/{datasetName}/branch [get]
 // @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
-func GetModelAllBranches(request *models.Request) *models.Response {
+// @Param datasetName path string true "Dataset Name"
+func GetDatasetAllBranches(request *models.Request) *models.Response {
 	var response *models.Response
-	modelUUID := request.GetModelUUID()
-	allOrgs, err := datastore.GetModelAllBranches(modelUUID)
+	datasetUUID := request.GetDatasetUUID()
+	allOrgs, err := datastore.GetDatasetAllBranches(datasetUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {

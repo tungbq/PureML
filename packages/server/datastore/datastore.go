@@ -128,12 +128,78 @@ func GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, er
 	return ds.GetModelAllVersions(modelUUID)
 }
 
-func GetBranchByName(modelName string, branchName string) (*models.ModelBranchResponse, error) {
-	return ds.GetBranchByName(modelName, branchName)
+func GetModelBranchByName(orgId uuid.UUID, modelName string, branchName string) (*models.ModelBranchResponse, error) {
+	return ds.GetModelBranchByName(orgId, modelName, branchName)
 }
 
-func GetBranchByUUID(branchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
-	return ds.GetBranchByUUID(branchUUID)
+func GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
+	return ds.GetModelBranchByUUID(modelBranchUUID)
+}
+
+func GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+	return ds.GetModelBranchAllVersions(modelBranchUUID)
+}
+
+func GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelVersionResponse, error) {
+	return ds.GetModelBranchVersion(modelBranchUUID, version)
+}
+
+func GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {
+	return ds.GetAllDatasets(orgId)
+}
+
+func GetDatasetByName(orgId uuid.UUID, datasetName string) (*models.DatasetResponse, error) {
+	return ds.GetDatasetByName(orgId, datasetName)
+}
+
+func CreateDataset(orgId uuid.UUID, name string, wiki string, userUUID uuid.UUID) (*models.DatasetResponse, error) {
+	return ds.CreateDataset(orgId, name, wiki, userUUID)
+}
+
+func CreateDatasetBranch(datasetUUID uuid.UUID, branchName string) (*models.DatasetBranchResponse, error) {
+	return ds.CreateDatasetBranch(datasetUUID, branchName)
+}
+
+func CreateDatasetBranches(datasetUUID uuid.UUID, branchNames []string) ([]models.DatasetBranchResponse, error) {
+	var branches []models.DatasetBranchResponse
+
+	for _, branchName := range branchNames {
+		branch, err := CreateDatasetBranch(datasetUUID, branchName)
+		if err != nil {
+			return nil, err
+		}
+		branches = append(branches, *branch)
+	}
+
+	return branches, nil
+}
+
+func UploadAndRegisterDatasetFile(datasetBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+	return ds.UploadAndRegisterDatasetFile(datasetBranchUUID, file, hash, source, lineage)
+}
+
+func GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.DatasetBranchResponse, error) {
+	return ds.GetDatasetAllBranches(datasetUUID)
+}
+
+func GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+	return ds.GetDatasetAllVersions(datasetUUID)
+}
+
+func GetDatasetBranchByName(orgId uuid.UUID, datasetName string, branchName string) (*models.DatasetBranchResponse, error) {
+	return ds.GetDatasetBranchByName(orgId, datasetName, branchName)
+}
+
+func GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*models.DatasetBranchResponse, error) {
+	return ds.GetDatasetBranchByUUID(datasetBranchUUID)
+}
+
+func GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+	return ds.GetDatasetBranchAllVersions(datasetBranchUUID)
+}
+
+func GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetVersionResponse, error) {
+	return ds.GetDatasetBranchVersion(datasetBranchUUID, version)
 }
 
 func GetActivity(activityName string, modelName string, datasetName string) (*models.ActivityResponse, error) {

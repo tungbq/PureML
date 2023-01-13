@@ -175,6 +175,377 @@ paths:
       summary: Add a user to an organization.
       tags:
       - Organization
+  /org/{orgId}/dataset/{datasetName}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific dataset of an organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific dataset of an organization
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branches of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branches of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific branch of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific branch of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete a branch of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a branch of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update a branch of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a branch of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branch versions of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branch versions of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific branch version of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific branch version of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Create a new branch of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: body
+        name: branchName
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new branch of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/hash-status:
+    post:
+      consumes:
+      - '*/*'
+      description: Verify dataset hash status to determine if dataset is already uploaded
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Hash value
+        in: body
+        name: hash
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Verify dataset hash status
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/register:
+    post:
+      consumes:
+      - '*/*'
+      description: Register dataset file. Create dataset and default branches if not
+        exists
+      parameters:
+      - description: Dataset file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Organization UUID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - in: formData
+        name: hash
+        type: string
+      - in: formData
+        name: lineage
+        type: string
+      - in: formData
+        name: wiki
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Register dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/all:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all datasets of an organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all datasets of an organization
+      tags:
+      - Dataset
   /org/{orgId}/leave:
     post:
       consumes:
@@ -232,6 +603,35 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get specific model of an organization
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branches of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branches of a model
       tags:
       - Model
   /org/{orgId}/model/{modelName}/branch/{branchName}:
@@ -442,35 +842,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create a new branch of a model
-      tags:
-      - Model
-  /org/{orgId}/model/{modelName}/branches:
-    get:
-      consumes:
-      - '*/*'
-      description: Get all branches of a model
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: string
-      - description: Model Name
-        in: path
-        name: modelName
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get all branches of a model
       tags:
       - Model
   /org/{orgId}/model/{modelName}/hash-status:

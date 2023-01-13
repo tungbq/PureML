@@ -2,6 +2,14 @@ package models
 
 import uuid "github.com/satori/go.uuid"
 
+// Request models
+
+type RegisterDatasetRequest struct {
+	Wiki    string `json:"wiki"`
+	Hash    string `json:"hash"`
+	Lineage string `json:"lineage"`
+}
+
 // Response models
 
 type DatasetNameResponse struct {

@@ -85,6 +85,20 @@ func main() {
 	modelGroup.POST("/:modelName/dataset/:datasetName/activity/:acivityName/update", handler.DefaultHandler(service.UpdateActivity))
 	modelGroup.DELETE("/:modelName/dataset/:datasetName/activity/:acivityName/delete", handler.DefaultHandler(service.DeleteActivity))
 
+	//Dataset APIs
+	datasetGroup := e.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup.GET("/all", handler.DefaultHandler(service.GetAllDatasets))
+	datasetGroup.GET("/:datasetName", handler.DefaultHandler(service.GetDataset), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/register", handler.DefaultHandler(service.RegisterDataset))
+	datasetGroup.POST("/:datasetName/hash-status", handler.DefaultHandler(service.VerifyDatasetHashStatus))
+	datasetGroup.GET("/:datasetName/branch", handler.DefaultHandler(service.GetDatasetAllBranches), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/branch/create", handler.DefaultHandler(service.CreateDatasetBranch), middlewares.ValidateDataset)
+	datasetGroup.GET("/:datasetName/branch/:branchName", handler.DefaultHandler(service.GetDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.POST("/:datasetName/branch/:branchName/update", handler.DefaultHandler(service.UpdateDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.DELETE("/:datasetName/branch/:branchName/delete", handler.DefaultHandler(service.DeleteDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.GET("/:datasetName/branch/:branchName/version", handler.DefaultHandler(service.GetDatasetBranchAllVersions), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetDatasetBranchVersion), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+
 	//Log APIs
 	e.POST("/model/:modelName/log", handler.DefaultHandler(service.LogModel), middlewares.AuthenticateJWT)
 	e.POST("/dataset/:datasetName/log", handler.DefaultHandler(service.LogDataset), middlewares.AuthenticateJWT)
