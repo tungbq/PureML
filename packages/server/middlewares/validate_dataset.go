@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	_ "fmt"
 	"net/http"
 
 	ds "github.com/PureML-Inc/PureML/server/datastore"
@@ -10,30 +9,29 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func ValidateModelBranch(next echo.HandlerFunc) echo.HandlerFunc {
+func ValidateDataset(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
-		branchName := context.Param("branchName")
-		modelName := context.Param("modelName")
+		datasetName := context.Param("datasetName")
 		orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
-		if branchName == "" {
+		if datasetName == "" {
 			context.Response().WriteHeader(http.StatusBadRequest)
-			context.Response().Writer.Write([]byte("Branch name required"))
+			context.Response().Writer.Write([]byte("Dataset name required"))
 			return nil
 		}
-		branch, err := ds.GetModelBranchByName(orgId, modelName, branchName)
+		dataset, err := ds.GetDatasetByName(orgId, datasetName)
 		if err != nil {
 			context.Response().WriteHeader(http.StatusInternalServerError)
 			context.Response().Writer.Write([]byte(err.Error()))
 			return nil
 		}
-		if branch == nil {
+		if dataset == nil {
 			context.Response().WriteHeader(http.StatusNotFound)
-			context.Response().Writer.Write([]byte("Branch not found"))
+			context.Response().Writer.Write([]byte("Dataset not found"))
 			return nil
 		}
-		context.Set("ModelBranch", &models.ModelBranchNameResponse{
-			Name: branch.Name,
-			UUID: branch.UUID,
+		context.Set("Dataset", &models.DatasetNameResponse{
+			Name: dataset.Name,
+			UUID: dataset.UUID,
 		})
 		return next(context)
 	}

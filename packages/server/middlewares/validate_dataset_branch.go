@@ -10,17 +10,17 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func ValidateModelBranch(next echo.HandlerFunc) echo.HandlerFunc {
+func ValidateDatasetBranch(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
-		branchName := context.Param("branchName")
-		modelName := context.Param("modelName")
+		datasetBranchName := context.Param("branchName")
+		datasetName := context.Param("datasetName")
 		orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
-		if branchName == "" {
+		if datasetBranchName == "" {
 			context.Response().WriteHeader(http.StatusBadRequest)
 			context.Response().Writer.Write([]byte("Branch name required"))
 			return nil
 		}
-		branch, err := ds.GetModelBranchByName(orgId, modelName, branchName)
+		branch, err := ds.GetDatasetBranchByName(orgId, datasetName, datasetBranchName)
 		if err != nil {
 			context.Response().WriteHeader(http.StatusInternalServerError)
 			context.Response().Writer.Write([]byte(err.Error()))
@@ -31,7 +31,7 @@ func ValidateModelBranch(next echo.HandlerFunc) echo.HandlerFunc {
 			context.Response().Writer.Write([]byte("Branch not found"))
 			return nil
 		}
-		context.Set("ModelBranch", &models.ModelBranchNameResponse{
+		context.Set("DatasetBranch", &models.DatasetBranchNameResponse{
 			Name: branch.Name,
 			UUID: branch.UUID,
 		})

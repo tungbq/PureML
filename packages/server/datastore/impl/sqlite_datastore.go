@@ -434,6 +434,15 @@ func (ds *SQLiteDatastore) UpdateUser(email string, name string, bio string, ava
 	}, nil
 }
 
+// Helper
+func IncrementVersion(latestVersion string) string {
+	version := strings.Split(latestVersion, "v")
+	versionNumber, _ := strconv.Atoi(version[1])
+	newVersionNumber := versionNumber + 1
+	newVersion := fmt.Sprintf("v%d", newVersionNumber)
+	return newVersion
+}
+
 /////////////////////////////// MODEL METHODS/////////////////////////////////
 
 func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
@@ -573,9 +582,9 @@ func (ds *SQLiteDatastore) GetModelAllBranches(modelUUID uuid.UUID) ([]models.Mo
 	return branches, nil
 }
 
-func (ds *SQLiteDatastore) CreateModelBranch(modelUUID uuid.UUID, branchName string) (*models.ModelBranchResponse, error) {
+func (ds *SQLiteDatastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName string) (*models.ModelBranchResponse, error) {
 	modelBranch := dbmodels.ModelBranch{
-		Name: branchName,
+		Name: modelBranchName,
 		Model: dbmodels.Model{
 			BaseModel: dbmodels.BaseModel{
 				UUID: modelUUID,
@@ -675,7 +684,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID,
 			Name: modelVersion.Branch.Name,
 		},
 		Path: models.PathResponse{
-			UUID: 	modelVersion.Path.UUID,
+			UUID:       modelVersion.Path.UUID,
 			SourcePath: modelVersion.Path.SourcePath,
 			SourceType: models.SourceTypeResponse{
 				Name:      modelVersion.Path.SourceType.Name,
@@ -683,14 +692,6 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID,
 			},
 		},
 	}, nil
-}
-
-func IncrementVersion(latestVersion string) string {
-	version := strings.Split(latestVersion, "v")
-	versionNumber, _ := strconv.Atoi(version[1])
-	newVersionNumber := versionNumber + 1
-	newVersion := fmt.Sprintf("v%d", newVersionNumber)
-	return newVersion
 }
 
 func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
@@ -710,7 +711,7 @@ func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.Mo
 				Name: modelVersion.Branch.Name,
 			},
 			Path: models.PathResponse{
-				UUID: 	modelVersion.Path.UUID,
+				UUID:       modelVersion.Path.UUID,
 				SourcePath: modelVersion.Path.SourcePath,
 				SourceType: models.SourceTypeResponse{
 					Name:      modelVersion.Path.SourceType.Name,
@@ -722,13 +723,13 @@ func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.Mo
 	return modelVersionsResponse, nil
 }
 
-func (ds *SQLiteDatastore) GetBranchByName(orgId uuid.UUID, modelName string, branchName string) (*models.ModelBranchResponse, error) {
+func (ds *SQLiteDatastore) GetModelBranchByName(orgId uuid.UUID, modelName string, modelBranchName string) (*models.ModelBranchResponse, error) {
 	var modelBranch dbmodels.ModelBranch
 	model, err := ds.GetModelByName(orgId, modelName)
 	if err != nil {
 		return nil, err
 	}
-	res := ds.DB.Where("name = ?", branchName).Where("model_uuid = ?", model.UUID).Preload("Model").Limit(1).Find(&modelBranch)
+	res := ds.DB.Where("name = ?", modelBranchName).Where("model_uuid = ?", model.UUID).Preload("Model").Limit(1).Find(&modelBranch)
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -743,7 +744,7 @@ func (ds *SQLiteDatastore) GetBranchByName(orgId uuid.UUID, modelName string, br
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
+func (ds *SQLiteDatastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
 	var modelBranch dbmodels.ModelBranch
 	err := ds.DB.Where("uuid = ?", modelBranchUUID).Preload("Model").Find(&modelBranch).Error
 	if err != nil {
@@ -777,7 +778,7 @@ func (ds *SQLiteDatastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) 
 				Name: modelVersion.Branch.Name,
 			},
 			Path: models.PathResponse{
-				UUID: 	modelVersion.Path.UUID,
+				UUID:       modelVersion.Path.UUID,
 				SourcePath: modelVersion.Path.SourcePath,
 				SourceType: models.SourceTypeResponse{
 					Name:      modelVersion.Path.SourceType.Name,
@@ -813,6 +814,400 @@ func (ds *SQLiteDatastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, vers
 				Name:      modelVersion.Path.SourceType.Name,
 				PublicURL: modelVersion.Path.SourceType.PublicURL,
 			},
+		},
+	}, nil
+}
+
+/////////////////////////////// DATASET METHODS/////////////////////////////////
+
+func (ds *SQLiteDatastore) GetDatasetByName(orgId uuid.UUID, datasetName string) (*models.DatasetResponse, error) {
+	var dataset dbmodels.Dataset
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("name = ?", datasetName).Where("organization_uuid = ?", orgId).Limit(1).Find(&dataset)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.DatasetResponse{
+		UUID: dataset.UUID,
+		Name: dataset.Name,
+		Wiki: dataset.Wiki,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   dataset.CreatedByUser.UUID,
+			Handle: dataset.CreatedByUser.Handle,
+		},
+		UpdatedBy: models.UserHandleResponse{
+			UUID:   dataset.UpdatedByUser.UUID,
+			Handle: dataset.UpdatedByUser.Handle,
+		},
+		IsPublic: dataset.IsPublic,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetById(modelId string) (*models.DatasetResponse, error) {
+	var dataset dbmodels.Dataset
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("uuid = ?", modelId).Limit(1).Find(&dataset)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.DatasetResponse{
+		UUID: dataset.UUID,
+		Name: dataset.Name,
+		Wiki: dataset.Wiki,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   dataset.CreatedByUser.UUID,
+			Handle: dataset.CreatedByUser.Handle,
+		},
+		UpdatedBy: models.UserHandleResponse{
+			UUID:   dataset.UpdatedByUser.UUID,
+			Handle: dataset.UpdatedByUser.Handle,
+		},
+		IsPublic: dataset.IsPublic,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateDataset(orgId uuid.UUID, name string, wiki string, createdByUser uuid.UUID) (*models.DatasetResponse, error) {
+	dataset := dbmodels.Dataset{
+		Name: name,
+		Wiki: wiki,
+		Org: dbmodels.Organization{
+			BaseModel: dbmodels.BaseModel{
+				UUID: orgId,
+			},
+		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: createdByUser,
+			},
+		},
+		UpdatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: createdByUser,
+			},
+		},
+		IsPublic: false,
+	}
+	err := ds.DB.Create(&dataset).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetResponse{
+		UUID: dataset.UUID,
+		Name: dataset.Name,
+		Wiki: dataset.Wiki,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   dataset.CreatedByUser.UUID,
+			Handle: dataset.CreatedByUser.Handle,
+		},
+		UpdatedBy: models.UserHandleResponse{
+			UUID:   dataset.UpdatedByUser.UUID,
+			Handle: dataset.UpdatedByUser.Handle,
+		},
+		IsPublic: dataset.IsPublic,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {
+	var datasets []dbmodels.Dataset
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("organization_uuid = ?", orgId).Find(&datasets)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	datasetResponses := make([]models.DatasetResponse, len(datasets))
+	for i, dataset := range datasets {
+		datasetResponses[i] = models.DatasetResponse{
+			UUID: dataset.UUID,
+			Name: dataset.Name,
+			Wiki: dataset.Wiki,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   dataset.CreatedByUser.UUID,
+				Handle: dataset.CreatedByUser.Handle,
+			},
+			UpdatedBy: models.UserHandleResponse{
+				UUID:   dataset.UpdatedByUser.UUID,
+				Handle: dataset.UpdatedByUser.Handle,
+			},
+			IsPublic: dataset.IsPublic,
+		}
+	}
+	return datasetResponses, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.DatasetBranchResponse, error) {
+	var datasetBranches []dbmodels.DatasetBranch
+	result := ds.DB.Preload("Dataset").Where("dataset_uuid = ?", datasetUUID).Find(&datasetBranches)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	branches := make([]models.DatasetBranchResponse, len(datasetBranches))
+	for i, branch := range datasetBranches {
+		branches[i] = models.DatasetBranchResponse{
+			UUID: branch.UUID,
+			Name: branch.Name,
+			Dataset: models.DatasetNameResponse{
+				UUID: branch.Dataset.UUID,
+				Name: branch.Dataset.Name,
+			},
+		}
+	}
+	return branches, nil
+}
+
+func (ds *SQLiteDatastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchName string) (*models.DatasetBranchResponse, error) {
+	datasetBranch := dbmodels.DatasetBranch{
+		Name: datasetBranchName,
+		Dataset: dbmodels.Dataset{
+			BaseModel: dbmodels.BaseModel{
+				UUID: datasetUUID,
+			},
+		},
+	}
+	err := ds.DB.Create(&datasetBranch).Preload("Dataset").Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetBranchResponse{
+		UUID: datasetBranch.UUID,
+		Name: datasetBranch.Name,
+		Dataset: models.DatasetNameResponse{
+			UUID: datasetBranch.Dataset.UUID,
+			Name: datasetBranch.Dataset.Name,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(datasetBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+	// For now source is R2 by default
+
+	var sourceType dbmodels.SourceType
+	var sourcePath dbmodels.Path
+	if source == "R2" {
+		sourceType.Name = "R2"
+		err := ds.DB.Where(&sourceType).First(&sourceType).Error
+		if err != nil {
+			return nil, err
+		}
+		splitFile := strings.Split(file.Filename, ".")
+		updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
+		var uploadPath string
+
+		fileData, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		s3Client := GetR2Client()
+		uploader := manager.NewUploader(s3Client)
+		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+			Bucket: aws.String(config.R2BucketName()),
+			Key:    aws.String(updatedFilename),
+			Body:   fileData,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		uploadPath = strings.Split(result.Location, "/")[3]
+
+		sourcePath = dbmodels.Path{
+			SourcePath: uploadPath,
+			SourceType: sourceType,
+		}
+		err = ds.DB.Create(&sourcePath).Error
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	latestDatasetVersion := dbmodels.DatasetVersion{
+		BranchUUID: datasetBranchUUID,
+	}
+	res := ds.DB.Where(&latestDatasetVersion).Order("created_at desc").Limit(1).Find(&latestDatasetVersion)
+
+	var newVersion string
+	if res.RowsAffected == 0 {
+		newVersion = "v1"
+	} else {
+		latestVersion := latestDatasetVersion.Version
+		newVersion = IncrementVersion(latestVersion)
+	}
+
+	datasetVersion := dbmodels.DatasetVersion{
+		Hash:    hash,
+		Version: newVersion,
+		Branch: dbmodels.DatasetBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: datasetBranchUUID,
+			},
+		},
+		Lineage: dbmodels.Lineage{
+			Lineage: lineage,
+		},
+		Path: sourcePath,
+	}
+	err := ds.DB.Create(&datasetVersion).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.DatasetVersionResponse{
+		UUID:    datasetVersion.UUID,
+		Hash:    datasetVersion.Hash,
+		Version: datasetVersion.Version,
+		Branch: models.DatasetBranchNameResponse{
+			UUID: datasetVersion.Branch.UUID,
+			Name: datasetVersion.Branch.Name,
+		},
+		Path: models.PathResponse{
+			UUID:       datasetVersion.Path.UUID,
+			SourcePath: datasetVersion.Path.SourcePath,
+			SourceType: models.SourceTypeResponse{
+				Name:      datasetVersion.Path.SourceType.Name,
+				PublicURL: datasetVersion.Path.SourceType.PublicURL,
+			},
+		},
+		Lineage: models.LineageResponse{
+			UUID:    datasetVersion.Lineage.UUID,
+			Lineage: datasetVersion.Lineage.Lineage,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+	var datasetVersions []dbmodels.DatasetVersion
+	err := ds.DB.Where("dataset_uuid = ?", datasetUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Find(&datasetVersions).Error
+	if err != nil {
+		return nil, err
+	}
+	var datasetVersionsResponse []models.DatasetVersionResponse
+	for _, datasetVersion := range datasetVersions {
+		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetVersionResponse{
+			UUID:    datasetVersion.UUID,
+			Hash:    datasetVersion.Hash,
+			Version: datasetVersion.Version,
+			Branch: models.DatasetBranchNameResponse{
+				UUID: datasetVersion.Branch.UUID,
+				Name: datasetVersion.Branch.Name,
+			},
+			Path: models.PathResponse{
+				UUID:       datasetVersion.Path.UUID,
+				SourcePath: datasetVersion.Path.SourcePath,
+				SourceType: models.SourceTypeResponse{
+					Name:      datasetVersion.Path.SourceType.Name,
+					PublicURL: datasetVersion.Path.SourceType.PublicURL,
+				},
+			},
+			Lineage: models.LineageResponse{
+				UUID:    datasetVersion.Lineage.UUID,
+				Lineage: datasetVersion.Lineage.Lineage,
+			},
+		})
+	}
+	return datasetVersionsResponse, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetBranchByName(orgId uuid.UUID, datasetName string, datasetBranchName string) (*models.DatasetBranchResponse, error) {
+	var datasetBranch dbmodels.DatasetBranch
+	model, err := ds.GetDatasetByName(orgId, datasetName)
+	if err != nil {
+		return nil, err
+	}
+	res := ds.DB.Where("name = ?", datasetBranchName).Where("dataset_uuid = ?", model.UUID).Preload("Dataset").Limit(1).Find(&datasetBranch)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	return &models.DatasetBranchResponse{
+		UUID: datasetBranch.UUID,
+		Name: datasetBranch.Name,
+		Dataset: models.DatasetNameResponse{
+			UUID: datasetBranch.Dataset.UUID,
+			Name: datasetBranch.Dataset.Name,
+		},
+		IsDefault: datasetBranch.IsDefault,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*models.DatasetBranchResponse, error) {
+	var datasetBranch dbmodels.DatasetBranch
+	err := ds.DB.Where("uuid = ?", datasetBranchUUID).Preload("Dataset").Find(&datasetBranch).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetBranchResponse{
+		UUID: datasetBranch.UUID,
+		Name: datasetBranch.Name,
+		Dataset: models.DatasetNameResponse{
+			UUID: datasetBranch.Dataset.UUID,
+			Name: datasetBranch.Dataset.Name,
+		},
+		IsDefault: datasetBranch.IsDefault,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+	var datasetVersions []dbmodels.DatasetVersion
+	err := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Find(&datasetVersions).Error
+	if err != nil {
+		return nil, err
+	}
+	var datasetVersionsResponse []models.DatasetVersionResponse
+	for _, datasetVersion := range datasetVersions {
+		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetVersionResponse{
+			UUID:    datasetVersion.UUID,
+			Hash:    datasetVersion.Hash,
+			Version: datasetVersion.Version,
+			Branch: models.DatasetBranchNameResponse{
+				UUID: datasetVersion.Branch.UUID,
+				Name: datasetVersion.Branch.Name,
+			},
+			Path: models.PathResponse{
+				UUID:       datasetVersion.Path.UUID,
+				SourcePath: datasetVersion.Path.SourcePath,
+				SourceType: models.SourceTypeResponse{
+					Name:      datasetVersion.Path.SourceType.Name,
+					PublicURL: datasetVersion.Path.SourceType.PublicURL,
+				},
+			},
+			Lineage: models.LineageResponse{
+				UUID:    datasetVersion.Lineage.UUID,
+				Lineage: datasetVersion.Lineage.Lineage,
+			},
+		})
+	}
+	return datasetVersionsResponse, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetVersionResponse, error) {
+	var datasetVersion dbmodels.DatasetVersion
+	res := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Where("version = ?", version).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	return &models.DatasetVersionResponse{
+		UUID:    datasetVersion.UUID,
+		Hash:    datasetVersion.Hash,
+		Version: datasetVersion.Version,
+		Branch: models.DatasetBranchNameResponse{
+			UUID: datasetVersion.Branch.UUID,
+			Name: datasetVersion.Branch.Name,
+		},
+		Path: models.PathResponse{
+			UUID:       datasetVersion.Path.UUID,
+			SourcePath: datasetVersion.Path.SourcePath,
+			SourceType: models.SourceTypeResponse{
+				Name:      datasetVersion.Path.SourceType.Name,
+				PublicURL: datasetVersion.Path.SourceType.PublicURL,
+			},
+		},
+		Lineage: models.LineageResponse{
+			UUID:    datasetVersion.Lineage.UUID,
+			Lineage: datasetVersion.Lineage.Lineage,
 		},
 	}, nil
 }

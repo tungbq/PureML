@@ -9,7 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var defaultBranchNames = []string{"main", "development"}
+var defaultModelBranchNames = []string{"main", "development"}
 
 // RegisterModel godoc
 // @Security ApiKeyAuth
@@ -45,7 +45,7 @@ func RegisterModel(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		modelBranches, err := datastore.CreateModelBranches(model.UUID, defaultBranchNames)
+		modelBranches, err := datastore.CreateModelBranches(model.UUID, defaultDatasetBranchNames)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
@@ -62,7 +62,7 @@ func RegisterModel(request *models.Request) *models.Response {
 		}
 		if len(modelBranches) == 0 {
 			// Create default branches as model branches does not exist
-			modelBranches, err := datastore.CreateModelBranches(model.UUID, defaultBranchNames)
+			modelBranches, err := datastore.CreateModelBranches(model.UUID, defaultDatasetBranchNames)
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}
