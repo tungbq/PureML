@@ -204,6 +204,157 @@ paths:
       summary: Get specific dataset of an organization
       tags:
       - Dataset
+  /org/{orgId}/dataset/{datasetName}/activity/{category}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get activity of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get activity of a dataset for a category
+      tags:
+      - Common
+    post:
+      consumes:
+      - '*/*'
+      description: Add activity of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity
+        in: body
+        name: activity
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add activity of a dataset for a category
+      tags:
+      - Common
+  /org/{orgId}/dataset/{datasetName}/activity/{category}/{activityUUID}:
+    get:
+      consumes:
+      - '*/*'
+      description: Update activity of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity UUID
+        in: path
+        name: activityUUID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update activity of a dataset for a category
+      tags:
+      - Common
+  /org/{orgId}/dataset/{datasetName}/activity/{category}/{activityUUID}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete an activity of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity UUID
+        in: path
+        name: activityUUID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete an activity of a dataset for a category
+      tags:
+      - Common
   /org/{orgId}/dataset/{datasetName}/branch:
     get:
       consumes:
@@ -605,6 +756,157 @@ paths:
       summary: Get specific model of an organization
       tags:
       - Model
+  /org/{orgId}/model/{modelName}/activity/{category}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get activity of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get activity of a model for a category
+      tags:
+      - Common
+    post:
+      consumes:
+      - '*/*'
+      description: Add activity of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity
+        in: body
+        name: activity
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add activity of a model for a category
+      tags:
+      - Common
+  /org/{orgId}/model/{modelName}/activity/{category}/{activityUUID}:
+    get:
+      consumes:
+      - '*/*'
+      description: Update activity of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity UUID
+        in: path
+        name: activityUUID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update activity of a model for a category
+      tags:
+      - Common
+  /org/{orgId}/model/{modelName}/activity/{category}/{activityUUID}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete an activity of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity UUID
+        in: path
+        name: activityUUID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete an activity of a model for a category
+      tags:
+      - Common
   /org/{orgId}/model/{modelName}/branch:
     get:
       consumes:

@@ -8,20 +8,20 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// UpdateModelActivity godoc
+// UpdateDatasetActivity godoc
 // @Security ApiKeyAuth
-// @Summary Update activity of a model for a category
-// @Description Update activity of a model for a category
+// @Summary Update activity of a dataset for a category
+// @Description Update activity of a dataset for a category
 // @Tags Common
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/{orgId}/model/{modelName}/activity/{category}/{activityUUID} [get]
+// @Router /org/{orgId}/dataset/{datasetName}/activity/{category}/{activityUUID} [get]
 // @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
+// @Param datasetName path string true "Dataset Name"
 // @Param category path string true "Category"
 // @Param activityUUID path string true "Activity UUID"
-func UpdateModelActivity(request *models.Request) *models.Response {
+func UpdateDatasetActivity(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	activityUUID := uuid.Must(uuid.FromString(request.GetPathParam("activityUUID")))
 	updatedActivity := request.GetParsedBodyAttribute("activity").(string)
@@ -29,9 +29,9 @@ func UpdateModelActivity(request *models.Request) *models.Response {
 	if updatedActivity != "" {
 		updatedAttributes["activity"] = updatedActivity
 	}
-	updatedDbActivity, err := datastore.UpdateModelActivity(activityUUID, updatedAttributes)
+	updatedDbActivity, err := datastore.UpdateDatasetActivity(activityUUID, updatedAttributes)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	return models.NewDataResponse(http.StatusOK, []models.ActivityResponse{*updatedDbActivity}, "Model Activity updated")
+	return models.NewDataResponse(http.StatusOK, []models.ActivityResponse{*updatedDbActivity}, "Dataset Activity updated")
 }

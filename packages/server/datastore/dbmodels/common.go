@@ -5,6 +5,7 @@ import uuid "github.com/satori/go.uuid"
 type Activity struct {
 	BaseModel   `gorm:"embedded"`
 	UserUUID    uuid.UUID `json:"user_uuid" gorm:"type:uuid;not null"`
+	Category    string    `json:"category"`
 	Activity    string    `json:"activity"`
 	ModelUUID   uuid.UUID `json:"model_uuid" gorm:"type:uuid;"`
 	DatasetUUID uuid.UUID `json:"dataset_uuid" gorm:"type:uuid;"`

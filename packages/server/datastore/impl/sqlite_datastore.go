@@ -34,7 +34,7 @@ func NewSQLiteDatastore() *SQLiteDatastore {
 		&dbmodels.DatasetVersion{},
 		&dbmodels.Lineage{},
 		&dbmodels.Log{},
-		&dbmodels.Model{},
+		&dbmodels.Dataset{},
 		&dbmodels.ModelBranch{},
 		&dbmodels.ModelReview{},
 		&dbmodels.ModelUser{},
@@ -1256,4 +1256,192 @@ func (ds *SQLiteDatastore) CreateLogForDatasetVersion(data string, datasetVersio
 			Version: log.DatasetVersion.Version,
 		},
 	}, nil
+}
+
+//////////////////////////////// ACTIVITY METHODS /////////////////////////////////
+
+func (ds *SQLiteDatastore) GetModelActivity(modelUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
+	var activity dbmodels.Activity
+	err := ds.DB.Where("model_uuid = ?", modelUUID).Where("category = ?", category).Preload("Model").Preload("User").Limit(1).Find(&activity).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ActivityResponse{
+		UUID:     activity.UUID,
+		Category: activity.Category,
+		Activity: activity.Activity,
+		Model: models.ModelNameResponse{
+			UUID: activity.Model.UUID,
+			Name: activity.Model.Name,
+		},
+		User: models.UserHandleResponse{
+			UUID: activity.User.UUID,
+			Name: activity.User.Name,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateModelActivity(modelUUID uuid.UUID, userUUID uuid.UUID, category string, activity string) (*models.ActivityResponse, error) {
+	dbactivity := dbmodels.Activity{
+		Category: category,
+		Activity: activity,
+		Model: dbmodels.Model{
+			BaseModel: dbmodels.BaseModel{
+				UUID: modelUUID,
+			},
+		},
+		User: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: userUUID,
+			},
+		},
+	}
+	err := ds.DB.Create(&dbactivity).Preload("Model").Preload("User").Find(&dbactivity).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ActivityResponse{
+		UUID:     dbactivity.UUID,
+		Category: dbactivity.Category,
+		Activity: dbactivity.Activity,
+		Model: models.ModelNameResponse{
+			UUID: dbactivity.Model.UUID,
+			Name: dbactivity.Model.Name,
+		},
+		User: models.UserHandleResponse{
+			UUID: dbactivity.User.UUID,
+			Name: dbactivity.User.Name,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) UpdateModelActivity(activityUUID uuid.UUID, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
+	var activity dbmodels.Activity
+	err := ds.DB.Where("uuid = ?", activityUUID).Preload("Model").Preload("User").Limit(1).Find(&activity).Error
+	if err != nil {
+		return nil, err
+	}
+	err = ds.DB.Model(&activity).Updates(updatedAttributes).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ActivityResponse{
+		UUID:     activity.UUID,
+		Category: activity.Category,
+		Activity: activity.Activity,
+		Model: models.ModelNameResponse{
+			UUID: activity.Model.UUID,
+			Name: activity.Model.Name,
+		},
+		User: models.UserHandleResponse{
+			UUID: activity.User.UUID,
+			Name: activity.User.Name,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) DeleteModelActivity(activityUUID uuid.UUID) error {
+	var activity dbmodels.Activity
+	err := ds.DB.Where("uuid = ?", activityUUID).Limit(1).Find(&activity).Error
+	if err != nil {
+		return err
+	}
+	err = ds.DB.Delete(&activity).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetActivity(datasetUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
+	var activity dbmodels.Activity
+	err := ds.DB.Where("dataset_uuid = ?", datasetUUID).Where("category = ?", category).Preload("Dataset").Preload("User").Limit(1).Find(&activity).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ActivityResponse{
+		UUID:     activity.UUID,
+		Category: activity.Category,
+		Activity: activity.Activity,
+		Dataset: models.DatasetNameResponse{
+			UUID: activity.Dataset.UUID,
+			Name: activity.Dataset.Name,
+		},
+		User: models.UserHandleResponse{
+			UUID: activity.User.UUID,
+			Name: activity.User.Name,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateDatasetActivity(datasetUUID uuid.UUID, userUUID uuid.UUID, category string, activity string) (*models.ActivityResponse, error) {
+	dbactivity := dbmodels.Activity{
+		Category: category,
+		Activity: activity,
+		Dataset: dbmodels.Dataset{
+			BaseModel: dbmodels.BaseModel{
+				UUID: datasetUUID,
+			},
+		},
+		User: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: userUUID,
+			},
+		},
+	}
+	err := ds.DB.Create(&dbactivity).Preload("Dataset").Preload("User").Find(&dbactivity).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ActivityResponse{
+		UUID:     dbactivity.UUID,
+		Category: dbactivity.Category,
+		Activity: dbactivity.Activity,
+		Dataset: models.DatasetNameResponse{
+			UUID: dbactivity.Dataset.UUID,
+			Name: dbactivity.Dataset.Name,
+		},
+		User: models.UserHandleResponse{
+			UUID: dbactivity.User.UUID,
+			Name: dbactivity.User.Name,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) UpdateDatasetActivity(activityUUID uuid.UUID, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
+	var activity dbmodels.Activity
+	err := ds.DB.Where("uuid = ?", activityUUID).Preload("Dataset").Preload("User").Limit(1).Find(&activity).Error
+	if err != nil {
+		return nil, err
+	}
+	err = ds.DB.Model(&activity).Updates(updatedAttributes).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ActivityResponse{
+		UUID:     activity.UUID,
+		Category: activity.Category,
+		Activity: activity.Activity,
+		Dataset: models.DatasetNameResponse{
+			UUID: activity.Dataset.UUID,
+			Name: activity.Dataset.Name,
+		},
+		User: models.UserHandleResponse{
+			UUID: activity.User.UUID,
+			Name: activity.User.Name,
+		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
+	var activity dbmodels.Activity
+	err := ds.DB.Where("uuid = ?", activityUUID).Limit(1).Find(&activity).Error
+	if err != nil {
+		return err
+	}
+	err = ds.DB.Delete(&activity).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

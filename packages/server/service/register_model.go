@@ -45,7 +45,7 @@ func RegisterModel(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		modelBranches, err := datastore.CreateModelBranches(model.UUID, defaultDatasetBranchNames)
+		modelBranches, err := datastore.CreateModelBranches(model.UUID, defaultModelBranchNames)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
@@ -62,7 +62,7 @@ func RegisterModel(request *models.Request) *models.Response {
 		}
 		if len(modelBranches) == 0 {
 			// Create default branches as model branches does not exist
-			modelBranches, err := datastore.CreateModelBranches(model.UUID, defaultDatasetBranchNames)
+			modelBranches, err := datastore.CreateModelBranches(model.UUID, defaultModelBranchNames)
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}

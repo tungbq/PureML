@@ -12,7 +12,7 @@ type LogRequest struct {
 
 type ActivityResponse struct {
 	UUID     uuid.UUID           `json:"uuid"`
-	Name     string              `json:"name"`
+	Category string              `json:"category"`
 	Activity string              `json:"activity"`
 	User     UserHandleResponse  `json:"user"`
 	Model    ModelNameResponse   `json:"model"`

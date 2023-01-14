@@ -202,20 +202,36 @@ func GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*mode
 	return ds.GetDatasetBranchVersion(datasetBranchUUID, version)
 }
 
-func GetModelActivity(orgId uuid.UUID, modelName string, activityName string) (*models.ActivityResponse, error) {
-	return nil, nil
+func GetModelActivity(modelUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
+	return ds.GetModelActivity(modelUUID, category)
 }
 
-func CreateModelActivity(orgId uuid.UUID, modelName string, activityName string) (*models.ActivityResponse, error) {
-	return nil, nil
+func CreateModelActivity(modelUUID uuid.UUID, userUUID uuid.UUID, category string, activity string) (*models.ActivityResponse, error) {
+	return ds.CreateModelActivity(modelUUID, userUUID, category, activity)
 }
 
-func UpdateModelActivity(orgId uuid.UUID, modelName string, activityName string, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
-	return nil, nil
+func UpdateModelActivity(activityUUID uuid.UUID, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
+	return ds.UpdateModelActivity(activityUUID, updatedAttributes)
 }
 
-func DeleteModelActivity(orgId uuid.UUID, modelName string, acctivityName string) (*models.ActivityResponse, error) {
-	return nil, nil
+func DeleteModelActivity(activityUUID uuid.UUID) error {
+	return ds.DeleteModelActivity(activityUUID)
+}
+
+func GetDatasetActivity(datasetUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
+	return ds.GetDatasetActivity(datasetUUID, category)
+}
+
+func CreateDatasetActivity(datasetUUID uuid.UUID, userUUID uuid.UUID, category string, activity string) (*models.ActivityResponse, error) {
+	return ds.CreateDatasetActivity(datasetUUID, userUUID, category, activity)
+}
+
+func UpdateDatasetActivity(activityUUID uuid.UUID, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
+	return ds.UpdateDatasetActivity(activityUUID, updatedAttributes)
+}
+
+func DeleteDatasetActivity(activityUUID uuid.UUID) error {
+	return ds.DeleteDatasetActivity(activityUUID)
 }
 
 type Datastore interface {
