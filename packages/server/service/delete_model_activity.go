@@ -12,7 +12,7 @@ import (
 // @Security ApiKeyAuth
 // @Summary Delete an activity of a model for a category
 // @Description Delete an activity of a model for a category
-// @Tags Common
+// @Tags Model
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}

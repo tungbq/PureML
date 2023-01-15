@@ -18,12 +18,13 @@ import (
 // @Router /org/{orgId}/dataset/{datasetName}/hash-status [post]
 // @Param orgId path string true "Organization Id"
 // @Param datasetName path string true "Dataset Name"
-// @Param hash body string true "Hash value"
+// @Param hash body models.HashRequest true "Hash value"
 func VerifyDatasetHashStatus(request *models.Request) *models.Response {
 	datasetName := request.GetDatasetName()
 	datasetUUID := request.GetDatasetUUID()
+	message := "Hash validity (True - does not exist in db)"
 	if datasetName == "" {
-		return models.NewDataResponse(http.StatusOK, true, "Hash validity (True - does not exist in db)")
+		return models.NewDataResponse(http.StatusOK, true, message)
 	}
 	request.ParseJsonBody()
 	hashValue := request.GetParsedBodyAttribute("hash").(string)
@@ -35,8 +36,9 @@ func VerifyDatasetHashStatus(request *models.Request) *models.Response {
 	for _, version := range versions {
 		if version.Hash == hashValue {
 			response = false
+			message = "Hash validity (False - exists in db)"
 			break
 		}
 	}
-	return models.NewDataResponse(http.StatusOK, response, "Hash validity (True - does not exist in db)")
+	return models.NewDataResponse(http.StatusOK, response, message)
 }

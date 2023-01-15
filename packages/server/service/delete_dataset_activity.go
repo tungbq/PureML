@@ -12,7 +12,7 @@ import (
 // @Security ApiKeyAuth
 // @Summary Delete an activity of a dataset for a category
 // @Description Delete an activity of a dataset for a category
-// @Tags Common
+// @Tags Dataset
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}

@@ -11,7 +11,7 @@ import (
 // @Security ApiKeyAuth
 // @Summary Get activity of a model for a category
 // @Description Get activity of a model for a category
-// @Tags Common
+// @Tags Model
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}

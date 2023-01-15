@@ -31,3 +31,11 @@ type LogResponse struct {
 	ModelVersion   ModelVersionNameResponse   `json:"model_version"`
 	DatasetVersion DatasetVersionNameResponse `json:"dataset_version"`
 }
+
+type HashRequest struct {
+	Hash string `json:"hash"`
+}
+
+type ActivityRequest struct {
+	Activity string `json:"activity"`
+}

@@ -18,7 +18,7 @@ import (
 // @Router /org/{orgId}/model/{modelName}/hash-status [post]
 // @Param orgId path string true "Organization Id"
 // @Param modelName path string true "Model Name"
-// @Param hash body string true "Hash value"
+// @Param hash body models.HashRequest true "Hash value"
 func VerifyModelHashStatus(request *models.Request) *models.Response {
 	modelName := request.GetModelName()
 	modelUUID := request.GetModelUUID()

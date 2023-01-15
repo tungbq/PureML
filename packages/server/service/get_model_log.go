@@ -7,20 +7,20 @@ import (
 	"github.com/PureML-Inc/PureML/server/models"
 )
 
-// GetModelBranchVersion godoc
+// GetLogModel godoc
 // @Security ApiKeyAuth
-// @Summary Get specific branch version of a model
-// @Description Get specific branch version of a model
+// @Summary Get Log data for model
+// @Description Get Log data for model
 // @Tags Model
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version} [get]
+// @Router /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log [get]
 // @Param orgId path string true "Organization Id"
 // @Param modelName path string true "Model Name"
 // @Param branchName path string true "Branch Name"
 // @Param version path string true "Version"
-func GetModelBranchVersion(request *models.Request) *models.Response {
+func GetLogModel(request *models.Request) *models.Response {
 	branchUUID := request.GetModelBranchUUID()
 	versionName := request.PathParams["version"]
 	version, err := datastore.GetModelBranchVersion(branchUUID, versionName)
@@ -30,5 +30,10 @@ func GetModelBranchVersion(request *models.Request) *models.Response {
 	if version == nil {
 		return models.NewErrorResponse(http.StatusNotFound, "Version not found")
 	}
-	return models.NewDataResponse(http.StatusOK, version, "Model branch details")
+	result, err := datastore.GetLogForModelVersion(version.UUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Log created")
+	return response
 }

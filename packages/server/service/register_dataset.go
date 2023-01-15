@@ -28,9 +28,20 @@ func RegisterDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	userUUID := request.GetUserUUID()
 	datasetName := request.GetPathParam("datasetName")
-	datasetHash := request.FormValues["hash"][0]
-	datasetWiki := request.FormValues["wiki"][0]
-	datasetLineage := request.FormValues["lineage"][0]
+	var datasetHash string
+	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
+		datasetHash = request.FormValues["hash"][0]
+	} else {
+		return models.NewErrorResponse(http.StatusBadRequest, "Hash is required")
+	}
+	var datasetWiki string
+	if request.FormValues["wiki"] != nil && len(request.FormValues["wiki"]) > 0 {
+		datasetWiki = request.FormValues["wiki"][0]
+	}
+	var datasetLineage string
+	if request.FormValues["lineage"] != nil && len(request.FormValues["lineage"]) > 0 {
+		datasetLineage = request.FormValues["lineage"][0]
+	}
 	fileHeader := request.GetFormFile("file")
 	if fileHeader == nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "File is required")

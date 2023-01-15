@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  models.ActivityRequest:
+    properties:
+      activity:
+        type: string
+    type: object
   models.CreateOrUpdateOrgRequest:
     properties:
       avatar:
@@ -9,6 +14,11 @@ definitions:
       handle:
         type: string
       name:
+        type: string
+    type: object
+  models.HashRequest:
+    properties:
+      hash:
         type: string
     type: object
   models.LogRequest:
@@ -66,31 +76,6 @@ info:
   title: PureML API Documentation
   version: "1.0"
 paths:
-  /dataset/{datasetName}/log:
-    post:
-      consumes:
-      - '*/*'
-      description: Log data for dataset
-      parameters:
-      - description: Data to log
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.LogRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Log data for dataset
-      tags:
-      - Common
   /health:
     get:
       consumes:
@@ -107,31 +92,6 @@ paths:
       summary: Show the status of server.
       tags:
       - Root
-  /model/{modelName}/log:
-    post:
-      consumes:
-      - '*/*'
-      description: Log data for model
-      parameters:
-      - description: Data to log
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.LogRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Log data for model
-      tags:
-      - Common
   /org/:
     get:
       consumes:
@@ -237,7 +197,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get activity of a dataset for a category
       tags:
-      - Common
+      - Dataset
     post:
       consumes:
       - '*/*'
@@ -260,10 +220,10 @@ paths:
         type: string
       - description: Activity
         in: body
-        name: activity
+        name: data
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.ActivityRequest'
       produces:
       - application/json
       responses:
@@ -276,7 +236,7 @@ paths:
       - ApiKeyAuth: []
       summary: Add activity of a dataset for a category
       tags:
-      - Common
+      - Dataset
   /org/{orgId}/dataset/{datasetName}/activity/{category}/{activityUUID}:
     get:
       consumes:
@@ -315,7 +275,7 @@ paths:
       - ApiKeyAuth: []
       summary: Update activity of a dataset for a category
       tags:
-      - Common
+      - Dataset
   /org/{orgId}/dataset/{datasetName}/activity/{category}/{activityUUID}/delete:
     delete:
       consumes:
@@ -354,7 +314,7 @@ paths:
       - ApiKeyAuth: []
       summary: Delete an activity of a dataset for a category
       tags:
-      - Common
+      - Dataset
   /org/{orgId}/dataset/{datasetName}/branch:
     get:
       consumes:
@@ -559,6 +519,89 @@ paths:
       summary: Get specific branch version of a dataset
       tags:
       - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Log data for dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Log data for dataset
+      tags:
+      - Dataset
+    post:
+      consumes:
+      - '*/*'
+      description: Log data for dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Data to log
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Log data for dataset
+      tags:
+      - Dataset
   /org/{orgId}/dataset/{datasetName}/branch/create:
     post:
       consumes:
@@ -615,7 +658,7 @@ paths:
         name: hash
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.HashRequest'
       produces:
       - application/json
       responses:
@@ -789,7 +832,7 @@ paths:
       - ApiKeyAuth: []
       summary: Get activity of a model for a category
       tags:
-      - Common
+      - Model
     post:
       consumes:
       - '*/*'
@@ -812,10 +855,10 @@ paths:
         type: string
       - description: Activity
         in: body
-        name: activity
+        name: data
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.ActivityRequest'
       produces:
       - application/json
       responses:
@@ -828,7 +871,7 @@ paths:
       - ApiKeyAuth: []
       summary: Add activity of a model for a category
       tags:
-      - Common
+      - Model
   /org/{orgId}/model/{modelName}/activity/{category}/{activityUUID}:
     get:
       consumes:
@@ -867,7 +910,7 @@ paths:
       - ApiKeyAuth: []
       summary: Update activity of a model for a category
       tags:
-      - Common
+      - Model
   /org/{orgId}/model/{modelName}/activity/{category}/{activityUUID}/delete:
     delete:
       consumes:
@@ -906,7 +949,7 @@ paths:
       - ApiKeyAuth: []
       summary: Delete an activity of a model for a category
       tags:
-      - Common
+      - Model
   /org/{orgId}/model/{modelName}/branch:
     get:
       consumes:
@@ -1111,6 +1154,89 @@ paths:
       summary: Get specific branch version of a model
       tags:
       - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Log data for model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Log data for model
+      tags:
+      - Model
+    post:
+      consumes:
+      - '*/*'
+      description: Log data for model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Data to log
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Log data for model
+      tags:
+      - Model
   /org/{orgId}/model/{modelName}/branch/create:
     post:
       consumes:
@@ -1167,7 +1293,7 @@ paths:
         name: hash
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.HashRequest'
       produces:
       - application/json
       responses:

@@ -696,7 +696,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID,
 
 func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
-	err := ds.DB.Where("model_uuid = ?", modelUUID).Preload("Branch").Preload("Path.SourceType").Find(&modelVersions).Error
+	err := ds.DB.Select("model_versions.*").Joins("JOIN model_branches ON model_branches.uuid = model_versions.branch_uuid").Where("model_branches.model_uuid = ?", modelUUID).Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -733,6 +733,9 @@ func (ds *SQLiteDatastore) GetModelBranchByName(orgId uuid.UUID, modelName strin
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
+	if res.Error != nil {
+		return nil, res.Error
+	}
 	return &models.ModelBranchResponse{
 		UUID: modelBranch.UUID,
 		Name: modelBranch.Name,
@@ -746,9 +749,12 @@ func (ds *SQLiteDatastore) GetModelBranchByName(orgId uuid.UUID, modelName strin
 
 func (ds *SQLiteDatastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
 	var modelBranch dbmodels.ModelBranch
-	err := ds.DB.Where("uuid = ?", modelBranchUUID).Preload("Model").Find(&modelBranch).Error
-	if err != nil {
-		return nil, err
+	res := ds.DB.Where("uuid = ?", modelBranchUUID).Preload("Model").Limit(1).Find(&modelBranch)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	if res.Error != nil {
+		return nil, res.Error
 	}
 	return &models.ModelBranchResponse{
 		UUID: modelBranch.UUID,
@@ -845,7 +851,7 @@ func (ds *SQLiteDatastore) GetDatasetByName(orgId uuid.UUID, datasetName string)
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetById(modelId string) (*models.DatasetResponse, error) {
+func (ds *SQLiteDatastore) GetDatasetByUUID(modelId string) (*models.DatasetResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("uuid = ?", modelId).Limit(1).Find(&dataset)
 	if result.RowsAffected == 0 {
@@ -1078,7 +1084,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(datasetBranchUUID uuid.U
 
 func (ds *SQLiteDatastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
-	err := ds.DB.Where("dataset_uuid = ?", datasetUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Find(&datasetVersions).Error
+	err := ds.DB.Select("dataset_versions.*").Joins("JOIN dataset_branches ON dataset_branches.uuid = dataset_versions.branch_uuid").Where("dataset_branches.dataset_uuid = ?", datasetUUID).Find(&datasetVersions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1214,6 +1220,25 @@ func (ds *SQLiteDatastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, 
 
 //////////////////////////////// LOG METHODS /////////////////////////////////
 
+func (ds *SQLiteDatastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
+	var logs []dbmodels.Log
+	err := ds.DB.Where("model_version_uuid = ?", modelVersionUUID).Preload("ModelVersion").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	var logsResponse []models.LogResponse
+	for _, log := range logs {
+		logsResponse = append(logsResponse, models.LogResponse{
+			Data: log.Data,
+			ModelVersion: models.ModelVersionNameResponse{
+				UUID:    log.ModelVersion.UUID,
+				Version: log.ModelVersion.Version,
+			},
+		})
+	}
+	return logsResponse, nil
+}
+
 func (ds *SQLiteDatastore) CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
 	log := dbmodels.Log{
 		Data: data,
@@ -1223,7 +1248,7 @@ func (ds *SQLiteDatastore) CreateLogForModelVersion(data string, modelVersionUUI
 			},
 		},
 	}
-	err := ds.DB.Create(&log).Association("ModelVersion").Find(&log.ModelVersion)
+	err := ds.DB.Create(&log).Preload("ModelVersion").Find(&log).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1236,6 +1261,25 @@ func (ds *SQLiteDatastore) CreateLogForModelVersion(data string, modelVersionUUI
 	}, nil
 }
 
+func (ds *SQLiteDatastore) GetLogForDatasetVersion(datasetVersion uuid.UUID) ([]models.LogResponse, error) {
+	var logs []dbmodels.Log
+	err := ds.DB.Where("dataset_version_uuid = ?", datasetVersion).Preload("DatasetVersion").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	var logsResponse []models.LogResponse
+	for _, log := range logs {
+		logsResponse = append(logsResponse, models.LogResponse{
+			Data: log.Data,
+			DatasetVersion: models.DatasetVersionNameResponse{
+				UUID:    log.DatasetVersion.UUID,
+				Version: log.DatasetVersion.Version,
+			},
+		})
+	}
+	return logsResponse, nil
+}
+
 func (ds *SQLiteDatastore) CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
 	log := dbmodels.Log{
 		Data: data,
@@ -1245,7 +1289,7 @@ func (ds *SQLiteDatastore) CreateLogForDatasetVersion(data string, datasetVersio
 			},
 		},
 	}
-	err := ds.DB.Create(&log).Association("DatasetVersion").Find(&log.DatasetVersion)
+	err := ds.DB.Create(&log).Preload("DatasetVersion").Find(&log).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1262,9 +1306,12 @@ func (ds *SQLiteDatastore) CreateLogForDatasetVersion(data string, datasetVersio
 
 func (ds *SQLiteDatastore) GetModelActivity(modelUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
 	var activity dbmodels.Activity
-	err := ds.DB.Where("model_uuid = ?", modelUUID).Where("category = ?", category).Preload("Model").Preload("User").Limit(1).Find(&activity).Error
-	if err != nil {
-		return nil, err
+	res := ds.DB.Where("model_uuid = ?", modelUUID).Where("category = ?", category).Preload("Model").Preload("User").Limit(1).Find(&activity)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	if res.Error != nil {
+		return nil, res.Error
 	}
 	return &models.ActivityResponse{
 		UUID:     activity.UUID,
@@ -1355,9 +1402,12 @@ func (ds *SQLiteDatastore) DeleteModelActivity(activityUUID uuid.UUID) error {
 
 func (ds *SQLiteDatastore) GetDatasetActivity(datasetUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
 	var activity dbmodels.Activity
-	err := ds.DB.Where("dataset_uuid = ?", datasetUUID).Where("category = ?", category).Preload("Dataset").Preload("User").Limit(1).Find(&activity).Error
-	if err != nil {
-		return nil, err
+	res := ds.DB.Where("dataset_uuid = ?", datasetUUID).Where("category = ?", category).Preload("Dataset").Preload("User").Limit(1).Find(&activity)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	if res.Error != nil {
+		return nil, res.Error
 	}
 	return &models.ActivityResponse{
 		UUID:     activity.UUID,

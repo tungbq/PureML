@@ -28,8 +28,16 @@ func RegisterModel(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	userUUID := request.GetUserUUID()
 	modelName := request.GetPathParam("modelName")
-	modelHash := request.FormValues["hash"][0]
-	modelWiki := request.FormValues["wiki"][0]
+	var modelHash string
+	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
+		modelHash = request.FormValues["hash"][0]
+	} else {
+		return models.NewErrorResponse(http.StatusBadRequest, "Hash is required")
+	}
+	var modelWiki string
+	if request.FormValues["wiki"] != nil && len(request.FormValues["wiki"]) > 0 {
+		modelWiki = request.FormValues["wiki"][0]
+	}
 	fileHeader := request.GetFormFile("file")
 	if fileHeader == nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "File is required")

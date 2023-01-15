@@ -20,10 +20,13 @@ import (
 // @Param datasetName path string true "Dataset Name"
 // @Param branchName path string true "Branch Name"
 func GetDatasetBranch(request *models.Request) *models.Response {
-	datasetBranchUUID := request.DatasetBranch.UUID
-	branch, err := datastore.GetModelBranchByUUID(datasetBranchUUID)
+	datasetBranchUUID := request.GetDatasetBranchUUID()
+	branch, err := datastore.GetDatasetBranchByUUID(datasetBranchUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+	if branch == nil {
+		return models.NewErrorResponse(http.StatusNotFound, "Branch not found")
 	}
 	return models.NewDataResponse(http.StatusOK, branch, "Dataset branch details")
 }

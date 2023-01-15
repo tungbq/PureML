@@ -78,8 +78,16 @@ func UpdateUser(email string, name string, avatar string, bio string) (*models.U
 	return ds.UpdateUser(email, name, avatar, bio)
 }
 
+func GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
+	return ds.GetLogForModelVersion(modelVersionUUID)
+}
+
 func CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
 	return ds.CreateLogForModelVersion(data, modelVersionUUID)
+}
+
+func GetLogForDatasetVersion(datasetVersionUUID uuid.UUID) ([]models.LogResponse, error) {
+	return ds.GetLogForDatasetVersion(datasetVersionUUID)
 }
 
 func CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {

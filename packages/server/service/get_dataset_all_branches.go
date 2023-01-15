@@ -25,7 +25,7 @@ func GetDatasetAllBranches(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {
-		response = models.NewDataResponse(http.StatusOK, allOrgs, "All organizations")
+		response = models.NewDataResponse(http.StatusOK, allOrgs, "All dataset branches")
 	}
 	return response
 }
