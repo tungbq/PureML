@@ -113,6 +113,16 @@ func main() {
 	datasetGroup.POST("/:datasetName/activity/:category/:activityUUID", handler.DefaultHandler(service.UpdateDatasetActivity), middlewares.ValidateDataset)
 	datasetGroup.DELETE("/:datasetName/activity/:category/:activityUUID/delete", handler.DefaultHandler(service.DeleteDatasetActivity), middlewares.ValidateDataset)
 
+	//Secret APIs
+	secretGroup := e.Group("/org/:orgId/secret", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	// secretGroup.GET("/all", handler.DefaultHandler(service.GetAllSecrets))
+	secretGroup.GET("/r2", handler.DefaultHandler(service.GetR2Secret))
+	secretGroup.POST("/r2/connect", handler.DefaultHandler(service.ConnectR2Secret))
+	secretGroup.DELETE("/r2/delete", handler.DefaultHandler(service.DeleteR2Secrets))
+	secretGroup.GET("/s3", handler.DefaultHandler(service.GetS3Secret))
+	secretGroup.POST("/s3/connect", handler.DefaultHandler(service.ConnectS3Secret))
+	secretGroup.DELETE("/s3/delete", handler.DefaultHandler(service.DeleteS3Secrets))
+
 	//Start server
 	e.Logger.Fatal(e.Start("localhost:8080"))
 

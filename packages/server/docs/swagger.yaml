@@ -26,6 +26,19 @@ definitions:
       data:
         type: string
     type: object
+  models.R2SecretRequest:
+    properties:
+      access_key_id:
+        type: string
+      access_key_secret:
+        type: string
+      account_id:
+        type: string
+      bucket_name:
+        type: string
+      public_url:
+        type: string
+    type: object
   models.UserLoginRequest:
     properties:
       email:
@@ -701,6 +714,9 @@ paths:
         name: lineage
         type: string
       - in: formData
+        name: storage
+        type: string
+      - in: formData
         name: wiki
         type: string
       produces:
@@ -1332,6 +1348,9 @@ paths:
         name: hash
         type: string
       - in: formData
+        name: storage
+        type: string
+      - in: formData
         name: wiki
         type: string
       produces:
@@ -1401,6 +1420,84 @@ paths:
       summary: Remove user from organization.
       tags:
       - Organization
+  /org/{orgId}/secret/r2:
+    get:
+      consumes:
+      - '*/*'
+      description: Get secrets for source type r2
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get secrets for source type r2
+      tags:
+      - Secret
+  /org/{orgId}/secret/r2/connect:
+    post:
+      consumes:
+      - '*/*'
+      description: Add secrets for source type r2
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Secret
+        in: body
+        name: secret
+        required: true
+        schema:
+          $ref: '#/definitions/models.R2SecretRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add secrets for source type r2
+      tags:
+      - Secret
+  /org/{orgId}/secret/r2/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete secrets for source type r2
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete secrets for source type r2
+      tags:
+      - Secret
   /org/{orgId}/update:
     post:
       consumes:

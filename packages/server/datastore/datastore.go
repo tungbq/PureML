@@ -9,7 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var ds *impl.SQLiteDatastore = nil
+var ds *impl.SQLiteDatastore
 
 func init() {
 	stage := os.Getenv("STAGE")
@@ -124,8 +124,8 @@ func CreateModelBranches(modelUUID uuid.UUID, branchNames []string) ([]models.Mo
 	return branches, nil
 }
 
-func UploadAndRegisterModelFile(modelBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string) (*models.ModelVersionResponse, error) {
-	return ds.UploadAndRegisterModelFile(modelBranchUUID, file, hash, source)
+func UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string) (*models.ModelVersionResponse, error) {
+	return ds.UploadAndRegisterModelFile(orgId, modelBranchUUID, file, hash, source)
 }
 
 func GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
@@ -182,8 +182,8 @@ func CreateDatasetBranches(datasetUUID uuid.UUID, branchNames []string) ([]model
 	return branches, nil
 }
 
-func UploadAndRegisterDatasetFile(datasetBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
-	return ds.UploadAndRegisterDatasetFile(datasetBranchUUID, file, hash, source, lineage)
+func UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+	return ds.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, file, hash, source, lineage)
 }
 
 func GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.DatasetBranchResponse, error) {
@@ -240,6 +240,22 @@ func UpdateDatasetActivity(activityUUID uuid.UUID, updatedAttributes map[string]
 
 func DeleteDatasetActivity(activityUUID uuid.UUID) error {
 	return ds.DeleteDatasetActivity(activityUUID)
+}
+
+func GetSourceSecret(orgId uuid.UUID, source string) (*models.SourceSecrets, error) {
+	return ds.GetSourceSecret(orgId, source)
+}
+
+func CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*impl.R2Secrets, error) {
+	return ds.CreateR2Secrets(orgId, accountId, accessKeyId, accessKeySecret, bucketName, publicURL)
+}
+
+func CreateR2Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
+	return ds.CreateR2Source(orgId, publicURL)
+}
+
+func DeleteR2Secrets(orgId uuid.UUID) error {
+	return ds.DeleteR2Secrets(orgId)
 }
 
 type Datastore interface {

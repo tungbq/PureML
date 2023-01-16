@@ -1,8 +1,9 @@
 package service
 
 import (
-	"fmt"
+	_ "fmt"
 	"net/http"
+	"strings"
 
 	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
@@ -38,6 +39,10 @@ func RegisterModel(request *models.Request) *models.Response {
 	if request.FormValues["wiki"] != nil && len(request.FormValues["wiki"]) > 0 {
 		modelWiki = request.FormValues["wiki"][0]
 	}
+	var modelSourceType string
+	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
+		modelSourceType = strings.ToUpper(request.FormValues["storage"][0])
+	}
 	fileHeader := request.GetFormFile("file")
 	if fileHeader == nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "File is required")
@@ -46,7 +51,6 @@ func RegisterModel(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	fmt.Println(model)
 	if model == nil {
 		// Create model and default branches as model does not exist
 		model, err := datastore.CreateModel(orgId, modelName, modelWiki, userUUID)
@@ -57,7 +61,7 @@ func RegisterModel(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		modelVersion, err := datastore.UploadAndRegisterModelFile(modelBranches[1].UUID, fileHeader, modelHash, "R2")
+		modelVersion, err := datastore.UploadAndRegisterModelFile(orgId, modelBranches[1].UUID, fileHeader, modelHash, modelSourceType)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
@@ -74,24 +78,24 @@ func RegisterModel(request *models.Request) *models.Response {
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}
-			modelVersion, err := datastore.UploadAndRegisterModelFile(modelBranches[1].UUID, fileHeader, modelHash, "R2")
+			modelVersion, err := datastore.UploadAndRegisterModelFile(orgId, modelBranches[1].UUID, fileHeader, modelHash, modelSourceType)
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}
 			return models.NewDataResponse(http.StatusOK, modelVersion, "Model successfully created")
 		} else {
 			// Model branches exists (defaultBranches)
-			var developementBranch models.ModelBranchResponse
+			var developmentBranch models.ModelBranchResponse
 			for _, branch := range modelBranches {
-				if branch.Name == "developement" {
-					developementBranch = branch
+				if branch.Name == "development" {
+					developmentBranch = branch
 					break
 				}
 			}
-			if developementBranch.UUID == uuid.Nil {
-				return models.NewErrorResponse(http.StatusConflict, "Model developement branch not found")
+			if developmentBranch.UUID == uuid.Nil {
+				return models.NewErrorResponse(http.StatusConflict, "Model development branch not found")
 			}
-			modelVersion, err := datastore.UploadAndRegisterModelFile(developementBranch.UUID, fileHeader, modelHash, "R2")
+			modelVersion, err := datastore.UploadAndRegisterModelFile(orgId, developmentBranch.UUID, fileHeader, modelHash, modelSourceType)
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}

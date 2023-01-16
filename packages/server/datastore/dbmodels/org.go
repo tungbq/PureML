@@ -9,5 +9,6 @@ type Organization struct {
 	APITokenHash string `json:"api_token_hash"`
 	JoinCode     string `json:"join_code" gorm:"not null"`
 
-	Users []User `gorm:"many2many:user_organizations;"` // many to many
+	Users   []User   `gorm:"many2many:user_organizations;"` // many to many
+	Secrets []Secret `gorm:"foreignKey:OrgUUID"`
 }

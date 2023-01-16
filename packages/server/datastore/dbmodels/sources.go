@@ -10,6 +10,18 @@ type Path struct {
 
 type SourceType struct {
 	BaseModel `gorm:"embedded"`
-	Name      string `json:"name" gorm:"not null"`
+	OrgUUID   string `json:"org_uuid" gorm:"not null;index:idx_org_source_type,unique"`
+	Name      string `json:"name" gorm:"not null;index:idx_org_source_type,unique"`
 	PublicURL string `json:"public_url"`
+
+	Org Organization `gorm:"foreignKey:OrgUUID"`
+}
+
+type Secret struct {
+	BaseModel `gorm:"embedded"`
+	OrgUUID   string `json:"org_uuid" gorm:"not null;index:idx_org_secret,unique"`
+	Name      string `json:"name" gorm:"not null;index:idx_org_secret,unique"`
+	Value     string `json:"value" gorm:"not null"`
+
+	Org Organization `gorm:"foreignKey:OrgUUID"`
 }

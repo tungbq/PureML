@@ -8,6 +8,7 @@ type RegisterDatasetRequest struct {
 	Wiki    string `json:"wiki"`
 	Hash    string `json:"hash"`
 	Lineage string `json:"lineage"`
+	Storage string `json:"storage"`
 }
 
 // Response models

@@ -5,8 +5,9 @@ import uuid "github.com/satori/go.uuid"
 // Request models
 
 type RegisterModelRequest struct {
-	Wiki string `json:"wiki"`
-	Hash string `json:"hash"`
+	Wiki    string `json:"wiki"`
+	Hash    string `json:"hash"`
+	Storage string `json:"storage"`
 }
 
 // Response models

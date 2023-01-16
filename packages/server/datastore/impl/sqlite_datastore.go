@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/server/config"
 	"github.com/PureML-Inc/PureML/server/datastore/dbmodels"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -43,6 +42,7 @@ func NewSQLiteDatastore() *SQLiteDatastore {
 		&dbmodels.Path{},
 		&dbmodels.User{},
 		&dbmodels.UserOrganizations{},
+		&dbmodels.Secret{},
 	)
 	if err != nil {
 		return &SQLiteDatastore{}
@@ -605,11 +605,18 @@ func (ds *SQLiteDatastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchNam
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string) (*models.ModelVersionResponse, error) {
-	// For now source is R2 by default
-
+func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string) (*models.ModelVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
+	org := dbmodels.Organization{
+		BaseModel: dbmodels.BaseModel{
+			UUID: orgId,
+		},
+	}
+	err := ds.DB.Where(&org).Preload("Secrets").First(&org).Error
+	if err != nil {
+		return nil, err
+	}
 	if source == "R2" {
 		sourceType.Name = "R2"
 		err := ds.DB.Where(&sourceType).First(&sourceType).Error
@@ -624,10 +631,15 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID,
 		if err != nil {
 			return nil, err
 		}
-		s3Client := GetR2Client()
+		r2Secrets := R2Secrets{}
+		err = r2Secrets.Load(org.Secrets)
+		if err != nil {
+			return nil, err
+		}
+		s3Client := GetR2Client(r2Secrets)
 		uploader := manager.NewUploader(s3Client)
 		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-			Bucket: aws.String(config.R2BucketName()),
+			Bucket: aws.String(r2Secrets.BucketName),
 			Key:    aws.String(updatedFilename),
 			Body:   fileData,
 		})
@@ -670,7 +682,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(modelBranchUUID uuid.UUID,
 		},
 		Path: sourcePath,
 	}
-	err := ds.DB.Create(&modelVersion).Preload("Branch").Preload("Path.SourceType").Error
+	err = ds.DB.Create(&modelVersion).Preload("Branch").Preload("Path.SourceType").Error
 	if err != nil {
 		return nil, err
 	}
@@ -986,12 +998,20 @@ func (ds *SQLiteDatastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBra
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(datasetBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
-	// For now source is R2 by default
-
+func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
-	if source == "R2" {
+	org := dbmodels.Organization{
+		BaseModel: dbmodels.BaseModel{
+			UUID: orgId,
+		},
+	}
+	err := ds.DB.Where(&org).Preload("Secrets").First(&org).Error
+	if err != nil {
+		return nil, err
+	}
+	switch strings.ToUpper(source) {
+	case "R2":
 		sourceType.Name = "R2"
 		err := ds.DB.Where(&sourceType).First(&sourceType).Error
 		if err != nil {
@@ -1005,10 +1025,55 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(datasetBranchUUID uuid.U
 		if err != nil {
 			return nil, err
 		}
-		s3Client := GetR2Client()
+		r2Secrets := R2Secrets{}
+		err = r2Secrets.Load(org.Secrets)
+		if err != nil {
+			return nil, err
+		}
+		s3Client := GetR2Client(r2Secrets)
 		uploader := manager.NewUploader(s3Client)
 		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-			Bucket: aws.String(config.R2BucketName()),
+			Bucket: aws.String(r2Secrets.BucketName),
+			Key:    aws.String(updatedFilename),
+			Body:   fileData,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		uploadPath = strings.Split(result.Location, "/")[3]
+
+		sourcePath = dbmodels.Path{
+			SourcePath: uploadPath,
+			SourceType: sourceType,
+		}
+		err = ds.DB.Create(&sourcePath).Error
+		if err != nil {
+			return nil, err
+		}
+	case "S3":
+		sourceType.Name = "S3"
+		err := ds.DB.Where(&sourceType).First(&sourceType).Error
+		if err != nil {
+			return nil, err
+		}
+		splitFile := strings.Split(file.Filename, ".")
+		updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
+		var uploadPath string
+
+		fileData, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		s3Secrets := S3Secrets{}
+		err = s3Secrets.Load(org.Secrets)
+		if err != nil {
+			return nil, err
+		}
+		s3Client := GetS3Client(s3Secrets)
+		uploader := manager.NewUploader(s3Client)
+		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+			Bucket: aws.String(s3Secrets.BucketName),
 			Key:    aws.String(updatedFilename),
 			Body:   fileData,
 		})
@@ -1054,7 +1119,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(datasetBranchUUID uuid.U
 		},
 		Path: sourcePath,
 	}
-	err := ds.DB.Create(&datasetVersion).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Error
+	err = ds.DB.Create(&datasetVersion).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Error
 	if err != nil {
 		return nil, err
 	}
@@ -1490,6 +1555,194 @@ func (ds *SQLiteDatastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 		return err
 	}
 	err = ds.DB.Delete(&activity).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/////////////////////////////// SECRET API METHODS ///////////////////////////////
+
+func (ds *SQLiteDatastore) GetSourceSecret(orgId uuid.UUID, source string) (*models.SourceSecrets, error) {
+	var secrets []dbmodels.Secret
+	res := ds.DB.Where("org_uuid = ?", orgId).Find(&secrets)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	var sourceSecret models.SourceSecrets
+	switch strings.ToUpper(source) {
+	case "R2":
+		var r2Secret R2Secrets
+		err := r2Secret.Load(secrets)
+		if err != nil {
+			return nil, err
+		}
+		sourceSecret.AccountId = r2Secret.AccountId
+		sourceSecret.AccessKeyId = r2Secret.AccessKeyId
+		sourceSecret.AccessKeySecret = r2Secret.AccessKeySecret
+		sourceSecret.BucketName = r2Secret.BucketName
+		sourceSecret.PublicURL = r2Secret.PublicURL
+	case "S3":
+		var s3Secret S3Secrets
+		err := s3Secret.Load(secrets)
+		if err != nil {
+			return nil, err
+		}
+		sourceSecret.AccessKeyId = s3Secret.AccessKeyId
+		sourceSecret.AccessKeySecret = s3Secret.AccessKeySecret
+		sourceSecret.BucketName = s3Secret.BucketName
+		sourceSecret.PublicURL = s3Secret.PublicURL
+	}
+	return &sourceSecret, nil
+}
+
+func (ds *SQLiteDatastore) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*R2Secrets, error) {
+	secret := dbmodels.Secret{
+		Org: dbmodels.Organization{
+			BaseModel: dbmodels.BaseModel{
+				UUID: orgId,
+			},
+		},
+	}
+	err := ds.DB.Transaction(func(tx *gorm.DB) error {
+		secret.Name = "R2_ACCOUNT_ID"
+		secret.Value = accountId
+		err := tx.Create(&secret).Error
+		if err != nil {
+			return err
+		}
+		secret.UUID = uuid.Nil
+		secret.Name = "R2_ACCESS_KEY_ID"
+		secret.Value = accessKeyId
+		err = tx.Create(&secret).Error
+		if err != nil {
+			return err
+		}
+		secret.UUID = uuid.Nil
+		secret.Name = "R2_ACCESS_KEY_SECRET"
+		secret.Value = accessKeySecret
+		err = tx.Create(&secret).Error
+		if err != nil {
+			return err
+		}
+		secret.UUID = uuid.Nil
+		secret.Name = "R2_BUCKET_NAME"
+		secret.Value = bucketName
+		err = tx.Create(&secret).Error
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &R2Secrets{
+		AccountId:       accountId,
+		AccessKeyId:     accessKeyId,
+		AccessKeySecret: accessKeySecret,
+		BucketName:      bucketName,
+		PublicURL:       publicURL,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateR2Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
+	sourceType := dbmodels.SourceType{
+		Name:      "R2",
+		PublicURL: publicURL,
+		Org: dbmodels.Organization{
+			BaseModel: dbmodels.BaseModel{
+				UUID: orgId,
+			},
+		},
+	}
+	err := ds.DB.Create(&sourceType).Find(&sourceType).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.SourceTypeResponse{
+		Name:      sourceType.Name,
+		PublicURL: sourceType.PublicURL,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) DeleteR2Secrets(orgId uuid.UUID) error {
+	var secrets []dbmodels.Secret
+	err := ds.DB.Where("org_uuid = ?", orgId).Where("name LIKE ?", "R2_%").Delete(&secrets).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ds *SQLiteDatastore) CreateS3Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*S3Secrets, error) {
+	secret := dbmodels.Secret{
+		Org: dbmodels.Organization{
+			BaseModel: dbmodels.BaseModel{
+				UUID: orgId,
+			},
+		},
+	}
+	err := ds.DB.Transaction(func(tx *gorm.DB) error {
+		secret.Name = "S3_ACCESS_KEY_ID"
+		secret.Value = accessKeyId
+		err := tx.Create(&secret).Error
+		if err != nil {
+			return err
+		}
+		secret.UUID = uuid.Nil
+		secret.Name = "S3_ACCESS_KEY_SECRET"
+		secret.Value = accessKeySecret
+		err = tx.Create(&secret).Error
+		if err != nil {
+			return err
+		}
+		secret.UUID = uuid.Nil
+		secret.Name = "S3_BUCKET_NAME"
+		secret.Value = bucketName
+		err = tx.Create(&secret).Error
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &S3Secrets{
+		AccessKeyId:     accessKeyId,
+		AccessKeySecret: accessKeySecret,
+		BucketName:      bucketName,
+		PublicURL:       publicURL,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) CreateS3Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
+	sourceType := dbmodels.SourceType{
+		Name:      "S3",
+		PublicURL: publicURL,
+		Org: dbmodels.Organization{
+			BaseModel: dbmodels.BaseModel{
+				UUID: orgId,
+			},
+		},
+	}
+	err := ds.DB.Create(&sourceType).Find(&sourceType).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.SourceTypeResponse{
+		Name:      sourceType.Name,
+		PublicURL: sourceType.PublicURL,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) DeleteS3Secrets(orgId uuid.UUID) error {
+	var secrets []dbmodels.Secret
+	err := ds.DB.Where("org_uuid = ?", orgId).Where("name LIKE ?", "S3_%").Delete(&secrets).Error
 	if err != nil {
 		return err
 	}

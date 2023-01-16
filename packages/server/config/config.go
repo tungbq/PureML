@@ -35,12 +35,12 @@ func TokenSigningSecret() []byte {
 	return []byte(env["JWT_SECRET"])
 }
 
-func R2Secrets() []string {
-	env := Environment()
-	return []string{env["R2_ACCOUNT_ID"], env["R2_ACCESS_KEY_ID"], env["R2_ACCESS_KEY_SECRET"]}
-}
+// func R2Secrets() []string {
+// 	env := Environment()
+// 	return []string{env["R2_ACCOUNT_ID"], env["R2_ACCESS_KEY_ID"], env["R2_ACCESS_KEY_SECRET"]}
+// }
 
-func R2BucketName() string {
-	env := Environment()
-	return env["R2_BUCKET_NAME"]
-}
+// func R2BucketName() string {
+// 	env := Environment()
+// 	return env["R2_BUCKET_NAME"]
+// }

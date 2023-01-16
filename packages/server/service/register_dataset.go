@@ -1,8 +1,9 @@
 package service
 
 import (
-	"fmt"
+	_ "fmt"
 	"net/http"
+	"strings"
 
 	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
@@ -38,6 +39,10 @@ func RegisterDataset(request *models.Request) *models.Response {
 	if request.FormValues["wiki"] != nil && len(request.FormValues["wiki"]) > 0 {
 		datasetWiki = request.FormValues["wiki"][0]
 	}
+	var modelSourceType string
+	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
+		modelSourceType = strings.ToUpper(request.FormValues["storage"][0])
+	}
 	var datasetLineage string
 	if request.FormValues["lineage"] != nil && len(request.FormValues["lineage"]) > 0 {
 		datasetLineage = request.FormValues["lineage"][0]
@@ -50,7 +55,6 @@ func RegisterDataset(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	fmt.Println(dataset)
 	if dataset == nil {
 		// Create dataset and default branches as dataset does not exist
 		dataset, err := datastore.CreateDataset(orgId, datasetName, datasetWiki, userUUID)
@@ -61,7 +65,7 @@ func RegisterDataset(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		datasetVersion, err := datastore.UploadAndRegisterDatasetFile(datasetBranches[1].UUID, fileHeader, datasetHash, "R2", datasetLineage)
+		datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranches[1].UUID, fileHeader, datasetHash, modelSourceType, datasetLineage)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
@@ -78,24 +82,24 @@ func RegisterDataset(request *models.Request) *models.Response {
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}
-			datasetVersion, err := datastore.UploadAndRegisterDatasetFile(datasetBranches[1].UUID, fileHeader, datasetHash, "R2", datasetLineage)
+			datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranches[1].UUID, fileHeader, datasetHash, modelSourceType, datasetLineage)
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}
 			return models.NewDataResponse(http.StatusOK, datasetVersion, "Dataset successfully created")
 		} else {
 			// Dataset branches exists (defaultBranches)
-			var developementBranch models.DatasetBranchResponse
+			var developmentBranch models.DatasetBranchResponse
 			for _, branch := range datasetBranches {
-				if branch.Name == "developement" {
-					developementBranch = branch
+				if branch.Name == "development" {
+					developmentBranch = branch
 					break
 				}
 			}
-			if developementBranch.UUID == uuid.Nil {
-				return models.NewErrorResponse(http.StatusConflict, "Dataset developement branch not found")
+			if developmentBranch.UUID == uuid.Nil {
+				return models.NewErrorResponse(http.StatusConflict, "Dataset development branch not found")
 			}
-			datasetVersion, err := datastore.UploadAndRegisterDatasetFile(developementBranch.UUID, fileHeader, datasetHash, "R2", datasetLineage)
+			datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, developmentBranch.UUID, fileHeader, datasetHash, modelSourceType, datasetLineage)
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}
