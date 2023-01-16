@@ -85,7 +85,6 @@ def create_pipeline():
     if len(dataset) > 0:
         pipeline_components.append(dataset)
 
-    # print(pipeline_components)
 
 
     edges = create_edges(components=pipeline_components)
