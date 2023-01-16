@@ -89,8 +89,8 @@ def add_dataset_to_config(name, func=None, hash='', version='', parent=None):
             hash = generate_hash_for_function(func)
         except Exception as e:
             print('Unable to get dataset source code')
-            print(e)                                       
-    
+            print(e)
+
     config['dataset'] = {
                         'name' : name,
                         'hash' : hash,
