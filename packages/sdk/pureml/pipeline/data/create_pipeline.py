@@ -1,6 +1,8 @@
 from pureml.utils.constants import PATH_CONFIG
 from pureml.utils.config import load_config
 from collections import OrderedDict
+import json
+
 
 def create_nodes(components):
     # print(components)
@@ -63,6 +65,16 @@ def create_edges(components):
     return edges
 
 
+def prune_dict_elements(components):
+    components_string = [json.dumps(d) for d in components]
+
+    components_string = set(components_string)
+    
+    components_loaded = [json.loads(d) for d in components_string]
+
+    return components_loaded
+
+
 
 
 def create_pipeline():
@@ -86,13 +98,17 @@ def create_pipeline():
         pipeline_components.append(dataset)
 
 
+    pipeline_components =  prune_dict_elements(pipeline_components)
 
     edges = create_edges(components=pipeline_components)
+    edges = prune_dict_elements(edges)
+
 
     nodes = create_nodes(components=pipeline_components)
-
     nodes = create_extra_nodes(nodes, edges)
-    
+    nodes = prune_dict_elements(nodes)
+
+
     pipeline = {
         'edges': edges,
         'nodes': nodes
