@@ -1,29 +1,38 @@
 package service
 
 import (
-	"fmt"
-	"github.com/PriyavKaneria/PureML/service/config"
-	"github.com/PriyavKaneria/PureML/service/datastore"
-	"github.com/PriyavKaneria/PureML/service/models"
+	// "fmt"
 	"net/http"
+
+	"github.com/PureML-Inc/PureML/server/config"
+	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/models"
 )
 
+// GetAllAdminOrgs godoc
+// @Security ApiKeyAuth
+// @Summary Get all organizations and their details.
+// @Description Get all organizations and their details. Only accessible by admins.
+// @Tags Organization
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /org/all [get]
 func GetAllAdminOrgs(request *models.Request) *models.Response {
-	response := &models.Response{}
-	if config.HasAdminAccess(request.UserName) {
+	var response *models.Response
+	if request.User == nil {
+		response = models.NewErrorResponse(http.StatusUnauthorized, "Unauthorized")
+		return response
+	}
+	if config.HasAdminAccess(request.User.Email) {
 		allOrgs, err := datastore.GetAllAdminOrgs()
 		if err != nil {
-			fmt.Println(err)
-			response.Error = err
-			response.StatusCode = http.StatusInternalServerError
-			response.Body = "Internal server error"
+			return models.NewServerErrorResponse(err)
 		} else {
-			response.StatusCode = http.StatusOK
-			response.Body = allOrgs
+			response = models.NewDataResponse(http.StatusOK, allOrgs, "All organizations")
 		}
 	} else {
-		response.StatusCode = http.StatusForbidden
-		response.Body = "Forbidden"
+		response = models.NewErrorResponse(http.StatusForbidden, "Forbidden")
 	}
 	return response
 }
