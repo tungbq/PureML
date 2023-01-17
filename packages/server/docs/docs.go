@@ -2332,6 +2332,129 @@ const docTemplate = `{
                 }
             }
         },
+        "/org/{orgId}/secret/s3": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get secrets for source type s3",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret"
+                ],
+                "summary": "Get secrets for source type s3",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/org/{orgId}/secret/s3/connect": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add secrets for source type s3",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret"
+                ],
+                "summary": "Add secrets for source type s3",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Secret",
+                        "name": "secret",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.S3SecretRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/org/{orgId}/secret/s3/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete secrets for source type s3",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret"
+                ],
+                "summary": "Delete secrets for source type s3",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/{orgId}/update": {
             "post": {
                 "security": [
@@ -2716,6 +2839,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "public_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.S3SecretRequest": {
+            "type": "object",
+            "properties": {
+                "access_key_id": {
+                    "type": "string"
+                },
+                "access_key_secret": {
+                    "type": "string"
+                },
+                "bucket_location": {
+                    "type": "string"
+                },
+                "bucket_name": {
                     "type": "string"
                 }
             }

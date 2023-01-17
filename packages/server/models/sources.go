@@ -12,6 +12,13 @@ type R2SecretRequest struct {
 	PublicURL       string `json:"public_url"`
 }
 
+type S3SecretRequest struct {
+	AccessKeyId     string `json:"access_key_id"`
+	AccessKeySecret string `json:"access_key_secret"`
+	BucketName      string `json:"bucket_name"`
+	BucketLocation  string `json:"bucket_location"`
+}
+
 // Response models
 
 type PathResponse struct {
@@ -35,5 +42,6 @@ type SourceSecrets struct {
 	AccessKeyId     string `json:"access_key_id"`
 	AccessKeySecret string `json:"access_key_secret"`
 	BucketName      string `json:"bucket_name"`
+	BucketLocation  string `json:"bucket_location"`
 	PublicURL       string `json:"public_url"`
 }

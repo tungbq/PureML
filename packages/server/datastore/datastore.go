@@ -258,6 +258,18 @@ func DeleteR2Secrets(orgId uuid.UUID) error {
 	return ds.DeleteR2Secrets(orgId)
 }
 
+func CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*impl.S3Secrets, error) {
+	return ds.CreateS3Secrets(orgId, accessKeyId, accessKeySecret, bucketName, bucketLocation)
+}
+
+func CreateS3Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
+	return ds.CreateS3Source(orgId, publicURL)
+}
+
+func DeleteS3Secrets(orgId uuid.UUID) error {
+	return ds.DeleteS3Secrets(orgId)
+}
+
 type Datastore interface {
 	GetAllAdminOrgs() ([]models.OrganizationResponse, error)
 	GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error)

@@ -617,7 +617,8 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 	if err != nil {
 		return nil, err
 	}
-	if source == "R2" {
+	switch source {
+	case "R2":
 		sourceType.Name = "R2"
 		err := ds.DB.Where(&sourceType).First(&sourceType).Error
 		if err != nil {
@@ -636,10 +637,50 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 		if err != nil {
 			return nil, err
 		}
-		s3Client := GetR2Client(r2Secrets)
-		uploader := manager.NewUploader(s3Client)
+		r2Client := GetR2Client(r2Secrets)
+		uploader := manager.NewUploader(r2Client)
 		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 			Bucket: aws.String(r2Secrets.BucketName),
+			Key:    aws.String(updatedFilename),
+			Body:   fileData,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		uploadPath = strings.Split(result.Location, "/")[3]
+
+		sourcePath = dbmodels.Path{
+			SourcePath: uploadPath,
+			SourceType: sourceType,
+		}
+		err = ds.DB.Create(&sourcePath).Error
+		if err != nil {
+			return nil, err
+		}
+	case "S3":
+		sourceType.Name = "S3"
+		err := ds.DB.Where(&sourceType).First(&sourceType).Error
+		if err != nil {
+			return nil, err
+		}
+		splitFile := strings.Split(file.Filename, ".")
+		updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
+		var uploadPath string
+
+		fileData, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		s3Secrets := S3Secrets{}
+		err = s3Secrets.Load(org.Secrets)
+		if err != nil {
+			return nil, err
+		}
+		s3Client := GetS3Client(s3Secrets)
+		uploader := manager.NewUploader(s3Client)
+		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+			Bucket: aws.String(s3Secrets.BucketName),
 			Key:    aws.String(updatedFilename),
 			Body:   fileData,
 		})
@@ -1030,8 +1071,8 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, dataset
 		if err != nil {
 			return nil, err
 		}
-		s3Client := GetR2Client(r2Secrets)
-		uploader := manager.NewUploader(s3Client)
+		r2Client := GetR2Client(r2Secrets)
+		uploader := manager.NewUploader(r2Client)
 		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 			Bucket: aws.String(r2Secrets.BucketName),
 			Key:    aws.String(updatedFilename),
@@ -1594,6 +1635,7 @@ func (ds *SQLiteDatastore) GetSourceSecret(orgId uuid.UUID, source string) (*mod
 		sourceSecret.AccessKeyId = s3Secret.AccessKeyId
 		sourceSecret.AccessKeySecret = s3Secret.AccessKeySecret
 		sourceSecret.BucketName = s3Secret.BucketName
+		sourceSecret.BucketLocation = s3Secret.BucketLocation
 		sourceSecret.PublicURL = s3Secret.PublicURL
 	}
 	return &sourceSecret, nil
@@ -1678,7 +1720,7 @@ func (ds *SQLiteDatastore) DeleteR2Secrets(orgId uuid.UUID) error {
 	return nil
 }
 
-func (ds *SQLiteDatastore) CreateS3Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*S3Secrets, error) {
+func (ds *SQLiteDatastore) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*S3Secrets, error) {
 	secret := dbmodels.Secret{
 		Org: dbmodels.Organization{
 			BaseModel: dbmodels.BaseModel{
@@ -1707,11 +1749,19 @@ func (ds *SQLiteDatastore) CreateS3Secrets(orgId uuid.UUID, accountId string, ac
 		if err != nil {
 			return err
 		}
+		secret.UUID = uuid.Nil
+		secret.Name = "S3_BUCKET_LOCATION"
+		secret.Value = bucketLocation
+		err = tx.Create(&secret).Error
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
+	publicURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com", bucketName, bucketLocation)
 	return &S3Secrets{
 		AccessKeyId:     accessKeyId,
 		AccessKeySecret: accessKeySecret,

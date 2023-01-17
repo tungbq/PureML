@@ -4,6 +4,7 @@ dist/
 poetry.lock
 catboost_info/
 experiments/
+.env
 
 packages/server/db/
 

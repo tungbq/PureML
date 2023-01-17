@@ -16,6 +16,7 @@ type S3Secrets struct {
 	AccessKeyId     string
 	AccessKeySecret string
 	BucketName      string
+	BucketLocation  string
 	PublicURL       string
 }
 
@@ -28,10 +29,12 @@ func (s3secrets *S3Secrets) Load(secrets []dbmodels.Secret) error {
 			s3secrets.AccessKeySecret = secret.Value
 		case "S3_BUCKET_NAME":
 			s3secrets.BucketName = secret.Value
+		case "S3_BUCKET_LOCATION":
+			s3secrets.BucketLocation = secret.Value
 		}
 	}
-	if s3secrets.AccessKeyId == "" || s3secrets.AccessKeySecret == "" || s3secrets.BucketName == "" {
-		return fmt.Errorf("r2 secrets not found")
+	if s3secrets.AccessKeyId == "" || s3secrets.AccessKeySecret == "" || s3secrets.BucketName == "" || s3secrets.BucketLocation == "" {
+		return fmt.Errorf("s3 secrets not found")
 	}
 	return nil
 }
@@ -51,6 +54,7 @@ func GetS3Client(secrets S3Secrets) *s3.Client {
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyId, accessKeySecret, "")),
+		config.WithRegion(secrets.BucketLocation),
 	)
 	if err != nil {
 		log.Fatal(err)
