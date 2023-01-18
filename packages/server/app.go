@@ -124,6 +124,6 @@ func main() {
 	secretGroup.DELETE("/s3/delete", handler.DefaultHandler(service.DeleteS3Secrets))
 
 	//Start server
-	e.Logger.Fatal(e.Start("localhost:8080"))
+	e.Logger.Fatal(e.Start("0.0.0.0:8080"))
 
 }
