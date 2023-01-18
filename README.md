@@ -41,6 +41,10 @@
   <a
     href="https://app.pureml.com/auth/signup"
   ><b>Sign Up for free</b></a>
+  <a
+    href="https://pureml.height.app/roadmap"
+  ><b>Roadmap</b></a>
+
 
 </p>
 
@@ -297,7 +301,8 @@ To report any bugs you have faced while using PureML package, please
 # ⌨ Contributing and Developing
 Lets work together to improve the features for everyone. For more details, please look at out [Contributing Guide](./CONTRIBUTING.md)
 
-Work with mutual respect.
+Work with mutual respect. Please take a look at our public roadmap here.
+[Roadmap](https://pureml.height.app/roadmap)
 
 
 <br />
