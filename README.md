@@ -41,6 +41,7 @@
   <a
     href="https://app.pureml.com/auth/signup"
   ><b>Sign Up for free</b></a>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
   <a
     href="https://pureml.height.app/roadmap"
   ><b>Roadmap</b></a>
