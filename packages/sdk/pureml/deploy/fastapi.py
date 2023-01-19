@@ -68,12 +68,16 @@ def create_fastapi_file(model_name, model_version, predict_path,
 
       
     query = """
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 import uvicorn
 import pureml
 from predict import model_predict
 import os
 from dotenv import load_dotenv
+import pandas as pd
+import json
+import numpy as np
+
 
 load_dotenv()
 
@@ -87,11 +91,24 @@ model = pureml.model.fetch('{MODEL_NAME}', '{MODEL_VERSION}')
 # Create the app
 app = FastAPI()     
 
-@app.get('/predict')
-async def predict(test_data):
-    results = model_predict(model, test_data)
+@app.post('/predict')
+async def predict(request: Request):
+    req_json = await request.json()
 
-    return results
+    data_json = req_json['test_data']
+    data = pd.DataFrame.from_dict(data_json)
+
+    results = model_predict(model, data)
+
+    if isinstance(results, np.ndarray):
+        results = results.tolist()
+
+
+
+    predictions = json.dumps({'predictions': results})
+
+    return predictions
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host='{HOST}', port={PORT})""".format(
