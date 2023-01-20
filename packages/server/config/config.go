@@ -25,6 +25,16 @@ func Environment() map[string]string {
 	return myEnv
 }
 
+func GetHost() string {
+	env := Environment()
+	return env["HOST_URL"]
+}
+
+func GetPort() string {
+	env := Environment()
+	return env["PORT"]
+}
+
 func HasAdminAccess(email string) bool {
 	_, ok := adminAccess[email]
 	return ok
