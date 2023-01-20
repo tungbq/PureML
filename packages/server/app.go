@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	config "github.com/PureML-Inc/PureML/server/config"
 	_ "github.com/PureML-Inc/PureML/server/docs"
 	"github.com/PureML-Inc/PureML/server/handler"
 	"github.com/PureML-Inc/PureML/server/middlewares"
@@ -20,9 +23,11 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
+/////////////////////////// CHANGE BELOW HOST & SCHEME FOR SWAGGER DOCUMENTATION ///////////////////////////
+// @host pureml-development.up.railway.app
 // @BasePath /
-// @schemes http
+// @schemes https
+
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
@@ -78,17 +83,17 @@ func main() {
 	modelGroup.DELETE("/:modelName/branch/:branchName/delete", handler.DefaultHandler(service.DeleteModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.GET("/:modelName/branch/:branchName/version", handler.DefaultHandler(service.GetModelBranchAllVersions), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch)
-	
+
 	//Model Log APIs
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log", handler.DefaultHandler(service.GetLogModel), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.POST("/:modelName/branch/:branchName/version/:version/log", handler.DefaultHandler(service.LogModel), middlewares.ValidateModel, middlewares.ValidateModelBranch)
-	
+
 	//Model Activity APIs
 	modelGroup.GET("/:modelName/activity/:category", handler.DefaultHandler(service.GetModelActivity), middlewares.ValidateModel)
 	modelGroup.POST("/:modelName/activity/:category", handler.DefaultHandler(service.CreateModelActivity), middlewares.ValidateModel)
 	modelGroup.POST("/:modelName/activity/:category/:activityUUID", handler.DefaultHandler(service.UpdateModelActivity), middlewares.ValidateModel)
 	modelGroup.DELETE("/:modelName/activity/:category/:activityUUID/delete", handler.DefaultHandler(service.DeleteModelActivity), middlewares.ValidateModel)
-	
+
 	//Dataset APIs
 	datasetGroup := e.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
 	datasetGroup.GET("/all", handler.DefaultHandler(service.GetAllDatasets))
@@ -106,7 +111,7 @@ func main() {
 	//Dataset Log APIs
 	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version/log", handler.DefaultHandler(service.GetLogDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
 	datasetGroup.POST("/:datasetName/branch/:branchName/version/:version/log", handler.DefaultHandler(service.LogDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
-	
+
 	//Dataset Activity APIs
 	datasetGroup.GET("/:datasetName/activity/:category", handler.DefaultHandler(service.GetDatasetActivity), middlewares.ValidateDataset)
 	datasetGroup.POST("/:datasetName/activity/:category", handler.DefaultHandler(service.CreateDatasetActivity), middlewares.ValidateDataset)
@@ -124,6 +129,8 @@ func main() {
 	secretGroup.DELETE("/s3/delete", handler.DefaultHandler(service.DeleteS3Secrets))
 
 	//Start server
-	e.Logger.Fatal(e.Start("0.0.0.0:8080"))
+	// config.GetHost()
+	port := config.GetPort()
+	e.Logger.Fatal(e.Start(fmt.Sprintf("0.0.0.0:%s", port)))
 
 }

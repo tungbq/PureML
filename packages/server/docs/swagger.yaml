@@ -88,7 +88,7 @@ definitions:
       name:
         type: string
     type: object
-host: localhost:8080
+host: pureml-development.up.railway.app
 info:
   contact:
     email: contact@pureml.com
@@ -1886,7 +1886,7 @@ paths:
       tags:
       - User
 schemes:
-- http
+- https
 securityDefinitions:
   ApiKeyAuth:
     in: header
