@@ -21,7 +21,6 @@ def save_auth(org_id:str=None, access_token:str=None, email=None):
     token_dir = os.path.dirname(token_path)
     os.makedirs(token_dir, exist_ok=True)
 
-
     token = {
                 'org_id': org_id,
                 'accessToken': access_token,
