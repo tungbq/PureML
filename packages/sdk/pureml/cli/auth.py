@@ -48,7 +48,6 @@ def details():
 
 
 
-
 @app.callback()
 def callback():
     """
