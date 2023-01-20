@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 // @title PureML API Documentation
