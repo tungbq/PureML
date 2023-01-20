@@ -2,7 +2,8 @@ import os
 
 
 # BASE_URL = 'https://dev-api.pureml.com'
-BASE_URL = 'https://api.pureml.com'
+# BASE_URL = 'https://api.pureml.com'
+BASE_URL = 'https://pureml-development.up.railway.app/'
 
 PATH_USER_TOKEN =  os.path.join(os.path.expanduser('~'), '.pureml/token')
 

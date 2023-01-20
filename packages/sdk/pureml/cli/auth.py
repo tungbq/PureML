@@ -15,7 +15,7 @@ import json
 app = typer.Typer()
 
 
-def save_auth(org_id:str=None, access_token:str=None):
+def save_auth(org_id:str=None, access_token:str=None, email=None):
     token_path = PATH_USER_TOKEN
 
     token_dir = os.path.dirname(token_path)
@@ -23,8 +23,9 @@ def save_auth(org_id:str=None, access_token:str=None):
 
 
     token = {
-                'email': org_id,
-                'accessToken': access_token
+                'org_id': org_id,
+                'accessToken': access_token,
+                'email': email
             }
         
     token = json.dumps(token)
@@ -83,60 +84,85 @@ def signup():
         return
     print(f"[bold green]Successfully created your account! You can now login using ```pure auth login```")
 
+
+
+def check_org_status(access_token):
+
+    org_id: str = typer.prompt("Enter your Org Id")
+
+    url_path = 'org/id/{}'.format(org_id)
+    url = urljoin(BASE_URL, url_path)
+
+    headers = {
+        'accept': 'application/json',
+        'Authorization': 'Bearer {}'.format(access_token)
+    }
+
+
+    response = requests.get(url,headers=headers)
+
+    if response.ok:
+        print('[bold green]Organization Exists!')
+        return org_id
+    else:
+        print('[bold red]Organization doesnot Exists!')
+        return None
+        
+
+
+
+
 @app.command()
 def login():
+
     print(f"\n[bold]Enter your credentials to login[/bold]\n")
     email: str = typer.prompt("Enter your email")
     password: str = typer.prompt("Enter your password", hide_input=True)
     data = {"email": email, "password": password}
 
 
-    url_path_1 = 'user/login'
-    url = urljoin(BASE_URL, url_path_1)
+    url_path = 'user/login'
+    url = urljoin(BASE_URL, url_path)
 
     response = requests.post(url,json=data)
     
-    if not response.ok:
-        print(f"[bold red]Could not login! Please try again later")
-        print('[bold yellow] Please signup at https://app.pureml.com/auth/signup')
-        return
-    elif response == "":
-        print(f"[bold red]Invalid email or password!")
-        print('[bold yellow] Please signup at https://app.pureml.com/auth/signup')
-        return
-
-
-    if response.status_code == 200:
+    if response.ok:
         token = response.text
-        token = json.loads(token)['data'][0]
+        token = json.loads(token)['Data'][0]
 
-        org_id = token['email']
         access_token = token['accessToken']
+        email = token['email']
 
-        save_auth(org_id=org_id, access_token=access_token)
-        print(f"[bold green]Successfully logged in to your account!")
+        org_id = check_org_status(access_token=access_token)
 
-        print('org_id:', org_id)
-        print('accessToken:', access_token)
+        if org_id is not None:
+
+            save_auth(org_id=org_id, access_token=access_token, email=email)
+            print(f"[bold green]Successfully logged in to your account!")
+
+            print('org_id:', org_id)
+            print('accessToken:', access_token)
+        else:
+            print(f"[bold red]Unable to login to your account!")
 
     else:
-        print(f"[bold green]Unable to login to your account!")
+        print(f"[bold red]Unable to login to your account!")
 
- 
 
-@app.command()
-def status():
-    print()
-    path = PATH_USER_TOKEN
 
-    curr_path = Path(__file__).parent.resolve()
-    if os.path.exists(path):
-        token = open(path, "r").read()
-        public_key = open(f"{curr_path}/public.pem", "rb").read()
-        payload = jwt.decode(token, public_key, algorithms=["RS256"])
-        print(f"[bold green]You are currently logged in as {payload['email']}")
-    else:
-        print("[bold red]You are not logged in!")
+# @app.command()
+# def status():
+#     print()
+#     path = PATH_USER_TOKEN
+
+#     curr_path = Path(__file__).parent.resolve()
+#     if os.path.exists(path):
+#         token = open(path, "r").read()
+#         public_key = open(f"{curr_path}/public.pem", "rb").read()
+#         payload = jwt.decode(token, public_key, algorithms=["RS256"])
+#         print(f"[bold green]You are currently logged in as {payload['email']}")
+#     else:
+#         print("[bold red]You are not logged in!")
 
 def statusHelper():
     path = PATH_USER_TOKEN
@@ -153,16 +179,16 @@ def auth_validate():
         raise typer.Exit()
     return token
 
-@app.command()
-def logout():
-    print()
-    path = PATH_USER_TOKEN
+# @app.command()
+# def logout():
+#     print()
+#     path = PATH_USER_TOKEN
 
-    if os.path.exists(path):
-        os.remove(path)
-        print(f"[bold yellow]Successfully logged out!")
-    else:
-        print(f"[bold red]You are not logged in!")
+#     if os.path.exists(path):
+#         os.remove(path)
+#         print(f"[bold yellow]Successfully logged out!")
+#     else:
+#         print(f"[bold red]You are not logged in!")
 
 if __name__ == "__main__":
     app()

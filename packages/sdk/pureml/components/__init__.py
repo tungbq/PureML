@@ -2,7 +2,7 @@ import os, json
 from pureml.utils.constants import PATH_USER_TOKEN, PATH_USER_PROJECT
 
 
-
+# T-1093 Remove project related functions
 
 
 def get_token():
@@ -41,6 +41,7 @@ def get_org_id():
         The org is being returned.
     
     '''
+    # T-1092 Change the way org id is obtained for a logged in use
     path = PATH_USER_TOKEN
 
     path = os.path.expanduser(path)
@@ -50,7 +51,7 @@ def get_org_id():
 
         creds_json = json.loads(creds)
 
-        org_id = creds_json['email']
+        org_id = creds_json['org_id']
         # print(f"[bold green]Organization exists!")
 
         # print(org_id)
