@@ -14,11 +14,8 @@ from pureml import save_model, load_model
 from urllib.parse import urljoin
 import joblib
 from pureml.utils.hash import check_hash_status_model
+from  pureml.utils.readme_utils import load_readme
 
-# app = typer.Typer()
-
-
-# @app.command()
 def list():
     '''This function will return a list of all the models in the project
     
@@ -58,6 +55,39 @@ def list():
         
     return
 
+
+def init(name:str, readme:str=None, branch:str=None):
+    user_token = get_token()
+    org_id = get_org_id()
+    
+    file_content, file_type = load_readme(path=readme)
+
+    branch_user = 'dev' if branch is None else branch
+    branch_main = 'main'
+
+
+    url_path = 'org/{}/model/create'.format(org_id)
+    url = urljoin(BASE_URL, url_path)
+
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer {}'.format(user_token)
+    }
+
+
+    data = {'name': name, 
+            'branch':[branch_main, branch_user], 
+            'readme': {'file_type': file_type, 'file_content':file_content}}
+
+    response = requests.post(url, data=data, headers=headers)
+
+    if response.ok:
+        print(f"[bold green]Model has been created!")
+
+
+    else:
+        print(f"[bold red]Model has not been created!")
 
 
 
@@ -100,7 +130,6 @@ def check_model_hash(hash: str, name:str):
 
 
 
-# @app.command()
 def register(model, name:str) -> str:
     ''' The function takes in a model, a name and a version and saves the model locally, then uploads the
     model to the PureML server
@@ -213,7 +242,7 @@ def details(name:str, version:str='latest'):
 
 
 
-# @app.command()
+
 def fetch(name:str, version:str='latest'):
     '''This function fetches a model from the server and returns it as a `Model` object
     
@@ -280,7 +309,6 @@ def fetch(name:str, version:str='latest'):
 
 
 
-# @app.command()
 def delete(name:str, version:str='latest') -> str:
     ''' This function deletes a model from the project
     
