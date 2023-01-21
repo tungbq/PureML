@@ -85,7 +85,6 @@ def init(name:str, readme:str=None, branch:str=None):
     if response.ok:
         print(f"[bold green]Model has been created!")
 
-
     else:
         print(f"[bold red]Model has not been created!")
 
