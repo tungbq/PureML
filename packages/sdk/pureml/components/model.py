@@ -13,8 +13,8 @@ from pureml.utils.constants import BASE_URL, PATH_MODEL_DIR
 from pureml import save_model, load_model
 from urllib.parse import urljoin
 import joblib
-from pureml.utils.hash import check_hash_status_model
-from  pureml.utils.readme_utils import load_readme
+from pureml.utils.hash import check_hash_status_model, generate_hash_unique, generate_hash_file
+from  pureml.utils.readme import load_readme
 
 def list():
     '''This function will return a list of all the models in the project
@@ -29,8 +29,8 @@ def list():
     org_id = get_org_id()
     project_id = get_project_id()
 
-    url_path_1 = '{}/project/{}/models'.format(org_id, project_id)
-    url = urljoin(BASE_URL, url_path_1)
+    url = '{}/project/{}/models'.format(org_id, project_id)
+    url = urljoin(BASE_URL, url)
     
     data = {"project_id": project_id}
 
@@ -66,8 +66,8 @@ def init(name:str, readme:str=None, branch:str=None):
     branch_main = 'main'
 
 
-    url_path = 'org/{}/model/create'.format(org_id)
-    url = urljoin(BASE_URL, url_path)
+    url = 'org/{}/model/create'.format(org_id)
+    url = urljoin(BASE_URL, url)
 
 
     headers = {
@@ -90,15 +90,14 @@ def init(name:str, readme:str=None, branch:str=None):
 
 
 
-def check_model_hash(hash: str, name:str):
+def check_model_hash(hash: str, name:str, branch:str):
 
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
 
 
-    url_path_1 = '{}/project/{}/model/{}/hash_status'.format(org_id, project_id, name)
-    url = urljoin(BASE_URL, url_path_1)
+    url = 'org/{}/model/{}/branch/{}/hash-status'.format(org_id, branch, name)
+    url = urljoin(BASE_URL, url)
 
 
     headers = {
@@ -106,30 +105,20 @@ def check_model_hash(hash: str, name:str):
     }
 
 
-    data = {'hash': hash, 'project_id':project_id}
+    data = {'hash': hash, 'branch':branch}
     response = requests.post(url, data=data, headers=headers)
 
     hash_exists = False
 
-    if response.status_code == 200:
-        # print(f"[bold green]Model hash verified!")
-
-        hash_exists = response.json()['data']
-
-        # if response.text == True:       #Change this logic accordingly
-        #     hash_exists = True
-
-    # else:
-    #     print(f"[bold red]Model has not been verified!")
-        # print(response.status_code)
-        # print(response.text)
+    if response.ok:
+        hash_exists = response.json()['Data']
 
     return hash_exists
 
 
 
 
-def register(model, name:str) -> str:
+def register(model, name:str, branch:str='dev') -> str:
     ''' The function takes in a model, a name and a version and saves the model locally, then uploads the
     model to the PureML server
     
@@ -144,7 +133,6 @@ def register(model, name:str) -> str:
         
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
 
 
     model_file_name = '.'.join([name, 'pkl'])
@@ -154,10 +142,9 @@ def register(model, name:str) -> str:
     
     save_model(model, name, model_path=model_path)
 
-    # name_with_ext = '.'.join([name, 'pkl'])
-    # model_path = os.path.join(PATH_MODEL_DIR, name_with_ext)
 
-    model_exists_locally, model_hash =  check_hash_status_model(file_path = model_path, name=name, item_key='model')
+    model_hash = generate_hash_file(file_path=model_path)
+    model_exists_locally, model_hash =  check_hash_status_model(hash_value= model_hash, name=name, item_key='model')
     model_exists_remote = check_model_hash(hash=model_hash, name=name)
 
 
@@ -165,8 +152,8 @@ def register(model, name:str) -> str:
         print(f"[bold red]Model already exists. Not registering a new version!")
         return True, model_hash, 'latest'
     else:        
-        url_path_1 = '{}/project/{}/model/register'.format(org_id, project_id)
-        url = urljoin(BASE_URL, url_path_1)
+        url = 'org/{}/model/{}/branch/{}/register'.format(org_id, name, branch)
+        url = urljoin(BASE_URL, url)
 
 
         headers = {
@@ -176,13 +163,14 @@ def register(model, name:str) -> str:
 
         files = {'file': (model_file_name, open(model_path, 'rb'))}
 
-        data = {'name': name, 'project_id':project_id, 'hash':model_hash}
+        data = {'name': name, 'branch':branch, 'hash':model_hash}
         response = requests.post(url, files=files, data=data, headers=headers)
 
-        if response.status_code == 200:
+        if response.ok:
             print(f"[bold green]Model has been registered!")
 
-            model_version = response.json()['data'][0]['version']
+            model_version = response.json()['Data'][0]['version']
+            print('Model Version: ', model_version)
 
             return True, model_hash, model_version
 
@@ -214,8 +202,8 @@ def details(name:str, version:str='latest'):
     org_id = get_org_id()
     project_id = get_project_id()
 
-    url_path_1 = '{}/project/{}/model/{}/{}/details'.format(org_id, project_id, name, version)
-    url = urljoin(BASE_URL, url_path_1)
+    url = '{}/project/{}/model/{}/{}/details'.format(org_id, project_id, name, version)
+    url = urljoin(BASE_URL, url)
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -325,8 +313,8 @@ def delete(name:str, version:str='latest') -> str:
     project_id = get_project_id()
 
 
-    url_path_1 = '{}/project/{}/model/{}/delete'.format(org_id, project_id, name)
-    url = urljoin(BASE_URL, url_path_1)
+    url = '{}/project/{}/model/{}/delete'.format(org_id, project_id, name)
+    url = urljoin(BASE_URL, url)
 
     
     headers = {
