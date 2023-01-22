@@ -43,6 +43,7 @@ type DatasetVersion struct {
 	LineageUUID uuid.UUID `json:"lineage_uuid"`
 	Hash        string    `json:"hash" gorm:"not null"`
 	PathUUID    uuid.UUID `json:"path_uuid" gorm:"type:uuid;"`
+	IsEmpty     bool      `json:"is_empty"`
 
 	Branch  DatasetBranch `gorm:"foreignKey:BranchUUID"`
 	Lineage Lineage       `gorm:"foreignKey:LineageUUID"`

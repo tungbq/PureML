@@ -42,6 +42,7 @@ type ModelVersion struct {
 	BranchUUID uuid.UUID `json:"branch_uuid" gorm:"not null;index:idx_model_branch_version,unique"`
 	Hash       string    `json:"hash" gorm:"not null;unique"`
 	PathUUID   uuid.UUID `json:"path_uuid"`
+	IsEmpty    bool      `json:"is_empty"`
 
 	Branch ModelBranch `gorm:"foreignKey:BranchUUID"`
 	Path   Path        `gorm:"foreignKey:PathUUID"`

@@ -35,3 +35,22 @@ type Log struct {
 	ModelVersion   ModelVersion   `gorm:"foreignKey:ModelVersionUUID"`
 	DatasetVersion DatasetVersion `gorm:"foreignKey:DatasetVersionUUID"`
 }
+
+type Readme struct {
+	BaseModel          `gorm:"embedded"`
+	ModelVersionUUID   uuid.UUID `json:"model_version_uuid" gorm:"type:uuid;"`
+	DatasetVersionUUID uuid.UUID `json:"dataset_version_uuid" gorm:"type:uuid;"`
+
+	ModelVersion   ModelVersion   `gorm:"foreignKey:ModelVersionUUID"`
+	DatasetVersion DatasetVersion `gorm:"foreignKey:DatasetVersionUUID"`
+}
+
+type ReadmeVersion struct {
+	BaseModel  `gorm:"embedded"`
+	ReadmeUUID uuid.UUID `json:"readme_uuid" gorm:"type:uuid;not null;index:idx_readme_version,unique"`
+	FileType   string    `json:"file_type"`
+	Content    string    `json:"content"`
+	Version    string    `json:"version" gorm:"not null;index:idx_readme_version,unique"`
+
+	Readme Readme `gorm:"foreignKey:ReadmeUUID"`
+}
