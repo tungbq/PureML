@@ -15,6 +15,7 @@ type Dataset struct {
 	CreatedByUser User         `gorm:"foreignKey:CreatedBy"`
 	UpdatedByUser User         `gorm:"foreignKey:UpdatedBy"`
 
+	Readme   Readme          `gorm:"foreignKey:DatasetUUID"`
 	Branches []DatasetBranch `gorm:"foreignKey:DatasetUUID"`
 	Users    []User          `gorm:"many2many:dataset_users;"`
 }
@@ -43,6 +44,7 @@ type DatasetVersion struct {
 	LineageUUID uuid.UUID `json:"lineage_uuid"`
 	Hash        string    `json:"hash" gorm:"not null"`
 	PathUUID    uuid.UUID `json:"path_uuid" gorm:"type:uuid;"`
+	IsEmpty     bool      `json:"is_empty"`
 
 	Branch  DatasetBranch `gorm:"foreignKey:BranchUUID"`
 	Lineage Lineage       `gorm:"foreignKey:LineageUUID"`

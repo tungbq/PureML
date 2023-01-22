@@ -7,10 +7,7 @@ import (
 
 	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
-	uuid "github.com/satori/go.uuid"
 )
-
-var defaultDatasetBranchNames = []string{"main", "development"}
 
 // RegisterDataset godoc
 // @Security ApiKeyAuth
@@ -20,28 +17,27 @@ var defaultDatasetBranchNames = []string{"main", "development"}
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router /org/{orgId}/dataset/{datasetName}/register [post]
+// @Router /org/{orgId}/dataset/{datasetName}/branch/{branchName}/register [post]
 // @Param file formData file true "Dataset file"
 // @Param orgId path string true "Organization UUID"
 // @Param datasetName path string true "Dataset name"
+// @Param branchName path string true "Branch name"
 // @Param data formData models.RegisterDatasetRequest true "Dataset details"
 func RegisterDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	userUUID := request.GetUserUUID()
-	datasetName := request.GetPathParam("datasetName")
 	var datasetHash string
 	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
 		datasetHash = request.FormValues["hash"][0]
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Hash is required")
 	}
-	var datasetWiki string
-	if request.FormValues["wiki"] != nil && len(request.FormValues["wiki"]) > 0 {
-		datasetWiki = request.FormValues["wiki"][0]
-	}
-	var modelSourceType string
+	var datasetSourceType string
 	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
-		modelSourceType = strings.ToUpper(request.FormValues["storage"][0])
+		datasetSourceType = strings.ToUpper(request.FormValues["storage"][0])
+	}
+	var datasetIsEmpty bool
+	if request.FormValues["is_empty"] != nil && len(request.FormValues["is_empty"]) > 0 {
+		datasetIsEmpty = request.FormValues["is_empty"][0] == "true"
 	}
 	var datasetLineage string
 	if request.FormValues["lineage"] != nil && len(request.FormValues["lineage"]) > 0 {
@@ -51,59 +47,24 @@ func RegisterDataset(request *models.Request) *models.Response {
 	if fileHeader == nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "File is required")
 	}
-	dataset, err := datastore.GetDatasetByName(orgId, datasetName)
+	datasetBranchName := request.GetPathParam("branchName")
+	if datasetBranchName == "main" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Cannot register model directly to main branch")
+	}
+	sourceValid := false
+	for source := range models.SupportedSources {
+		if models.SupportedSources[source] == datasetSourceType {
+			sourceValid = true
+			break
+		}
+	}
+	if sourceValid == false {
+		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
+	}
+	datasetBranchUUID := request.GetDatasetBranchUUID()
+	datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, fileHeader, datasetIsEmpty, datasetHash, datasetSourceType, datasetLineage)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	if dataset == nil {
-		// Create dataset and default branches as dataset does not exist
-		dataset, err := datastore.CreateDataset(orgId, datasetName, datasetWiki, userUUID)
-		if err != nil {
-			return models.NewServerErrorResponse(err)
-		}
-		datasetBranches, err := datastore.CreateDatasetBranches(dataset.UUID, defaultDatasetBranchNames)
-		if err != nil {
-			return models.NewServerErrorResponse(err)
-		}
-		datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranches[1].UUID, fileHeader, datasetHash, modelSourceType, datasetLineage)
-		if err != nil {
-			return models.NewServerErrorResponse(err)
-		}
-		return models.NewDataResponse(http.StatusOK, datasetVersion, "Dataset successfully created")
-	} else {
-		// Dataset exists
-		datasetBranches, err := datastore.GetDatasetAllBranches(dataset.UUID)
-		if err != nil {
-			return models.NewServerErrorResponse(err)
-		}
-		if len(datasetBranches) == 0 {
-			// Create default branches as dataset branches does not exist
-			datasetBranches, err := datastore.CreateDatasetBranches(dataset.UUID, defaultDatasetBranchNames)
-			if err != nil {
-				return models.NewServerErrorResponse(err)
-			}
-			datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranches[1].UUID, fileHeader, datasetHash, modelSourceType, datasetLineage)
-			if err != nil {
-				return models.NewServerErrorResponse(err)
-			}
-			return models.NewDataResponse(http.StatusOK, datasetVersion, "Dataset successfully created")
-		} else {
-			// Dataset branches exists (defaultBranches)
-			var developmentBranch models.DatasetBranchResponse
-			for _, branch := range datasetBranches {
-				if branch.Name == "development" {
-					developmentBranch = branch
-					break
-				}
-			}
-			if developmentBranch.UUID == uuid.Nil {
-				return models.NewErrorResponse(http.StatusConflict, "Dataset development branch not found")
-			}
-			datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, developmentBranch.UUID, fileHeader, datasetHash, modelSourceType, datasetLineage)
-			if err != nil {
-				return models.NewServerErrorResponse(err)
-			}
-			return models.NewDataResponse(http.StatusOK, datasetVersion, "Dataset successfully created")
-		}
-	}
+	return models.NewDataResponse(http.StatusOK, datasetVersion, "Dataset successfully registered")
 }

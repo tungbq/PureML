@@ -22,6 +22,11 @@ func AuthenticateJWT(next echo.HandlerFunc) echo.HandlerFunc {
 			context.Response().Writer.Write([]byte("Authentication Token Required"))
 			return nil
 		}
+		if !strings.HasPrefix(authHeaderValue, "Bearer ") {
+			context.Response().WriteHeader(http.StatusUnauthorized)
+			context.Response().Writer.Write([]byte("Invalid Authentication Token"))
+			return nil
+		}
 		authHeaderValue = strings.Split(authHeaderValue, " ")[1] //Splitting the bearer part?? yep
 		token, _ := jwt.Parse(authHeaderValue, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {

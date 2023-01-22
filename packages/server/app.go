@@ -8,10 +8,10 @@ import (
 	"github.com/PureML-Inc/PureML/server/handler"
 	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/service"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
-	_ "github.com/joho/godotenv/autoload"
 )
 
 // @title PureML API Documentation
@@ -47,6 +47,8 @@ func main() {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	//Org APIs
+	e.GET("/org/handle/:orgHandle", handler.DefaultHandler(service.GetOrgByHandle))
+
 	orgGroup := e.Group("/org", middlewares.AuthenticateJWT)
 	orgGroup.GET("/all", handler.DefaultHandler(service.GetAllAdminOrgs))
 	orgGroup.GET("/id/:orgId", handler.DefaultHandler(service.GetOrgByID), middlewares.ValidateOrg)
@@ -75,12 +77,13 @@ func main() {
 	modelGroup := e.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
 	modelGroup.GET("/all", handler.DefaultHandler(service.GetAllModels))
 	modelGroup.GET("/:modelName", handler.DefaultHandler(service.GetModel), middlewares.ValidateModel)
-	modelGroup.POST("/:modelName/register", handler.DefaultHandler(service.RegisterModel))
-	modelGroup.POST("/:modelName/hash-status", handler.DefaultHandler(service.VerifyModelHashStatus), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/create", handler.DefaultHandler(service.CreateModel))
 	modelGroup.GET("/:modelName/branch", handler.DefaultHandler(service.GetModelAllBranches), middlewares.ValidateModel)
 	modelGroup.POST("/:modelName/branch/create", handler.DefaultHandler(service.CreateModelBranch), middlewares.ValidateModel)
 	modelGroup.GET("/:modelName/branch/:branchName", handler.DefaultHandler(service.GetModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.POST("/:modelName/branch/:branchName/update", handler.DefaultHandler(service.UpdateModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.POST("/:modelName/branch/:branchName/hash-status", handler.DefaultHandler(service.VerifyModelBranchHashStatus), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/branch/:branchName/register", handler.DefaultHandler(service.RegisterModel), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.DELETE("/:modelName/branch/:branchName/delete", handler.DefaultHandler(service.DeleteModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.GET("/:modelName/branch/:branchName/version", handler.DefaultHandler(service.GetModelBranchAllVersions), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch)
@@ -99,13 +102,14 @@ func main() {
 	datasetGroup := e.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
 	datasetGroup.GET("/all", handler.DefaultHandler(service.GetAllDatasets))
 	datasetGroup.GET("/:datasetName", handler.DefaultHandler(service.GetDataset), middlewares.ValidateDataset)
-	datasetGroup.POST("/:datasetName/register", handler.DefaultHandler(service.RegisterDataset))
-	datasetGroup.POST("/:datasetName/hash-status", handler.DefaultHandler(service.VerifyDatasetHashStatus), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/create", handler.DefaultHandler(service.CreateDataset))
 	datasetGroup.GET("/:datasetName/branch", handler.DefaultHandler(service.GetDatasetAllBranches), middlewares.ValidateDataset)
 	datasetGroup.POST("/:datasetName/branch/create", handler.DefaultHandler(service.CreateDatasetBranch), middlewares.ValidateDataset)
 	datasetGroup.GET("/:datasetName/branch/:branchName", handler.DefaultHandler(service.GetDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
 	datasetGroup.POST("/:datasetName/branch/:branchName/update", handler.DefaultHandler(service.UpdateDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
 	datasetGroup.DELETE("/:datasetName/branch/:branchName/delete", handler.DefaultHandler(service.DeleteDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.POST("/:datasetName/branch/:branchName/hash-status", handler.DefaultHandler(service.VerifyDatasetBranchHashStatus), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/branch/:branchName/register", handler.DefaultHandler(service.RegisterDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
 	datasetGroup.GET("/:datasetName/branch/:branchName/version", handler.DefaultHandler(service.GetDatasetBranchAllVersions), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
 	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetDatasetBranchVersion), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
 

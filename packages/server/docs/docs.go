@@ -146,6 +146,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/org/handle/{orgHandle}": {
+            "get": {
+                "description": "Get organization details by handle.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Get organization details by handle.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Handle",
+                        "name": "orgHandle",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/id/{orgId}": {
             "get": {
                 "security": [
@@ -777,6 +810,146 @@ const docTemplate = `{
                 }
             }
         },
+        "/org/{orgId}/dataset/{datasetName}/branch/{branchName}/hash-status": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Verify dataset hash status to determine if dataset is already uploaded",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dataset"
+                ],
+                "summary": "Verify dataset hash status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dataset Name",
+                        "name": "datasetName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch Name",
+                        "name": "branchName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Hash value",
+                        "name": "hash",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HashRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/org/{orgId}/dataset/{datasetName}/branch/{branchName}/register": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Register dataset file. Create dataset and default branches if not exists",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dataset"
+                ],
+                "summary": "Register dataset",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Dataset file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Organization UUID",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dataset name",
+                        "name": "datasetName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch name",
+                        "name": "branchName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "hash",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "is_empty",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "lineage",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "storage",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/{orgId}/dataset/{datasetName}/branch/{branchName}/update": {
             "post": {
                 "security": [
@@ -1065,61 +1238,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/{orgId}/dataset/{datasetName}/hash-status": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Verify dataset hash status to determine if dataset is already uploaded",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Dataset"
-                ],
-                "summary": "Verify dataset hash status",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Dataset Name",
-                        "name": "datasetName",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Hash value",
-                        "name": "hash",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.HashRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/dataset/{datasetName}/register": {
+        "/org/{orgId}/dataset/{datasetName}/create": {
             "post": {
                 "security": [
                     {
@@ -1139,13 +1258,6 @@ const docTemplate = `{
                 "summary": "Register dataset",
                 "parameters": [
                     {
-                        "type": "file",
-                        "description": "Dataset file",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
                         "type": "string",
                         "description": "Organization UUID",
                         "name": "orgId",
@@ -1160,24 +1272,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "hash",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "lineage",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "storage",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "wiki",
-                        "in": "formData"
+                        "description": "Dataset details",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateDatasetRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1753,6 +1854,141 @@ const docTemplate = `{
                 }
             }
         },
+        "/org/{orgId}/model/{modelName}/branch/{branchName}/hash-status": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Verify model hash status to determine if model is already uploaded",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Model"
+                ],
+                "summary": "Verify model hash status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model Name",
+                        "name": "modelName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch Name",
+                        "name": "branchName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Hash value",
+                        "name": "hash",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HashRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/org/{orgId}/model/{modelName}/branch/{branchName}/register": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Register model file. Create model and default branches if not exists",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Model"
+                ],
+                "summary": "Register model",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Model file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Organization UUID",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model name",
+                        "name": "modelName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch name",
+                        "name": "branchName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "hash",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "is_empty",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "storage",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/{orgId}/model/{modelName}/branch/{branchName}/update": {
             "post": {
                 "security": [
@@ -2041,61 +2277,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/{orgId}/model/{modelName}/hash-status": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Verify model hash status to determine if model is already uploaded",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Model"
-                ],
-                "summary": "Verify model hash status",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Model Name",
-                        "name": "modelName",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Hash value",
-                        "name": "hash",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.HashRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/model/{modelName}/register": {
+        "/org/{orgId}/model/{modelName}/create": {
             "post": {
                 "security": [
                     {
@@ -2115,13 +2297,6 @@ const docTemplate = `{
                 "summary": "Register model",
                 "parameters": [
                     {
-                        "type": "file",
-                        "description": "Model file",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
                         "type": "string",
                         "description": "Organization UUID",
                         "name": "orgId",
@@ -2136,19 +2311,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "name": "hash",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "storage",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "wiki",
-                        "in": "formData"
+                        "description": "Model details",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateModelRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -2790,6 +2959,46 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateDatasetRequest": {
+            "type": "object",
+            "properties": {
+                "branch_names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "readme": {
+                    "$ref": "#/definitions/models.ReadmeRequest"
+                },
+                "wiki": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateModelRequest": {
+            "type": "object",
+            "properties": {
+                "branch_names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "readme": {
+                    "$ref": "#/definitions/models.ReadmeRequest"
+                },
+                "wiki": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateOrUpdateOrgRequest": {
             "type": "object",
             "properties": {
@@ -2839,6 +3048,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "public_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ReadmeRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "file_type": {
                     "type": "string"
                 }
             }

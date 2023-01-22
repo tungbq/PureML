@@ -30,6 +30,10 @@ func GetOrgById(orgId uuid.UUID) (*models.OrganizationResponse, error) {
 	return ds.GetOrgByID(orgId)
 }
 
+func GetOrgByHandle(orgHandle string) (*models.OrganizationResponse, error) {
+	return ds.GetOrgByHandle(orgHandle)
+}
+
 func GetOrgByJoinCode(joinCode string) (*models.OrganizationResponse, error) {
 	return ds.GetOrgByJoinCode(joinCode)
 }
@@ -66,8 +70,8 @@ func GetUserByEmail(email string) (*models.UserResponse, error) {
 	return ds.GetUserByEmail(email)
 }
 
-func GetUserByHandle(email string) (*models.UserResponse, error) {
-	return ds.GetUserByHandle(email)
+func GetUserByHandle(handle string) (*models.UserResponse, error) {
+	return ds.GetUserByHandle(handle)
 }
 
 func CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
@@ -102,8 +106,8 @@ func GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, e
 	return ds.GetModelByName(orgId, modelName)
 }
 
-func CreateModel(orgId uuid.UUID, name string, wiki string, userUUID uuid.UUID) (*models.ModelResponse, error) {
-	return ds.CreateModel(orgId, name, wiki, userUUID)
+func CreateModel(orgId uuid.UUID, name string, wiki string, isPublic bool, readmeData *models.ReadmeRequest, userUUID uuid.UUID) (*models.ModelResponse, error) {
+	return ds.CreateModel(orgId, name, wiki, isPublic, readmeData, userUUID)
 }
 
 func CreateModelBranch(modelUUID uuid.UUID, branchName string) (*models.ModelBranchResponse, error) {
@@ -124,8 +128,8 @@ func CreateModelBranches(modelUUID uuid.UUID, branchNames []string) ([]models.Mo
 	return branches, nil
 }
 
-func UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string) (*models.ModelVersionResponse, error) {
-	return ds.UploadAndRegisterModelFile(orgId, modelBranchUUID, file, hash, source)
+func UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelVersionResponse, error) {
+	return ds.UploadAndRegisterModelFile(orgId, modelBranchUUID, file, isEmpty, hash, source)
 }
 
 func GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
@@ -160,8 +164,8 @@ func GetDatasetByName(orgId uuid.UUID, datasetName string) (*models.DatasetRespo
 	return ds.GetDatasetByName(orgId, datasetName)
 }
 
-func CreateDataset(orgId uuid.UUID, name string, wiki string, userUUID uuid.UUID) (*models.DatasetResponse, error) {
-	return ds.CreateDataset(orgId, name, wiki, userUUID)
+func CreateDataset(orgId uuid.UUID, name string, wiki string, isPublic bool, readmeData *models.ReadmeRequest, userUUID uuid.UUID) (*models.DatasetResponse, error) {
+	return ds.CreateDataset(orgId, name, wiki, isPublic, readmeData, userUUID)
 }
 
 func CreateDatasetBranch(datasetUUID uuid.UUID, branchName string) (*models.DatasetBranchResponse, error) {
@@ -182,8 +186,8 @@ func CreateDatasetBranches(datasetUUID uuid.UUID, branchNames []string) ([]model
 	return branches, nil
 }
 
-func UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
-	return ds.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, file, hash, source, lineage)
+func UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+	return ds.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, file, isEmpty, hash, source, lineage)
 }
 
 func GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.DatasetBranchResponse, error) {

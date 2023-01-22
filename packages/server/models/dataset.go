@@ -4,11 +4,18 @@ import uuid "github.com/satori/go.uuid"
 
 // Request models
 
+type CreateDatasetRequest struct {
+	Wiki        string        `json:"wiki"`
+	IsPublic    bool          `json:"is_public"`
+	Readme      ReadmeRequest `json:"readme"`
+	BranchNames []string      `json:"branch_names"`
+}
+
 type RegisterDatasetRequest struct {
-	Wiki    string `json:"wiki"`
 	Hash    string `json:"hash"`
 	Lineage string `json:"lineage"`
 	Storage string `json:"storage"`
+	IsEmpty bool   `json:"is_empty"`
 }
 
 // Response models
@@ -25,6 +32,7 @@ type DatasetResponse struct {
 	Org       OrganizationResponse `json:"org"`
 	CreatedBy UserHandleResponse   `json:"created_by"`
 	UpdatedBy UserHandleResponse   `json:"updated_by"`
+	Readme    ReadmeResponse       `json:"readme"`
 	IsPublic  bool                 `json:"is_public"`
 }
 
@@ -57,6 +65,7 @@ type DatasetVersionResponse struct {
 	Lineage LineageResponse           `json:"lineage"`
 	Hash    string                    `json:"hash"`
 	Path    PathResponse              `json:"path"`
+	IsEmpty bool                      `json:"is_empty"`
 }
 
 type LineageResponse struct {
