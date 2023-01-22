@@ -16,57 +16,14 @@ import joblib
 from pureml.utils.hash import check_hash_status_model, generate_hash_unique, generate_hash_file
 from  pureml.utils.readme import load_readme
 
-def list():
-    '''This function will return a list of all the models in the project
-    
-    Returns
-    -------
-        A list of all the models in the project
-    
-    '''
 
-    user_token = get_token()
-    org_id = get_org_id()
-    project_id = get_project_id()
-
-    url = '{}/project/{}/models'.format(org_id, project_id)
-    url = urljoin(BASE_URL, url)
-    
-    data = {"project_id": project_id}
-
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
-    }
-
-
-    response = requests.get(url,data=data, headers=headers)
-    
-    if response.status_code == 200:
-        # print(f"[bold green]Obtained list of models")
-        
-        response_text = response.json()
-        model_list = response_text['data']
-        # print(model_list)
-
-        return model_list
-    else:
-        print(f"[bold red]Unable to obtain the list of models!")
-        
-    return
-
-
-def init(name:str, readme:str=None, branch:str=None):
+def init_branch(branch:str, model_name:str):
     user_token = get_token()
     org_id = get_org_id()
     
-    file_content, file_type = load_readme(path=readme)
-
-    branch_user = 'dev' if branch is None else branch
-    branch_main = 'main'
 
 
-    url = 'org/{}/model/create'.format(org_id)
+    url = '/org/{}/model/{}/branch/create'.format(org_id, model_name)
     url = urljoin(BASE_URL, url)
 
 
@@ -76,17 +33,20 @@ def init(name:str, readme:str=None, branch:str=None):
     }
 
 
-    data = {'name': name, 
-            'branch':[branch_main, branch_user], 
-            'readme': {'file_type': file_type, 'file_content':file_content}}
+    data = {'model_name': model_name, 
+            'branchName':branch}
 
     response = requests.post(url, data=data, headers=headers)
 
     if response.ok:
-        print(f"[bold green]Model has been created!")
+        print(f"[bold green]Branch has been created!")
+
+        return True
 
     else:
-        print(f"[bold red]Model has not been created!")
+        print(f"[bold red]Branch has not been created!")
+
+        return False
 
 
 
@@ -116,25 +76,172 @@ def check_model_hash(hash: str, name:str, branch:str):
     return hash_exists
 
 
-
-
-def register(model, name:str, branch:str='dev') -> str:
-    ''' The function takes in a model, a name and a version and saves the model locally, then uploads the
-    model to the PureML server
-    
-    Parameters
-    ----------
-    model
-        The model you want to register
-    name : str
-        The name of the model.
-    
-    '''
-        
+def branch_details(branch:str, model_name:str):
     user_token = get_token()
     org_id = get_org_id()
 
 
+    url = 'org/{}/model/{}/branch/{}'.format(org_id, model_name, branch)
+    url = urljoin(BASE_URL, url)
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer {}'.format(user_token)
+    }
+    
+
+    response = requests.get(url, headers=headers)
+    # print(response.url)
+    # print(response.text)
+
+    if response.ok:
+        # print(f"[bold green]Model details have been fetched")
+        response_text = response.json()
+        branch_details = response_text['Data'][0]
+        # print(model_details)
+
+        return branch_details
+
+    else:
+        print(f"[bold red]Branch details details have not been found")
+        return 
+
+
+def branch_status(branch:str, model_name:str):
+
+    branch_details = branch_details(branch=branch, model_name=model_name)
+
+    if branch_details:
+        return True
+    else:
+        return False
+
+
+def branch_delete(branch:str, model_name:str) -> str:
+    
+    user_token = get_token()
+    org_id = get_org_id()
+
+
+    url = 'org/{}/model/{}/branch/{}/delete'.format(org_id, model_name, branch)
+    url = urljoin(BASE_URL, url)
+
+    
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer {}'.format(user_token)
+    }
+
+    
+    response = requests.delete(url, headers=headers)
+
+
+    if response.ok:
+        print(f"[bold green]Model branch has been deleted")
+        
+    else:
+        print(f"[bold red]Unable to delete Model branch")
+
+    return response.text
+
+
+
+def list():
+    '''This function will return a list of all the models in the project
+    
+    Returns
+    -------
+        A list of all the models in the project
+    
+    '''
+
+    user_token = get_token()
+    org_id = get_org_id()
+
+    url = 'org/{}/model/all'.format(org_id)
+    url = urljoin(BASE_URL, url)
+    
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer {}'.format(user_token)
+    }
+
+
+    response = requests.get(url, headers=headers)
+    
+    if response.ok == 200:
+        # print(f"[bold green]Obtained list of models")
+        
+        response_text = response.json()
+        model_list = response_text['Data']
+        # print(model_list)
+
+        return model_list
+    else:
+        print(f"[bold red]Unable to obtain the list of models!")
+        
+    return
+
+
+def init(name:str, readme:str=None, branch:str=None):
+    user_token = get_token()
+    org_id = get_org_id()
+    
+    file_content, file_type = load_readme(path=readme)
+
+    branch_user = 'dev' if branch is None else branch
+    branch_main = 'main'
+
+
+    url = 'org/{}/model/{}/create'.format(org_id, name)
+    url = urljoin(BASE_URL, url)
+
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer {}'.format(user_token)
+    }
+
+
+    data = {'name': name, 
+            'branch_names':[branch_main, branch_user], 
+            'readme': {'file_type': file_type, 'content':file_content}}
+
+    response = requests.post(url, data=data, headers=headers)
+
+    if response.ok:
+        print(f"[bold green]Model has been created!")
+
+    else:
+        print(f"[bold red]Model has not been created!")
+
+
+
+
+def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pureml-cloud'):
+    user_token = get_token()
+    org_id = get_org_id()
+
+    model_exists = model_status(model)
+
+    if not model_exists:
+        model_created = init(name=name, branch=branch)
+        if not model_created:
+            print('[bold red] Unable to register the model')
+            return
+
+    
+    branch_exists = branch_status(model, branch)
+
+    if not branch_exists:
+        branch_created = init_branch(branch=branch, model_name=name)
+        
+        if not branch_created:
+            print('[bold red] Unable to register the model')
+            return
+
+    
     model_file_name = '.'.join([name, 'pkl'])
     model_path = os.path.join(PATH_MODEL_DIR, model_file_name)
 
@@ -143,8 +250,8 @@ def register(model, name:str, branch:str='dev') -> str:
     save_model(model, name, model_path=model_path)
 
 
-    model_hash = generate_hash_file(file_path=model_path)
-    model_exists_locally, model_hash =  check_hash_status_model(hash_value= model_hash, name=name, item_key='model')
+    model_hash = generate_hash_file(file_path=model_path, is_empty=is_empty)
+    # model_exists_locally =  check_hash_status_model(hash_value= model_hash, name=name, item_key='model')
     model_exists_remote = check_model_hash(hash=model_hash, name=name)
 
 
@@ -163,7 +270,9 @@ def register(model, name:str, branch:str='dev') -> str:
 
         files = {'file': (model_file_name, open(model_path, 'rb'))}
 
-        data = {'name': name, 'branch':branch, 'hash':model_hash}
+        data = {'name': name, 'branch':branch, 'hash':model_hash, 
+                'is_empty':is_empty, 'storage':storage}
+
         response = requests.post(url, files=files, data=data, headers=headers)
 
         if response.ok:
@@ -183,7 +292,82 @@ def register(model, name:str, branch:str='dev') -> str:
 
 
 
-def details(name:str, version:str='latest'):
+
+
+
+# def register(model, name:str, branch:str='dev') -> str:
+#     ''' The function takes in a model, a name and a version and saves the model locally, then uploads the
+#     model to the PureML server
+    
+#     Parameters
+#     ----------
+#     model
+#         The model you want to register
+#     name : str
+#         The name of the model.
+    
+#     '''
+        
+#     user_token = get_token()
+#     org_id = get_org_id()
+
+
+#     model_file_name = '.'.join([name, 'pkl'])
+#     model_path = os.path.join(PATH_MODEL_DIR, model_file_name)
+
+#     os.makedirs(PATH_MODEL_DIR, exist_ok=True)
+    
+#     save_model(model, name, model_path=model_path)
+
+
+#     model_hash = generate_hash_file(file_path=model_path)
+#     model_exists_locally, model_hash =  check_hash_status_model(hash_value= model_hash, name=name, item_key='model')
+#     model_exists_remote = check_model_hash(hash=model_hash, name=name)
+
+
+#     if model_exists_remote:
+#         print(f"[bold red]Model already exists. Not registering a new version!")
+#         return True, model_hash, 'latest'
+#     else:        
+#         url = 'org/{}/model/{}/branch/{}/register'.format(org_id, name, branch)
+#         url = urljoin(BASE_URL, url)
+
+
+#         headers = {
+#             'Authorization': 'Bearer {}'.format(user_token)
+#         }
+
+
+#         files = {'file': (model_file_name, open(model_path, 'rb'))}
+
+#         data = {'name': name, 'branch':branch, 'hash':model_hash}
+#         response = requests.post(url, files=files, data=data, headers=headers)
+
+#         if response.ok:
+#             print(f"[bold green]Model has been registered!")
+
+#             model_version = response.json()['Data'][0]['version']
+#             print('Model Version: ', model_version)
+
+#             return True, model_hash, model_version
+
+#         else:
+#             print(f"[bold red]Model has not been registered!")
+    
+    
+#         return False, model_hash, None
+
+def model_status(name:str):
+
+    model_details = details(name=name)
+
+    if model_details:
+        return True
+    else:
+        return False
+
+
+def details(name:str):
     '''It fetches the details of a model.
     
     Parameters
@@ -200,9 +384,8 @@ def details(name:str, version:str='latest'):
     
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
 
-    url = '{}/project/{}/model/{}/{}/details'.format(org_id, project_id, name, version)
+    url = 'org/{}/model/{}'.format(org_id, name)
     url = urljoin(BASE_URL, url)
 
     headers = {
@@ -215,10 +398,10 @@ def details(name:str, version:str='latest'):
     # print(response.url)
     # print(response.text)
 
-    if response.status_code == 200:
+    if response.ok:
         # print(f"[bold green]Model details have been fetched")
         response_text = response.json()
-        model_details = response_text['data'][0]
+        model_details = response_text['Data'][0]
         # print(model_details)
 
         return model_details
@@ -229,8 +412,49 @@ def details(name:str, version:str='latest'):
 
 
 
+def version_details(name:str, branch:str, version:str='latest'):
+    '''It fetches the details of a model.
+    
+    Parameters
+    ----------
+    name : str
+        The name of the model
+    version: str
+        The version of the model
+    Returns
+    -------
+        The details of the model.
+    
+    '''
+    
+    user_token = get_token()
+    org_id = get_org_id()
 
-def fetch(name:str, version:str='latest'):
+    url = '/org/{}/model/{}/branch/{}/version/{}'.format(org_id, name, branch, version)
+    url = urljoin(BASE_URL, url)
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer {}'.format(user_token)
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        # print(f"[bold green]Model Version details have been fetched")
+        response_text = response.json()
+        model_details = response_text['Data'][0]
+        # print(model_details)
+
+        return model_details
+
+    else:
+        print(f"[bold red]Model details have not been found")
+        return 
+
+
+
+def fetch(name:str, branch:str, version:str='latest'):
     '''This function fetches a model from the server and returns it as a `Model` object
     
     Parameters
@@ -248,23 +472,27 @@ def fetch(name:str, version:str='latest'):
 
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
 
 
 
-    model_details = details(name=name, version=version)
+    model_details = version_details(name=name, branch=branch, version=version)
 
     if model_details is None:
-        print(f"[bold red]Unable to fetch Model")
+        print(f"[bold red]Unable to fetch Model version")
         return
 
+    is_empty = model_details['is_empty']
 
-    # model_location = model_details['location']
-    # model_url = 'https://{}'.format(model_location)
-    model_url = model_details['location']
+    if is_empty:
+        print('[bold orange]Model file is not registered to the version')
+        return
+
+    storage_path = model_details['path']['source_path']
+    storage_source_type = model_details['path']['source_type']['public_url']
+
+    model_url = urljoin(storage_source_type, storage_path)
     
-    model_url = model_url.replace('https://pureml-registry.67f23f4479798ac96c01212517a90146.r2.cloudflarestorage.com', 
-                                        'https://pub-072ac07f18cd4246bd5c879e7a9df94e.r2.dev')
+
     # print(model_url)
 
     headers = {
@@ -272,23 +500,20 @@ def fetch(name:str, version:str='latest'):
         'Authorization': 'Bearer {}'.format(user_token)
     }
     
-    # print('url', model_url)
-
-    # response = requests.get(model_url, headers=headers)
 
     response = requests.get(model_url)
 
-    if response.status_code == 200:
+    if response.ok:
         model_bytes = response.content
         open('temp_model.pure', 'wb').write(model_bytes)
 
         model = load_model(model_path='temp_model.pure')
 
 
-        # print(f"[bold green]Model has been fetched")
+        # print(f"[bold green]Model version has been fetched")
         return model
     else:
-        print(f"[bold red]Unable to fetch Model")
+        print(f"[bold red]Unable to fetch Model version")
         # print(response.status_code)
         # print(response.text)
         # print(response.url)
@@ -296,7 +521,7 @@ def fetch(name:str, version:str='latest'):
 
 
 
-def delete(name:str, version:str='latest') -> str:
+def delete(name:str) -> str:
     ''' This function deletes a model from the project
     
     Parameters
@@ -310,10 +535,9 @@ def delete(name:str, version:str='latest') -> str:
 
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
 
 
-    url = '{}/project/{}/model/{}/delete'.format(org_id, project_id, name)
+    url = 'org/{}/model/{}/delete'.format(org_id, name)
     url = urljoin(BASE_URL, url)
 
     
@@ -322,13 +546,11 @@ def delete(name:str, version:str='latest') -> str:
         'Authorization': 'Bearer {}'.format(user_token)
     }
 
-    data = {'version':version}
     
-    
-    response = requests.delete(url, headers=headers, data=data)
+    response = requests.delete(url, headers=headers)
 
 
-    if response.status_code == 200:
+    if response.ok:
         print(f"[bold green]Model has been deleted")
         
     else:
@@ -337,11 +559,8 @@ def delete(name:str, version:str='latest') -> str:
     return response.text
 
 
-# @app.command()
+
 def serve_model():
     pass
 
 
-
-# if __name__ == "__main__":
-#     app()

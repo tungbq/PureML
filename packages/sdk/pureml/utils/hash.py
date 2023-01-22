@@ -37,17 +37,21 @@ def generate_hash_unique(org_id, access_token, name, branch):
 
     
 
-def generate_hash_file(file_path, hash=hashlib.md5):
-    hash_obj = hash()
-    file_object = open(file_path, 'rb')
+def generate_hash_file(file_path, hash=hashlib.md5, is_empty=False):
 
-    
-    for chunk in file_reader_chunk(file_object):
-        hash_obj.update(chunk)
-    
-    hash_value = hash_obj.hexdigest()
+    if is_empty:
+        hash_value = generate_hash_unique()
+    else:
+        hash_obj = hash()
+        file_object = open(file_path, 'rb')
 
-    file_object.close()
+        
+        for chunk in file_reader_chunk(file_object):
+            hash_obj.update(chunk)
+        
+        hash_value = hash_obj.hexdigest()
+
+        file_object.close()
     
     return hash_value
 
@@ -97,7 +101,7 @@ def check_hash_status_model(hash_value, name, item_key='model'):
                 return hash_status, hash_value
 
             
-    return hash_status, hash_value
+    return hash_status
 
 
 def check_hash_status_dataset(file_path, name, item_key='dataset'):
