@@ -8,7 +8,6 @@ import (
 )
 
 // GetOrgByHandle godoc
-// @Security ApiKeyAuth
 // @Summary Get organization details by handle.
 // @Description Get organization details by handle.
 // @Tags Organization

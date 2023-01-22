@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	myconfig "github.com/PureML-Inc/PureML/server/config"
 	"github.com/PureML-Inc/PureML/server/datastore/dbmodels"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -40,11 +41,21 @@ func (r2secrets *R2Secrets) Load(secrets []dbmodels.Secret) error {
 	return nil
 }
 
+func (r2secret *R2Secrets) LoadPureMLCloudSecrets() error {
+	secrets := myconfig.GetPureMLR2Secrets()
+	r2secret.AccountId = secrets["R2_ACCOUNT_ID"]
+	r2secret.AccessKeyId = secrets["R2_ACCESS_KEY_ID"]
+	r2secret.AccessKeySecret = secrets["R2_ACCESS_KEY_SECRET"]
+	r2secret.BucketName = secrets["R2_BUCKET_NAME"]
+	r2secret.PublicURL = secrets["R2_PUBLIC_URL"]
+	return nil
+}
+
 func (r2secrets *R2Secrets) CreateBucketIfNotExists() error {
 	client := GetR2Client(*r2secrets)
 	client.CreateBucket(context.TODO(), &s3.CreateBucketInput{
 		Bucket: &r2secrets.BucketName,
-	}) 
+	})
 	// NEED TO CHECK IF RESPONSE IS 200 OR 409 THEN SUCCESS ELSE FAIL
 	return nil
 }

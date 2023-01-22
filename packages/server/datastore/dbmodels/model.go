@@ -15,6 +15,7 @@ type Model struct {
 	CreatedByUser User         `gorm:"foreignKey:CreatedBy"`
 	UpdatedByUser User         `gorm:"foreignKey:UpdatedBy"`
 
+	Readme   Readme        `gorm:"foreignKey:ModelUUID"`
 	Branches []ModelBranch `gorm:"foreignKey:ModelUUID"`
 	Users    []User        `gorm:"many2many:model_users;"`
 }
@@ -30,6 +31,7 @@ type ModelBranch struct {
 	Name      string    `json:"name" gorm:"not null;index:idx_model_branch,unique"`
 	ModelUUID uuid.UUID `json:"model_uuid" gorm:"not null;index:idx_model_branch,unique"`
 	IsDefault bool      `json:"is_default" default:"false"`
+	// IsProtected bool      `json:"is_protected" default:"false"`
 
 	Model Model `gorm:"foreignKey:ModelUUID"`
 

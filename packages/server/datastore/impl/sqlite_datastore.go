@@ -43,6 +43,8 @@ func NewSQLiteDatastore() *SQLiteDatastore {
 		&dbmodels.User{},
 		&dbmodels.UserOrganizations{},
 		&dbmodels.Secret{},
+		&dbmodels.Readme{},
+		&dbmodels.ReadmeVersion{},
 	)
 	if err != nil {
 		return &SQLiteDatastore{}
@@ -447,7 +449,9 @@ func IncrementVersion(latestVersion string) string {
 
 func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
 	var model dbmodels.Model
-	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("name = ?", modelName).Where("organization_uuid = ?", orgId).Limit(1).Find(&model)
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("readme_versions.version DESC").Limit(1)
+	}).Where("name = ?", modelName).Where("organization_uuid = ?", orgId).Limit(1).Find(&model)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -467,12 +471,23 @@ func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*m
 			Handle: model.UpdatedByUser.Handle,
 		},
 		IsPublic: model.IsPublic,
+		Readme: models.ReadmeResponse{
+			UUID: model.Readme.UUID,
+			LatestVersion: models.ReadmeVersionResponse{
+				UUID:     model.Readme.ReadmeVersions[0].UUID,
+				Version:  model.Readme.ReadmeVersions[0].Version,
+				FileType: model.Readme.ReadmeVersions[0].FileType,
+				Content:  model.Readme.ReadmeVersions[0].Content,
+			},
+		},
 	}, nil
 }
 
 func (ds *SQLiteDatastore) GetModelById(modelId string) (*models.ModelResponse, error) {
 	var model dbmodels.Model
-	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("uuid = ?", modelId).Limit(1).Find(&model)
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("readme_versions.version DESC").Limit(1)
+	}).Where("uuid = ?", modelId).Limit(1).Find(&model)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -492,10 +507,19 @@ func (ds *SQLiteDatastore) GetModelById(modelId string) (*models.ModelResponse, 
 			Handle: model.UpdatedByUser.Handle,
 		},
 		IsPublic: model.IsPublic,
+		Readme: models.ReadmeResponse{
+			UUID: model.Readme.UUID,
+			LatestVersion: models.ReadmeVersionResponse{
+				UUID:     model.Readme.ReadmeVersions[0].UUID,
+				Version:  model.Readme.ReadmeVersions[0].Version,
+				FileType: model.Readme.ReadmeVersions[0].FileType,
+				Content:  model.Readme.ReadmeVersions[0].Content,
+			},
+		},
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string, createdByUser uuid.UUID) (*models.ModelResponse, error) {
+func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string, isPublic bool, readmeData *models.ReadmeRequest, createdByUser uuid.UUID) (*models.ModelResponse, error) {
 	model := dbmodels.Model{
 		Name: name,
 		Wiki: wiki,
@@ -514,7 +538,16 @@ func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string
 				UUID: createdByUser,
 			},
 		},
-		IsPublic: false,
+		IsPublic: isPublic,
+		Readme: dbmodels.Readme{
+			ReadmeVersions: []dbmodels.ReadmeVersion{
+				{
+					Version:  "v1",
+					FileType: readmeData.FileType,
+					Content:  readmeData.Content,
+				},
+			},
+		},
 	}
 	err := ds.DB.Create(&model).Error
 	if err != nil {
@@ -533,6 +566,15 @@ func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string
 			Handle: model.UpdatedByUser.Handle,
 		},
 		IsPublic: model.IsPublic,
+		Readme: models.ReadmeResponse{
+			UUID: model.Readme.UUID,
+			LatestVersion: models.ReadmeVersionResponse{
+				UUID:     model.Readme.ReadmeVersions[0].UUID,
+				Version:  model.Readme.ReadmeVersions[0].Version,
+				FileType: model.Readme.ReadmeVersions[0].FileType,
+				Content:  model.Readme.ReadmeVersions[0].Content,
+			},
+		},
 	}, nil
 }
 
@@ -605,7 +647,7 @@ func (ds *SQLiteDatastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchNam
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string) (*models.ModelVersionResponse, error) {
+func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -617,89 +659,100 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 	if err != nil {
 		return nil, err
 	}
-	switch source {
-	case "R2":
-		sourceType.Name = "R2"
-		err := ds.DB.Where(&sourceType).First(&sourceType).Error
-		if err != nil {
-			return nil, err
-		}
-		splitFile := strings.Split(file.Filename, ".")
-		updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
-		var uploadPath string
+	if !isEmpty {
+		switch strings.ToUpper(source) {
+		case "R2", "PUREML-CLOUD":
+			if source == "R2" {
+				sourceType.Name = "R2"
+				err := ds.DB.Where(&sourceType).First(&sourceType).Error
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				sourceType.Name = "PUREML-CLOUD"
+				sourceType.Org.BaseModel.UUID = orgId
+			}
+			splitFile := strings.Split(file.Filename, ".")
+			updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
+			var uploadPath string
 
-		fileData, err := file.Open()
-		if err != nil {
-			return nil, err
-		}
-		r2Secrets := R2Secrets{}
-		err = r2Secrets.Load(org.Secrets)
-		if err != nil {
-			return nil, err
-		}
-		r2Client := GetR2Client(r2Secrets)
-		uploader := manager.NewUploader(r2Client)
-		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-			Bucket: aws.String(r2Secrets.BucketName),
-			Key:    aws.String(updatedFilename),
-			Body:   fileData,
-		})
-		if err != nil {
-			return nil, err
-		}
+			fileData, err := file.Open()
+			if err != nil {
+				return nil, err
+			}
+			r2Secrets := R2Secrets{}
+			if source == "R2" {
+				err = r2Secrets.Load(org.Secrets)
+			} else {
+				err = r2Secrets.LoadPureMLCloudSecrets()
+				sourceType.PublicURL = r2Secrets.PublicURL
+			}
+			if err != nil {
+				return nil, err
+			}
+			r2Client := GetR2Client(r2Secrets)
+			uploader := manager.NewUploader(r2Client)
+			result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+				Bucket: aws.String(r2Secrets.BucketName),
+				Key:    aws.String(updatedFilename),
+				Body:   fileData,
+			})
+			if err != nil {
+				return nil, err
+			}
 
-		uploadPath = strings.Split(result.Location, "/")[3]
+			uploadPath = strings.Split(result.Location, "/")[3]
 
-		sourcePath = dbmodels.Path{
-			SourcePath: uploadPath,
-			SourceType: sourceType,
-		}
-		err = ds.DB.Create(&sourcePath).Error
-		if err != nil {
-			return nil, err
-		}
-	case "S3":
-		sourceType.Name = "S3"
-		err := ds.DB.Where(&sourceType).First(&sourceType).Error
-		if err != nil {
-			return nil, err
-		}
-		splitFile := strings.Split(file.Filename, ".")
-		updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
-		var uploadPath string
+			sourcePath = dbmodels.Path{
+				SourcePath: uploadPath,
+				SourceType: sourceType,
+			}
+			err = ds.DB.Create(&sourcePath).Error
+			if err != nil {
+				return nil, err
+			}
+		case "S3":
+			sourceType.Name = "S3"
+			err := ds.DB.Where(&sourceType).First(&sourceType).Error
+			if err != nil {
+				return nil, err
+			}
+			splitFile := strings.Split(file.Filename, ".")
+			updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
+			var uploadPath string
 
-		fileData, err := file.Open()
-		if err != nil {
-			return nil, err
-		}
-		s3Secrets := S3Secrets{}
-		err = s3Secrets.Load(org.Secrets)
-		if err != nil {
-			return nil, err
-		}
-		s3Client := GetS3Client(s3Secrets)
-		uploader := manager.NewUploader(s3Client)
-		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-			Bucket: aws.String(s3Secrets.BucketName),
-			Key:    aws.String(updatedFilename),
-			Body:   fileData,
-		})
-		if err != nil {
-			return nil, err
-		}
+			fileData, err := file.Open()
+			if err != nil {
+				return nil, err
+			}
+			s3Secrets := S3Secrets{}
+			err = s3Secrets.Load(org.Secrets)
+			if err != nil {
+				return nil, err
+			}
+			s3Client := GetS3Client(s3Secrets)
+			uploader := manager.NewUploader(s3Client)
+			result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+				Bucket: aws.String(s3Secrets.BucketName),
+				Key:    aws.String(updatedFilename),
+				Body:   fileData,
+			})
+			if err != nil {
+				return nil, err
+			}
 
-		uploadPath = strings.Split(result.Location, "/")[3]
+			uploadPath = strings.Split(result.Location, "/")[3]
 
-		sourcePath = dbmodels.Path{
-			SourcePath: uploadPath,
-			SourceType: sourceType,
-		}
-		err = ds.DB.Create(&sourcePath).Error
-		if err != nil {
-			return nil, err
+			sourcePath = dbmodels.Path{
+				SourcePath: uploadPath,
+				SourceType: sourceType,
+			}
+			err = ds.DB.Create(&sourcePath).Error
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-
 	latestModelVersion := dbmodels.ModelVersion{
 		BranchUUID: modelBranchUUID,
 	}
@@ -721,7 +774,8 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 				UUID: modelBranchUUID,
 			},
 		},
-		Path: sourcePath,
+		Path:    sourcePath,
+		IsEmpty: isEmpty,
 	}
 	err = ds.DB.Create(&modelVersion).Preload("Branch").Preload("Path.SourceType").Error
 	if err != nil {
@@ -744,6 +798,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 				PublicURL: modelVersion.Path.SourceType.PublicURL,
 			},
 		},
+		IsEmpty: modelVersion.IsEmpty,
 	}, nil
 }
 
@@ -771,6 +826,7 @@ func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.Mo
 					PublicURL: modelVersion.Path.SourceType.PublicURL,
 				},
 			},
+			IsEmpty: modelVersion.IsEmpty,
 		})
 	}
 	return modelVersionsResponse, nil
@@ -844,6 +900,7 @@ func (ds *SQLiteDatastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) 
 					PublicURL: modelVersion.Path.SourceType.PublicURL,
 				},
 			},
+			IsEmpty: modelVersion.IsEmpty,
 		})
 	}
 	return modelVersionsResponse, nil
@@ -874,6 +931,7 @@ func (ds *SQLiteDatastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, vers
 				PublicURL: modelVersion.Path.SourceType.PublicURL,
 			},
 		},
+		IsEmpty: modelVersion.IsEmpty,
 	}, nil
 }
 
@@ -881,7 +939,9 @@ func (ds *SQLiteDatastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, vers
 
 func (ds *SQLiteDatastore) GetDatasetByName(orgId uuid.UUID, datasetName string) (*models.DatasetResponse, error) {
 	var dataset dbmodels.Dataset
-	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("name = ?", datasetName).Where("organization_uuid = ?", orgId).Limit(1).Find(&dataset)
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("readme_versions.version DESC").Limit(1)
+	}).Where("name = ?", datasetName).Where("organization_uuid = ?", orgId).Limit(1).Find(&dataset)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -901,12 +961,23 @@ func (ds *SQLiteDatastore) GetDatasetByName(orgId uuid.UUID, datasetName string)
 			Handle: dataset.UpdatedByUser.Handle,
 		},
 		IsPublic: dataset.IsPublic,
+		Readme: models.ReadmeResponse{
+			UUID: dataset.Readme.UUID,
+			LatestVersion: models.ReadmeVersionResponse{
+				UUID:     dataset.Readme.ReadmeVersions[0].UUID,
+				Version:  dataset.Readme.ReadmeVersions[0].Version,
+				FileType: dataset.Readme.ReadmeVersions[0].FileType,
+				Content:  dataset.Readme.ReadmeVersions[0].Content,
+			},
+		},
 	}, nil
 }
 
 func (ds *SQLiteDatastore) GetDatasetByUUID(modelId string) (*models.DatasetResponse, error) {
 	var dataset dbmodels.Dataset
-	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("uuid = ?", modelId).Limit(1).Find(&dataset)
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("readme_versions.version DESC").Limit(1)
+	}).Where("uuid = ?", modelId).Limit(1).Find(&dataset)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -926,10 +997,19 @@ func (ds *SQLiteDatastore) GetDatasetByUUID(modelId string) (*models.DatasetResp
 			Handle: dataset.UpdatedByUser.Handle,
 		},
 		IsPublic: dataset.IsPublic,
+		Readme: models.ReadmeResponse{
+			UUID: dataset.Readme.UUID,
+			LatestVersion: models.ReadmeVersionResponse{
+				UUID:     dataset.Readme.ReadmeVersions[0].UUID,
+				Version:  dataset.Readme.ReadmeVersions[0].Version,
+				FileType: dataset.Readme.ReadmeVersions[0].FileType,
+				Content:  dataset.Readme.ReadmeVersions[0].Content,
+			},
+		},
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateDataset(orgId uuid.UUID, name string, wiki string, createdByUser uuid.UUID) (*models.DatasetResponse, error) {
+func (ds *SQLiteDatastore) CreateDataset(orgId uuid.UUID, name string, wiki string, isPublic bool, readmeData *models.ReadmeRequest, createdByUser uuid.UUID) (*models.DatasetResponse, error) {
 	dataset := dbmodels.Dataset{
 		Name: name,
 		Wiki: wiki,
@@ -948,7 +1028,16 @@ func (ds *SQLiteDatastore) CreateDataset(orgId uuid.UUID, name string, wiki stri
 				UUID: createdByUser,
 			},
 		},
-		IsPublic: false,
+		IsPublic: isPublic,
+		Readme: dbmodels.Readme{
+			ReadmeVersions: []dbmodels.ReadmeVersion{
+				{
+					Version:  "v1",
+					FileType: readmeData.FileType,
+					Content:  readmeData.Content,
+				},
+			},
+		},
 	}
 	err := ds.DB.Create(&dataset).Error
 	if err != nil {
@@ -967,6 +1056,15 @@ func (ds *SQLiteDatastore) CreateDataset(orgId uuid.UUID, name string, wiki stri
 			Handle: dataset.UpdatedByUser.Handle,
 		},
 		IsPublic: dataset.IsPublic,
+		Readme: models.ReadmeResponse{
+			UUID: dataset.Readme.UUID,
+			LatestVersion: models.ReadmeVersionResponse{
+				UUID:     dataset.Readme.ReadmeVersions[0].UUID,
+				Version:  dataset.Readme.ReadmeVersions[0].Version,
+				FileType: dataset.Readme.ReadmeVersions[0].FileType,
+				Content:  dataset.Readme.ReadmeVersions[0].Content,
+			},
+		},
 	}, nil
 }
 
@@ -1039,7 +1137,7 @@ func (ds *SQLiteDatastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBra
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -1051,89 +1149,100 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, dataset
 	if err != nil {
 		return nil, err
 	}
-	switch strings.ToUpper(source) {
-	case "R2":
-		sourceType.Name = "R2"
-		err := ds.DB.Where(&sourceType).First(&sourceType).Error
-		if err != nil {
-			return nil, err
-		}
-		splitFile := strings.Split(file.Filename, ".")
-		updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
-		var uploadPath string
+	if !isEmpty {
+		switch strings.ToUpper(source) {
+		case "R2", "PUREML-CLOUD":
+			if source == "R2" {
+				sourceType.Name = "R2"
+				err := ds.DB.Where(&sourceType).First(&sourceType).Error
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				sourceType.Name = "PUREML-CLOUD"
+				sourceType.Org.BaseModel.UUID = orgId
+			}
+			splitFile := strings.Split(file.Filename, ".")
+			updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
+			var uploadPath string
 
-		fileData, err := file.Open()
-		if err != nil {
-			return nil, err
-		}
-		r2Secrets := R2Secrets{}
-		err = r2Secrets.Load(org.Secrets)
-		if err != nil {
-			return nil, err
-		}
-		r2Client := GetR2Client(r2Secrets)
-		uploader := manager.NewUploader(r2Client)
-		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-			Bucket: aws.String(r2Secrets.BucketName),
-			Key:    aws.String(updatedFilename),
-			Body:   fileData,
-		})
-		if err != nil {
-			return nil, err
-		}
+			fileData, err := file.Open()
+			if err != nil {
+				return nil, err
+			}
+			r2Secrets := R2Secrets{}
+			if source == "R2" {
+				err = r2Secrets.Load(org.Secrets)
+			} else {
+				err = r2Secrets.LoadPureMLCloudSecrets()
+				sourceType.PublicURL = r2Secrets.PublicURL
+			}
+			if err != nil {
+				return nil, err
+			}
+			r2Client := GetR2Client(r2Secrets)
+			uploader := manager.NewUploader(r2Client)
+			result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+				Bucket: aws.String(r2Secrets.BucketName),
+				Key:    aws.String(updatedFilename),
+				Body:   fileData,
+			})
+			if err != nil {
+				return nil, err
+			}
 
-		uploadPath = strings.Split(result.Location, "/")[3]
+			uploadPath = strings.Split(result.Location, "/")[3]
 
-		sourcePath = dbmodels.Path{
-			SourcePath: uploadPath,
-			SourceType: sourceType,
-		}
-		err = ds.DB.Create(&sourcePath).Error
-		if err != nil {
-			return nil, err
-		}
-	case "S3":
-		sourceType.Name = "S3"
-		err := ds.DB.Where(&sourceType).First(&sourceType).Error
-		if err != nil {
-			return nil, err
-		}
-		splitFile := strings.Split(file.Filename, ".")
-		updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
-		var uploadPath string
+			sourcePath = dbmodels.Path{
+				SourcePath: uploadPath,
+				SourceType: sourceType,
+			}
+			err = ds.DB.Create(&sourcePath).Error
+			if err != nil {
+				return nil, err
+			}
+		case "S3":
+			sourceType.Name = "S3"
+			err := ds.DB.Where(&sourceType).First(&sourceType).Error
+			if err != nil {
+				return nil, err
+			}
+			splitFile := strings.Split(file.Filename, ".")
+			updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
+			var uploadPath string
 
-		fileData, err := file.Open()
-		if err != nil {
-			return nil, err
-		}
-		s3Secrets := S3Secrets{}
-		err = s3Secrets.Load(org.Secrets)
-		if err != nil {
-			return nil, err
-		}
-		s3Client := GetS3Client(s3Secrets)
-		uploader := manager.NewUploader(s3Client)
-		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-			Bucket: aws.String(s3Secrets.BucketName),
-			Key:    aws.String(updatedFilename),
-			Body:   fileData,
-		})
-		if err != nil {
-			return nil, err
-		}
+			fileData, err := file.Open()
+			if err != nil {
+				return nil, err
+			}
+			s3Secrets := S3Secrets{}
+			err = s3Secrets.Load(org.Secrets)
+			if err != nil {
+				return nil, err
+			}
+			s3Client := GetS3Client(s3Secrets)
+			uploader := manager.NewUploader(s3Client)
+			result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+				Bucket: aws.String(s3Secrets.BucketName),
+				Key:    aws.String(updatedFilename),
+				Body:   fileData,
+			})
+			if err != nil {
+				return nil, err
+			}
 
-		uploadPath = strings.Split(result.Location, "/")[3]
+			uploadPath = strings.Split(result.Location, "/")[3]
 
-		sourcePath = dbmodels.Path{
-			SourcePath: uploadPath,
-			SourceType: sourceType,
-		}
-		err = ds.DB.Create(&sourcePath).Error
-		if err != nil {
-			return nil, err
+			sourcePath = dbmodels.Path{
+				SourcePath: uploadPath,
+				SourceType: sourceType,
+			}
+			err = ds.DB.Create(&sourcePath).Error
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-
 	latestDatasetVersion := dbmodels.DatasetVersion{
 		BranchUUID: datasetBranchUUID,
 	}
@@ -1158,7 +1267,8 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, dataset
 		Lineage: dbmodels.Lineage{
 			Lineage: lineage,
 		},
-		Path: sourcePath,
+		Path:    sourcePath,
+		IsEmpty: isEmpty,
 	}
 	err = ds.DB.Create(&datasetVersion).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Error
 	if err != nil {
@@ -1185,6 +1295,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, dataset
 			UUID:    datasetVersion.Lineage.UUID,
 			Lineage: datasetVersion.Lineage.Lineage,
 		},
+		IsEmpty: datasetVersion.IsEmpty,
 	}, nil
 }
 
@@ -1216,6 +1327,7 @@ func (ds *SQLiteDatastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]model
 				UUID:    datasetVersion.Lineage.UUID,
 				Lineage: datasetVersion.Lineage.Lineage,
 			},
+			IsEmpty: datasetVersion.IsEmpty,
 		})
 	}
 	return datasetVersionsResponse, nil
@@ -1287,6 +1399,7 @@ func (ds *SQLiteDatastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UU
 				UUID:    datasetVersion.Lineage.UUID,
 				Lineage: datasetVersion.Lineage.Lineage,
 			},
+			IsEmpty: datasetVersion.IsEmpty,
 		})
 	}
 	return datasetVersionsResponse, nil
@@ -1321,6 +1434,7 @@ func (ds *SQLiteDatastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, 
 			UUID:    datasetVersion.Lineage.UUID,
 			Lineage: datasetVersion.Lineage.Lineage,
 		},
+		IsEmpty: datasetVersion.IsEmpty,
 	}, nil
 }
 

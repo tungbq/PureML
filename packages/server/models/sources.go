@@ -45,3 +45,5 @@ type SourceSecrets struct {
 	BucketLocation  string `json:"bucket_location"`
 	PublicURL       string `json:"public_url"`
 }
+
+var SupportedSources = []string{"S3", "R2", "PUREML-CLOUD"}

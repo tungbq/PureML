@@ -4,6 +4,11 @@ import uuid "github.com/satori/go.uuid"
 
 // Request models
 
+type ReadmeRequest struct {
+	FileType string `json:"file_type"`
+	Content  string `json:"content"`
+}
+
 type LogRequest struct {
 	Data string `json:"data"`
 }
@@ -38,4 +43,16 @@ type HashRequest struct {
 
 type ActivityRequest struct {
 	Activity string `json:"activity"`
+}
+
+type ReadmeResponse struct {
+	UUID          uuid.UUID             `json:"uuid"`
+	LatestVersion ReadmeVersionResponse `json:"latest_version"`
+}
+
+type ReadmeVersionResponse struct {
+	UUID     uuid.UUID `json:"uuid"`
+	FileType string    `json:"file_type"`
+	Content  string    `json:"content"`
+	Version  string    `json:"version"`
 }

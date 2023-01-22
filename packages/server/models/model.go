@@ -4,10 +4,17 @@ import uuid "github.com/satori/go.uuid"
 
 // Request models
 
+type CreateModelRequest struct {
+	Wiki        string        `json:"wiki"`
+	IsPublic    bool          `json:"is_public"`
+	Readme      ReadmeRequest `json:"readme"`
+	BranchNames []string      `json:"branch_names"`
+}
+
 type RegisterModelRequest struct {
-	Wiki    string `json:"wiki"`
 	Hash    string `json:"hash"`
 	Storage string `json:"storage"`
+	IsEmpty bool   `json:"is_empty"`
 }
 
 // Response models
@@ -23,6 +30,7 @@ type ModelResponse struct {
 	Wiki      string             `json:"wiki"`
 	CreatedBy UserHandleResponse `json:"created_by"`
 	UpdatedBy UserHandleResponse `json:"updated_by"`
+	Readme    ReadmeResponse     `json:"readme"`
 	IsPublic  bool               `json:"is_public"`
 }
 
@@ -54,6 +62,7 @@ type ModelVersionResponse struct {
 	Branch  ModelBranchNameResponse `json:"branch"`
 	Hash    string                  `json:"hash"`
 	Path    PathResponse            `json:"path"`
+	IsEmpty bool                    `json:"is_empty"`
 }
 
 type ModelReviewResponse struct {

@@ -15,6 +15,7 @@ type Dataset struct {
 	CreatedByUser User         `gorm:"foreignKey:CreatedBy"`
 	UpdatedByUser User         `gorm:"foreignKey:UpdatedBy"`
 
+	Readme   Readme          `gorm:"foreignKey:DatasetUUID"`
 	Branches []DatasetBranch `gorm:"foreignKey:DatasetUUID"`
 	Users    []User          `gorm:"many2many:dataset_users;"`
 }

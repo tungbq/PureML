@@ -5,6 +5,32 @@ definitions:
       activity:
         type: string
     type: object
+  models.CreateDatasetRequest:
+    properties:
+      branch_names:
+        items:
+          type: string
+        type: array
+      is_public:
+        type: boolean
+      readme:
+        $ref: '#/definitions/models.ReadmeRequest'
+      wiki:
+        type: string
+    type: object
+  models.CreateModelRequest:
+    properties:
+      branch_names:
+        items:
+          type: string
+        type: array
+      is_public:
+        type: boolean
+      readme:
+        $ref: '#/definitions/models.ReadmeRequest'
+      wiki:
+        type: string
+    type: object
   models.CreateOrUpdateOrgRequest:
     properties:
       avatar:
@@ -37,6 +63,13 @@ definitions:
       bucket_name:
         type: string
       public_url:
+        type: string
+    type: object
+  models.ReadmeRequest:
+    properties:
+      content:
+        type: string
+      file_type:
         type: string
     type: object
   models.S3SecretRequest:
@@ -436,6 +469,98 @@ paths:
       summary: Delete a branch of a dataset
       tags:
       - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/hash-status:
+    post:
+      consumes:
+      - '*/*'
+      description: Verify dataset hash status to determine if dataset is already uploaded
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Hash value
+        in: body
+        name: hash
+        required: true
+        schema:
+          $ref: '#/definitions/models.HashRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Verify dataset hash status
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/register:
+    post:
+      consumes:
+      - '*/*'
+      description: Register dataset file. Create dataset and default branches if not
+        exists
+      parameters:
+      - description: Dataset file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Organization UUID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - in: formData
+        name: hash
+        type: string
+      - in: formData
+        name: is_empty
+        type: boolean
+      - in: formData
+        name: lineage
+        type: string
+      - in: formData
+        name: storage
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Register dataset
+      tags:
+      - Dataset
   /org/{orgId}/dataset/{datasetName}/branch/{branchName}/update:
     post:
       consumes:
@@ -661,53 +786,13 @@ paths:
       summary: Create a new branch of a dataset
       tags:
       - Dataset
-  /org/{orgId}/dataset/{datasetName}/hash-status:
-    post:
-      consumes:
-      - '*/*'
-      description: Verify dataset hash status to determine if dataset is already uploaded
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: string
-      - description: Dataset Name
-        in: path
-        name: datasetName
-        required: true
-        type: string
-      - description: Hash value
-        in: body
-        name: hash
-        required: true
-        schema:
-          $ref: '#/definitions/models.HashRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Verify dataset hash status
-      tags:
-      - Dataset
-  /org/{orgId}/dataset/{datasetName}/register:
+  /org/{orgId}/dataset/{datasetName}/create:
     post:
       consumes:
       - '*/*'
       description: Register dataset file. Create dataset and default branches if not
         exists
       parameters:
-      - description: Dataset file
-        in: formData
-        name: file
-        required: true
-        type: file
       - description: Organization UUID
         in: path
         name: orgId
@@ -718,18 +803,12 @@ paths:
         name: datasetName
         required: true
         type: string
-      - in: formData
-        name: hash
-        type: string
-      - in: formData
-        name: lineage
-        type: string
-      - in: formData
-        name: storage
-        type: string
-      - in: formData
-        name: wiki
-        type: string
+      - description: Dataset details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDatasetRequest'
       produces:
       - application/json
       responses:
@@ -1074,6 +1153,94 @@ paths:
       summary: Delete a branch of a model
       tags:
       - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/hash-status:
+    post:
+      consumes:
+      - '*/*'
+      description: Verify model hash status to determine if model is already uploaded
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Hash value
+        in: body
+        name: hash
+        required: true
+        schema:
+          $ref: '#/definitions/models.HashRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Verify model hash status
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/register:
+    post:
+      consumes:
+      - '*/*'
+      description: Register model file. Create model and default branches if not exists
+      parameters:
+      - description: Model file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Organization UUID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - in: formData
+        name: hash
+        type: string
+      - in: formData
+        name: is_empty
+        type: boolean
+      - in: formData
+        name: storage
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Register model
+      tags:
+      - Model
   /org/{orgId}/model/{modelName}/branch/{branchName}/update:
     post:
       consumes:
@@ -1299,52 +1466,12 @@ paths:
       summary: Create a new branch of a model
       tags:
       - Model
-  /org/{orgId}/model/{modelName}/hash-status:
-    post:
-      consumes:
-      - '*/*'
-      description: Verify model hash status to determine if model is already uploaded
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: string
-      - description: Model Name
-        in: path
-        name: modelName
-        required: true
-        type: string
-      - description: Hash value
-        in: body
-        name: hash
-        required: true
-        schema:
-          $ref: '#/definitions/models.HashRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Verify model hash status
-      tags:
-      - Model
-  /org/{orgId}/model/{modelName}/register:
+  /org/{orgId}/model/{modelName}/create:
     post:
       consumes:
       - '*/*'
       description: Register model file. Create model and default branches if not exists
       parameters:
-      - description: Model file
-        in: formData
-        name: file
-        required: true
-        type: file
       - description: Organization UUID
         in: path
         name: orgId
@@ -1355,15 +1482,12 @@ paths:
         name: modelName
         required: true
         type: string
-      - in: formData
-        name: hash
-        type: string
-      - in: formData
-        name: storage
-        type: string
-      - in: formData
-        name: wiki
-        type: string
+      - description: Model details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateModelRequest'
       produces:
       - application/json
       responses:
@@ -1658,6 +1782,28 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create an organization.
+      tags:
+      - Organization
+  /org/handle/{orgHandle}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get organization details by handle.
+      parameters:
+      - description: Organization Handle
+        in: path
+        name: orgHandle
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get organization details by handle.
       tags:
       - Organization
   /org/id/{orgId}:

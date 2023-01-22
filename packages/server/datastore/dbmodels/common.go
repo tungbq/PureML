@@ -37,12 +37,11 @@ type Log struct {
 }
 
 type Readme struct {
-	BaseModel          `gorm:"embedded"`
-	ModelVersionUUID   uuid.UUID `json:"model_version_uuid" gorm:"type:uuid;"`
-	DatasetVersionUUID uuid.UUID `json:"dataset_version_uuid" gorm:"type:uuid;"`
+	BaseModel   `gorm:"embedded"`
+	ModelUUID   uuid.UUID `json:"model_uuid" gorm:"type:uuid"`
+	DatasetUUID uuid.UUID `json:"dataset_uuid" gorm:"type:uuid"`
 
-	ModelVersion   ModelVersion   `gorm:"foreignKey:ModelVersionUUID"`
-	DatasetVersion DatasetVersion `gorm:"foreignKey:DatasetVersionUUID"`
+	ReadmeVersions []ReadmeVersion `gorm:"foreignKey:ReadmeUUID"`
 }
 
 type ReadmeVersion struct {
