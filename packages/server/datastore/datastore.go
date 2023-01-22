@@ -30,6 +30,10 @@ func GetOrgById(orgId uuid.UUID) (*models.OrganizationResponse, error) {
 	return ds.GetOrgByID(orgId)
 }
 
+func GetOrgByHandle(orgHandle string) (*models.OrganizationResponse, error) {
+	return ds.GetOrgByHandle(orgHandle)
+}
+
 func GetOrgByJoinCode(joinCode string) (*models.OrganizationResponse, error) {
 	return ds.GetOrgByJoinCode(joinCode)
 }

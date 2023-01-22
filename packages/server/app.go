@@ -8,10 +8,10 @@ import (
 	"github.com/PureML-Inc/PureML/server/handler"
 	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/service"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
-	_ "github.com/joho/godotenv/autoload"
 )
 
 // @title PureML API Documentation
@@ -47,6 +47,8 @@ func main() {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	//Org APIs
+	e.GET("org/handle/:orgHandle", handler.DefaultHandler(service.GetOrgByHandle))
+
 	orgGroup := e.Group("/org", middlewares.AuthenticateJWT)
 	orgGroup.GET("/all", handler.DefaultHandler(service.GetAllAdminOrgs))
 	orgGroup.GET("/id/:orgId", handler.DefaultHandler(service.GetOrgByID), middlewares.ValidateOrg)
