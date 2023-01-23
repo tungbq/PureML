@@ -483,11 +483,11 @@ func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*m
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetModelById(modelId string) (*models.ModelResponse, error) {
+func (ds *SQLiteDatastore) GetModelByUUID(modelUUID uuid.UUID) (*models.ModelResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("readme_versions.version DESC").Limit(1)
-	}).Where("uuid = ?", modelId).Limit(1).Find(&model)
+	}).Where("uuid = ?", modelUUID).Limit(1).Find(&model)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -516,6 +516,85 @@ func (ds *SQLiteDatastore) GetModelById(modelId string) (*models.ModelResponse, 
 				Content:  model.Readme.ReadmeVersions[0].Content,
 			},
 		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetModelReadmeVersion(modelUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {
+	var model dbmodels.Model
+	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
+		return db.Where("version = ?", version).Limit(1)
+	}).Where("uuid = ?", modelUUID).Limit(1).Find(&model)
+	if result.RowsAffected == 0 || len(model.Readme.ReadmeVersions) == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.ReadmeVersionResponse{
+		UUID:     model.Readme.ReadmeVersions[0].UUID,
+		Version:  model.Readme.ReadmeVersions[0].Version,
+		FileType: model.Readme.ReadmeVersions[0].FileType,
+		Content:  model.Readme.ReadmeVersions[0].Content,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetModelReadmeAllVersions(modelUUID uuid.UUID) ([]models.ReadmeVersionResponse, error) {
+	var model dbmodels.Model
+	result := ds.DB.Preload("Readme.ReadmeVersions").Where("uuid = ?", modelUUID).Limit(1).Find(&model)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var versions []models.ReadmeVersionResponse
+	for _, version := range model.Readme.ReadmeVersions {
+		versions = append(versions, models.ReadmeVersionResponse{
+			UUID:     version.UUID,
+			Version:  version.Version,
+			FileType: version.FileType,
+			Content:  version.Content,
+		})
+	}
+	return versions, nil
+}
+
+func (ds *SQLiteDatastore) UpdateModelReadme(modelUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
+	var model dbmodels.Model
+	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("version desc").Limit(1)
+	}).Where("uuid = ?", modelUUID).Limit(1).Find(&model)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var version string
+	if len(model.Readme.ReadmeVersions) == 0 {
+		version = "v1"
+	} else {
+		version = IncrementVersion(model.Readme.ReadmeVersions[0].Version)
+	}
+	readmeVersion := dbmodels.ReadmeVersion{
+		Version:  version,
+		FileType: fileType,
+		Content:  content,
+		Readme: dbmodels.Readme{
+			BaseModel: dbmodels.BaseModel{
+				UUID: model.Readme.UUID,
+			},
+		},
+	}
+	result = ds.DB.Create(&readmeVersion)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.ReadmeVersionResponse{
+		UUID:     readmeVersion.UUID,
+		Version:  readmeVersion.Version,
+		FileType: readmeVersion.FileType,
+		Content:  readmeVersion.Content,
 	}, nil
 }
 
@@ -670,7 +749,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 				}
 			} else {
 				sourceType.Name = "PUREML-CLOUD"
-				sourceType.Org.BaseModel.UUID = orgId
+				sourceType.Org.BaseModel.UUID = uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
 			}
 			splitFile := strings.Split(file.Filename, ".")
 			updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
@@ -973,11 +1052,11 @@ func (ds *SQLiteDatastore) GetDatasetByName(orgId uuid.UUID, datasetName string)
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetByUUID(modelId string) (*models.DatasetResponse, error) {
+func (ds *SQLiteDatastore) GetDatasetByUUID(datasetUUID uuid.UUID) (*models.DatasetResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("readme_versions.version DESC").Limit(1)
-	}).Where("uuid = ?", modelId).Limit(1).Find(&dataset)
+	}).Where("uuid = ?", datasetUUID).Limit(1).Find(&dataset)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -1006,6 +1085,85 @@ func (ds *SQLiteDatastore) GetDatasetByUUID(modelId string) (*models.DatasetResp
 				Content:  dataset.Readme.ReadmeVersions[0].Content,
 			},
 		},
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetReadmeVersion(datasetUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {
+	var dataset dbmodels.Dataset
+	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
+		return db.Where("version = ?", version).Limit(1)
+	}).Where("uuid = ?", datasetUUID).Limit(1).Find(&dataset)
+	if result.RowsAffected == 0 || len(dataset.Readme.ReadmeVersions) == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.ReadmeVersionResponse{
+		UUID:     dataset.Readme.ReadmeVersions[0].UUID,
+		Version:  dataset.Readme.ReadmeVersions[0].Version,
+		FileType: dataset.Readme.ReadmeVersions[0].FileType,
+		Content:  dataset.Readme.ReadmeVersions[0].Content,
+	}, nil
+}
+
+func (ds *SQLiteDatastore) GetDatasetReadmeAllVersions(datasetUUID uuid.UUID) ([]models.ReadmeVersionResponse, error) {
+	var dataset dbmodels.Dataset
+	result := ds.DB.Preload("Readme.ReadmeVersions").Where("uuid = ?", datasetUUID).Limit(1).Find(&dataset)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var versions []models.ReadmeVersionResponse
+	for _, version := range dataset.Readme.ReadmeVersions {
+		versions = append(versions, models.ReadmeVersionResponse{
+			UUID:     version.UUID,
+			Version:  version.Version,
+			FileType: version.FileType,
+			Content:  version.Content,
+		})
+	}
+	return versions, nil
+}
+
+func (ds *SQLiteDatastore) UpdateDatasetReadme(datasetUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
+	var dataset dbmodels.Dataset
+	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("version desc").Limit(1)
+	}).Where("uuid = ?", datasetUUID).Limit(1).Find(&dataset)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var version string
+	if len(dataset.Readme.ReadmeVersions) == 0 {
+		version = "v1"
+	} else {
+		version = IncrementVersion(dataset.Readme.ReadmeVersions[0].Version)
+	}
+	readmeVersion := dbmodels.ReadmeVersion{
+		Version:  version,
+		FileType: fileType,
+		Content:  content,
+		Readme: dbmodels.Readme{
+			BaseModel: dbmodels.BaseModel{
+				UUID: dataset.Readme.UUID,
+			},
+		},
+	}
+	result = ds.DB.Create(&readmeVersion)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.ReadmeVersionResponse{
+		UUID:     readmeVersion.UUID,
+		Version:  readmeVersion.Version,
+		FileType: readmeVersion.FileType,
+		Content:  readmeVersion.Content,
 	}, nil
 }
 
@@ -1160,7 +1318,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, dataset
 				}
 			} else {
 				sourceType.Name = "PUREML-CLOUD"
-				sourceType.Org.BaseModel.UUID = orgId
+				sourceType.Org.BaseModel.UUID = uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
 			}
 			splitFile := strings.Split(file.Filename, ".")
 			updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
