@@ -1,6 +1,5 @@
 
 import requests
-import typer
 from rich import print
 from rich.syntax import Syntax
 
@@ -15,6 +14,48 @@ from urllib.parse import urljoin
 import joblib
 import pandas as pd
 from pureml.utils.hash import check_hash_status_dataset
+from  pureml.utils.readme import load_readme
+
+
+
+def init(name:str, readme:str=None, branch:str=None):
+    user_token = get_token()
+    org_id = get_org_id()
+    
+    file_content, file_type = load_readme(path=readme)
+
+    branch_user = 'dev' if branch is None else branch
+    branch_main = 'main'
+
+
+    url = 'org/{}/dataset/{}/create'.format(org_id, name)
+    url = urljoin(BASE_URL, url)
+
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer {}'.format(user_token)
+    }
+
+
+    data = {'name': name, 
+            'branch_names':[branch_main, branch_user], 
+            'readme': {'file_type': file_type, 'content':file_content}}
+
+    response = requests.post(url, data=data, headers=headers)
+
+    if response.ok:
+        print(f"[bold green]Dataset has been created!")
+
+    else:
+        print(f"[bold red]Dataset has not been created!")
+
+
+
+
+
+
+
 
 
 def save_dataset(dataset, name:str):

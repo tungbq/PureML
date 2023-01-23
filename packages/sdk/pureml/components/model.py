@@ -1,6 +1,5 @@
 
 import requests
-# import typer
 from rich import print
 
 
@@ -8,12 +7,12 @@ import os
 import json
 
 
-from . import get_token, get_project_id, get_org_id
+from . import get_token, get_org_id
 from pureml.utils.constants import BASE_URL, PATH_MODEL_DIR
 from pureml import save_model, load_model
 from urllib.parse import urljoin
 import joblib
-from pureml.utils.hash import check_hash_status_model, generate_hash_unique, generate_hash_file
+from pureml.utils.hash import generate_hash_file
 from  pureml.utils.readme import load_readme
 
 
