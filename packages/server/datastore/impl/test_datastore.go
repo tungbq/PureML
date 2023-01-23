@@ -5,12 +5,13 @@ import (
 
 	"github.com/PureML-Inc/PureML/server/datastore/dbmodels"
 	uuid "github.com/satori/go.uuid"
+
 	// "github.com/PureML-Inc/PureML/server/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func NewTestSQLiteDatastore() *SQLiteDatastore {
+func NewTestSQLiteDatastore() *Datastore {
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -36,9 +37,9 @@ func NewTestSQLiteDatastore() *SQLiteDatastore {
 		&dbmodels.UserOrganizations{},
 	)
 	if err != nil {
-		return &SQLiteDatastore{}
+		return &Datastore{}
 	}
-	return &SQLiteDatastore{
+	return &Datastore{
 		DB: db,
 	}
 }
@@ -47,14 +48,14 @@ type TestDatastore struct {
 	DB *gorm.DB
 }
 
-func (ds *SQLiteDatastore) TestGetAllAdminOrgs() ([]dbmodels.Organization, error) {
+func (ds *Datastore) TestGetAllAdminOrgs() ([]dbmodels.Organization, error) {
 	return []dbmodels.Organization{}, nil
 }
 
-func (ds *SQLiteDatastore) TestGetOrgByID(orgId uuid.UUID) (*dbmodels.Organization, error) {
+func (ds *Datastore) TestGetOrgByID(orgId uuid.UUID) (*dbmodels.Organization, error) {
 	return nil, nil
 }
 
-func (ds *SQLiteDatastore) TestGetOrgsByUserMail(email string) ([]dbmodels.UserOrganizations, error) {
+func (ds *Datastore) TestGetOrgsByUserMail(email string) ([]dbmodels.UserOrganizations, error) {
 	return []dbmodels.UserOrganizations{}, nil
 }

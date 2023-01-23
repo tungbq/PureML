@@ -46,4 +46,4 @@ type SourceSecrets struct {
 	PublicURL       string `json:"public_url"`
 }
 
-var SupportedSources = []string{"S3", "R2", "PUREML-CLOUD"}
+var SupportedSources = []string{"S3", "R2", "PUREML-STORAGE"}
