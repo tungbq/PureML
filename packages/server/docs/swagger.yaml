@@ -295,7 +295,7 @@ paths:
       tags:
       - Dataset
   /org/{orgId}/dataset/{datasetName}/activity/{category}/{activityUUID}:
-    get:
+    post:
       consumes:
       - '*/*'
       description: Update activity of a dataset for a category
@@ -320,6 +320,12 @@ paths:
         name: activityUUID
         required: true
         type: string
+      - description: Activity
+        in: body
+        name: activity
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
@@ -822,6 +828,104 @@ paths:
       summary: Register dataset
       tags:
       - Dataset
+  /org/{orgId}/dataset/{datasetName}/readme:
+    post:
+      consumes:
+      - '*/*'
+      description: Update readme of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReadmeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update readme of a dataset for a category
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/readme/version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get dataset readme
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get dataset readme
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/readme/version/{version}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get dataset readme
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get dataset readme
+      tags:
+      - Dataset
   /org/{orgId}/dataset/all:
     get:
       consumes:
@@ -979,7 +1083,7 @@ paths:
       tags:
       - Model
   /org/{orgId}/model/{modelName}/activity/{category}/{activityUUID}:
-    get:
+    post:
       consumes:
       - '*/*'
       description: Update activity of a model for a category
@@ -1004,6 +1108,12 @@ paths:
         name: activityUUID
         required: true
         type: string
+      - description: Activity
+        in: body
+        name: activity
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
@@ -1499,6 +1609,109 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Register model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/readme:
+    post:
+      consumes:
+      - '*/*'
+      description: Update readme of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReadmeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update readme of a model for a category
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/readme/version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get model readme
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get model readme
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/readme/version/{version}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get model readme
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get model readme
       tags:
       - Model
   /org/{orgId}/model/all:

@@ -1,6 +1,11 @@
 package service
 
-import "github.com/PureML-Inc/PureML/server/models"
+import (
+	"net/http"
+
+	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/models"
+)
 
 // CreateDatasetBranch godoc
 // @Security ApiKeyAuth
@@ -15,5 +20,20 @@ import "github.com/PureML-Inc/PureML/server/models"
 // @Param datasetName path string true "Dataset Name"
 // @Param branchName body string true "Branch Name"
 func CreateDatasetBranch(request *models.Request) *models.Response {
-	return nil
+	datasetUUID := request.GetDatasetUUID()
+	datasetBranchName := request.GetPathParam("branchName")
+	datasetBranches, err := datastore.GetDatasetAllBranches(datasetUUID)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+	for _, branch := range datasetBranches {
+		if branch.Name == datasetBranchName {
+			return models.NewErrorResponse(http.StatusBadRequest, "Branch already exists")
+		}
+	}
+	modelBranch, err := datastore.CreateDatasetBranch(datasetUUID, datasetBranchName)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+	return models.NewDataResponse(http.StatusOK, modelBranch, "Dataset branch created")
 }

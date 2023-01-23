@@ -274,6 +274,30 @@ func DeleteS3Secrets(orgId uuid.UUID) error {
 	return ds.DeleteS3Secrets(orgId)
 }
 
+func GetModelReadmeVersion(modelUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {
+	return ds.GetModelReadmeVersion(modelUUID, version)
+}
+
+func GetModelReadmeAllVersions(modelUUID uuid.UUID) ([]models.ReadmeVersionResponse, error) {
+	return ds.GetModelReadmeAllVersions(modelUUID)
+}
+
+func UpdateModelReadme(modelUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
+	return ds.UpdateModelReadme(modelUUID, fileType, content)
+}
+
+func GetDatasetReadmeVersion(modelUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {
+	return ds.GetDatasetReadmeVersion(modelUUID, version)
+}
+
+func GetDatasetReadmeAllVersions(modelUUID uuid.UUID) ([]models.ReadmeVersionResponse, error) {
+	return ds.GetDatasetReadmeAllVersions(modelUUID)
+}
+
+func UpdateDatasetReadme(modelUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
+	return ds.UpdateDatasetReadme(modelUUID, fileType, content)
+}
+
 type Datastore interface {
 	GetAllAdminOrgs() ([]models.OrganizationResponse, error)
 	GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error)

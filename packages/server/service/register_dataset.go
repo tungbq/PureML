@@ -58,7 +58,7 @@ func RegisterDataset(request *models.Request) *models.Response {
 			break
 		}
 	}
-	if sourceValid == false {
+	if !sourceValid {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
 	datasetBranchUUID := request.GetDatasetBranchUUID()
