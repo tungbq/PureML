@@ -13,10 +13,10 @@ def dataset(name:str, parent:str=None, upload=False):
             
             func_output = func(*args, **kwargs)
 
+            is_empty = False
+
             if not upload:
-                dataset = None
-            else:
-                dataset = func_output
+                is_empty = True                
 
 
             add_dataset_to_config(name=name, parent=parent, func=func)
@@ -24,7 +24,7 @@ def dataset(name:str, parent:str=None, upload=False):
             pipeline = create_pipeline()
 
 
-            dataset_exists_in_remote, dataset_hash, dataset_version = register(dataset=dataset, name=name, pipeline=pipeline)
+            dataset_exists_in_remote, dataset_hash, dataset_version = register(dataset=dataset, name=name, pipeline=pipeline, is_empty=is_empty)
 
             #Uncomment this if there any components that depend on dataset version, or dataset hash
             # if dataset_exists_in_remote:

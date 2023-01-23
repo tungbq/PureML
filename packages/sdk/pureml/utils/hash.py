@@ -19,6 +19,7 @@ def file_reader_chunk(file_obj, chunk_size=1024):
             return
         yield chunk
 
+
 def generate_hash_unique(org_id, access_token, name, branch):
     time_current = str(datetime.now())
    
@@ -37,7 +38,7 @@ def generate_hash_unique(org_id, access_token, name, branch):
 
     
 
-def generate_hash_file(file_path, hash=hashlib.md5, is_empty=False):
+def generate_hash_for_file(file_path, hash=hashlib.md5, is_empty=False):
 
     if is_empty:
         hash_value = generate_hash_unique()
@@ -85,38 +86,38 @@ def generate_hash_for_function(func, hash=hashlib.md5):
 
 
 
-def check_hash_status_model(hash_value, name, item_key='model'):
+# def check_hash_status_model(hash_value, name, item_key='model'):
     
-    hash_status = False
+#     hash_status = False
 
-    config = load_config()
-    if len(config) > 0:
-        models = config[item_key]
-        for model_invoke_order, model_details in models.items():
-            # print('model_invoke_order', model_invoke_order)
-            # print('model_details', model_details)
+#     config = load_config()
+#     if len(config) > 0:
+#         models = config[item_key]
+#         for model_invoke_order, model_details in models.items():
+#             # print('model_invoke_order', model_invoke_order)
+#             # print('model_details', model_details)
 
-            if hash_value == model_details['hash']:
-                hash_status = True
-                return hash_status, hash_value
-
-            
-    return hash_status
-
-
-def check_hash_status_dataset(file_path, name, item_key='dataset'):
-    hash_value = generate_hash_file(file_path=file_path)
-    hash_status = False
-
-    config = load_config()
-    if len(config) > 0:
-        dataset = config[item_key]
-
-
-        if hash_value == dataset['hash']:
-            hash_status = True
-            return hash_status, hash_value
+#             if hash_value == model_details['hash']:
+#                 hash_status = True
+#                 return hash_status, hash_value
 
             
-    return hash_status, hash_value
+#     return hash_status
+
+
+# def check_hash_status_dataset(file_path, name, item_key='dataset'):
+#     hash_value = generate_hash_for_file(file_path=file_path)
+#     hash_status = False
+
+#     config = load_config()
+#     if len(config) > 0:
+#         dataset = config[item_key]
+
+
+#         if hash_value == dataset['hash']:
+#             hash_status = True
+#             return hash_status, hash_value
+
+            
+#     return hash_status, hash_value
 

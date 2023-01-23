@@ -12,7 +12,7 @@ from pureml.utils.constants import BASE_URL, PATH_MODEL_DIR
 from pureml import save_model, load_model
 from urllib.parse import urljoin
 import joblib
-from pureml.utils.hash import generate_hash_file
+from pureml.utils.hash import generate_hash_for_file
 from  pureml.utils.readme import load_readme
 
 
@@ -146,11 +146,11 @@ def branch_delete(branch:str, model_name:str) -> str:
 
 
 def list():
-    '''This function will return a list of all the models in the project
+    '''This function will return a list of all the modelst
     
     Returns
     -------
-        A list of all the models in the project
+        A list of all the models
     
     '''
 
@@ -169,7 +169,7 @@ def list():
 
     response = requests.get(url, headers=headers)
     
-    if response.ok == 200:
+    if response.ok:
         # print(f"[bold green]Obtained list of models")
         
         response_text = response.json()
@@ -218,7 +218,7 @@ def init(name:str, readme:str=None, branch:str=None):
 
 
 
-def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pureml-cloud'):
+def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pureml-storage'):
     user_token = get_token()
     org_id = get_org_id()
 
@@ -249,8 +249,7 @@ def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pure
     save_model(model, name, model_path=model_path)
 
 
-    model_hash = generate_hash_file(file_path=model_path, is_empty=is_empty)
-    # model_exists_locally =  check_hash_status_model(hash_value= model_hash, name=name, item_key='model')
+    model_hash = generate_hash_for_file(file_path=model_path, is_empty=is_empty)
     model_exists_remote = check_model_hash(hash=model_hash, name=name)
 
 
@@ -289,72 +288,6 @@ def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pure
         return False, model_hash, None
 
 
-
-
-
-
-
-# def register(model, name:str, branch:str='dev') -> str:
-#     ''' The function takes in a model, a name and a version and saves the model locally, then uploads the
-#     model to the PureML server
-    
-#     Parameters
-#     ----------
-#     model
-#         The model you want to register
-#     name : str
-#         The name of the model.
-    
-#     '''
-        
-#     user_token = get_token()
-#     org_id = get_org_id()
-
-
-#     model_file_name = '.'.join([name, 'pkl'])
-#     model_path = os.path.join(PATH_MODEL_DIR, model_file_name)
-
-#     os.makedirs(PATH_MODEL_DIR, exist_ok=True)
-    
-#     save_model(model, name, model_path=model_path)
-
-
-#     model_hash = generate_hash_file(file_path=model_path)
-#     model_exists_locally, model_hash =  check_hash_status_model(hash_value= model_hash, name=name, item_key='model')
-#     model_exists_remote = check_model_hash(hash=model_hash, name=name)
-
-
-#     if model_exists_remote:
-#         print(f"[bold red]Model already exists. Not registering a new version!")
-#         return True, model_hash, 'latest'
-#     else:        
-#         url = 'org/{}/model/{}/branch/{}/register'.format(org_id, name, branch)
-#         url = urljoin(BASE_URL, url)
-
-
-#         headers = {
-#             'Authorization': 'Bearer {}'.format(user_token)
-#         }
-
-
-#         files = {'file': (model_file_name, open(model_path, 'rb'))}
-
-#         data = {'name': name, 'branch':branch, 'hash':model_hash}
-#         response = requests.post(url, files=files, data=data, headers=headers)
-
-#         if response.ok:
-#             print(f"[bold green]Model has been registered!")
-
-#             model_version = response.json()['Data'][0]['version']
-#             print('Model Version: ', model_version)
-
-#             return True, model_hash, model_version
-
-#         else:
-#             print(f"[bold red]Model has not been registered!")
-    
-    
-#         return False, model_hash, None
 
 def model_status(name:str):
 
@@ -439,7 +372,7 @@ def version_details(name:str, branch:str, version:str='latest'):
 
     response = requests.get(url, headers=headers)
 
-    if response.status_code == 200:
+    if response.ok:
         # print(f"[bold green]Model Version details have been fetched")
         response_text = response.json()
         model_details = response_text['Data'][0]
@@ -471,8 +404,6 @@ def fetch(name:str, branch:str, version:str='latest'):
 
     user_token = get_token()
     org_id = get_org_id()
-
-
 
     model_details = version_details(name=name, branch=branch, version=version)
 
