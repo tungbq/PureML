@@ -29,16 +29,22 @@ func AuthenticateJWT(next echo.HandlerFunc) echo.HandlerFunc {
 			return nil
 		}
 		authHeaderValue = strings.Split(authHeaderValue, " ")[1] //Splitting the bearer part?? yep
-		token, _ := jwt.Parse(authHeaderValue, func(t *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(authHeaderValue, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("invalid token signing algorithm %v", t.Method.Alg())
 			}
 			return config.TokenSigningSecret(), nil
 		})
+		if err != nil {
+			// fmt.Println(err)
+			context.Response().WriteHeader(http.StatusForbidden)
+			context.Response().Writer.Write([]byte("Could not parse Authentication Token"))
+			return nil
+		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userUUID := uuid.Must(uuid.FromString(claims["uuid"].(string)))
 			user, err := datastore.GetUserByUUID(userUUID)
-			if err != nil {
+			if err != nil || user == nil {
 				context.Response().WriteHeader(http.StatusNotFound)
 				context.Response().Writer.Write([]byte("User not found"))
 				return nil

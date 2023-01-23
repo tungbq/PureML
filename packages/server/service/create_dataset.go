@@ -46,7 +46,10 @@ func CreateDataset(request *models.Request) *models.Response {
 	if datasetBranchNames == nil {
 		datasetBranchNamesData = defaultDatasetBranchNames
 	} else {
-		datasetBranchNamesData = datasetBranchNames.([]string)
+		datasetBranchNames := datasetBranchNames.([]interface{})
+		for _, branchName := range datasetBranchNames {
+			datasetBranchNamesData = append(datasetBranchNamesData, branchName.(string))
+		}
 	}
 	datasetReadme := request.GetParsedBodyAttribute("readme")
 	var datasetReadmeData *models.ReadmeRequest
@@ -76,5 +79,5 @@ func CreateDataset(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	return models.NewDataResponse(http.StatusOK, dataset, "Dataset & branches successfully created")
+	return models.NewDataResponse(http.StatusOK, dataset, "Dataset and branches successfully created")
 }

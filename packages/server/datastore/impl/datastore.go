@@ -58,6 +58,7 @@ func NewSQLiteDatastore() *Datastore {
 
 func NewPostgresDatastore() *Datastore {
 	dsn := config.GetDatabaseURL()
+	// fmt.Println(dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -405,7 +406,10 @@ func (ds *Datastore) GetUserByHandle(handle string) (*models.UserResponse, error
 
 func (ds *Datastore) GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, error) {
 	var user dbmodels.User
-	result := ds.DB.First(&user, userUUID)
+	result := ds.DB.Limit(1).Find(&user, userUUID)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}

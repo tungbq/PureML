@@ -15,7 +15,7 @@ type User struct {
 }
 
 type UserOrganizations struct {
-	UserUUID         uuid.UUID `json:"user_uuid" gorm:"primaryKey"`
-	OrganizationUUID uuid.UUID `json:"organization_uuid" gorm:"primaryKey"`
+	UserUUID         uuid.UUID `json:"user_uuid" gorm:"type:uuid;primaryKey"`
+	OrganizationUUID uuid.UUID `json:"organization_uuid" gorm:"type:uuid;primaryKey"`
 	Role             string    `json:"role" gorm:"not null;default:member"`
 }

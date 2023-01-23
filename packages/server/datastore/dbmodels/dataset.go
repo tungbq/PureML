@@ -41,7 +41,7 @@ type DatasetVersion struct {
 	BaseModel   `gorm:"embedded"`
 	Version     string    `json:"version" gorm:"not null;index:idx_dataset_branch_version,unique"`
 	BranchUUID  uuid.UUID `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_dataset_branch_version,unique"`
-	LineageUUID uuid.UUID `json:"lineage_uuid"`
+	LineageUUID uuid.UUID `json:"lineage_uuid" gorm:"type:uuid;"`
 	Hash        string    `json:"hash" gorm:"not null"`
 	PathUUID    uuid.UUID `json:"path_uuid" gorm:"type:uuid;"`
 	IsEmpty     bool      `json:"is_empty"`

@@ -3069,11 +3069,6 @@ const docTemplate = `{
         },
         "/user/login": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "User login with email and password.",
                 "consumes": [
                     "*/*"
