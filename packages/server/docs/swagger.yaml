@@ -2132,8 +2132,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - ApiKeyAuth: []
       summary: User login.
       tags:
       - User

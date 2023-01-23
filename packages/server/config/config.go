@@ -1,9 +1,17 @@
 package config
 
 import (
+	"fmt"
 	"os"
+
+	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 )
+
+func init() {
+	fmt.Println("Loading environment variables from .env file")
+	godotenv.Load("../.env")
+}
 
 var adminAccess = map[string]bool{
 	"priyavkkaneria@gmail.com": true,

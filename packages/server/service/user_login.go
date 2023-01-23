@@ -11,7 +11,6 @@ import (
 )
 
 // UserLogin godoc
-// @Security ApiKeyAuth
 // @Summary User login.
 // @Description User login with email and password.
 // @Tags User

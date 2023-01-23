@@ -17,7 +17,7 @@ import (
 // @Success 200 {object} map[string]interface{}
 // @Router /org/ [get]
 func GetOrgsForUser(request *models.Request) *models.Response {
-	email := request.User.Email
+	email := request.GetUserMail()
 	UserOrganization, err := datastore.GetUserOrganizationsByEmail(email)
 	if err != nil {
 		return models.NewServerErrorResponse(err)

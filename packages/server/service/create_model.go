@@ -46,7 +46,10 @@ func CreateModel(request *models.Request) *models.Response {
 	if modelBranchNames == nil {
 		modelBranchNamesData = defaultModelBranchNames
 	} else {
-		modelBranchNamesData = modelBranchNames.([]string)
+		modelBranchNames := modelBranchNames.([]interface{})
+		for _, branchName := range modelBranchNames {
+			modelBranchNamesData = append(modelBranchNamesData, branchName.(string))
+		}
 	}
 	modelReadme := request.GetParsedBodyAttribute("readme")
 	var modelReadmeData *models.ReadmeRequest
@@ -76,5 +79,5 @@ func CreateModel(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	return models.NewDataResponse(http.StatusOK, model, "Model & branches successfully created")
+	return models.NewDataResponse(http.StatusOK, model, "Model and branches successfully created")
 }
