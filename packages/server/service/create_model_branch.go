@@ -1,6 +1,11 @@
 package service
 
-import "github.com/PureML-Inc/PureML/server/models"
+import (
+	"net/http"
+
+	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/models"
+)
 
 // CreateModelBranch godoc
 // @Security ApiKeyAuth
@@ -15,5 +20,20 @@ import "github.com/PureML-Inc/PureML/server/models"
 // @Param modelName path string true "Model Name"
 // @Param branchName body string true "Branch Name"
 func CreateModelBranch(request *models.Request) *models.Response {
-	return nil
+	modelUUID := request.GetModelUUID()
+	modelBranchName := request.GetPathParam("branchName")
+	modelBranches, err := datastore.GetModelAllBranches(modelUUID)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+	for _, branch := range modelBranches {
+		if branch.Name == modelBranchName {
+			return models.NewErrorResponse(http.StatusBadRequest, "Branch already exists")
+		}
+	}
+	modelBranch, err := datastore.CreateModelBranch(modelUUID, modelBranchName)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+	return models.NewDataResponse(http.StatusOK, modelBranch, "Model branch created")
 }

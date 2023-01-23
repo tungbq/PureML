@@ -41,7 +41,7 @@ func CreateDataset(request *models.Request) *models.Response {
 	} else {
 		datasetIsPublicData = datasetIsPublic.(bool)
 	}
-	datasetBranchNames := request.GetParsedBodyAttribute("branches")
+	datasetBranchNames := request.GetParsedBodyAttribute("branch_names")
 	var datasetBranchNamesData []string
 	if datasetBranchNames == nil {
 		datasetBranchNamesData = defaultDatasetBranchNames

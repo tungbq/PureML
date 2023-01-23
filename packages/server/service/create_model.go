@@ -41,7 +41,7 @@ func CreateModel(request *models.Request) *models.Response {
 	} else {
 		modelIsPublicData = modelIsPublic.(bool)
 	}
-	modelBranchNames := request.GetParsedBodyAttribute("branches")
+	modelBranchNames := request.GetParsedBodyAttribute("branch_names")
 	var modelBranchNamesData []string
 	if modelBranchNames == nil {
 		modelBranchNamesData = defaultModelBranchNames

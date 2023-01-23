@@ -25,13 +25,13 @@ func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 	datasetName := request.GetDatasetName()
 	datasetBranchName := request.GetPathParam("branchName")
 	orgId := uuid.Must(uuid.FromString(request.GetPathParam("orgId")))
-	message := "Hash validity (True - does not exist in db)"
+	message := "Hash validity (False - does not exist in db)"
 	dataset, err := datastore.GetDatasetBranchByName(orgId, datasetName, datasetBranchName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	if dataset == nil {
-		return models.NewDataResponse(http.StatusOK, true, message)
+		return models.NewDataResponse(http.StatusOK, false, message)
 	}
 	datasetBranchUUID := dataset.UUID
 	request.ParseJsonBody()
@@ -40,11 +40,11 @@ func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	response := true
+	response := false
 	for _, version := range versions {
 		if version.Hash == hashValue {
-			response = false
-			message = "Hash validity (False - exists in db)"
+			response = true
+			message = "Hash validity (True - exists in db)"
 			break
 		}
 	}
