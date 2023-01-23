@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 var adminAccess = map[string]bool{
@@ -28,6 +29,10 @@ func GetPureMLR2Secrets() map[string]string {
 		"R2_BUCKET_NAME":      os.Getenv("R2_BUCKET_NAME"),
 		"R2_PUBLIC_URL":       os.Getenv("R2_PUBLIC_URL"),
 	}
+}
+
+func GetDatabaseURL() string {
+	return os.Getenv("DATABASE_URL")
 }
 
 func HasAdminAccess(email string) bool {

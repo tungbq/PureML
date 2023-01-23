@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/PureML-Inc/PureML/server/config"
+	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -35,8 +36,15 @@ func AuthenticateJWT(next echo.HandlerFunc) echo.HandlerFunc {
 			return config.TokenSigningSecret(), nil
 		})
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			userUUID := uuid.Must(uuid.FromString(claims["uuid"].(string)))
+			user, err := datastore.GetUserByUUID(userUUID)
+			if err != nil {
+				context.Response().WriteHeader(http.StatusNotFound)
+				context.Response().Writer.Write([]byte("User not found"))
+				return nil
+			}
 			context.Set("User", &models.UserClaims{
-				UUID:   uuid.Must(uuid.FromString(claims["uuid"].(string))),
+				UUID:   user.UUID,
 				Email:  claims["email"].(string),
 				Handle: claims["handle"].(string),
 			})

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/PureML-Inc/PureML/server/config"
 	"github.com/PureML-Inc/PureML/server/datastore/dbmodels"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -14,11 +15,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	uuid "github.com/satori/go.uuid"
 	"github.com/teris-io/shortid"
+	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func NewSQLiteDatastore() *SQLiteDatastore {
+func NewSQLiteDatastore() *Datastore {
 	db, err := gorm.Open(sqlite.Open("db/pureml.db"), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -47,20 +49,57 @@ func NewSQLiteDatastore() *SQLiteDatastore {
 		&dbmodels.ReadmeVersion{},
 	)
 	if err != nil {
-		return &SQLiteDatastore{}
+		return &Datastore{}
 	}
-	return &SQLiteDatastore{
+	return &Datastore{
 		DB: db,
 	}
 }
 
-type SQLiteDatastore struct {
+func NewPostgresDatastore() *Datastore {
+	dsn := config.GetDatabaseURL()
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		panic("Error connecting to database")
+	}
+	err = db.AutoMigrate(
+		&dbmodels.Activity{},
+		&dbmodels.Dataset{},
+		&dbmodels.DatasetBranch{},
+		&dbmodels.DatasetReview{},
+		&dbmodels.DatasetUser{},
+		&dbmodels.DatasetVersion{},
+		&dbmodels.Lineage{},
+		&dbmodels.Log{},
+		&dbmodels.Dataset{},
+		&dbmodels.ModelBranch{},
+		&dbmodels.ModelReview{},
+		&dbmodels.ModelUser{},
+		&dbmodels.ModelVersion{},
+		&dbmodels.Organization{},
+		&dbmodels.Path{},
+		&dbmodels.User{},
+		&dbmodels.UserOrganizations{},
+		&dbmodels.Secret{},
+		&dbmodels.Readme{},
+		&dbmodels.ReadmeVersion{},
+	)
+	if err != nil {
+		return &Datastore{}
+	}
+	return &Datastore{
+		DB: db,
+	}
+}
+
+type Datastore struct {
 	DB *gorm.DB
 }
 
 //////////////////////////// ORGANIZATION METHODS ////////////////////////////
 
-func (ds *SQLiteDatastore) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
+func (ds *Datastore) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	var organizations []dbmodels.Organization
 	ds.DB.Find(&organizations)
 	var responseOrganizations []models.OrganizationResponse
@@ -77,7 +116,7 @@ func (ds *SQLiteDatastore) GetAllAdminOrgs() ([]models.OrganizationResponse, err
 	return responseOrganizations, nil
 }
 
-func (ds *SQLiteDatastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error) {
+func (ds *Datastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error) {
 	org := dbmodels.Organization{
 		BaseModel: dbmodels.BaseModel{
 			UUID: orgId,
@@ -100,7 +139,7 @@ func (ds *SQLiteDatastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResp
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetOrgByJoinCode(joinCode string) (*models.OrganizationResponse, error) {
+func (ds *Datastore) GetOrgByJoinCode(joinCode string) (*models.OrganizationResponse, error) {
 	var org dbmodels.Organization
 	result := ds.DB.Where("join_code = ?", joinCode).Limit(1).Find(&org)
 	if result.RowsAffected == 0 {
@@ -119,7 +158,7 @@ func (ds *SQLiteDatastore) GetOrgByJoinCode(joinCode string) (*models.Organizati
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateOrgFromEmail(email string, orgName string, orgDesc string, orgHandle string) (*models.OrganizationResponse, error) {
+func (ds *Datastore) CreateOrgFromEmail(email string, orgName string, orgDesc string, orgHandle string) (*models.OrganizationResponse, error) {
 	org := dbmodels.Organization{
 		Name:         orgName,
 		Handle:       orgHandle,
@@ -164,7 +203,7 @@ func (ds *SQLiteDatastore) CreateOrgFromEmail(email string, orgName string, orgD
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetOrgByHandle(handle string) (*models.OrganizationResponse, error) {
+func (ds *Datastore) GetOrgByHandle(handle string) (*models.OrganizationResponse, error) {
 	var org dbmodels.Organization
 	result := ds.DB.Where("handle = ?", handle).Limit(1).Find(&org)
 	if result.RowsAffected == 0 {
@@ -183,7 +222,7 @@ func (ds *SQLiteDatastore) GetOrgByHandle(handle string) (*models.OrganizationRe
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetUserOrganizationsByEmail(email string) ([]models.UserOrganizationsResponse, error) {
+func (ds *Datastore) GetUserOrganizationsByEmail(email string) ([]models.UserOrganizationsResponse, error) {
 	var orgs []models.UserOrganizationsResponse
 	var tableOrgs []struct {
 		UUID   uuid.UUID
@@ -210,7 +249,7 @@ func (ds *SQLiteDatastore) GetUserOrganizationsByEmail(email string) ([]models.U
 	return orgs, nil
 }
 
-func (ds *SQLiteDatastore) GetUserOrganizationByOrgIdAndEmail(orgId uuid.UUID, email string) (*models.UserOrganizationsResponse, error) {
+func (ds *Datastore) GetUserOrganizationByOrgIdAndEmail(orgId uuid.UUID, email string) (*models.UserOrganizationsResponse, error) {
 	var org models.UserOrganizationsResponse
 	result := ds.DB.Table("organizations").Select("organizations.uuid, organizations.handle, organizations.name, organizations.avatar, user_organization.role").Joins("JOIN user_organizations ON user_organizations.organization_uuid = organizations.uuid").Joins("JOIN users ON users.uuid = user_organizations.user_uuid").Where("users.email = ?", email).Where("organizations.uuid = ?", orgId).Scan(&org)
 	if result.Error != nil {
@@ -219,7 +258,7 @@ func (ds *SQLiteDatastore) GetUserOrganizationByOrgIdAndEmail(orgId uuid.UUID, e
 	return &org, nil
 }
 
-func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) (*models.UserOrganizationsResponse, error) {
+func (ds *Datastore) CreateUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) (*models.UserOrganizationsResponse, error) {
 	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
 	if result.Error != nil {
@@ -250,7 +289,7 @@ func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndOrgId(email string,
 	}, nil
 }
 
-func (ds *SQLiteDatastore) DeleteUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) error {
+func (ds *Datastore) DeleteUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) error {
 	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
 	if result.Error != nil {
@@ -268,7 +307,7 @@ func (ds *SQLiteDatastore) DeleteUserOrganizationFromEmailAndOrgId(email string,
 	return nil
 }
 
-func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizationsResponse, error) {
+func (ds *Datastore) CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizationsResponse, error) {
 	var org dbmodels.Organization
 	result := ds.DB.Where("join_code = ?", joinCode).First(&org)
 	if result.Error != nil {
@@ -299,7 +338,7 @@ func (ds *SQLiteDatastore) CreateUserOrganizationFromEmailAndJoinCode(email stri
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, orgAvatar string) (*models.OrganizationResponse, error) {
+func (ds *Datastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, orgAvatar string) (*models.OrganizationResponse, error) {
 	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
 	if result.Error != nil {
@@ -324,7 +363,7 @@ func (ds *SQLiteDatastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc st
 
 /////////////////////////////// USER METHODS /////////////////////////////////
 
-func (ds *SQLiteDatastore) GetUserByEmail(email string) (*models.UserResponse, error) {
+func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) {
 	var user dbmodels.User
 	result := ds.DB.Where("email = ?", email).Limit(1).Find(&user)
 	if result.RowsAffected == 0 {
@@ -344,7 +383,7 @@ func (ds *SQLiteDatastore) GetUserByEmail(email string) (*models.UserResponse, e
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetUserByHandle(handle string) (*models.UserResponse, error) {
+func (ds *Datastore) GetUserByHandle(handle string) (*models.UserResponse, error) {
 	var user dbmodels.User
 	result := ds.DB.Where("handle = ?", handle).Limit(1).Find(&user)
 	if result.RowsAffected == 0 {
@@ -364,7 +403,24 @@ func (ds *SQLiteDatastore) GetUserByHandle(handle string) (*models.UserResponse,
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
+func (ds *Datastore) GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, error) {
+	var user dbmodels.User
+	result := ds.DB.First(&user, userUUID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.UserResponse{
+		UUID:     user.UUID,
+		Name:     user.Name,
+		Email:    user.Email,
+		Handle:   user.Handle,
+		Bio:      user.Bio,
+		Avatar:   user.Avatar,
+		Password: user.Password,
+	}, nil
+}
+
+func (ds *Datastore) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
 	user := dbmodels.User{
 		Name:     name,
 		Email:    email,
@@ -407,7 +463,7 @@ func (ds *SQLiteDatastore) CreateUser(name string, email string, handle string, 
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UpdateUser(email string, name string, bio string, avatar string) (*models.UserResponse, error) {
+func (ds *Datastore) UpdateUser(email string, name string, bio string, avatar string) (*models.UserResponse, error) {
 	var user dbmodels.User
 	result := ds.DB.Where("email = ?", email).First(&user)
 	if result.Error != nil {
@@ -447,7 +503,7 @@ func IncrementVersion(latestVersion string) string {
 
 /////////////////////////////// MODEL METHODS/////////////////////////////////
 
-func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
+func (ds *Datastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("readme_versions.version DESC").Limit(1)
@@ -483,7 +539,7 @@ func (ds *SQLiteDatastore) GetModelByName(orgId uuid.UUID, modelName string) (*m
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetModelByUUID(modelUUID uuid.UUID) (*models.ModelResponse, error) {
+func (ds *Datastore) GetModelByUUID(modelUUID uuid.UUID) (*models.ModelResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("readme_versions.version DESC").Limit(1)
@@ -519,7 +575,7 @@ func (ds *SQLiteDatastore) GetModelByUUID(modelUUID uuid.UUID) (*models.ModelRes
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetModelReadmeVersion(modelUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {
+func (ds *Datastore) GetModelReadmeVersion(modelUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Where("version = ?", version).Limit(1)
@@ -538,7 +594,7 @@ func (ds *SQLiteDatastore) GetModelReadmeVersion(modelUUID uuid.UUID, version st
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetModelReadmeAllVersions(modelUUID uuid.UUID) ([]models.ReadmeVersionResponse, error) {
+func (ds *Datastore) GetModelReadmeAllVersions(modelUUID uuid.UUID) ([]models.ReadmeVersionResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("Readme.ReadmeVersions").Where("uuid = ?", modelUUID).Limit(1).Find(&model)
 	if result.RowsAffected == 0 {
@@ -559,7 +615,7 @@ func (ds *SQLiteDatastore) GetModelReadmeAllVersions(modelUUID uuid.UUID) ([]mod
 	return versions, nil
 }
 
-func (ds *SQLiteDatastore) UpdateModelReadme(modelUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
+func (ds *Datastore) UpdateModelReadme(modelUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("version desc").Limit(1)
@@ -598,7 +654,7 @@ func (ds *SQLiteDatastore) UpdateModelReadme(modelUUID uuid.UUID, fileType strin
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string, isPublic bool, readmeData *models.ReadmeRequest, createdByUser uuid.UUID) (*models.ModelResponse, error) {
+func (ds *Datastore) CreateModel(orgId uuid.UUID, name string, wiki string, isPublic bool, readmeData *models.ReadmeRequest, createdByUser uuid.UUID) (*models.ModelResponse, error) {
 	model := dbmodels.Model{
 		Name: name,
 		Wiki: wiki,
@@ -657,7 +713,7 @@ func (ds *SQLiteDatastore) CreateModel(orgId uuid.UUID, name string, wiki string
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetAllModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
+func (ds *Datastore) GetAllModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
 	var mymodels []dbmodels.Model
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("organization_uuid = ?", orgId).Find(&mymodels)
 	if result.Error != nil {
@@ -683,7 +739,7 @@ func (ds *SQLiteDatastore) GetAllModels(orgId uuid.UUID) ([]models.ModelResponse
 	return modelResponses, nil
 }
 
-func (ds *SQLiteDatastore) GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
+func (ds *Datastore) GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
 	var modelBranches []dbmodels.ModelBranch
 	result := ds.DB.Preload("Model").Where("model_uuid = ?", modelUUID).Find(&modelBranches)
 	if result.Error != nil {
@@ -703,7 +759,7 @@ func (ds *SQLiteDatastore) GetModelAllBranches(modelUUID uuid.UUID) ([]models.Mo
 	return branches, nil
 }
 
-func (ds *SQLiteDatastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName string) (*models.ModelBranchResponse, error) {
+func (ds *Datastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName string) (*models.ModelBranchResponse, error) {
 	modelBranch := dbmodels.ModelBranch{
 		Name: modelBranchName,
 		Model: dbmodels.Model{
@@ -726,7 +782,7 @@ func (ds *SQLiteDatastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchNam
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelVersionResponse, error) {
+func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -740,7 +796,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 	}
 	if !isEmpty {
 		switch strings.ToUpper(source) {
-		case "R2", "PUREML-CLOUD":
+		case "R2", "PUREML-STORAGE":
 			if source == "R2" {
 				sourceType.Name = "R2"
 				err := ds.DB.Where(&sourceType).First(&sourceType).Error
@@ -748,7 +804,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 					return nil, err
 				}
 			} else {
-				sourceType.Name = "PUREML-CLOUD"
+				sourceType.Name = "PUREML-STORAGE"
 				sourceType.Org.BaseModel.UUID = uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
 			}
 			splitFile := strings.Split(file.Filename, ".")
@@ -881,7 +937,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBran
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
 	err := ds.DB.Select("model_versions.*").Joins("JOIN model_branches ON model_branches.uuid = model_versions.branch_uuid").Where("model_branches.model_uuid = ?", modelUUID).Find(&modelVersions).Error
 	if err != nil {
@@ -911,7 +967,7 @@ func (ds *SQLiteDatastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.Mo
 	return modelVersionsResponse, nil
 }
 
-func (ds *SQLiteDatastore) GetModelBranchByName(orgId uuid.UUID, modelName string, modelBranchName string) (*models.ModelBranchResponse, error) {
+func (ds *Datastore) GetModelBranchByName(orgId uuid.UUID, modelName string, modelBranchName string) (*models.ModelBranchResponse, error) {
 	var modelBranch dbmodels.ModelBranch
 	model, err := ds.GetModelByName(orgId, modelName)
 	if err != nil {
@@ -935,7 +991,7 @@ func (ds *SQLiteDatastore) GetModelBranchByName(orgId uuid.UUID, modelName strin
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
+func (ds *Datastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchResponse, error) {
 	var modelBranch dbmodels.ModelBranch
 	res := ds.DB.Where("uuid = ?", modelBranchUUID).Preload("Model").Limit(1).Find(&modelBranch)
 	if res.RowsAffected == 0 {
@@ -955,7 +1011,7 @@ func (ds *SQLiteDatastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*mod
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
 	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Find(&modelVersions).Error
 	if err != nil {
@@ -985,7 +1041,7 @@ func (ds *SQLiteDatastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) 
 	return modelVersionsResponse, nil
 }
 
-func (ds *SQLiteDatastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelVersionResponse, error) {
 	var modelVersion dbmodels.ModelVersion
 	res := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Where("version = ?", version).Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
 	if res.Error != nil {
@@ -1016,7 +1072,7 @@ func (ds *SQLiteDatastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, vers
 
 /////////////////////////////// DATASET METHODS/////////////////////////////////
 
-func (ds *SQLiteDatastore) GetDatasetByName(orgId uuid.UUID, datasetName string) (*models.DatasetResponse, error) {
+func (ds *Datastore) GetDatasetByName(orgId uuid.UUID, datasetName string) (*models.DatasetResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("readme_versions.version DESC").Limit(1)
@@ -1052,7 +1108,7 @@ func (ds *SQLiteDatastore) GetDatasetByName(orgId uuid.UUID, datasetName string)
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetByUUID(datasetUUID uuid.UUID) (*models.DatasetResponse, error) {
+func (ds *Datastore) GetDatasetByUUID(datasetUUID uuid.UUID) (*models.DatasetResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("readme_versions.version DESC").Limit(1)
@@ -1088,7 +1144,7 @@ func (ds *SQLiteDatastore) GetDatasetByUUID(datasetUUID uuid.UUID) (*models.Data
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetReadmeVersion(datasetUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {
+func (ds *Datastore) GetDatasetReadmeVersion(datasetUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Where("version = ?", version).Limit(1)
@@ -1107,7 +1163,7 @@ func (ds *SQLiteDatastore) GetDatasetReadmeVersion(datasetUUID uuid.UUID, versio
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetReadmeAllVersions(datasetUUID uuid.UUID) ([]models.ReadmeVersionResponse, error) {
+func (ds *Datastore) GetDatasetReadmeAllVersions(datasetUUID uuid.UUID) ([]models.ReadmeVersionResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("Readme.ReadmeVersions").Where("uuid = ?", datasetUUID).Limit(1).Find(&dataset)
 	if result.RowsAffected == 0 {
@@ -1128,7 +1184,7 @@ func (ds *SQLiteDatastore) GetDatasetReadmeAllVersions(datasetUUID uuid.UUID) ([
 	return versions, nil
 }
 
-func (ds *SQLiteDatastore) UpdateDatasetReadme(datasetUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
+func (ds *Datastore) UpdateDatasetReadme(datasetUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("version desc").Limit(1)
@@ -1167,7 +1223,7 @@ func (ds *SQLiteDatastore) UpdateDatasetReadme(datasetUUID uuid.UUID, fileType s
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateDataset(orgId uuid.UUID, name string, wiki string, isPublic bool, readmeData *models.ReadmeRequest, createdByUser uuid.UUID) (*models.DatasetResponse, error) {
+func (ds *Datastore) CreateDataset(orgId uuid.UUID, name string, wiki string, isPublic bool, readmeData *models.ReadmeRequest, createdByUser uuid.UUID) (*models.DatasetResponse, error) {
 	dataset := dbmodels.Dataset{
 		Name: name,
 		Wiki: wiki,
@@ -1226,7 +1282,7 @@ func (ds *SQLiteDatastore) CreateDataset(orgId uuid.UUID, name string, wiki stri
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {
+func (ds *Datastore) GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {
 	var datasets []dbmodels.Dataset
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("organization_uuid = ?", orgId).Find(&datasets)
 	if result.Error != nil {
@@ -1252,7 +1308,7 @@ func (ds *SQLiteDatastore) GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResp
 	return datasetResponses, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.DatasetBranchResponse, error) {
+func (ds *Datastore) GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.DatasetBranchResponse, error) {
 	var datasetBranches []dbmodels.DatasetBranch
 	result := ds.DB.Preload("Dataset").Where("dataset_uuid = ?", datasetUUID).Find(&datasetBranches)
 	if result.Error != nil {
@@ -1272,7 +1328,7 @@ func (ds *SQLiteDatastore) GetDatasetAllBranches(datasetUUID uuid.UUID) ([]model
 	return branches, nil
 }
 
-func (ds *SQLiteDatastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchName string) (*models.DatasetBranchResponse, error) {
+func (ds *Datastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchName string) (*models.DatasetBranchResponse, error) {
 	datasetBranch := dbmodels.DatasetBranch{
 		Name: datasetBranchName,
 		Dataset: dbmodels.Dataset{
@@ -1295,7 +1351,7 @@ func (ds *SQLiteDatastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBra
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -1309,7 +1365,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, dataset
 	}
 	if !isEmpty {
 		switch strings.ToUpper(source) {
-		case "R2", "PUREML-CLOUD":
+		case "R2", "PUREML-STORAGE":
 			if source == "R2" {
 				sourceType.Name = "R2"
 				err := ds.DB.Where(&sourceType).First(&sourceType).Error
@@ -1317,7 +1373,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, dataset
 					return nil, err
 				}
 			} else {
-				sourceType.Name = "PUREML-CLOUD"
+				sourceType.Name = "PUREML-STORAGE"
 				sourceType.Org.BaseModel.UUID = uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
 			}
 			splitFile := strings.Split(file.Filename, ".")
@@ -1457,7 +1513,7 @@ func (ds *SQLiteDatastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, dataset
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
 	err := ds.DB.Select("dataset_versions.*").Joins("JOIN dataset_branches ON dataset_branches.uuid = dataset_versions.branch_uuid").Where("dataset_branches.dataset_uuid = ?", datasetUUID).Find(&datasetVersions).Error
 	if err != nil {
@@ -1491,7 +1547,7 @@ func (ds *SQLiteDatastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]model
 	return datasetVersionsResponse, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetBranchByName(orgId uuid.UUID, datasetName string, datasetBranchName string) (*models.DatasetBranchResponse, error) {
+func (ds *Datastore) GetDatasetBranchByName(orgId uuid.UUID, datasetName string, datasetBranchName string) (*models.DatasetBranchResponse, error) {
 	var datasetBranch dbmodels.DatasetBranch
 	model, err := ds.GetDatasetByName(orgId, datasetName)
 	if err != nil {
@@ -1512,7 +1568,7 @@ func (ds *SQLiteDatastore) GetDatasetBranchByName(orgId uuid.UUID, datasetName s
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*models.DatasetBranchResponse, error) {
+func (ds *Datastore) GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*models.DatasetBranchResponse, error) {
 	var datasetBranch dbmodels.DatasetBranch
 	err := ds.DB.Where("uuid = ?", datasetBranchUUID).Preload("Dataset").Find(&datasetBranch).Error
 	if err != nil {
@@ -1529,7 +1585,7 @@ func (ds *SQLiteDatastore) GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
 	err := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Find(&datasetVersions).Error
 	if err != nil {
@@ -1563,7 +1619,7 @@ func (ds *SQLiteDatastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UU
 	return datasetVersionsResponse, nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetVersionResponse, error) {
 	var datasetVersion dbmodels.DatasetVersion
 	res := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Where("version = ?", version).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
 	if res.Error != nil {
@@ -1598,7 +1654,7 @@ func (ds *SQLiteDatastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, 
 
 //////////////////////////////// LOG METHODS /////////////////////////////////
 
-func (ds *SQLiteDatastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
+func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
 	var logs []dbmodels.Log
 	err := ds.DB.Where("model_version_uuid = ?", modelVersionUUID).Preload("ModelVersion").Find(&logs).Error
 	if err != nil {
@@ -1617,7 +1673,7 @@ func (ds *SQLiteDatastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]
 	return logsResponse, nil
 }
 
-func (ds *SQLiteDatastore) CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
+func (ds *Datastore) CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
 	log := dbmodels.Log{
 		Data: data,
 		ModelVersion: dbmodels.ModelVersion{
@@ -1639,7 +1695,7 @@ func (ds *SQLiteDatastore) CreateLogForModelVersion(data string, modelVersionUUI
 	}, nil
 }
 
-func (ds *SQLiteDatastore) GetLogForDatasetVersion(datasetVersion uuid.UUID) ([]models.LogResponse, error) {
+func (ds *Datastore) GetLogForDatasetVersion(datasetVersion uuid.UUID) ([]models.LogResponse, error) {
 	var logs []dbmodels.Log
 	err := ds.DB.Where("dataset_version_uuid = ?", datasetVersion).Preload("DatasetVersion").Find(&logs).Error
 	if err != nil {
@@ -1658,7 +1714,7 @@ func (ds *SQLiteDatastore) GetLogForDatasetVersion(datasetVersion uuid.UUID) ([]
 	return logsResponse, nil
 }
 
-func (ds *SQLiteDatastore) CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
+func (ds *Datastore) CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
 	log := dbmodels.Log{
 		Data: data,
 		DatasetVersion: dbmodels.DatasetVersion{
@@ -1682,7 +1738,7 @@ func (ds *SQLiteDatastore) CreateLogForDatasetVersion(data string, datasetVersio
 
 //////////////////////////////// ACTIVITY METHODS /////////////////////////////////
 
-func (ds *SQLiteDatastore) GetModelActivity(modelUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
+func (ds *Datastore) GetModelActivity(modelUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
 	var activity dbmodels.Activity
 	res := ds.DB.Where("model_uuid = ?", modelUUID).Where("category = ?", category).Preload("Model").Preload("User").Limit(1).Find(&activity)
 	if res.RowsAffected == 0 {
@@ -1706,7 +1762,7 @@ func (ds *SQLiteDatastore) GetModelActivity(modelUUID uuid.UUID, category string
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateModelActivity(modelUUID uuid.UUID, userUUID uuid.UUID, category string, activity string) (*models.ActivityResponse, error) {
+func (ds *Datastore) CreateModelActivity(modelUUID uuid.UUID, userUUID uuid.UUID, category string, activity string) (*models.ActivityResponse, error) {
 	dbactivity := dbmodels.Activity{
 		Category: category,
 		Activity: activity,
@@ -1740,7 +1796,7 @@ func (ds *SQLiteDatastore) CreateModelActivity(modelUUID uuid.UUID, userUUID uui
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UpdateModelActivity(activityUUID uuid.UUID, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
+func (ds *Datastore) UpdateModelActivity(activityUUID uuid.UUID, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
 	var activity dbmodels.Activity
 	err := ds.DB.Where("uuid = ?", activityUUID).Preload("Model").Preload("User").Limit(1).Find(&activity).Error
 	if err != nil {
@@ -1765,7 +1821,7 @@ func (ds *SQLiteDatastore) UpdateModelActivity(activityUUID uuid.UUID, updatedAt
 	}, nil
 }
 
-func (ds *SQLiteDatastore) DeleteModelActivity(activityUUID uuid.UUID) error {
+func (ds *Datastore) DeleteModelActivity(activityUUID uuid.UUID) error {
 	var activity dbmodels.Activity
 	err := ds.DB.Where("uuid = ?", activityUUID).Limit(1).Find(&activity).Error
 	if err != nil {
@@ -1778,7 +1834,7 @@ func (ds *SQLiteDatastore) DeleteModelActivity(activityUUID uuid.UUID) error {
 	return nil
 }
 
-func (ds *SQLiteDatastore) GetDatasetActivity(datasetUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
+func (ds *Datastore) GetDatasetActivity(datasetUUID uuid.UUID, category string) (*models.ActivityResponse, error) {
 	var activity dbmodels.Activity
 	res := ds.DB.Where("dataset_uuid = ?", datasetUUID).Where("category = ?", category).Preload("Dataset").Preload("User").Limit(1).Find(&activity)
 	if res.RowsAffected == 0 {
@@ -1802,7 +1858,7 @@ func (ds *SQLiteDatastore) GetDatasetActivity(datasetUUID uuid.UUID, category st
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateDatasetActivity(datasetUUID uuid.UUID, userUUID uuid.UUID, category string, activity string) (*models.ActivityResponse, error) {
+func (ds *Datastore) CreateDatasetActivity(datasetUUID uuid.UUID, userUUID uuid.UUID, category string, activity string) (*models.ActivityResponse, error) {
 	dbactivity := dbmodels.Activity{
 		Category: category,
 		Activity: activity,
@@ -1836,7 +1892,7 @@ func (ds *SQLiteDatastore) CreateDatasetActivity(datasetUUID uuid.UUID, userUUID
 	}, nil
 }
 
-func (ds *SQLiteDatastore) UpdateDatasetActivity(activityUUID uuid.UUID, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
+func (ds *Datastore) UpdateDatasetActivity(activityUUID uuid.UUID, updatedAttributes map[string]string) (*models.ActivityResponse, error) {
 	var activity dbmodels.Activity
 	err := ds.DB.Where("uuid = ?", activityUUID).Preload("Dataset").Preload("User").Limit(1).Find(&activity).Error
 	if err != nil {
@@ -1861,7 +1917,7 @@ func (ds *SQLiteDatastore) UpdateDatasetActivity(activityUUID uuid.UUID, updated
 	}, nil
 }
 
-func (ds *SQLiteDatastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
+func (ds *Datastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 	var activity dbmodels.Activity
 	err := ds.DB.Where("uuid = ?", activityUUID).Limit(1).Find(&activity).Error
 	if err != nil {
@@ -1876,7 +1932,7 @@ func (ds *SQLiteDatastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 
 /////////////////////////////// SECRET API METHODS ///////////////////////////////
 
-func (ds *SQLiteDatastore) GetSourceSecret(orgId uuid.UUID, source string) (*models.SourceSecrets, error) {
+func (ds *Datastore) GetSourceSecret(orgId uuid.UUID, source string) (*models.SourceSecrets, error) {
 	var secrets []dbmodels.Secret
 	res := ds.DB.Where("org_uuid = ?", orgId).Find(&secrets)
 	if res.RowsAffected == 0 {
@@ -1913,7 +1969,7 @@ func (ds *SQLiteDatastore) GetSourceSecret(orgId uuid.UUID, source string) (*mod
 	return &sourceSecret, nil
 }
 
-func (ds *SQLiteDatastore) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*R2Secrets, error) {
+func (ds *Datastore) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*R2Secrets, error) {
 	secret := dbmodels.Secret{
 		Org: dbmodels.Organization{
 			BaseModel: dbmodels.BaseModel{
@@ -1963,7 +2019,7 @@ func (ds *SQLiteDatastore) CreateR2Secrets(orgId uuid.UUID, accountId string, ac
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateR2Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
+func (ds *Datastore) CreateR2Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
 	sourceType := dbmodels.SourceType{
 		Name:      "R2",
 		PublicURL: publicURL,
@@ -1983,7 +2039,7 @@ func (ds *SQLiteDatastore) CreateR2Source(orgId uuid.UUID, publicURL string) (*m
 	}, nil
 }
 
-func (ds *SQLiteDatastore) DeleteR2Secrets(orgId uuid.UUID) error {
+func (ds *Datastore) DeleteR2Secrets(orgId uuid.UUID) error {
 	var secrets []dbmodels.Secret
 	err := ds.DB.Where("org_uuid = ?", orgId).Where("name LIKE ?", "R2_%").Delete(&secrets).Error
 	if err != nil {
@@ -1992,7 +2048,7 @@ func (ds *SQLiteDatastore) DeleteR2Secrets(orgId uuid.UUID) error {
 	return nil
 }
 
-func (ds *SQLiteDatastore) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*S3Secrets, error) {
+func (ds *Datastore) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*S3Secrets, error) {
 	secret := dbmodels.Secret{
 		Org: dbmodels.Organization{
 			BaseModel: dbmodels.BaseModel{
@@ -2042,7 +2098,7 @@ func (ds *SQLiteDatastore) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, 
 	}, nil
 }
 
-func (ds *SQLiteDatastore) CreateS3Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
+func (ds *Datastore) CreateS3Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
 	sourceType := dbmodels.SourceType{
 		Name:      "S3",
 		PublicURL: publicURL,
@@ -2062,7 +2118,7 @@ func (ds *SQLiteDatastore) CreateS3Source(orgId uuid.UUID, publicURL string) (*m
 	}, nil
 }
 
-func (ds *SQLiteDatastore) DeleteS3Secrets(orgId uuid.UUID) error {
+func (ds *Datastore) DeleteS3Secrets(orgId uuid.UUID) error {
 	var secrets []dbmodels.Secret
 	err := ds.DB.Where("org_uuid = ?", orgId).Where("name LIKE ?", "S3_%").Delete(&secrets).Error
 	if err != nil {

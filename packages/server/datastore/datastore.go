@@ -9,7 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var ds *impl.SQLiteDatastore
+var ds *impl.Datastore
 
 func init() {
 	stage := os.Getenv("STAGE")
@@ -18,7 +18,8 @@ func init() {
 		ds = impl.NewTestSQLiteDatastore()
 	} else {
 		//Real db
-		ds = impl.NewSQLiteDatastore()
+		// ds = impl.NewSQLiteDatastore()
+		ds = impl.NewPostgresDatastore()
 	}
 }
 
@@ -72,6 +73,10 @@ func GetUserByEmail(email string) (*models.UserResponse, error) {
 
 func GetUserByHandle(handle string) (*models.UserResponse, error) {
 	return ds.GetUserByHandle(handle)
+}
+
+func GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, error) {
+	return ds.GetUserByUUID(userUUID)
 }
 
 func CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
