@@ -233,7 +233,6 @@ def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pure
 
     model_hash = generate_hash_for_file(file_path=model_path, name=name, branch=branch, is_empty=is_empty)
 
-
     model_exists = model_status(model)
 
     if not model_exists:
