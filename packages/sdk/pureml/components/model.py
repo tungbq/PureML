@@ -222,13 +222,25 @@ def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pure
     user_token = get_token()
     org_id = get_org_id()
 
+
+    model_file_name = '.'.join([name, 'pkl'])
+    model_path = os.path.join(PATH_MODEL_DIR, model_file_name)
+
+    os.makedirs(PATH_MODEL_DIR, exist_ok=True)
+    
+    save_model(model, name, model_path=model_path)
+
+
+    model_hash = generate_hash_for_file(file_path=model_path, name=name, branch=branch, is_empty=is_empty)
+
+
     model_exists = model_status(model)
 
     if not model_exists:
         model_created = init(name=name, branch=branch)
         if not model_created:
             print('[bold red] Unable to register the model')
-            return
+            return False, model_hash, 'latest'
 
     
     branch_exists = branch_status(model, branch)
@@ -238,18 +250,8 @@ def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pure
         
         if not branch_created:
             print('[bold red] Unable to register the model')
-            return
+            return False, model_hash, 'latest'
 
-    
-    model_file_name = '.'.join([name, 'pkl'])
-    model_path = os.path.join(PATH_MODEL_DIR, model_file_name)
-
-    os.makedirs(PATH_MODEL_DIR, exist_ok=True)
-    
-    save_model(model, name, model_path=model_path)
-
-
-    model_hash = generate_hash_for_file(file_path=model_path, is_empty=is_empty)
     model_exists_remote = check_model_hash(hash=model_hash, name=name)
 
 

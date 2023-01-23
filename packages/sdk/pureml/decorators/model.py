@@ -3,7 +3,7 @@ from pureml.utils.pipeline import add_model_to_config, load_metrics_from_config,
 from pureml import metrics, params
 
 
-def model(name:str):
+def model(name:str, branch:str):
     
     def decorator(func):
         # print('Inside decorator')

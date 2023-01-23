@@ -215,11 +215,7 @@ def init(name:str, readme:str=None, branch:str=None):
     else:
         print(f"[bold red]Dataset has not been created!")
 
-
-
-
-
-
+    print(response.json)
 
 
 
@@ -258,13 +254,20 @@ def register(dataset, name:str, pipeline, branch:str, is_empty:bool=False, stora
     user_token = get_token()
     org_id = get_org_id()
 
+
+    dataset_path = save_dataset(dataset, name)
+    name_with_ext = dataset_path.split('/')[-1]
+
+    dataset_hash = generate_hash_for_file(file_path=dataset_path, name=name, branch=branch, is_empty=is_empty)
+
+    
     dataset_exists = dataset_status(dataset)
 
     if not dataset_exists:
         dataset_created = init(name=name, branch=branch)
         if not dataset_created:
             print('[bold red] Unable to register the dataset')
-            return
+            return  False, dataset_hash, None
 
     
     branch_exists = branch_status(dataset, branch)
@@ -274,14 +277,8 @@ def register(dataset, name:str, pipeline, branch:str, is_empty:bool=False, stora
         
         if not branch_created:
             print('[bold red] Unable to register the dataset')
-            return
+            return False, dataset_hash, None
 
-
-    
-    dataset_path = save_dataset(dataset, name)
-    name_with_ext = dataset_path.split('/')[-1]
-
-    dataset_hash = generate_hash_for_file(file_path=dataset_path, is_empty=is_empty)
     dataset_exists_remote = check_dataset_hash(hash=dataset_hash, name=name)
 
 

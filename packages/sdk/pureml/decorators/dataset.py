@@ -2,7 +2,7 @@ from pureml.components.dataset import register
 from pureml.utils.pipeline import add_dataset_to_config
 from pureml.pipeline.data.create_pipeline import create_pipeline
 
-def dataset(name:str, parent:str=None, upload=False):
+def dataset(name:str, branch:str, parent:str=None, upload=False):
 
     def decorator(func):
 
@@ -15,8 +15,8 @@ def dataset(name:str, parent:str=None, upload=False):
 
             is_empty = False
 
-            if not upload:
-                is_empty = True                
+            if not upload or func_output is None:
+                is_empty = True
 
 
             add_dataset_to_config(name=name, parent=parent, func=func)
@@ -24,7 +24,8 @@ def dataset(name:str, parent:str=None, upload=False):
             pipeline = create_pipeline()
 
 
-            dataset_exists_in_remote, dataset_hash, dataset_version = register(dataset=dataset, name=name, pipeline=pipeline, is_empty=is_empty)
+            dataset_exists_in_remote, dataset_hash, dataset_version = register(dataset=func_output, name=name, branch=branch, 
+                                                                                pipeline=pipeline, is_empty=is_empty)
 
             #Uncomment this if there any components that depend on dataset version, or dataset hash
             # if dataset_exists_in_remote:

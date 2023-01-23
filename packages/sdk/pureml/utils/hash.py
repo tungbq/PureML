@@ -9,6 +9,7 @@ import json
 import inspect
 import re
 from datetime import datetime
+from pureml.components import get_org_id, get_token
 
 
 def file_reader_chunk(file_obj, chunk_size=1024):
@@ -20,16 +21,25 @@ def file_reader_chunk(file_obj, chunk_size=1024):
         yield chunk
 
 
-def generate_hash_unique(org_id, access_token, name, branch):
+def generate_hash_unique(name, branch, hash=hashlib.md5):
+
+    org_id = get_org_id()
+    access_token = get_token()
+
     time_current = str(datetime.now())
    
     string_random = ''.join(random.choices(string.ascii_lowercase +string.digits, k=16))
  
 
-    hash_content = 'puremlHash'.join(org_id, access_token, name, branch, time_current, string_random)
+    hash_content = 'puremlHash'.join([org_id, access_token, name, branch, time_current, string_random])
     
+    # print('hash content', hash_content)
+
     value_str = hash_content.encode()
+    # print('value_str', value_str)
+
     file_object = hash(value_str)
+    # print(file_object)
 
     hash_value = file_object.hexdigest()
 
@@ -38,10 +48,10 @@ def generate_hash_unique(org_id, access_token, name, branch):
 
     
 
-def generate_hash_for_file(file_path, hash=hashlib.md5, is_empty=False):
+def generate_hash_for_file(file_path, name:str, branch:str, hash=hashlib.md5, is_empty=False):
 
     if is_empty:
-        hash_value = generate_hash_unique()
+        hash_value = generate_hash_unique(name=name, branch=branch)
     else:
         hash_obj = hash()
         file_object = open(file_path, 'rb')
