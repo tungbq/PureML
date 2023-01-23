@@ -124,7 +124,6 @@ def get_project_name():
     return
 
 
-
 def convert_values_to_string(logged_dict):
     
     for key in logged_dict:
