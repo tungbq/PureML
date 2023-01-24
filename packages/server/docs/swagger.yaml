@@ -5,6 +5,11 @@ definitions:
       activity:
         type: string
     type: object
+  models.CreateDatasetBranchRequest:
+    properties:
+      branch_name:
+        type: string
+    type: object
   models.CreateDatasetRequest:
     properties:
       branch_names:
@@ -16,6 +21,11 @@ definitions:
       readme:
         $ref: '#/definitions/models.ReadmeRequest'
       wiki:
+        type: string
+    type: object
+  models.CreateModelBranchRequest:
+    properties:
+      branch_name:
         type: string
     type: object
   models.CreateModelRequest:
@@ -773,12 +783,12 @@ paths:
         name: datasetName
         required: true
         type: string
-      - description: Branch Name
+      - description: Data
         in: body
         name: branchName
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.CreateDatasetBranchRequest'
       produces:
       - application/json
       responses:
@@ -825,7 +835,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Register dataset
+      summary: Create dataset
       tags:
       - Dataset
   /org/{orgId}/dataset/{datasetName}/readme:
@@ -1557,12 +1567,12 @@ paths:
         name: modelName
         required: true
         type: string
-      - description: Branch Name
+      - description: Data
         in: body
         name: branchName
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.CreateModelBranchRequest'
       produces:
       - application/json
       responses:
@@ -1608,7 +1618,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Register model
+      summary: Create model
       tags:
       - Model
   /org/{orgId}/model/{modelName}/readme:

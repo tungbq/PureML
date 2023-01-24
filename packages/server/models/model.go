@@ -11,6 +11,10 @@ type CreateModelRequest struct {
 	BranchNames []string      `json:"branch_names"`
 }
 
+type CreateModelBranchRequest struct {
+	BranchName string `json:"branch_name"`
+}
+
 type RegisterModelRequest struct {
 	Hash    string `json:"hash"`
 	Storage string `json:"storage"`

@@ -11,6 +11,10 @@ type CreateDatasetRequest struct {
 	BranchNames []string      `json:"branch_names"`
 }
 
+type CreateDatasetBranchRequest struct {
+	BranchName string `json:"branch_name"`
+}
+
 type RegisterDatasetRequest struct {
 	Hash    string `json:"hash"`
 	Lineage string `json:"lineage"`

@@ -18,10 +18,14 @@ import (
 // @Router /org/{orgId}/model/{modelName}/branch/create [post]
 // @Param orgId path string true "Organization Id"
 // @Param modelName path string true "Model Name"
-// @Param branchName body string true "Branch Name"
+// @Param branchName body models.CreateModelBranchRequest true "Data"
 func CreateModelBranch(request *models.Request) *models.Response {
+	request.ParseJsonBody()
 	modelUUID := request.GetModelUUID()
-	modelBranchName := request.GetPathParam("branchName")
+	modelBranchName := request.GetParsedBodyAttribute("branch_name").(string)
+	if modelBranchName == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Branch name cannot be empty")
+	}
 	modelBranches, err := datastore.GetModelAllBranches(modelUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())

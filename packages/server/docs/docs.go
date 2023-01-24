@@ -695,12 +695,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Branch Name",
+                        "description": "Data",
                         "name": "branchName",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.CreateDatasetBranchRequest"
                         }
                     }
                 ],
@@ -1264,7 +1264,7 @@ const docTemplate = `{
                 "tags": [
                     "Dataset"
                 ],
-                "summary": "Register dataset",
+                "summary": "Create dataset",
                 "parameters": [
                     {
                         "type": "string",
@@ -1899,12 +1899,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Branch Name",
+                        "description": "Data",
                         "name": "branchName",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.CreateModelBranchRequest"
                         }
                     }
                 ],
@@ -2463,7 +2463,7 @@ const docTemplate = `{
                 "tags": [
                     "Model"
                 ],
-                "summary": "Register model",
+                "summary": "Create model",
                 "parameters": [
                     {
                         "type": "string",
@@ -3281,6 +3281,14 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateDatasetBranchRequest": {
+            "type": "object",
+            "properties": {
+                "branch_name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateDatasetRequest": {
             "type": "object",
             "properties": {
@@ -3297,6 +3305,14 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.ReadmeRequest"
                 },
                 "wiki": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateModelBranchRequest": {
+            "type": "object",
+            "properties": {
+                "branch_name": {
                     "type": "string"
                 }
             }
