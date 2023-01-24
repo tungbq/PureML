@@ -12,7 +12,7 @@ var defaultModelBranchNames = []string{"main", "development"}
 
 // CreateModel godoc
 // @Security ApiKeyAuth
-// @Summary Register model
+// @Summary Create model
 // @Description Register model file. Create model and default branches if not exists
 // @Tags Model
 // @Accept */*

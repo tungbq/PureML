@@ -12,7 +12,7 @@ var defaultDatasetBranchNames = []string{"main", "development"}
 
 // CreateDataset godoc
 // @Security ApiKeyAuth
-// @Summary Register dataset
+// @Summary Create dataset
 // @Description Register dataset file. Create dataset and default branches if not exists
 // @Tags Dataset
 // @Accept */*

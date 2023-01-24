@@ -1,6 +1,9 @@
 package models
 
-import "net/http"
+import (
+	"net/http"
+	"reflect"
+)
 
 type ResponseBody struct {
 	Status  int
@@ -46,6 +49,9 @@ func NewErrorResponse(statusCode int, message string) *Response {
 }
 
 func NewDataResponse(statusCode int, data interface{}, message string) *Response {
+	if reflect.TypeOf(data).Kind() != reflect.Slice {
+		data = []interface{}{data}
+	}
 	return &Response{
 		Error: nil,
 		Body: ResponseBody{

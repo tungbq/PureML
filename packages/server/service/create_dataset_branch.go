@@ -18,10 +18,14 @@ import (
 // @Router /org/{orgId}/dataset/{datasetName}/branch/create [post]
 // @Param orgId path string true "Organization Id"
 // @Param datasetName path string true "Dataset Name"
-// @Param branchName body string true "Branch Name"
+// @Param branchName body models.CreateDatasetBranchRequest true "Data"
 func CreateDatasetBranch(request *models.Request) *models.Response {
+	request.ParseJsonBody()
 	datasetUUID := request.GetDatasetUUID()
-	datasetBranchName := request.GetPathParam("branchName")
+	datasetBranchName := request.GetParsedBodyAttribute("branch_name").(string)
+	if datasetBranchName == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Branch name cannot be empty")
+	}
 	datasetBranches, err := datastore.GetDatasetAllBranches(datasetUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
