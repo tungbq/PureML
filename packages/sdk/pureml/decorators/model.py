@@ -3,7 +3,7 @@ from pureml.utils.pipeline import add_model_to_config, load_metrics_from_config,
 from pureml import metrics, params
 
 
-def model(name:str):
+def model(name:str, branch:str):
     
     def decorator(func):
         # print('Inside decorator')
@@ -16,7 +16,7 @@ def model(name:str):
             
             func_output = func(*args, **kwargs)
 
-            model_exists_in_remote, model_hash, model_version = register(model=func_output, name=name)
+            model_exists_in_remote, model_hash, model_version = register(model=func_output, name=name, branch=branch)
 
             if model_exists_in_remote:                 #Only add the model to config if it is successfully pushed
 
