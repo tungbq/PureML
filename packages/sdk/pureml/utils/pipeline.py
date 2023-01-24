@@ -69,7 +69,7 @@ def add_transformer_to_config(name, func=None, hash='', parent=None):
     save_config(config=config)
 
 
-def add_dataset_to_config(name, func=None, hash='', version='', parent=None):
+def add_dataset_to_config(name, branch, func=None, hash='', version='', parent=None):
 
     config = load_config()
 
@@ -94,6 +94,7 @@ def add_dataset_to_config(name, func=None, hash='', version='', parent=None):
 
     config['dataset'] = {
                         'name' : name,
+                        'branch': branch,
                         'hash' : hash,
                         'version': version,
                         'parent' : parent ,
@@ -106,7 +107,7 @@ def add_dataset_to_config(name, func=None, hash='', version='', parent=None):
     
 
 
-def add_model_to_config(name, func=None, hash='', version=''):
+def add_model_to_config(name, branch, func=None, hash='', version=''):
     # name = ''
     # hash = ''
     # version = ''
@@ -129,6 +130,7 @@ def add_model_to_config(name, func=None, hash='', version=''):
         
         config['model'][position] = {
                                         'name' : name,
+                                        'branch' : branch,
                                         'hash' : hash,
                                         'version': version,
                                         'code': code
@@ -137,6 +139,7 @@ def add_model_to_config(name, func=None, hash='', version=''):
         position = len(config['model'])
         model_name_position = config['model'][position]['name']
         if model_name_position == name:        
+            config['model'][position]['branch'] = branch
             config['model'][position]['hash'] = hash
             config['model'][position]['version'] = version
             config['model'][position]['code'] = code
@@ -145,11 +148,11 @@ def add_model_to_config(name, func=None, hash='', version=''):
     save_config(config=config)
 
 
-def add_metrics_to_config(values, model_name=None, model_version=None, func=None):
+def add_metrics_to_config(values, model_name=None, model_branch=None, model_version=None, func=None):
     config = load_config()
 
     if model_name is None:
-        model_name, model_version, model_hash = get_model_latest(config=config)
+        model_name, model_branch, model_version, model_hash = get_model_latest(config=config)
 
 
     if len(config['metrics']) != 0:
@@ -157,18 +160,17 @@ def add_metrics_to_config(values, model_name=None, model_version=None, func=None
         metric_values = update_step_dict(metric_values, values)
         # print('default',metric_values)
     else:
-        
         metric_values = values
 
         # print('not default',metric_values)
 
     hash = generate_hash_for_dict(values=metric_values)
 
-
     config['metrics'].update({
                             'values' : metric_values,
                             'hash' : hash,
                             'model_name' : model_name,
+                            'model_branch': model_branch,
                             'model_version' : model_version
                         })
 
@@ -189,11 +191,11 @@ def load_metrics_from_config():
 
 
 
-def add_params_to_config(values, model_name=None, model_version=None, func=None):
+def add_params_to_config(values, model_name=None, model_branch=None, model_version=None, func=None):
     config = load_config()
     
     if model_name is None:
-        model_name, model_version, model_hash = get_model_latest(config=config)
+        model_name, model_branch, model_version, model_hash = get_model_latest(config=config)
 
 
 
@@ -210,6 +212,7 @@ def add_params_to_config(values, model_name=None, model_version=None, func=None)
                             'values' : param_values,
                             'hash' : hash,
                             'model_name' : model_name,
+                            'model_branch': model_branch,
                             'model_version' : model_version
                         })
 
@@ -238,7 +241,7 @@ def add_artifacts_to_config(name, values, func):
     version = ''
     config = load_config()
     
-    model_name, model_version = get_model_latest(config=config)
+    model_name, model_branch, model_version, model_hash = get_model_latest(config=config)
 
     position = len(config['artifacts']) + 1
     config['artifacts'][position] = {
@@ -307,7 +310,8 @@ def get_model_latest(config, version='latest'):
         # print(model_positions)
         position = model_positions[-1]
         model_name = config_model[position]['name']
+        model_branch = config_model[position]['branch']
         model_version = config_model[position]['version']
         model_hash = config_model[position]['hash']
     
-    return model_name, model_version, model_hash
+    return model_name, model_branch, model_version, model_hash

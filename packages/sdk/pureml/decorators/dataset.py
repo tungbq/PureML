@@ -19,7 +19,7 @@ def dataset(name:str, branch:str, parent:str=None, upload=False):
                 is_empty = True
 
 
-            add_dataset_to_config(name=name, parent=parent, func=func)
+            add_dataset_to_config(name=name, branch=branch, parent=parent, func=func)
 
             pipeline = create_pipeline()
 

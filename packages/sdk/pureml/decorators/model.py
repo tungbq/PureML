@@ -9,7 +9,7 @@ def model(name:str, branch:str):
         # print('Inside decorator')
 
         # print('Adding model name: ', name, 'to config before invoking user function')
-        add_model_to_config(name=name)
+        add_model_to_config(name=name, branch=branch)
         
         def wrapper(*args, **kwargs):
             # print("Inside wrapper")
@@ -24,11 +24,11 @@ def model(name:str, branch:str):
 
                 metric_values = load_metrics_from_config()
                 if len(metric_values) !=0 :
-                    metrics.add(metrics=metric_values, model_name=name, model_version=model_version)
+                    metrics.add(metrics=metric_values, model_name=name, model_branch=branch, model_version=model_version)
 
                 param_values = load_params_from_config()
                 if len(param_values) !=0 :
-                    params.add(params=param_values, model_name=name, model_version=model_version)
+                    params.add(params=param_values, model_name=name, model_branch=branch, model_version=model_version)
  
 
             return func_output
