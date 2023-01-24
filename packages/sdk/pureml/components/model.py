@@ -35,6 +35,8 @@ def init_branch(branch:str, model_name:str):
     data = {'model_name': model_name, 
             'branchName':branch}
 
+    data = json.dumps(data)
+
     response = requests.post(url, data=data, headers=headers)
 
     if response.ok:
@@ -63,8 +65,10 @@ def check_model_hash(hash: str, name:str, branch:str):
         'Authorization': 'Bearer {}'.format(user_token)
     }
 
-
     data = {'hash': hash, 'branch':branch}
+
+    data = json.dumps(data)
+
     response = requests.post(url, data=data, headers=headers)
 
     hash_exists = False
@@ -207,6 +211,8 @@ def init(name:str, readme:str=None, branch:str=None):
             'branch_names':[branch_main, branch_user], 
             'readme': {'file_type': file_type, 'content':file_content}}
 
+    data = json.dumps(data)
+
     response = requests.post(url, data=data, headers=headers)
 
     if response.ok:
@@ -271,6 +277,8 @@ def register(model, name:str, branch:str, is_empty:bool=False, storage:str='pure
 
         data = {'name': name, 'branch':branch, 'hash':model_hash, 
                 'is_empty':is_empty, 'storage':storage}
+
+        data = json.dumps(data)
 
         response = requests.post(url, files=files, data=data, headers=headers)
 

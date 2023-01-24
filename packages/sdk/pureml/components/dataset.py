@@ -1,39 +1,33 @@
-
-import requests
-from rich import print
-
-import os 
 import json
-
-
-from . import get_token, get_project_id, get_org_id
-
-from pureml.utils.constants import BASE_URL, PATH_DATASET_DIR
+import os
 from urllib.parse import urljoin
+
 import joblib
 import pandas as pd
+import requests
+from pureml.utils.constants import BASE_URL, PATH_DATASET_DIR
 from pureml.utils.hash import generate_hash_for_file
-from  pureml.utils.readme import load_readme
+from pureml.utils.readme import load_readme
+from rich import print
+
+from . import get_org_id, get_token
 
 
-def init_branch(branch:str, dataset_name:str):
+def init_branch(branch: str, dataset_name: str):
     user_token = get_token()
     org_id = get_org_id()
-    
 
-
-    url = '/org/{}/dataset/{}/branch/create'.format(org_id, dataset_name)
+    url = "/org/{}/dataset/{}/branch/create".format(org_id, dataset_name)
     url = urljoin(BASE_URL, url)
 
-
     headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {}".format(user_token),
     }
 
+    data = {"dataset_name": dataset_name, "branchName": branch}
 
-    data = {'dataset_name': dataset_name, 
-            'branchName':branch}
+    data = json.dumps(data)
 
     response = requests.post(url, data=data, headers=headers)
 
@@ -48,164 +42,160 @@ def init_branch(branch:str, dataset_name:str):
         return False
 
 
-
-def check_dataset_hash(hash: str, name:str, branch:str):
+def check_dataset_hash(hash: str, name: str, branch: str):
 
     user_token = get_token()
     org_id = get_org_id()
 
-
-    url = 'org/{}/dataset/{}/branch/{}/hash-status'.format(org_id, branch, name)
+    url = "org/{}/dataset/{}/branch/{}/hash-status".format(org_id, branch, name)
     url = urljoin(BASE_URL, url)
 
+    headers = {"Authorization": "Bearer {}".format(user_token)}
 
-    headers = {
-        'Authorization': 'Bearer {}'.format(user_token)
-    }
+    data = {"hash": hash, "branch": branch}
 
+    data = json.dumps(data)
 
-    data = {'hash': hash, 'branch':branch}
     response = requests.post(url, data=data, headers=headers)
 
     hash_exists = False
 
     if response.ok:
-        hash_exists = response.json()['Data']
+        hash_exists = response.json()["Data"]
 
     return hash_exists
 
 
-
-def branch_details(branch:str, dataset_name:str):
+def branch_details(branch: str, dataset_name: str):
     user_token = get_token()
     org_id = get_org_id()
 
-
-    url = 'org/{}/dataset/{}/branch/{}'.format(org_id, dataset_name, branch)
+    url = "org/{}/dataset/{}/branch/{}".format(org_id, dataset_name, branch)
     url = urljoin(BASE_URL, url)
 
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
     }
-    
 
     response = requests.get(url, headers=headers)
-    # print(response.url)
-    # print(response.text)
+
+    # print(response.json)
+    # print(response.request.url)
+    # print(response.request.body)
+    # print(response.request.headers)
 
     if response.ok:
-        # print(f"[bold green]Model details have been fetched")
         response_text = response.json()
-        branch_details = response_text['Data'][0]
+        # T-1161 standardize api response to contains Data as a list
+        branch_details = response_text["Data"]
+
+        # branch_details = response_text['Data'][0]
         # print(model_details)
 
         return branch_details
 
     else:
         print(f"[bold red]Branch details details have not been found")
-        return 
+        return
 
 
+def branch_status(branch: str, dataset_name: str):
 
-def branch_status(branch:str, dataset_name:str):
+    details = branch_details(branch=branch, dataset_name=dataset_name)
 
-    branch_details = branch_details(branch=branch, dataset_name=dataset_name)
-
-    if branch_details:
+    if details:
         return True
     else:
         return False
 
 
-def branch_delete(branch:str, dataset_name:str) -> str:
-    
+def branch_delete(branch: str, dataset_name: str) -> str:
+
     user_token = get_token()
     org_id = get_org_id()
 
-
-    url = 'org/{}/dataset/{}/branch/{}/delete'.format(org_id, dataset_name, branch)
+    url = "org/{}/dataset/{}/branch/{}/delete".format(org_id, dataset_name, branch)
     url = urljoin(BASE_URL, url)
 
-    
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
     }
 
-    
     response = requests.delete(url, headers=headers)
-
 
     if response.ok:
         print(f"[bold green]Dataset branch has been deleted")
-        
+
     else:
         print(f"[bold red]Unable to delete Model branch")
 
     return response.text
 
+
 def list():
-    '''This function will return a list of all the datasets
-    
+    """This function will return a list of all the datasets
+
     Returns
     -------
         A list of all the datasets
-    
-    '''
+
+    """
 
     user_token = get_token()
     org_id = get_org_id()
 
-    url = 'org/{}/dataset/all'.format(org_id)
+    url = "org/{}/dataset/all".format(org_id)
     url = urljoin(BASE_URL, url)
-    
 
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
     }
 
-
     response = requests.get(url, headers=headers)
-    
+
     if response.ok:
         # print(f"[bold green]Obtained list of models")
-        
+
         response_text = response.json()
-        model_list = response_text['Data']
+        model_list = response_text["Data"]
         # print(model_list)
 
         return model_list
     else:
         print(f"[bold red]Unable to obtain the list of dataset!")
-        
+
     return
 
 
-def init(name:str, readme:str=None, branch:str=None):
+def init(name: str, readme: str = None, branch: str = None):
     user_token = get_token()
     org_id = get_org_id()
-    
+
     file_content, file_type = load_readme(path=readme)
 
-    branch_user = 'dev' if branch is None else branch
-    branch_main = 'main'
+    branch_user = "dev" if branch is None else branch
+    branch_main = "main"
 
-
-    url = 'org/{}/dataset/{}/create'.format(org_id, name)
+    url = "org/{}/dataset/{}/create".format(org_id, name)
     url = urljoin(BASE_URL, url)
 
-
     headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {}".format(user_token),
+        # 'accept': 'application/json',
+        # 'Content-Type': '*/*',
     }
 
+    data = {
+        "name": name,
+        "branch_names": [branch_main, branch_user],
+        "readme": {"file_type": file_type, "content": file_content},
+    }
 
-    data = {'name': name, 
-            'branch_names':[branch_main, branch_user], 
-            'readme': {'file_type': file_type, 'content':file_content}}
+    data = json.dumps(data)
 
     response = requests.post(url, data=data, headers=headers)
 
@@ -215,31 +205,31 @@ def init(name:str, readme:str=None, branch:str=None):
     else:
         print(f"[bold red]Dataset has not been created!")
 
-    print(response.json)
 
-
-
-def save_dataset(dataset, name:str):
+def save_dataset(dataset, name: str):
     # file_name = '.'.join([name, 'parquet'])
-    file_name = '.'.join([name, 'pkl'])
+    file_name = ".".join([name, "pkl"])
     save_path = os.path.join(PATH_DATASET_DIR, file_name)
-
 
     os.makedirs(PATH_DATASET_DIR, exist_ok=True)
 
     # dataset.to_parquet(save_path)
     joblib.dump(dataset, save_path)
 
-    
     return save_path
 
 
-
-
-def register(dataset, name:str, pipeline, branch:str, is_empty:bool=False, storage:str='pureml-storage') -> str:
-    ''' The function takes in a dataset, a name and a version and saves the dataset locally, then uploads the
+def register(
+    dataset,
+    name: str,
+    pipeline,
+    branch: str,
+    is_empty: bool = False,
+    storage: str = "pureml-storage",
+) -> str:
+    """The function takes in a dataset, a name and a version and saves the dataset locally, then uploads the
     dataset to the PureML server
-    
+
     Parameters
     ----------
     dataset
@@ -248,81 +238,106 @@ def register(dataset, name:str, pipeline, branch:str, is_empty:bool=False, stora
         The name of the dataset.
     version: str, optional
         The version of the dataset.
-    
-    '''
-        
+
+    """
+
     user_token = get_token()
     org_id = get_org_id()
 
-
     dataset_path = save_dataset(dataset, name)
-    name_with_ext = dataset_path.split('/')[-1]
+    name_with_ext = dataset_path.split("/")[-1]
 
-    dataset_hash = generate_hash_for_file(file_path=dataset_path, name=name, branch=branch, is_empty=is_empty)
+    dataset_hash = generate_hash_for_file(
+        file_path=dataset_path, name=name, branch=branch, is_empty=is_empty
+    )
 
-    
-    dataset_exists = dataset_status(dataset)
+    if is_empty:
+        dataset_path = save_dataset(dataset=None, name=name)
+        name_with_ext = dataset_path.split("/")[-1]
+
+
+    dataset_exists = dataset_status(name)
 
     if not dataset_exists:
         dataset_created = init(name=name, branch=branch)
         if not dataset_created:
-            print('[bold red] Unable to register the dataset')
-            return  False, dataset_hash, None
+            print("[bold red] Unable to register the dataset")
+            return False, dataset_hash, None
+        else:
+            print("[bold green] Connected to Dataset")
 
-    
-    branch_exists = branch_status(dataset, branch)
+    branch_exists = branch_status(branch=branch, dataset_name=name)
 
     if not branch_exists:
         branch_created = init_branch(branch=branch, dataset_name=name)
-        
+
         if not branch_created:
-            print('[bold red] Unable to register the dataset')
+            print("[bold red] Unable to register the dataset")
             return False, dataset_hash, None
+        else:
+            print("[bold green] Connected to Branch")
 
-    dataset_exists_remote = check_dataset_hash(hash=dataset_hash, name=name)
-
-
+    dataset_exists_remote = check_dataset_hash(
+        hash=dataset_hash, name=name, branch=branch
+    )
 
     if dataset_exists_remote:
 
         print(f"[bold red]Dataset already exists. Not registering a new version!")
-        return True, dataset_hash, 'latest'
+        return True, dataset_hash, "latest"
     else:
 
-        url = 'org/{}dataset/{}/branch/{}/register'.format(org_id, name, branch)
+        url = "org/{}dataset/{}/branch/{}/register".format(org_id, name, branch)
         url = urljoin(BASE_URL, url)
 
-        headers = {
-            'Authorization': 'Bearer {}'.format(user_token)
-        }
+        headers = {"Authorization": "Bearer {}".format(user_token)}
 
-
-        files = {'file': (name_with_ext, open(dataset_path, 'rb'))}
+        files = {"file": (name_with_ext, open(dataset_path, "rb"))}
 
         pipeline = json.dumps(pipeline)
 
-        data = {'name': name, 'branch':branch, 'hash':dataset_hash, 'pipeline': pipeline, 
-                'is_empty':is_empty, 'storage':storage}
+        data = {
+            "name": name,
+            "branch": branch,
+            "hash": dataset_hash,
+            "pipeline": pipeline,
+            "is_empty": is_empty,
+            "storage": storage,
+        }
 
         response = requests.post(url, files=files, data=data, headers=headers)
 
+        # T-1165 Fix invalid json response while registering dataset
+        # print(response.json())
+        try:
+            print(response.json())
+        except Exception as e:
+            print('Unable to get response.json()')
+            print(e)
+
+
+        print(response.request.url)
+        print(response.request.body)
+        print(response.request.headers)
+
         if response.ok:
             if is_empty:
-               print(f"[bold green]Pipeline has been registered!")
-            else:            
+                print(f"[bold green]Pipeline has been registered!")
+            else:
                 print(f"[bold green]Dataset and pipeline have been registered!")
 
-            dataset_version = response.json()['Data'][0]['version']
+            print(response.json())
+
+            dataset_version = response.json()["Data"][0]["version"]
 
             return True, dataset_hash, dataset_version
         else:
             print(f"[bold red]Dataset has not been registered!")
-            
+
             return True, dataset_hash, None
 
 
-
-def dataset_status(name:str):
+def dataset_status(name: str):
 
     dataset_details = details(name=name)
 
@@ -332,9 +347,11 @@ def dataset_status(name:str):
         return False
 
 
-def details(name:str,):
-    '''It fetches the details of a dataset.
-    
+def details(
+    name: str,
+):
+    """It fetches the details of a dataset.
+
     Parameters
     ----------
     name : str
@@ -344,39 +361,37 @@ def details(name:str,):
     Returns
     -------
         The details of the dataset.
-    
-    '''
-    
+
+    """
+
     user_token = get_token()
     org_id = get_org_id()
 
-    url = 'org/{}/dataset/{}'.format(org_id, name)
+    url = "org/{}/dataset/{}".format(org_id, name)
     url = urljoin(BASE_URL, url)
 
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
     }
-    
 
     response = requests.get(url, headers=headers)
-
 
     if response.ok:
         # print(f"[bold green]Dataset details have been fetched")
         response_text = response.json()
-        dataset_details = response_text['Data'][0]
-        
+        dataset_details = response_text["Data"][0]
+
         return dataset_details
 
     else:
         print(f"[bold red]Dataset details have not been found")
-        return 
+        return
 
 
-def version_details(name:str, branch:str, version:str='latest'):
-    '''It fetches the details of a dataset.
-    
+def version_details(name: str, branch: str, version: str = "latest"):
+    """It fetches the details of a dataset.
+
     Parameters
     ----------
     name : str
@@ -386,18 +401,20 @@ def version_details(name:str, branch:str, version:str='latest'):
     Returns
     -------
         The details of the dataset.
-    
-    '''
-    
+
+    """
+
     user_token = get_token()
     org_id = get_org_id()
 
-    url = '/org/{}/dataset/{}/branch/{}/version/{}'.format(org_id, name, branch, version)
+    url = "/org/{}/dataset/{}/branch/{}/version/{}".format(
+        org_id, name, branch, version
+    )
     url = urljoin(BASE_URL, url)
 
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
     }
 
     response = requests.get(url, headers=headers)
@@ -405,36 +422,34 @@ def version_details(name:str, branch:str, version:str='latest'):
     if response.ok:
         # print(f"[bold green]Dataset Version details have been fetched")
         response_text = response.json()
-        dataset_details = response_text['Data'][0]
+        dataset_details = response_text["Data"][0]
         # print(dataset_details)
 
         return dataset_details
 
     else:
         print(f"[bold red]Dataset details have not been found")
-        return 
+        return
 
 
+def fetch(name: str, branch: str, version: str = "latest"):
+    """This function fetches a dataset from the server and returns it as a dataframe object
 
-def fetch(name:str, branch:str, version:str='latest'):
-    '''This function fetches a dataset from the server and returns it as a dataframe object
-    
     Parameters
     ----------
     name : str, optional
         The name of the dataset you want to fetch.
     version: str
         The version of the dataset
-    
+
     Returns
     -------
         The dataset dataframe is being returned.
-    
-    '''
+
+    """
 
     user_token = get_token()
     org_id = get_org_id()
-
 
     dataset_details = version_details(name=name, branch=branch, version=version)
 
@@ -442,24 +457,22 @@ def fetch(name:str, branch:str, version:str='latest'):
         print(f"[bold red]Unable to fetch Dataset version")
         return
 
-    is_empty = dataset_details['is_empty']
+    is_empty = dataset_details["is_empty"]
 
     if is_empty:
-        print('[bold orange]Dataset file is not registered to the version')
+        print("[bold orange]Dataset file is not registered to the version")
         return
 
-
-    storage_path = dataset_details['path']['source_path']
-    storage_source_type = dataset_details['path']['source_type']['public_url']
-
+    storage_path = dataset_details["path"]["source_path"]
+    storage_source_type = dataset_details["path"]["source_type"]["public_url"]
 
     dataset_url = urljoin(storage_source_type, storage_path)
 
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
     }
-    
+
     # print('url', dataset_url)
 
     # response = requests.get(dataset_url, headers=headers)
@@ -471,9 +484,8 @@ def fetch(name:str, branch:str, version:str='latest'):
         # open('temp_dataset.parquet', 'wb').write(dataset_bytes)
         # dataset = pd.read_parquet('temp_dataset.parquet')
 
-        open('temp_dataset.pkl', 'wb').write(dataset_bytes)
-        dataset = joblib.load('temp_dataset.pkl')
-
+        open("temp_dataset.pkl", "wb").write(dataset_bytes)
+        dataset = joblib.load("temp_dataset.pkl")
 
         # print(f"[bold green]Dataset has been fetched")
         return dataset
@@ -482,49 +494,42 @@ def fetch(name:str, branch:str, version:str='latest'):
         # print(response.status_code)
         # print(response.text)
         # print(response.url)
-        return 
+        return
 
 
+def delete(name: str, version: str = "latest") -> str:
+    """This function deletes a dataset from the project
 
-
-def delete(name:str, version:str='latest') -> str:
-    ''' This function deletes a dataset from the project
-    
     Parameters
     ----------
     name : str
         The name of the dataset you want to delete
     version : str
         The version of the dataset to delete.
-    
-    '''
+
+    """
 
     user_token = get_token()
     org_id = get_org_id()
 
-
-    url = 'org/{}/dataset/{}/delete'.format(org_id, name)
+    url = "org/{}/dataset/{}/delete".format(org_id, name)
     url = urljoin(BASE_URL, url)
-    
+
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
     }
 
-    data = {'version':version}
-    
-    
-    response = requests.delete(url, headers=headers, data=data)
+    data = {"version": version}
 
+    data = json.dumps(data)
+
+    response = requests.delete(url, headers=headers, data=data)
 
     if response.ok:
         print(f"[bold green]Dataset has been deleted")
-        
+
     else:
         print(f"[bold red]Unable to delete Dataset")
 
     return response.text
-
-
-
-
