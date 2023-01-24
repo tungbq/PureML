@@ -100,8 +100,10 @@ def fetch(model_name: str, model_branch:str, model_version:str='latest', metric:
         'Authorization': 'Bearer {}'.format(user_token)
     }
 
+    request_params = {'key': 'metrics'}
+    request_params = json.dumps(request_params)
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params=request_params)
 
     if response.ok:
         res_text = json.loads(response.text)
