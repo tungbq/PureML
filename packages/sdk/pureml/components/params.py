@@ -1,43 +1,34 @@
-from pathlib import Path
-from typing import Optional
-import jwt
-import requests
-# import typer
-from rich import print
-from rich.syntax import Syntax
-
-import os 
 import json
-import typing
 from urllib.parse import urljoin
 
-from . import get_token, get_project_id, get_org_id, convert_values_to_string
-from pureml.utils.constants import BASE_URL, PATH_USER_PROJECT_DIR
-from pureml.utils.pipeline import add_params_to_config
+import requests
+from pureml.utils.constants import BASE_URL
 from pureml.utils.log_utils import merge_step_with_value
+from pureml.utils.pipeline import add_params_to_config
+from rich import print
+
+from . import convert_values_to_string, get_org_id, get_token
 
 
-def post_params(params, model_name: str, model_version:str):
+def post_params(params, model_name: str, model_branch:str, model_version:str):
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
     
-    url_path_1 = '{}/project/{}/model/{}/{}/params/add'.format(org_id, project_id, model_name, model_version)
-    url = urljoin(BASE_URL, url_path_1)
-
+    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = urljoin(BASE_URL, url)
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': 'Bearer {}'.format(user_token)
     }
 
-    params = json.dumps(params)
-    data = {'model_name': model_name, 'params': params}
+    data = {'params': params}
+    data = json.dumps(data)
 
     response = requests.post(url, data=data, headers=headers)
 
 
-    if response.status_code == 200:
+    if response.ok:
         print(f"[bold green]Params have been registered!")
 
     else:
@@ -46,7 +37,7 @@ def post_params(params, model_name: str, model_version:str):
     return response
 
 
-def add(params, model_name: str=None, model_version:str='latest', step=1) -> str:
+def add(params, model_name: str=None, model_branch:str=None, model_version:str='latest', step=1) -> str:
     '''`add()` takes a dictionary of parameters and a model name as input and returns a string
     
     Parameters
@@ -67,10 +58,10 @@ def add(params, model_name: str=None, model_version:str='latest', step=1) -> str
     params = convert_values_to_string(logged_dict=params)
     params = merge_step_with_value(values_dict=params, step=step)
 
-    add_params_to_config(values=params, model_name=model_name, model_version=model_version)
+    add_params_to_config(values=params, model_name=model_name, model_branch=model_branch, model_version=model_version)
 
     if model_name is not None and model_version is not None:
-        response = post_params(params=params, model_name=model_name, model_version=model_version)
+        response = post_params(params=params, model_name=model_name, model_branch=model_branch, model_version=model_version)
 
     #     return response.text
         
@@ -80,7 +71,7 @@ def add(params, model_name: str=None, model_version:str='latest', step=1) -> str
 
 
 # @app.command()
-def fetch(model_name: str, model_version:str='latest', param:str='') -> str:
+def fetch(model_name: str, model_branch:str, model_version:str='latest', param:str='') -> str:
     '''
     
     This function fetches the parameters of a model
@@ -101,11 +92,10 @@ def fetch(model_name: str, model_version:str='latest', param:str='') -> str:
     '''
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
     
 
-    url_path_1 = '{}/project/{}/model/{}/{}/params/{}'.format(org_id, project_id, model_name, model_version, param)
-    url = urljoin(BASE_URL, url_path_1)
+    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = urljoin(BASE_URL, url)
 
 
     headers = {
@@ -116,7 +106,7 @@ def fetch(model_name: str, model_version:str='latest', param:str='') -> str:
 
     response = requests.get(url, headers=headers)
 
-    if response.status_code == 200:
+    if response.ok:
         res_text = json.loads(response.text)
 
         if param == '':
@@ -153,7 +143,7 @@ def fetch(model_name: str, model_version:str='latest', param:str='') -> str:
 
 
 # @app.command()
-def delete(param:str, model_name:str, model_version:str='latest') -> str:
+def delete(param:str, model_name:str, model_branch:str, model_version:str='latest') -> str:
     '''This function deletes a parameter from a model
     
     Parameters
@@ -168,11 +158,10 @@ def delete(param:str, model_name:str, model_version:str='latest') -> str:
     '''
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
     
 
-    url_path_1 = '{}/project/{}/model/{}/{}/params/{}/delete'.format(org_id,project_id, model_name, model_version, param)
-    url = urljoin(BASE_URL, url_path_1)
+    url = '/org/{}/model/{}/branch/{}/version/{}/log/delete'.format(org_id, model_name, model_branch, model_version)
+    url = urljoin(BASE_URL, url)
 
 
     headers = {
@@ -183,7 +172,7 @@ def delete(param:str, model_name:str, model_version:str='latest') -> str:
 
     response = requests.delete(url, headers=headers)
 
-    if response.status_code == 200:
+    if response.ok:
         print(f"[bold green]Param has been deleted")
         
     else:
