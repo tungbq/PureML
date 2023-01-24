@@ -49,7 +49,7 @@ func NewErrorResponse(statusCode int, message string) *Response {
 }
 
 func NewDataResponse(statusCode int, data interface{}, message string) *Response {
-	if reflect.TypeOf(data).Kind() != reflect.Slice {
+	if data!=nil && reflect.TypeOf(data).Kind() != reflect.Slice {
 		data = []interface{}{data}
 	}
 	return &Response{

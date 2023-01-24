@@ -18,7 +18,6 @@ import (
 // @Router /org/{orgId}/model/{modelName}/readme/version [get]
 // @Param orgId path string true "Organization Id"
 // @Param modelName path string true "Model Name"
-// @Param version path string true "Version"
 func GetModelReadmeAllVersions(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
 	readme, err := datastore.GetModelReadmeAllVersions(modelUUID)
