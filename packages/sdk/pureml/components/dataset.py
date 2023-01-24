@@ -17,7 +17,7 @@ def init_branch(branch: str, dataset_name: str):
     user_token = get_token()
     org_id = get_org_id()
 
-    url = "/org/{}/dataset/{}/branch/create".format(org_id, dataset_name)
+    url = "org/{}/dataset/{}/branch/create".format(org_id, dataset_name)
     url = urljoin(BASE_URL, url)
 
     headers = {
@@ -88,12 +88,12 @@ def branch_details(branch: str, dataset_name: str):
     if response.ok:
         response_text = response.json()
         # T-1161 standardize api response to contains Data as a list
-        branch_details = response_text["Data"]
+        details = response_text["Data"]
 
-        # branch_details = response_text['Data'][0]
-        # print(model_details)
+        # details = response_text['Data'][0]
+        # print(details)
 
-        return branch_details
+        return details
 
     else:
         print(f"[bold red]Branch details details have not been found")
@@ -407,7 +407,7 @@ def version_details(name: str, branch: str, version: str = "latest"):
     user_token = get_token()
     org_id = get_org_id()
 
-    url = "/org/{}/dataset/{}/branch/{}/version/{}".format(
+    url = "org/{}/dataset/{}/branch/{}/version/{}".format(
         org_id, name, branch, version
     )
     url = urljoin(BASE_URL, url)

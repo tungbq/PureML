@@ -16,7 +16,7 @@ def model(name:str, branch:str):
             
             func_output = func(*args, **kwargs)
 
-            model_exists_in_remote, model_hash, model_version = register(model=func_output, name=name)
+            model_exists_in_remote, model_hash, model_version = register(model=func_output, name=name, branch=branch)
 
             if model_exists_in_remote:                 #Only add the model to config if it is successfully pushed
 
