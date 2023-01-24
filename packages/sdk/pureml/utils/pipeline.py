@@ -5,6 +5,7 @@ from .hash import generate_hash_for_dict, generate_hash_for_function
 from .source_code import get_source_code
 import os
 import shutil
+from .log_utils import update_step_dict
 
 def add_load_data_to_config(name, func=None, hash=''):
 
@@ -151,12 +152,15 @@ def add_metrics_to_config(values, model_name=None, model_version=None, func=None
         model_name, model_version, model_hash = get_model_latest(config=config)
 
 
-
     if len(config['metrics']) != 0:
         metric_values = config['metrics']['values']
-        metric_values.update(values)
+        metric_values = update_step_dict(metric_values, values)
+        # print('default',metric_values)
     else:
+        
         metric_values = values
+
+        # print('not default',metric_values)
 
     hash = generate_hash_for_dict(values=metric_values)
 
@@ -195,7 +199,7 @@ def add_params_to_config(values, model_name=None, model_version=None, func=None)
 
     if len(config['params']) != 0:
         param_values = config['params']['values']
-        param_values.update(values)
+        param_values = update_step_dict(param_values, values)
     else:
         param_values = values
 
