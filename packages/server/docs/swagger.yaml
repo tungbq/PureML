@@ -2182,7 +2182,7 @@ paths:
       summary: User update profile.
       tags:
       - User
-  /user/profile/{userhandle}:
+  /user/profile/{userHandle}:
     get:
       consumes:
       - '*/*'

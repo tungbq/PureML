@@ -3162,7 +3162,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/profile/{userhandle}": {
+        "/user/profile/{userHandle}": {
             "get": {
                 "description": "Get user profile by handle. Accessible without login.",
                 "consumes": [
