@@ -1,7 +1,7 @@
 from pureml.components.model import register
-from pureml.utils.pipeline import add_model_to_config, load_metrics_from_config, load_params_from_config
+from pureml.utils.pipeline import add_model_to_config, load_metrics_from_config, load_params_from_config, load_figures_from_config
 from pureml import metrics, params
-
+from pureml.components import figure
 
 def model(name:str, branch:str):
     
@@ -29,6 +29,11 @@ def model(name:str, branch:str):
                 param_values = load_params_from_config()
                 if len(param_values) !=0 :
                     params.add(params=param_values, model_name=name, model_branch=branch, model_version=model_version)
+
+                
+                figure_file_paths = load_figures_from_config()
+                if len(figure_file_paths) !=0 :
+                    figure.add(file_paths=figure_file_paths, model_name=name, model_branch=branch, model_version=model_version)
  
 
             return func_output

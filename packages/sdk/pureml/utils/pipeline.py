@@ -236,6 +236,50 @@ def load_params_from_config():
 
 
 
+
+def add_figures_to_config(values, model_name=None, model_branch=None, model_version=None, func=None):
+    config = load_config()
+    
+    if model_name is None:
+        model_name, model_branch, model_version, model_hash = get_model_latest(config=config)
+
+
+    if len(config['figure']) != 0:
+        figure_values = config['figure']['values']
+    else:
+        figure_values = values
+
+    hash = generate_hash_for_dict(values=figure_values)
+
+
+    config['figure'].update({
+                            'values' : figure_values,
+                            'hash' : hash,
+                            'model_name' : model_name,
+                            'model_branch': model_branch,
+                            'model_version' : model_version
+                        })
+
+    save_config(config=config)
+
+
+
+
+def load_figures_from_config():
+
+    config = load_config()
+    try:
+        figures = config['figure']['values']
+    except Exception as e:
+        # print(e)
+        print('No figures are found in config')
+        figures = {}
+
+    return figures
+
+
+
+
 def add_artifacts_to_config(name, values, func):
     hash = ''
     version = ''
@@ -252,48 +296,6 @@ def add_artifacts_to_config(name, values, func):
                                         'model_version' : model_version        
                                         }
 
-
-
-
-# def add_predict_to_config(name='', func=None, hash='',model_name=None, model_version=None, requirements_file:str=None):
-#     config = load_config()
-#     code = ''
-#     requirements = ''
-    
-#     if func is not None:
-#         try:
-#             code = get_source_code(func)
-#             hash = generate_hash_for_function(func)
-
-#             os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
-#             with open(PATH_PREDICT, 'w') as pred_file:
-#                 pred_file.write(code)
-
-#         except Exception as e:
-#             print('Unable to get predict source code')
-#             print(e)
-
-#     if requirements_file is not None:
-#         shutil.copy(requirements_file, PATH_PREDICT_REQUIREMENTS)
-
-
-#         try:
-#             with open(requirements_file, 'r') as req_file:
-#                 requirements = req_file.readlines()
-#                 requirements = [i.split('\n')[0] for i in requirements]
-#         except Exception as e:
-#             print('Unable to write requirements for prediction')
-#             print(e)
-
-
-#     config['predict'] = {
-#                             'name' : name,
-#                             'hash' : hash,
-#                             'requirements': requirements,
-#                             'code' : code,
-#                             }
-
-#     save_config(config=config)
 
 
 
