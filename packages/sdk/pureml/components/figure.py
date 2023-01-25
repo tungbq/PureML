@@ -231,7 +231,6 @@ def fetch(model_name: str, model_branch:str, model_version:str='latest'):
     return res_text
     
 
-
 def give_fig_urls(details):
     
     fig_paths = None
