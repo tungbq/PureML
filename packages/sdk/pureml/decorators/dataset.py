@@ -1,6 +1,6 @@
 from pureml.components.dataset import register
 from pureml.utils.pipeline import add_dataset_to_config
-from pureml.pipeline.data.create_pipeline import create_pipeline
+from pureml.lineage.data.create_lineage import create_lineage
 
 def dataset(name:str, branch:str, parent:str=None, upload=False):
 
@@ -21,11 +21,11 @@ def dataset(name:str, branch:str, parent:str=None, upload=False):
 
             add_dataset_to_config(name=name, parent=parent, func=func)
 
-            pipeline = create_pipeline()
+            lineage = create_lineage()
 
 
             dataset_exists_in_remote, dataset_hash, dataset_version = register(dataset=func_output, name=name, branch=branch, 
-                                                                                pipeline=pipeline, is_empty=is_empty)
+                                                                                lineage=lineage, is_empty=is_empty)
 
             #Uncomment this if there any components that depend on dataset version, or dataset hash
             # if dataset_exists_in_remote:

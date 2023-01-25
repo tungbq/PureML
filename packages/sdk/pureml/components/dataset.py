@@ -222,7 +222,7 @@ def save_dataset(dataset, name: str):
 def register(
     dataset,
     name: str,
-    pipeline,
+    lineage,
     branch: str,
     is_empty: bool = False,
     storage: str = "pureml-storage",
@@ -263,8 +263,8 @@ def register(
         if not dataset_created:
             print("[bold red] Unable to register the dataset")
             return False, dataset_hash, None
-        else:
-            print("[bold green] Connected to Dataset")
+    else:
+        print("[bold green] Connected to Dataset")
 
     branch_exists = branch_status(branch=branch, dataset_name=name)
 
@@ -274,8 +274,8 @@ def register(
         if not branch_created:
             print("[bold red] Unable to register the dataset")
             return False, dataset_hash, None
-        else:
-            print("[bold green] Connected to Branch")
+    else:
+        print("[bold green] Connected to Branch")
 
     dataset_exists_remote = check_dataset_hash(
         hash=dataset_hash, name=name, branch=branch
@@ -290,20 +290,23 @@ def register(
         url = "org/{}dataset/{}/branch/{}/register".format(org_id, name, branch)
         url = urljoin(BASE_URL, url)
 
-        headers = {"Authorization": "Bearer {}".format(user_token)}
+        headers = {"Authorization": "Bearer {}".format(user_token),
+                    'accept': 'application/json'}
 
         files = {"file": (name_with_ext, open(dataset_path, "rb"))}
 
-        pipeline = json.dumps(pipeline)
+        lineage = json.dumps(lineage)
 
         data = {
             "name": name,
             "branch": branch,
             "hash": dataset_hash,
-            "pipeline": pipeline,
+            "pipeline": lineage,
             "is_empty": is_empty,
             "storage": storage,
         }
+
+        # data = json.dumps(data)
 
         response = requests.post(url, files=files, data=data, headers=headers)
 
@@ -314,7 +317,7 @@ def register(
         except Exception as e:
             print('Unable to get response.json()')
             print(e)
-
+        print(response.status_code)
 
         print(response.request.url)
         print(response.request.body)
