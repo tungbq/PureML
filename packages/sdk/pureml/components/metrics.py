@@ -61,7 +61,7 @@ def add(metrics, model_name: str=None, model_branch:str=None, model_version:str=
     add_metrics_to_config(values=metrics, model_name=model_name, model_branch=model_branch, model_version=model_version)
     
 
-    if model_name is not None and model_version is not None:
+    if model_name is not None and model_branch is not None and model_version is not None:
         response = post_metrics(metrics=metrics, model_name=model_name, model_branch=model_branch, model_version=model_version)
 
         # return response.text
