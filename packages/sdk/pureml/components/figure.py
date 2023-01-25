@@ -117,87 +117,144 @@ def add(figure: dict=None, model_name: str=None, model_branch:str=None, model_ve
     # return response.text
 
 
-# def fetch(model_name: str, model_version:str='latest', name:str = ''):
-#     '''It fetches the figure from the server and stores it in the local directory
+def details(model_name: str, model_branch:str, model_version:str='latest'):
+    user_token = get_token()
+    org_id = get_org_id()
+
+    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = urljoin(BASE_URL, url)
+
+
+    headers = {
+        "accept": "application/json",
+        "Authorization": "Bearer {}".format(user_token),
+    }
+
+    response = requests.get(url, headers=headers)
+
+
+    if response.ok:
+        # T-1161 standardize api response to contains Models as a list
+        response_text = response.json()
+        details = response_text["Data"]
+
+        # print(model_details)
+
+        return details
+
+    else:
+        print(f"[bold red]Branch details details have not been found")
+        return
+
+
+
+def fetch(model_name: str, model_branch:str, model_version:str='latest'):
+    '''It fetches the figure from the server and stores it in the local directory
     
-#     Parameters
-#     ----------
-#     model_name : str
-#         The name of the model you want to fetch the figure from.
-#     model_version: str
-#         The version of the model
-#     name : str
-#         The name of the figure to be fetched. If not specified, all figures will be fetched.
+    Parameters
+    ----------
+    model_name : str
+        The name of the model you want to fetch the figure from.
+    model_version: str
+        The version of the model
+    name : str
+        The name of the figure to be fetched. If not specified, all figures will be fetched.
     
-#     Returns
-#     -------
-#         The response text is being returned.
+    Returns
+    -------
+        The response text is being returned.
     
-#     '''
+    '''
 
-#     user_token = get_token()
-#     org_id = get_org_id()
-
-
-#     def fetch_figure(figure_details: dict):
-
-#         url = figure_details['location']
-#         file_path_temp = figure_details['path']
-#         file_name = file_path_temp.split(os.path.sep)[-1]
-#         save_path = os.path.join(PATH_FIGURE_DIR, file_name)
-#         print('save path', save_path)
-
-#         name_fetched = figure_details['figure']
+    user_token = get_token()
+    org_id = get_org_id()
 
 
-#         headers = {
-#             'Content-Type': 'application/x-www-form-urlencoded',
-#             'Authorization': 'Bearer {}'.format(user_token)
-#         }
+    def fetch_figure(file_details):
+    
+        file_name, url = file_details
+
+        save_path = os.path.join(PATH_FIGURE_DIR, file_name)
+        print('save path', save_path)
+
+
+
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Bearer {}'.format(user_token)
+        }
         
-#         print('figure url', url)
+        print('figure url', url)
 
-#         # response = requests.get(url, headers=headers)
-#         response = requests.get(url)
+        # response = requests.get(url, headers=headers)
+        response = requests.get(url)
 
-#         print(response.status_code)
+        print(response.status_code)
 
-#         if response.status_code == 200:
-#             print('[bold green] figure {} has been fetched'.format(name_fetched))
+        if response.ok:
+            print('[bold green] figure {} has been fetched'.format(file_name))
 
-#             save_dir = os.path.dirname(save_path)
+            save_dir = os.path.dirname(save_path)
 
-#             os.makedirs(save_dir, exist_ok=True)
+            os.makedirs(save_dir, exist_ok=True)
 
-#             figure_bytes = response.content
+            figure_bytes = response.content
 
-#             open(save_path, 'wb').write(figure_bytes)
+            open(save_path, 'wb').write(figure_bytes)
 
 
-#             print('[bold green] figure {} has been stored at {}'.format(name_fetched, save_path))
+            print('[bold green] figure {} has been stored at {}'.format(file_name, save_path))
             
-#             return response.text
-#         else:
-#             print('[bold red] Unable to fetch the figure')
+            return response.text
+        else:
+            print('[bold red] Unable to fetch the figure')
 
-#             return response.text
-
-
-#     figure_details = details(model_name=model_name, name=name, model_version=model_version)
-
-#     if figure_details is None:
-#         return
-
-#     if type(figure_details) is dict:
-
-#         res_text = fetch_figure(figure_details)
-
-#     elif type(figure_details) is list:
-#         res_text = Parallel(n_jobs=-1)(delayed(fetch_figure)(art_det) for art_det in figure_details)
+            return response.text
 
 
-#     return res_text
+    figure_details = details(model_name=model_name, model_branch=model_branch, model_version=model_version)
+
+    if figure_details is None:
+        return
     
+    fig_urls = give_fig_urls(details=figure_details)
+
+
+    if len(fig_urls) <=1:
+
+        res_text = fetch_figure(fig_urls[0])
+
+    else:
+        res_text = Parallel(n_jobs=-1)(delayed(fetch_figure)(fig_url) for fig_url in fig_urls)
+
+
+    return res_text
+    
+
+
+def give_fig_urls(details):
+    
+    fig_paths = None
+
+    if details is not None:
+        
+        details = details[0]['data']
+        if 'figure' in details.keys():
+            fig_paths = []
+
+            fig_details_all = details['figure']
+
+            for fig_key, path in fig_details_all.items():
+                source_path = fig_details_all[fig_key]['path']['source_path']
+                source_url = fig_details_all[fig_key]['path']['source_type']['public_url']
+                file_url = urljoin(source_url, source_path)
+                fig_paths.append([source_path, file_url])
+
+    return fig_paths
+
+    
+
+
 
 
 # def delete(name:str, model_name:str,  model_version:str='latest') -> str:

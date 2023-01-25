@@ -300,7 +300,7 @@ def register(
             "name": name,
             "branch": branch,
             "hash": dataset_hash,
-            "pipeline": pipeline,
+            "lineage": pipeline,
             "is_empty": is_empty,
             "storage": storage,
         }
