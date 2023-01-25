@@ -75,6 +75,14 @@ func GetUserByHandle(handle string) (*models.UserResponse, error) {
 	return ds.GetUserByHandle(handle)
 }
 
+func GetSecureUserByEmail(email string) (*models.UserResponse, error) {
+	return ds.GetSecureUserByEmail(email)
+}
+
+func GetSecureUserByHandle(handle string) (*models.UserResponse, error) {
+	return ds.GetSecureUserByHandle(handle)
+}
+
 func GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, error) {
 	return ds.GetUserByUUID(userUUID)
 }

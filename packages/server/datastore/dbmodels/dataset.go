@@ -39,12 +39,12 @@ type DatasetBranch struct {
 
 type DatasetVersion struct {
 	BaseModel   `gorm:"embedded"`
-	Version     string    `json:"version" gorm:"not null;index:idx_dataset_branch_version,unique"`
-	BranchUUID  uuid.UUID `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_dataset_branch_version,unique"`
-	LineageUUID uuid.UUID `json:"lineage_uuid" gorm:"type:uuid;"`
-	Hash        string    `json:"hash" gorm:"not null"`
-	PathUUID    uuid.UUID `json:"path_uuid" gorm:"type:uuid;"`
-	IsEmpty     bool      `json:"is_empty"`
+	Version     string        `json:"version" gorm:"not null;index:idx_dataset_branch_version,unique"`
+	BranchUUID  uuid.UUID     `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_dataset_branch_version,unique"`
+	LineageUUID uuid.NullUUID `json:"lineage_uuid" gorm:"type:uuid;"`
+	Hash        string        `json:"hash" gorm:"not null"`
+	PathUUID    uuid.NullUUID `json:"path_uuid" gorm:"type:uuid;"`
+	IsEmpty     bool          `json:"is_empty"`
 
 	Branch  DatasetBranch `gorm:"foreignKey:BranchUUID"`
 	Lineage Lineage       `gorm:"foreignKey:LineageUUID"`
@@ -58,14 +58,14 @@ type Lineage struct {
 
 type DatasetReview struct {
 	BaseModel      `gorm:"embedded"`
-	FromBranchUUID uuid.UUID `json:"from_branch_uuid" gorm:"type:uuid;not null"`
-	ToBranchUUID   uuid.UUID `json:"to_branch_uuid" gorm:"type:uuid;not null"`
-	Title          string    `json:"title" gorm:"not null"`
-	Description    string    `json:"description"`
-	CreatedBy      uuid.UUID `json:"created_by" gorm:"type:uuid;not null"`
-	AssignedTo     uuid.UUID `json:"assigned_to" gorm:"type:uuid;"`
-	IsComplete     bool      `json:"is_complete" default:"false"`
-	IsAccepted     bool      `json:"is_accepted" default:"false"`
+	FromBranchUUID uuid.UUID     `json:"from_branch_uuid" gorm:"type:uuid;not null"`
+	ToBranchUUID   uuid.UUID     `json:"to_branch_uuid" gorm:"type:uuid;not null"`
+	Title          string        `json:"title" gorm:"not null"`
+	Description    string        `json:"description"`
+	CreatedBy      uuid.UUID     `json:"created_by" gorm:"type:uuid;not null"`
+	AssignedTo     uuid.NullUUID `json:"assigned_to" gorm:"type:uuid;"`
+	IsComplete     bool          `json:"is_complete" default:"false"`
+	IsAccepted     bool          `json:"is_accepted" default:"false"`
 
 	FromBranch     DatasetBranch `gorm:"foreignKey:FromBranchUUID"`
 	ToBranch       DatasetBranch `gorm:"foreignKey:ToBranchUUID"`

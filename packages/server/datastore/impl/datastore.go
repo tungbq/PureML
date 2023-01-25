@@ -374,6 +374,42 @@ func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) 
 		return nil, result.Error
 	}
 	return &models.UserResponse{
+		Name:     user.Name,
+		Email:    user.Email,
+		Handle:   user.Handle,
+		Bio:      user.Bio,
+		Avatar:   user.Avatar,
+	}, nil
+}
+
+func (ds *Datastore) GetUserByHandle(handle string) (*models.UserResponse, error) {
+	var user dbmodels.User
+	result := ds.DB.Where("handle = ?", handle).Limit(1).Find(&user)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.UserResponse{
+		Name:     user.Name,
+		Email:    user.Email,
+		Handle:   user.Handle,
+		Bio:      user.Bio,
+		Avatar:   user.Avatar,
+	}, nil
+}
+
+func (ds *Datastore) GetSecureUserByEmail(email string) (*models.UserResponse, error) {
+	var user dbmodels.User
+	result := ds.DB.Where("email = ?", email).Limit(1).Find(&user)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.UserResponse{
 		UUID:     user.UUID,
 		Name:     user.Name,
 		Email:    user.Email,
@@ -384,7 +420,7 @@ func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) 
 	}, nil
 }
 
-func (ds *Datastore) GetUserByHandle(handle string) (*models.UserResponse, error) {
+func (ds *Datastore) GetSecureUserByHandle(handle string) (*models.UserResponse, error) {
 	var user dbmodels.User
 	result := ds.DB.Where("handle = ?", handle).Limit(1).Find(&user)
 	if result.RowsAffected == 0 {
@@ -420,7 +456,6 @@ func (ds *Datastore) GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, er
 		Handle:   user.Handle,
 		Bio:      user.Bio,
 		Avatar:   user.Avatar,
-		Password: user.Password,
 	}, nil
 }
 
