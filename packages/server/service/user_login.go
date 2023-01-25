@@ -31,10 +31,10 @@ func UserLogin(request *models.Request) *models.Response {
 	var err error
 	if email != nil {
 		email := email.(string)
-		user, err = datastore.GetUserByEmail(email)
+		user, err = datastore.GetSecureUserByEmail(email)
 	} else {
 		handle := handle.(string)
-		user, err = datastore.GetUserByHandle(handle)
+		user, err = datastore.GetSecureUserByHandle(handle)
 	}
 	if err != nil {
 		return models.NewServerErrorResponse(err)

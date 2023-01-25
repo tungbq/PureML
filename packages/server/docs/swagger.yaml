@@ -1672,11 +1672,6 @@ paths:
         name: modelName
         required: true
         type: string
-      - description: Version
-        in: path
-        name: version
-        required: true
-        type: string
       produces:
       - application/json
       responses:

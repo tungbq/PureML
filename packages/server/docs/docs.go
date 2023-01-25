@@ -2586,13 +2586,6 @@ const docTemplate = `{
                         "name": "modelName",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Version",
-                        "name": "version",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
