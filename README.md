@@ -61,36 +61,43 @@
   >
     <img alt="PyPi" src="https://img.shields.io/pypi/v/pureml?color=green&logo=pureml" />
   </a>
+  &nbsp;
   <a
     href="https://python-poetry.org/"
   >
     <img src="https://img.shields.io/badge/poetry-1.1.14-blue?style=flat&logo=poetry&logoColor=white" />
   </a>
+  &nbsp;
   <a
     href="https://opensource.org/licenses/Apache-2.0"
   >
     <img alt="License" src="https://img.shields.io/pypi/l/pureml?color=red&logo=Apache&logoColor=red" />
   </a>
+  &nbsp;
   <a
     href="https://discord.gg/xNUHt9yguJ"
   >
     <img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20Discord-blueviolet?style=flat&logo=discord&logoColor=white" />
   </a>
+  &nbsp;
   <a
     href="https://pepy.tech/project/pureml"
   >
     <img alt="Downloads" src="https://static.pepy.tech/badge/pureml">
   </a>
+  &nbsp;
   <a
     href="https://pypi.org/project/pureml/"
   >
     <img alt="^3.8" src="https://img.shields.io/pypi/pyversions/pureml">
   </a>
+  &nbsp;
   <a
     href="https://pypi.org/project/pureml/"
   >
     <img alt="Coverage" src="https://img.shields.io/codecov/c/github/PureML-Inc/pureml">
   </a>
+  &nbsp;
   <a
     href="https://pypi.org/project/pureml/"
   >

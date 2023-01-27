@@ -5,6 +5,7 @@ from .hash import generate_hash_for_dict, generate_hash_for_function
 from .source_code import get_source_code
 import os
 import shutil
+from .log_utils import update_step_dict
 
 def add_load_data_to_config(name, func=None, hash=''):
 
@@ -68,7 +69,7 @@ def add_transformer_to_config(name, func=None, hash='', parent=None):
     save_config(config=config)
 
 
-def add_dataset_to_config(name, func=None, hash='', version='', parent=None):
+def add_dataset_to_config(name, branch, func=None, hash='', version='', parent=None):
 
     config = load_config()
 
@@ -93,6 +94,7 @@ def add_dataset_to_config(name, func=None, hash='', version='', parent=None):
 
     config['dataset'] = {
                         'name' : name,
+                        'branch': branch,
                         'hash' : hash,
                         'version': version,
                         'parent' : parent ,
@@ -105,7 +107,7 @@ def add_dataset_to_config(name, func=None, hash='', version='', parent=None):
     
 
 
-def add_model_to_config(name, func=None, hash='', version=''):
+def add_model_to_config(name, branch, func=None, hash='', version=''):
     # name = ''
     # hash = ''
     # version = ''
@@ -128,6 +130,7 @@ def add_model_to_config(name, func=None, hash='', version=''):
         
         config['model'][position] = {
                                         'name' : name,
+                                        'branch' : branch,
                                         'hash' : hash,
                                         'version': version,
                                         'code': code
@@ -136,6 +139,7 @@ def add_model_to_config(name, func=None, hash='', version=''):
         position = len(config['model'])
         model_name_position = config['model'][position]['name']
         if model_name_position == name:        
+            config['model'][position]['branch'] = branch
             config['model'][position]['hash'] = hash
             config['model'][position]['version'] = version
             config['model'][position]['code'] = code
@@ -144,27 +148,29 @@ def add_model_to_config(name, func=None, hash='', version=''):
     save_config(config=config)
 
 
-def add_metrics_to_config(values, model_name=None, model_version=None, func=None):
+def add_metrics_to_config(values, model_name=None, model_branch=None, model_version=None, func=None):
     config = load_config()
 
     if model_name is None:
-        model_name, model_version, model_hash = get_model_latest(config=config)
-
+        model_name, model_branch, model_version, model_hash = get_model_latest(config=config)
 
 
     if len(config['metrics']) != 0:
         metric_values = config['metrics']['values']
-        metric_values.update(values)
+        metric_values = update_step_dict(metric_values, values)
+        # print('default',metric_values)
     else:
         metric_values = values
 
-    hash = generate_hash_for_dict(values=metric_values)
+        # print('not default',metric_values)
 
+    hash = generate_hash_for_dict(values=metric_values)
 
     config['metrics'].update({
                             'values' : metric_values,
                             'hash' : hash,
                             'model_name' : model_name,
+                            'model_branch': model_branch,
                             'model_version' : model_version
                         })
 
@@ -185,17 +191,17 @@ def load_metrics_from_config():
 
 
 
-def add_params_to_config(values, model_name=None, model_version=None, func=None):
+def add_params_to_config(values, model_name=None, model_branch=None, model_version=None, func=None):
     config = load_config()
     
     if model_name is None:
-        model_name, model_version, model_hash = get_model_latest(config=config)
+        model_name, model_branch, model_version, model_hash = get_model_latest(config=config)
 
 
 
     if len(config['params']) != 0:
         param_values = config['params']['values']
-        param_values.update(values)
+        param_values = update_step_dict(param_values, values)
     else:
         param_values = values
 
@@ -206,6 +212,7 @@ def add_params_to_config(values, model_name=None, model_version=None, func=None)
                             'values' : param_values,
                             'hash' : hash,
                             'model_name' : model_name,
+                            'model_branch': model_branch,
                             'model_version' : model_version
                         })
 
@@ -229,12 +236,56 @@ def load_params_from_config():
 
 
 
+
+def add_figures_to_config(values, model_name=None, model_branch=None, model_version=None, func=None):
+    config = load_config()
+    
+    if model_name is None:
+        model_name, model_branch, model_version, model_hash = get_model_latest(config=config)
+
+
+    if len(config['figure']) != 0:
+        figure_values = config['figure']['values']
+    else:
+        figure_values = values
+
+    hash = generate_hash_for_dict(values=figure_values)
+
+
+    config['figure'].update({
+                            'values' : figure_values,
+                            'hash' : hash,
+                            'model_name' : model_name,
+                            'model_branch': model_branch,
+                            'model_version' : model_version
+                        })
+
+    save_config(config=config)
+
+
+
+
+def load_figures_from_config():
+
+    config = load_config()
+    try:
+        figures = config['figure']['values']
+    except Exception as e:
+        # print(e)
+        print('No figures are found in config')
+        figures = {}
+
+    return figures
+
+
+
+
 def add_artifacts_to_config(name, values, func):
     hash = ''
     version = ''
     config = load_config()
     
-    model_name, model_version = get_model_latest(config=config)
+    model_name, model_branch, model_version, model_hash = get_model_latest(config=config)
 
     position = len(config['artifacts']) + 1
     config['artifacts'][position] = {
@@ -245,48 +296,6 @@ def add_artifacts_to_config(name, values, func):
                                         'model_version' : model_version        
                                         }
 
-
-
-
-# def add_predict_to_config(name='', func=None, hash='',model_name=None, model_version=None, requirements_file:str=None):
-#     config = load_config()
-#     code = ''
-#     requirements = ''
-    
-#     if func is not None:
-#         try:
-#             code = get_source_code(func)
-#             hash = generate_hash_for_function(func)
-
-#             os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
-#             with open(PATH_PREDICT, 'w') as pred_file:
-#                 pred_file.write(code)
-
-#         except Exception as e:
-#             print('Unable to get predict source code')
-#             print(e)
-
-#     if requirements_file is not None:
-#         shutil.copy(requirements_file, PATH_PREDICT_REQUIREMENTS)
-
-
-#         try:
-#             with open(requirements_file, 'r') as req_file:
-#                 requirements = req_file.readlines()
-#                 requirements = [i.split('\n')[0] for i in requirements]
-#         except Exception as e:
-#             print('Unable to write requirements for prediction')
-#             print(e)
-
-
-#     config['predict'] = {
-#                             'name' : name,
-#                             'hash' : hash,
-#                             'requirements': requirements,
-#                             'code' : code,
-#                             }
-
-#     save_config(config=config)
 
 
 
@@ -303,7 +312,8 @@ def get_model_latest(config, version='latest'):
         # print(model_positions)
         position = model_positions[-1]
         model_name = config_model[position]['name']
+        model_branch = config_model[position]['branch']
         model_version = config_model[position]['version']
         model_hash = config_model[position]['hash']
     
-    return model_name, model_version, model_hash
+    return model_name, model_branch, model_version, model_hash

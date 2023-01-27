@@ -1,123 +1,47 @@
 
-import requests
-
-from rich import print
-from rich.syntax import Syntax
-
-import os 
 import json
-
-
+import os
 from urllib.parse import urljoin
 
-from . import get_token, get_project_id, get_org_id
-
-from pureml.utils.constants import BASE_URL, PATH_FIGURE_DIR
+import numpy as np
+import requests
 from joblib import Parallel, delayed
 from PIL import Image
-import numpy as np
+from pureml.utils.constants import BASE_URL, PATH_FIGURE_DIR
+from pureml.utils.pipeline import add_figures_to_config
+from rich import print
+
+from . import get_org_id, get_token
 
 
 def save_images(figure):
+    os.makedirs(PATH_FIGURE_DIR, exist_ok=True)
     figure_paths = {}
     for figure_key, figure_value in figure.items():
-        save_name = os.path.join(PATH_FIGURE_DIR, '.'.join(figure_key, '.png'))
+        save_name = os.path.join(PATH_FIGURE_DIR, '.'.join([figure_key, 'png']))
 
-        rgba_buf = figure_value.canvas.buffer_rgba()
-        (w,h) = figure_value.canvas.get_width_height()
-        rgba_arr = np.frombuffer(rgba_buf, dtype=np.uint8).reshape((h,w,4))
+        canvas = figure_value.canvas
+        canvas.draw()
+        data = np.frombuffer(canvas.tostring_rgb(), dtype=np.uint8)
+        rgb_array = data.reshape(canvas.get_width_height()[::-1] + (3,))
 
-        data = Image.fromarray(rgba_arr)        
+        data = Image.fromarray(rgb_array)        
         data.save(save_name)
 
-        figure_paths[figure_key] = figure_paths
+        figure_paths[figure_key] = save_name
     
     return figure_paths
 
 
 
-
-def details(model_name:str, model_version:str='latest', name:str=''):
-    '''This function returns the details of the figure for a given model
-    
-    Parameters
-    ----------
-    model_name : str
-        The name of the model you want to get the figure details for
-    model_version: str
-        The version of the model
-    name : str
-        The name of the figure.
-    
-    '''
-
+def post_figures(figure_paths, model_name: str, model_branch:str, model_version:str):
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
-
-
-
-    url_path_1 = '{}/project/{}/model/{}/{}/figure/{}/'.format(org_id, project_id, model_name, model_version, name)
-    url = urljoin(BASE_URL, url_path_1)
-
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
-    }
     
+    # print('figure_paths', figure_paths)
 
-    response = requests.get(url, headers=headers)
-
-
-    if response.status_code == 200:
-        res_text = json.loads(response.text)
-
-        if len(res_text) == 0:
-            print('[bold yellow] No figure have been found for the model')
-            print(res_text)
-            return 
-        else:
-            print('[bold green]figure have been found for the model')
-            print(res_text)
-            return res_text
-
-    else:
-        print('[bold red]Unable to obtain the figure details')
-        print(response.text)
-        return
-
-
-
-
-def add(figure: str, model_name: str, model_version:str='latest') -> str:    
-    '''`add` function takes in the path of the figure, name of the figure and the model name and
-    registers the figure
-    
-    Parameters
-    ----------
-    figure : str
-        The path to the figure file.
-    name : str
-        The name of the figure.
-    model_name : str
-        The name of the model you want to add figure to.
-    model_version: str
-        The version of the model
-    
-    Returns
-    -------
-        The response is a JSON object
-    
-    '''
-    
-    user_token = get_token()
-    org_id = get_org_id()
-    project_id = get_project_id()
-    
-    url_path_1 = '{}/project/{}/model/{}/{}/figure/add'.format(org_id, project_id, model_name, model_version)
-    url = urljoin(BASE_URL, url_path_1)
-
-    figure_paths = save_images(figure)
+    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = urljoin(BASE_URL, url)
 
     headers = {
         'Authorization': 'Bearer {}'.format(user_token)
@@ -132,22 +56,99 @@ def add(figure: str, model_name: str, model_version:str='latest') -> str:
             print('[bold red] figure', file_name,'doesnot exist at the given path')
 
     
-    data = {'name_path_mapping' : figure_paths}
+    data = {'name_path_mapping' : figure_paths,
+            'model_name': model_name,
+            'model_version': model_branch,
+            'model_version': model_version}
+
+    data = json.dumps(data)
+
+    # try:
 
     response = requests.post(url, data=data, files=files, headers=headers)
     
-    
-    if response.status_code == 200:
-        print(f"[bold green]figures have been registered!")
+
+    if response.ok:
+        print(f"[bold green]Figures have been registered!")
 
     else:
-        print(f"[bold red]figures have not been registered!")
-        print(response.text)
+        print(f"[bold red]Figures have not been registered!")
 
-    return response.text
+    return response
+    # except Exception as e:
+    #     return
 
 
-def fetch(model_name: str, model_version:str='latest', name:str = ''):
+def add(figure: dict=None, model_name: str=None, model_branch:str=None, model_version:str='latest', file_paths:dict=None) -> str:    
+    '''`add` function takes in the path of the figure, name of the figure and the model name and
+    registers the figure
+    
+    Parameters
+    ----------
+    figure : dict
+        Key is the figure name, value is the matplotlib figure object
+    name : str
+        The name of the figure.
+    model_name : str
+        The name of the model you want to add figure to.
+    model_version: str
+        The version of the model
+    
+    Returns
+    -------
+        The response is a JSON object
+    
+    '''
+    # print('file_paths', file_paths)
+    # print('figure', figure)
+
+    if file_paths is None:
+        file_paths = save_images(figure)
+            # print('figre paths', figure_paths)
+        add_figures_to_config(values=file_paths, model_name=model_name, model_branch=model_branch, model_version=model_version)
+
+
+    if model_name is not None and model_version is not None and model_version is not None:
+        response = post_figures(figure_paths=file_paths, model_name=model_name, model_branch=model_branch, model_version=model_version)
+        
+    
+        # print(response.text)
+
+    # return response.text
+
+
+def details(model_name: str, model_branch:str, model_version:str='latest'):
+    user_token = get_token()
+    org_id = get_org_id()
+
+    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = urljoin(BASE_URL, url)
+
+
+    headers = {
+        "accept": "application/json",
+        "Authorization": "Bearer {}".format(user_token),
+    }
+
+    response = requests.get(url, headers=headers)
+
+
+    if response.ok:
+        # T-1161 standardize api response to contains Models as a list
+        response_text = response.json()
+        details = response_text["Data"]
+
+        # print(model_details)
+
+        return details
+
+    else:
+        print(f"[bold red]Branch details details have not been found")
+        return
+
+
+
+def fetch(model_name: str, model_branch:str, model_version:str='latest'):
     '''It fetches the figure from the server and stores it in the local directory
     
     Parameters
@@ -167,18 +168,15 @@ def fetch(model_name: str, model_version:str='latest', name:str = ''):
 
     user_token = get_token()
     org_id = get_org_id()
-    project_id = get_project_id()
 
 
-    def fetch_figure(figure_details: dict):
+    def fetch_figure(file_details):
+    
+        file_name, url = file_details
 
-        url = figure_details['location']
-        file_path_temp = figure_details['path']
-        file_name = file_path_temp.split(os.path.sep)[-1]
         save_path = os.path.join(PATH_FIGURE_DIR, file_name)
         print('save path', save_path)
 
-        name_fetched = figure_details['figure']
 
 
         headers = {
@@ -193,8 +191,8 @@ def fetch(model_name: str, model_version:str='latest', name:str = ''):
 
         print(response.status_code)
 
-        if response.status_code == 200:
-            print('[bold green] figure {} has been fetched'.format(name_fetched))
+        if response.ok:
+            print('[bold green] figure {} has been fetched'.format(file_name))
 
             save_dir = os.path.dirname(save_path)
 
@@ -205,7 +203,7 @@ def fetch(model_name: str, model_version:str='latest', name:str = ''):
             open(save_path, 'wb').write(figure_bytes)
 
 
-            print('[bold green] figure {} has been stored at {}'.format(name_fetched, save_path))
+            print('[bold green] figure {} has been stored at {}'.format(file_name, save_path))
             
             return response.text
         else:
@@ -214,67 +212,93 @@ def fetch(model_name: str, model_version:str='latest', name:str = ''):
             return response.text
 
 
-    figure_details = details(model_name=model_name, name=name, model_version=model_version)
+    figure_details = details(model_name=model_name, model_branch=model_branch, model_version=model_version)
 
     if figure_details is None:
         return
+    
+    fig_urls = give_fig_urls(details=figure_details)
 
-    if type(figure_details) is dict:
 
-        res_text = fetch_figure(figure_details)
+    if len(fig_urls) <=1:
 
-    elif type(figure_details) is list:
-        res_text = Parallel(n_jobs=-1)(delayed(fetch_figure)(art_det) for art_det in figure_details)
+        res_text = fetch_figure(fig_urls[0])
+
+    else:
+        res_text = Parallel(n_jobs=-1)(delayed(fetch_figure)(fig_url) for fig_url in fig_urls)
 
 
     return res_text
     
 
-
-def delete(name:str, model_name:str,  model_version:str='latest') -> str:
-    '''`delete()` deletes an figure from a model
+def give_fig_urls(details):
     
-    Parameters
-    ----------
-    name : str
-        The name of the figure you want to delete.
-    model_name : str
-        The name of the model you want to delete the figure from
-    model_version: str
-        The version of the model
-    
-    '''
+    fig_paths = None
 
-    user_token = get_token()
-    org_id = get_org_id()
-    project_id = get_project_id()
-
-    url_path_1 = '{}/project/{}/model/{}/{}/figure/{}/delete'.format(org_id, project_id, model_name, model_version, name)
-    url = urljoin(BASE_URL, url_path_1)
-
-    
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer {}'.format(user_token)
-    }
-    
-
-    # figure_details = details(model_name=model_name, figure=figure)
-
-    # if figure_details is None:
-    #     print('[bold red] Unable to find figure details')
-    #     return
-
-
-    response = requests.delete(url, headers=headers)
-
-
-    if response.status_code == 200:
-        print(f"[bold green]figure has been deleted")
+    if details is not None:
         
-    else:
-        print(f"[bold red]Unable to delete figure")
+        details = details[0]['data']
+        if 'figure' in details.keys():
+            fig_paths = []
 
-    return response.text
+            fig_details_all = details['figure']
+
+            for fig_key, path in fig_details_all.items():
+                source_path = fig_details_all[fig_key]['path']['source_path']
+                source_url = fig_details_all[fig_key]['path']['source_type']['public_url']
+                file_url = urljoin(source_url, source_path)
+                fig_paths.append([source_path, file_url])
+
+    return fig_paths
+
+    
+
+
+
+
+# def delete(name:str, model_name:str,  model_version:str='latest') -> str:
+#     '''`delete()` deletes an figure from a model
+    
+#     Parameters
+#     ----------
+#     name : str
+#         The name of the figure you want to delete.
+#     model_name : str
+#         The name of the model you want to delete the figure from
+#     model_version: str
+#         The version of the model
+    
+#     '''
+
+#     user_token = get_token()
+#     org_id = get_org_id()
+
+#     url_path_1 = '{}/project/{}/model/{}/{}/figure/{}/delete'.format(org_id, project_id, model_name, model_version, name)
+#     url = urljoin(BASE_URL, url_path_1)
+
+    
+#     headers = {
+#         'Content-Type': 'application/x-www-form-urlencoded',
+#         'Authorization': 'Bearer {}'.format(user_token)
+#     }
+    
+
+#     # figure_details = details(model_name=model_name, figure=figure)
+
+#     # if figure_details is None:
+#     #     print('[bold red] Unable to find figure details')
+#     #     return
+
+
+#     response = requests.delete(url, headers=headers)
+
+
+#     if response.status_code == 200:
+#         print(f"[bold green]figure has been deleted")
+        
+#     else:
+#         print(f"[bold red]Unable to delete figure")
+
+#     return response.text
 
 

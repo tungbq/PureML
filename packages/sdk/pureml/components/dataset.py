@@ -301,7 +301,7 @@ def register(
             "name": name,
             "branch": branch,
             "hash": dataset_hash,
-            "pipeline": lineage,
+            "lineage": lineage,
             "is_empty": is_empty,
             "storage": storage,
         }
@@ -325,9 +325,9 @@ def register(
 
         if response.ok:
             if is_empty:
-                print(f"[bold green]Pipeline has been registered!")
+                print(f"[bold green]Lineage has been registered!")
             else:
-                print(f"[bold green]Dataset and pipeline have been registered!")
+                print(f"[bold green]Dataset and lineage have been registered!")
 
             print(response.json())
 
