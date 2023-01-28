@@ -48,12 +48,12 @@ func InitApi() (*echo.Echo, error) {
 	e.Use(middleware.Recover())
 
 	bindStaticUI(e)
-	
+
 	api := e.Group("/api")
 
 	//Health API
 	api.GET("/health", handler.DefaultHandler(service.HealthCheck))
-	
+
 	//Swagger API
 	api.GET("/swagger/*", SwaggerHandler)
 
@@ -195,7 +195,7 @@ func bindStaticUI(e *echo.Echo) error {
 	// (similar to echo.StaticFS but with gzip middleware enabled)
 	e.GET(
 		trailedPath+"*",
-		echo.StaticDirectoryHandler(ui.DistDirFS, false),
+		echo.StaticDirectoryHandler(ui.BuildDirFS, false),
 		middleware.Gzip(),
 	)
 

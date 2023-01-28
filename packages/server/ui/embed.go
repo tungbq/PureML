@@ -7,8 +7,8 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-//go:embed all:dist
-var distDir embed.FS
+//go:embed all:build
+var buildDir embed.FS
 
-// DistDirFS contains the embedded dist directory files (without the "dist" prefix)
-var DistDirFS = echo.MustSubFS(distDir, "dist")
+// BuildDirFS contains the embedded build directory files (without the "build" prefix)
+var BuildDirFS = echo.MustSubFS(buildDir, "build")
