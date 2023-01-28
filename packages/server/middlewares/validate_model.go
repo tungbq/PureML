@@ -5,14 +5,14 @@ import (
 
 	ds "github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	uuid "github.com/satori/go.uuid"
 )
 
 func ValidateModel(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
-		modelName := context.Param("modelName")
-		orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
+		modelName := context.PathParam("modelName")
+		orgId := uuid.Must(uuid.FromString(context.PathParam("orgId")))
 		if modelName == "" {
 			context.Response().WriteHeader(http.StatusBadRequest)
 			context.Response().Writer.Write([]byte("Model name required"))

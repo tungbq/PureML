@@ -7,6 +7,7 @@ experiments/
 .env
 
 packages/server/db/*.db
+packages/server/pureml_data
 
 __pycache__/
 *.pyc

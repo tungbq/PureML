@@ -6,15 +6,15 @@ import (
 
 	ds "github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	uuid "github.com/satori/go.uuid"
 )
 
 func ValidateDatasetBranch(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
-		datasetBranchName := context.Param("branchName")
-		datasetName := context.Param("datasetName")
-		orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
+		datasetBranchName := context.PathParam("branchName")
+		datasetName := context.PathParam("datasetName")
+		orgId := uuid.Must(uuid.FromString(context.PathParam("orgId")))
 		if datasetBranchName == "" {
 			context.Response().WriteHeader(http.StatusBadRequest)
 			context.Response().Writer.Write([]byte("Branch name required"))

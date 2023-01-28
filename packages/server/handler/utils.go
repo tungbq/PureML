@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/PureML-Inc/PureML/server/models"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func extractRequest(context echo.Context) *models.Request {
@@ -91,11 +91,11 @@ func extractQueryParams(context echo.Context) map[string]string {
 
 func extractPathParams(context echo.Context) map[string]string {
 	pathParams := map[string]string{}
-	for _, pathParam := range context.ParamNames() {
-		if _, ok := pathParams[pathParam]; ok {
+	for _, pathParam := range context.PathParams() {
+		if _, ok := pathParams[pathParam.Name]; ok {
 			panic("Conflicting Param found")
 		}
-		pathParams[pathParam] = context.Param(pathParam)
+		pathParams[pathParam.Name] = pathParam.Value
 	}
 	return pathParams
 }

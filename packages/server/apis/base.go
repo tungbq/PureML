@@ -1,18 +1,25 @@
-package main
+package apis
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
+	"net/http"
+	"net/url"
+	"path/filepath"
+	"strings"
 
-	config "github.com/PureML-Inc/PureML/server/config"
 	_ "github.com/PureML-Inc/PureML/server/docs"
 	"github.com/PureML-Inc/PureML/server/handler"
 	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/service"
+	"github.com/PureML-Inc/PureML/server/ui"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
+
+const trailedPath = "/_/"
 
 // @title PureML API Documentation
 // @version 1.0
@@ -32,24 +39,28 @@ import (
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
-func main() {
+func InitApi() (*echo.Echo, error) {
 	// Echo instance
 	e := echo.New()
 
 	// Middleware
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
+
+	bindStaticUI(e)
+	
+	api := e.Group("/api")
 
 	//Health API
-	e.GET("/health", handler.DefaultHandler(service.HealthCheck))
+	api.GET("/health", handler.DefaultHandler(service.HealthCheck))
+	
 	//Swagger API
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	api.GET("/swagger/*", SwaggerHandler)
 
 	//Org APIs
-	e.GET("/org/handle/:orgHandle", handler.DefaultHandler(service.GetOrgByHandle))
+	api.GET("/org/handle/:orgHandle", handler.DefaultHandler(service.GetOrgByHandle))
 
-	orgGroup := e.Group("/org", middlewares.AuthenticateJWT)
+	orgGroup := api.Group("/org", middlewares.AuthenticateJWT)
 	orgGroup.GET("/all", handler.DefaultHandler(service.GetAllAdminOrgs))
 	orgGroup.GET("/id/:orgId", handler.DefaultHandler(service.GetOrgByID), middlewares.ValidateOrg)
 	orgGroup.GET("/", handler.DefaultHandler(service.GetOrgsForUser))
@@ -60,11 +71,8 @@ func main() {
 	orgGroup.POST("/:orgId/remove", handler.DefaultHandler(service.RemoveOrg), middlewares.ValidateOrg)
 	orgGroup.POST("/:orgId/leave", handler.DefaultHandler(service.LeaveOrg), middlewares.ValidateOrg)
 
-	//Project APIs
-	// group := e.Group("")
-
 	//User APIs
-	userGroup := e.Group("user")
+	userGroup := api.Group("user")
 	userGroup.GET("/profile", handler.DefaultHandler(service.GetProfile), middlewares.AuthenticateJWT)
 	userGroup.GET("/profile/:userHandle", handler.DefaultHandler(service.GetProfileByHandle))
 	userGroup.POST("/profile", handler.DefaultHandler(service.UpdateProfile), middlewares.AuthenticateJWT)
@@ -74,7 +82,7 @@ func main() {
 	userGroup.POST("/reset-password", handler.DefaultHandler(service.UserResetPassword)) //TODO To complete the logic here and update middlewares
 
 	//Model APIs
-	modelGroup := e.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup := api.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
 	modelGroup.GET("/all", handler.DefaultHandler(service.GetAllModels))
 	modelGroup.GET("/:modelName", handler.DefaultHandler(service.GetModel), middlewares.ValidateModel)
 	modelGroup.POST("/:modelName/create", handler.DefaultHandler(service.CreateModel))
@@ -102,7 +110,7 @@ func main() {
 	modelGroup.DELETE("/:modelName/activity/:category/:activityUUID/delete", handler.DefaultHandler(service.DeleteModelActivity), middlewares.ValidateModel)
 
 	//Dataset APIs
-	datasetGroup := e.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup := api.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
 	datasetGroup.GET("/all", handler.DefaultHandler(service.GetAllDatasets))
 	datasetGroup.GET("/:datasetName", handler.DefaultHandler(service.GetDataset), middlewares.ValidateDataset)
 	datasetGroup.POST("/:datasetName/create", handler.DefaultHandler(service.CreateDataset))
@@ -130,7 +138,7 @@ func main() {
 	datasetGroup.DELETE("/:datasetName/activity/:category/:activityUUID/delete", handler.DefaultHandler(service.DeleteDatasetActivity), middlewares.ValidateDataset)
 
 	//Secret APIs
-	secretGroup := e.Group("/org/:orgId/secret", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	secretGroup := api.Group("/org/:orgId/secret", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
 	// secretGroup.GET("/all", handler.DefaultHandler(service.GetAllSecrets))
 	secretGroup.GET("/r2", handler.DefaultHandler(service.GetR2Secret))
 	secretGroup.POST("/r2/connect", handler.DefaultHandler(service.ConnectR2Secret))
@@ -139,9 +147,57 @@ func main() {
 	secretGroup.POST("/s3/connect", handler.DefaultHandler(service.ConnectS3Secret))
 	secretGroup.DELETE("/s3/delete", handler.DefaultHandler(service.DeleteS3Secrets))
 
-	//Start server
-	// config.GetHost()
-	port := config.GetPort()
-	e.Logger.Fatal(e.Start(fmt.Sprintf("0.0.0.0:%s", port)))
+	return e, nil
+}
 
+// StaticDirectoryHandler is similar to `echo.StaticDirectoryHandler`
+// but without the directory redirect which conflicts with RemoveTrailingSlash middleware.
+//
+// If a file resource is missing and indexFallback is set, the request
+// will be forwarded to the base index.html (useful also for SPA).
+//
+// @see https://github.com/labstack/echo/issues/2211
+func StaticDirectoryHandler(fileSystem fs.FS, indexFallback bool) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		p := c.PathParam("*")
+
+		// escape url path
+		tmpPath, err := url.PathUnescape(p)
+		if err != nil {
+			return fmt.Errorf("failed to unescape path variable: %w", err)
+		}
+		p = tmpPath
+
+		// fs.FS.Open() already assumes that file names are relative to FS root path and considers name with prefix `/` as invalid
+		name := filepath.ToSlash(filepath.Clean(strings.TrimPrefix(p, "/")))
+
+		fileErr := c.FileFS(name, fileSystem)
+
+		if fileErr != nil && indexFallback && errors.Is(fileErr, echo.ErrNotFound) {
+			return c.FileFS("index.html", fileSystem)
+		}
+
+		return fileErr
+	}
+}
+
+// bindStaticUI registers the endpoints that serves the static  UI.
+func bindStaticUI(e *echo.Echo) error {
+	// redirect to trailing slash to ensure that relative urls will still work properly
+	e.GET(
+		strings.TrimRight(trailedPath, "/"),
+		func(c echo.Context) error {
+			return c.Redirect(http.StatusTemporaryRedirect, trailedPath)
+		},
+	)
+
+	// serves static files from the /ui/dist directory
+	// (similar to echo.StaticFS but with gzip middleware enabled)
+	e.GET(
+		trailedPath+"*",
+		echo.StaticDirectoryHandler(ui.DistDirFS, false),
+		middleware.Gzip(),
+	)
+
+	return nil
 }

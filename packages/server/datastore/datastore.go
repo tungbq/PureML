@@ -2,8 +2,8 @@ package datastore
 
 import (
 	"mime/multipart"
-	"os"
 
+	"github.com/PureML-Inc/PureML/server/config"
 	"github.com/PureML-Inc/PureML/server/datastore/impl"
 	"github.com/PureML-Inc/PureML/server/models"
 	uuid "github.com/satori/go.uuid"
@@ -11,14 +11,13 @@ import (
 
 var ds *impl.Datastore
 
-func init() {
-	stage := os.Getenv("STAGE")
-	if stage == "Testing" {
-		//For testing
-		ds = impl.NewTestSQLiteDatastore()
-	} else {
-		//Real db
-		// ds = impl.NewSQLiteDatastore()
+func InitDB() {
+	databaseType := config.GetDatabaseType()
+	if databaseType == "local" {
+		//SQLite db for local
+		ds = impl.NewSQLiteDatastore()
+	} else if databaseType == "postgres" {
+		//Postgres db
 		ds = impl.NewPostgresDatastore()
 	}
 }

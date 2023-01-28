@@ -13,15 +13,25 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	puregosqlite "github.com/glebarez/sqlite"
 	uuid "github.com/satori/go.uuid"
 	"github.com/teris-io/shortid"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
+	cgosqlite "gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 func NewSQLiteDatastore() *Datastore {
-	db, err := gorm.Open(sqlite.Open("db/pureml.db"), &gorm.Config{})
+	var dialector gorm.Dialector
+	var err error
+	dataDir := config.GetDataDir()
+	databasePath := fmt.Sprintf("%s/pureml.db", dataDir)
+	if config.IsCGOEnabled() {
+		dialector = cgosqlite.Open(databasePath)
+	} else {
+		dialector = puregosqlite.Open(databasePath)
+	}
+	db, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 		panic("Error connecting to database")
@@ -374,11 +384,11 @@ func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) 
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		Name:     user.Name,
-		Email:    user.Email,
-		Handle:   user.Handle,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
 	}, nil
 }
 
@@ -392,11 +402,11 @@ func (ds *Datastore) GetUserByHandle(handle string) (*models.UserResponse, error
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		Name:     user.Name,
-		Email:    user.Email,
-		Handle:   user.Handle,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
 	}, nil
 }
 
@@ -450,12 +460,12 @@ func (ds *Datastore) GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, er
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:     user.UUID,
-		Name:     user.Name,
-		Email:    user.Email,
-		Handle:   user.Handle,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
+		UUID:   user.UUID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
 	}, nil
 }
 
