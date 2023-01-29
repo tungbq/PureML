@@ -7,8 +7,14 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-//go:embed all:build
+//go:embed all:public/build
 var buildDir embed.FS
 
-// BuildDirFS contains the embedded build directory files (without the "build" prefix)
-var BuildDirFS = echo.MustSubFS(buildDir, "build")
+//go:embed all:build
+var buildIndex embed.FS
+
+// BuildDirFS contains the embedded build directory files (without the "public/build" prefix)
+var BuildDirFS = echo.MustSubFS(buildDir, "public/build")
+
+// BuildIndexFS contains the embedded build directory files (without the "build" prefix)
+var BuildIndexFS = echo.MustSubFS(buildIndex, "build")

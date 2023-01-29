@@ -12,7 +12,7 @@ import (
 	_ "github.com/PureML-Inc/PureML/server/docs"
 	"github.com/PureML-Inc/PureML/server/handler"
 	"github.com/PureML-Inc/PureML/server/middlewares"
-	"github.com/PureML-Inc/PureML/server/service"
+	"github.com/PureML-Inc/PureML/server/apis/service"
 	"github.com/PureML-Inc/PureML/server/ui"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v5"
@@ -157,7 +157,7 @@ func InitApi() (*echo.Echo, error) {
 // will be forwarded to the base index.html (useful also for SPA).
 //
 // @see https://github.com/labstack/echo/issues/2211
-func StaticDirectoryHandler(fileSystem fs.FS, indexFallback bool) echo.HandlerFunc {
+func StaticDirectoryHandler(fileSystem fs.FS, number int, indexFallback bool) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p := c.PathParam("*")
 
@@ -191,11 +191,17 @@ func bindStaticUI(e *echo.Echo) error {
 		},
 	)
 
-	// serves static files from the /ui/dist directory
+	// e.FileFS(trailedPath+"*", "index.html", ui.BuildIndexFS)
+	// serves static files from the /ui/public/build directory
 	// (similar to echo.StaticFS but with gzip middleware enabled)
 	e.GET(
+		trailedPath+"build/*",
+		StaticDirectoryHandler(ui.BuildDirFS, 0, false),
+		middleware.Gzip(),
+	)
+	e.GET(
 		trailedPath+"*",
-		echo.StaticDirectoryHandler(ui.BuildDirFS, false),
+		StaticDirectoryHandler(ui.BuildIndexFS, 1, false),
 		middleware.Gzip(),
 	)
 

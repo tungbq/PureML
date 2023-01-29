@@ -2,7 +2,5 @@ node_modules
 
 /.cache
 /app/styles/app.css
-/build
-/public/build
 .env
 pnpm-lock.yaml
