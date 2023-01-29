@@ -9,3 +9,6 @@ docs:
 
 run:
 	go run ./purebackend.go
+
+build:
+	go build -o purebackend.exe ./purebackend.go
