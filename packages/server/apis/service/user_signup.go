@@ -9,15 +9,15 @@ import (
 )
 
 // UserSignUp godoc
-// @Security ApiKeyAuth
-// @Summary User sign up.
-// @Description User sign up with email, name, handle and password.
-// @Tags User
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/user/signup [post]
-// @Param org body models.UserSignupRequest true "User details"
+//
+//	@Summary		User sign up.
+//	@Description	User sign up with email, name, handle and password.
+//	@Tags			User
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/user/signup [post]
+//	@Param			user	body	models.UserSignupRequest	true	"User details"
 func UserSignUp(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)

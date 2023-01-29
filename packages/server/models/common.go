@@ -10,7 +10,6 @@ type ReadmeRequest struct {
 }
 
 type LogRequest struct {
-	Step string `json:"step"`
 	Key  string `json:"key"`
 	Data string `json:"data"`
 }
@@ -34,11 +33,10 @@ type TagResponse struct {
 }
 
 type LogResponse struct {
-	Step           string                     `json:"step"`
-	Key            string                     `json:"key"`
-	Data           string                     `json:"data"`
-	ModelVersion   ModelVersionNameResponse   `json:"model_version"`
-	DatasetVersion DatasetVersionNameResponse `json:"dataset_version"`
+	Key            string                           `json:"key"`
+	Data           string                           `json:"data"`
+	ModelVersion   ModelBranchVersionNameResponse   `json:"model_version"`
+	DatasetVersion DatasetBranchVersionNameResponse `json:"dataset_version"`
 }
 
 type HashRequest struct {

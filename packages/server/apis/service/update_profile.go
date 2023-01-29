@@ -8,15 +8,16 @@ import (
 )
 
 // UpdateProfile godoc
-// @Security ApiKeyAuth
-// @Summary User update profile.
-// @Description User can update profile by providing name, avatar, bio.
-// @Tags User
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/user/profile [post]
-// @Param org body models.UserUpdateRequest true "User details"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		User update profile.
+//	@Description	User can update profile by providing name, avatar, bio.
+//	@Tags			User
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/user/profile [post]
+//	@Param			org	body	models.UserUpdateRequest	true	"User details"
 func UpdateProfile(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	name := request.GetParsedBodyAttribute("name")

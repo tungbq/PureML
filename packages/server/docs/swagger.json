@@ -1,10 +1,6 @@
 {
-    "schemes": [
-        "https"
-    ],
     "swagger": "2.0",
     "info": {
-        "title": "PureML API Documentation",
         "contact": {
             "name": "API Support",
             "url": "http://www.swagger.io/support",
@@ -13,11 +9,8 @@
         "license": {
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
-        "version": "1.0"
+        }
     },
-    "host": "pureml-development.up.railway.app",
-    "basePath": "/",
     "paths": {
         "/health": {
             "get": {
@@ -1242,6 +1235,72 @@
                 }
             }
         },
+        "/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log/{key}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Log data for dataset with specific key",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dataset"
+                ],
+                "summary": "Get Log data for dataset with specific key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dataset Name",
+                        "name": "datasetName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch Name",
+                        "name": "branchName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/{orgId}/dataset/{datasetName}/create": {
             "post": {
                 "security": [
@@ -2441,6 +2500,72 @@
                 }
             }
         },
+        "/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log/{key}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Log data for model with specific key",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Model"
+                ],
+                "summary": "Get Log data for model with specific key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model Name",
+                        "name": "modelName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch Name",
+                        "name": "branchName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/{orgId}/model/{modelName}/create": {
             "post": {
                 "security": [
@@ -3221,11 +3346,6 @@
         },
         "/user/signup": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "User sign up with email, name, handle and password.",
                 "consumes": [
                     "*/*"
@@ -3240,7 +3360,7 @@
                 "parameters": [
                     {
                         "description": "User details",
-                        "name": "org",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -3355,6 +3475,9 @@
             "properties": {
                 "data": {
                     "type": "string"
+                },
+                "key": {
+                    "type": "string"
                 }
             }
         },
@@ -3468,6 +3591,7 @@
     },
     "securityDefinitions": {
         "ApiKeyAuth": {
+            "description": "Header for logged in user format: Bearer {token}",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

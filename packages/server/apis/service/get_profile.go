@@ -8,14 +8,15 @@ import (
 )
 
 // GetProfile godoc
-// @Security ApiKeyAuth
-// @Summary Get logged in user profile.
-// @Description Get logged in user profile.
-// @Tags User
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/user/profile [get]
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get logged in user profile.
+//	@Description	Get logged in user profile.
+//	@Tags			User
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/user/profile [get]
 func GetProfile(request *models.Request) *models.Response {
 	userUUID := request.GetUserUUID()
 	user, err := datastore.GetUserByUUID(userUUID)

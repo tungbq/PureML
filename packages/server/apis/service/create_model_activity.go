@@ -8,18 +8,19 @@ import (
 )
 
 // CreateModelActivity godoc
-// @Security ApiKeyAuth
-// @Summary Add activity of a model for a category
-// @Description Add activity of a model for a category
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/activity/{category} [post]
-// @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
-// @Param category path string true "Category"
-// @Param data body models.ActivityRequest true "Activity"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Add activity of a model for a category
+//	@Description	Add activity of a model for a category
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/activity/{category} [post]
+//	@Param			orgId		path	string					true	"Organization Id"
+//	@Param			modelName	path	string					true	"Model Name"
+//	@Param			category	path	string					true	"Category"
+//	@Param			data		body	models.ActivityRequest	true	"Activity"
 func CreateModelActivity(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	modelUUID := request.GetModelUUID()

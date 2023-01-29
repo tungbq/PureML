@@ -9,19 +9,20 @@ import (
 )
 
 // UpdateModelActivity godoc
-// @Security ApiKeyAuth
-// @Summary Update activity of a model for a category
-// @Description Update activity of a model for a category
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/activity/{category}/{activityUUID} [post]
-// @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
-// @Param category path string true "Category"
-// @Param activityUUID path string true "Activity UUID"
-// @Param activity body string true "Activity"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Update activity of a model for a category
+//	@Description	Update activity of a model for a category
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/activity/{category}/{activityUUID} [post]
+//	@Param			orgId			path	string	true	"Organization Id"
+//	@Param			modelName		path	string	true	"Model Name"
+//	@Param			category		path	string	true	"Category"
+//	@Param			activityUUID	path	string	true	"Activity UUID"
+//	@Param			activity		body	string	true	"Activity"
 func UpdateModelActivity(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	activityUUID := uuid.Must(uuid.FromString(request.GetPathParam("activityUUID")))

@@ -8,17 +8,18 @@ import (
 )
 
 // UpdateDatasetReadme godoc
-// @Security ApiKeyAuth
-// @Summary Update readme of a dataset for a category
-// @Description Update readme of a dataset for a category
-// @Tags Dataset
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/dataset/{datasetName}/readme [post]
-// @Param orgId path string true "Organization Id"
-// @Param datasetName path string true "Dataset Name"
-// @Param data body models.ReadmeRequest true "Data"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Update readme of a dataset for a category
+//	@Description	Update readme of a dataset for a category
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/readme [post]
+//	@Param			orgId		path	string					true	"Organization Id"
+//	@Param			datasetName	path	string					true	"Dataset Name"
+//	@Param			data		body	models.ReadmeRequest	true	"Data"
 func UpdateDatasetReadme(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	datasetUUID := request.GetDatasetUUID()

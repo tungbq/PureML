@@ -9,18 +9,19 @@ import (
 )
 
 // VerifyModelBranchHashStatus godoc
-// @Security ApiKeyAuth
-// @Summary Verify model hash status
-// @Description Verify model hash status to determine if model is already uploaded
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/branch/{branchName}/hash-status [post]
-// @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
-// @Param branchName path string true "Branch Name"
-// @Param hash body models.HashRequest true "Hash value"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Verify model hash status
+//	@Description	Verify model hash status to determine if model is already uploaded
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/hash-status [post]
+//	@Param			orgId		path	string				true	"Organization Id"
+//	@Param			modelName	path	string				true	"Model Name"
+//	@Param			branchName	path	string				true	"Branch Name"
+//	@Param			hash		body	models.HashRequest	true	"Hash value"
 func VerifyModelBranchHashStatus(request *models.Request) *models.Response {
 	modelName := request.GetModelName()
 	modelBranchName := request.GetPathParam("branchName")

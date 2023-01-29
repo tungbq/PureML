@@ -8,17 +8,18 @@ import (
 )
 
 // GetModelReadmeVersion godoc
-// @Security ApiKeyAuth
-// @Summary Get model readme
-// @Description Get model readme
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/readme/version/{version} [get]
-// @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
-// @Param version path string true "Version"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get model readme
+//	@Description	Get model readme
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/readme/version/{version} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			modelName	path	string	true	"Model Name"
+//	@Param			version		path	string	true	"Version"
 func GetModelReadmeVersion(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
 	versionName := request.GetPathParam("version")

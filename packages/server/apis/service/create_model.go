@@ -11,17 +11,18 @@ import (
 var defaultModelBranchNames = []string{"main", "development"}
 
 // CreateModel godoc
-// @Security ApiKeyAuth
-// @Summary Create model
-// @Description Register model file. Create model and default branches if not exists
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/create [post]
-// @Param orgId path string true "Organization UUID"
-// @Param modelName path string true "Model name"
-// @Param data body models.CreateModelRequest true "Model details"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Create model
+//	@Description	Register model file. Create model and default branches if not exists
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/create [post]
+//	@Param			orgId		path	string						true	"Organization UUID"
+//	@Param			modelName	path	string						true	"Model name"
+//	@Param			data		body	models.CreateModelRequest	true	"Model details"
 func CreateModel(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()

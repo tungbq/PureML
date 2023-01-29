@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/PureML-Inc/PureML/server/models"
-	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v4"
 )
 
 func extractRequest(context echo.Context) *models.Request {
@@ -33,6 +33,11 @@ func extractRequest(context echo.Context) *models.Request {
 	} else {
 		request.ModelBranch = &models.ModelBranchNameResponse{}
 	}
+	if context.Get("ModelBranchVersion") != nil {
+		request.ModelBranchVersion = context.Get("ModelBranchVersion").(*models.ModelBranchVersionNameResponse)
+	} else {
+		request.ModelBranchVersion = &models.ModelBranchVersionNameResponse{}
+	}
 	if context.Get("Dataset") != nil {
 		request.Dataset = context.Get("Dataset").(*models.DatasetNameResponse)
 	} else {
@@ -42,6 +47,11 @@ func extractRequest(context echo.Context) *models.Request {
 		request.DatasetBranch = context.Get("DatasetBranch").(*models.DatasetBranchNameResponse)
 	} else {
 		request.DatasetBranch = &models.DatasetBranchNameResponse{}
+	}
+	if context.Get("DatasetBranchVersion") != nil {
+		request.DatasetBranchVersion = context.Get("DatasetBranchVersion").(*models.DatasetBranchVersionNameResponse)
+	} else {
+		request.DatasetBranchVersion = &models.DatasetBranchVersionNameResponse{}
 	}
 	request.Headers = extractHeaders(context)
 	request.PathParams = extractPathParams(context)
@@ -91,11 +101,11 @@ func extractQueryParams(context echo.Context) map[string]string {
 
 func extractPathParams(context echo.Context) map[string]string {
 	pathParams := map[string]string{}
-	for _, pathParam := range context.PathParams() {
-		if _, ok := pathParams[pathParam.Name]; ok {
+	for _, pathParam := range context.ParamNames() {
+		if _, ok := pathParams[pathParam]; ok {
 			panic("Conflicting Param found")
 		}
-		pathParams[pathParam.Name] = pathParam.Value
+		pathParams[pathParam] = context.Param(pathParam)
 	}
 	return pathParams
 }

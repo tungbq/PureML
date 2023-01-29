@@ -10,19 +10,20 @@ import (
 )
 
 // RegisterDataset godoc
-// @Security ApiKeyAuth
-// @Summary Register dataset
-// @Description Register dataset file. Create dataset and default branches if not exists
-// @Tags Dataset
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/dataset/{datasetName}/branch/{branchName}/register [post]
-// @Param file formData file true "Dataset file"
-// @Param orgId path string true "Organization UUID"
-// @Param datasetName path string true "Dataset name"
-// @Param branchName path string true "Branch name"
-// @Param data formData models.RegisterDatasetRequest true "Dataset details"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Register dataset
+//	@Description	Register dataset file. Create dataset and default branches if not exists
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/register [post]
+//	@Param			file		formData	file							true	"Dataset file"
+//	@Param			orgId		path		string							true	"Organization UUID"
+//	@Param			datasetName	path		string							true	"Dataset name"
+//	@Param			branchName	path		string							true	"Branch name"
+//	@Param			data		formData	models.RegisterDatasetRequest	true	"Dataset details"
 func RegisterDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	var datasetHash string

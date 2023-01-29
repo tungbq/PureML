@@ -8,17 +8,18 @@ import (
 )
 
 // GetDatasetBranchAllVersions godoc
-// @Security ApiKeyAuth
-// @Summary Get all branch versions of a dataset
-// @Description Get all branch versions of a dataset
-// @Tags Dataset
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version [get]
-// @Param orgId path string true "Organization Id"
-// @Param datasetName path string true "Dataset Name"
-// @Param branchName path string true "Branch Name"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get all branch versions of a dataset
+//	@Description	Get all branch versions of a dataset
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
+//	@Param			branchName	path	string	true	"Branch Name"
 func GetDatasetBranchAllVersions(request *models.Request) *models.Response {
 	var response *models.Response
 	branchUUID := request.GetDatasetBranchUUID()

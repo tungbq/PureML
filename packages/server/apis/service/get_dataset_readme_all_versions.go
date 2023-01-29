@@ -8,16 +8,17 @@ import (
 )
 
 // GetDatasetReadmeAllVersions godoc
-// @Security ApiKeyAuth
-// @Summary Get dataset readme
-// @Description Get dataset readme
-// @Tags Dataset
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/dataset/{datasetName}/readme/version [get]
-// @Param orgId path string true "Organization Id"
-// @Param datasetName path string true "Dataset Name"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get dataset readme
+//	@Description	Get dataset readme
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/readme/version [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
 func GetDatasetReadmeAllVersions(request *models.Request) *models.Response {
 	modelUUID := request.GetDatasetUUID()
 	readme, err := datastore.GetDatasetReadmeAllVersions(modelUUID)

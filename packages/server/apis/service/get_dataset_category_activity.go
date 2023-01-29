@@ -8,17 +8,18 @@ import (
 )
 
 // GetDatasetActivity godoc
-// @Security ApiKeyAuth
-// @Summary Get activity of a dataset for a category
-// @Description Get activity of a dataset for a category
-// @Tags Dataset
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/dataset/{datasetName}/activity/{category} [get]
-// @Param orgId path string true "Organization Id"
-// @Param datasetName path string true "Dataset Name"
-// @Param category path string true "Category"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get activity of a dataset for a category
+//	@Description	Get activity of a dataset for a category
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/activity/{category} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
+//	@Param			category	path	string	true	"Category"
 func GetDatasetActivity(request *models.Request) *models.Response {
 	datasetUUID := request.GetDatasetUUID()
 	category := request.GetPathParam("category")

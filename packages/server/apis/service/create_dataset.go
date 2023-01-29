@@ -11,17 +11,18 @@ import (
 var defaultDatasetBranchNames = []string{"main", "development"}
 
 // CreateDataset godoc
-// @Security ApiKeyAuth
-// @Summary Create dataset
-// @Description Register dataset file. Create dataset and default branches if not exists
-// @Tags Dataset
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/dataset/{datasetName}/create [post]
-// @Param orgId path string true "Organization UUID"
-// @Param datasetName path string true "Dataset name"
-// @Param data body models.CreateDatasetRequest true "Dataset details"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Create dataset
+//	@Description	Register dataset file. Create dataset and default branches if not exists
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/create [post]
+//	@Param			orgId		path	string						true	"Organization UUID"
+//	@Param			datasetName	path	string						true	"Dataset name"
+//	@Param			data		body	models.CreateDatasetRequest	true	"Dataset details"
 func CreateDataset(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()

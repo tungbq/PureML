@@ -9,18 +9,19 @@ import (
 )
 
 // VerifyDatasetBranchHashStatus godoc
-// @Security ApiKeyAuth
-// @Summary Verify dataset hash status
-// @Description Verify dataset hash status to determine if dataset is already uploaded
-// @Tags Dataset
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/dataset/{datasetName}/branch/{branchName}/hash-status [post]
-// @Param orgId path string true "Organization Id"
-// @Param datasetName path string true "Dataset Name"
-// @Param branchName path string true "Branch Name"
-// @Param hash body models.HashRequest true "Hash value"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Verify dataset hash status
+//	@Description	Verify dataset hash status to determine if dataset is already uploaded
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/hash-status [post]
+//	@Param			orgId		path	string				true	"Organization Id"
+//	@Param			datasetName	path	string				true	"Dataset Name"
+//	@Param			branchName	path	string				true	"Branch Name"
+//	@Param			hash		body	models.HashRequest	true	"Hash value"
 func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 	datasetName := request.GetDatasetName()
 	datasetBranchName := request.GetPathParam("branchName")

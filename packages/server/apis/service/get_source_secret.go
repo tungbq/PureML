@@ -8,15 +8,16 @@ import (
 )
 
 // GetR2Secret godoc
-// @Security ApiKeyAuth
-// @Summary Get secrets for source type r2
-// @Description Get secrets for source type r2
-// @Tags Secret
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/secret/r2 [get]
-// @Param orgId path string true "Organization Id"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get secrets for source type r2
+//	@Description	Get secrets for source type r2
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/r2 [get]
+//	@Param			orgId	path	string	true	"Organization Id"
 func GetR2Secret(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	result, err := datastore.GetSourceSecret(orgId, "R2")
@@ -28,15 +29,16 @@ func GetR2Secret(request *models.Request) *models.Response {
 }
 
 // GetS3Secret godoc
-// @Security ApiKeyAuth
-// @Summary Get secrets for source type s3
-// @Description Get secrets for source type s3
-// @Tags Secret
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/secret/s3 [get]
-// @Param orgId path string true "Organization Id"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get secrets for source type s3
+//	@Description	Get secrets for source type s3
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/s3 [get]
+//	@Param			orgId	path	string	true	"Organization Id"
 func GetS3Secret(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	result, err := datastore.GetSourceSecret(orgId, "S3")

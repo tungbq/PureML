@@ -1,0 +1,98 @@
+package service
+
+import (
+	"net/http"
+
+	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/models"
+)
+
+// LogModel godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Log data for model
+//	@Description	Log data for model
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log [post]
+//	@Param			orgId		path	string				true	"Organization Id"
+//	@Param			modelName	path	string				true	"Model Name"
+//	@Param			branchName	path	string				true	"Branch Name"
+//	@Param			version		path	string				true	"Version"
+//	@Param			data		body	models.LogRequest	true	"Data to log"
+func LogModel(request *models.Request) *models.Response {
+	request.ParseJsonBody()
+	key := request.GetParsedBodyAttribute("key")
+	var keyData string
+	if key != nil {
+		keyData = key.(string)
+	} else {
+		keyData = ""
+	}
+	data := request.GetParsedBodyAttribute("data")
+	var dataData string
+	if data != nil {
+		dataData = data.(string)
+	} else {
+		dataData = ""
+	}
+	versionUUID := request.GetModelBranchVersionUUID()
+	result, err := datastore.CreateLogForModelVersion(keyData, dataData, versionUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Log created")
+	return response
+}
+
+// GetAllLogsModel godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get Log data for model
+//	@Description	Get Log data for model
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			modelName	path	string	true	"Model Name"
+//	@Param			branchName	path	string	true	"Branch Name"
+//	@Param			version		path	string	true	"Version"
+func GetAllLogsModel(request *models.Request) *models.Response {
+	versionUUID := request.GetModelBranchVersionUUID()
+	result, err := datastore.GetLogForModelVersion(versionUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Logs for model version")
+	return response
+}
+
+// GetKeyLogsModel godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get Log data for model with specific key
+//	@Description	Get Log data for model with specific key
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log/{key} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			modelName	path	string	true	"Model Name"
+//	@Param			branchName	path	string	true	"Branch Name"
+//	@Param			version		path	string	true	"Version"
+//	@Param			key			path	string	true	"Key"
+func GetKeyLogsModel(request *models.Request) *models.Response {
+	versionUUID := request.GetModelBranchVersionUUID()
+	key := request.PathParams["key"]
+	result, err := datastore.GetKeyLogForModelVersion(versionUUID, key)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Specific Key Logs for model version")
+	return response
+}

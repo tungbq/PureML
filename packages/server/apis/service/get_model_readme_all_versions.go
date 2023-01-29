@@ -8,16 +8,17 @@ import (
 )
 
 // GetModelReadmeAllVersions godoc
-// @Security ApiKeyAuth
-// @Summary Get model readme
-// @Description Get model readme
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/readme/version [get]
-// @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get model readme
+//	@Description	Get model readme
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/readme/version [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			modelName	path	string	true	"Model Name"
 func GetModelReadmeAllVersions(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
 	readme, err := datastore.GetModelReadmeAllVersions(modelUUID)

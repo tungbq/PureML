@@ -9,16 +9,17 @@ import (
 )
 
 // UpdateOrg godoc
-// @Security ApiKeyAuth
-// @Summary Update organization details.
-// @Description Update organization details by ID.
-// @Tags Organization
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/update [post]
-// @Param orgId path string true "Organization ID"
-// @Param org body models.CreateOrUpdateOrgRequest true "Organization details"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Update organization details.
+//	@Description	Update organization details by ID.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/update [post]
+//	@Param			orgId	path	string							true	"Organization ID"
+//	@Param			org		body	models.CreateOrUpdateOrgRequest	true	"Organization details"
 func UpdateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))

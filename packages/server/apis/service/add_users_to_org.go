@@ -9,15 +9,16 @@ import (
 )
 
 // AddUsersToOrg godoc
-// @Security ApiKeyAuth
-// @Summary Add a user to an organization.
-// @Description Add a user to an organization. Only accessible by owners of the organization.
-// @Tags Organization
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/add [post]
-// @Param email path string true "User email"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Add a user to an organization.
+//	@Description	Add a user to an organization. Only accessible by owners of the organization.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/add [post]
+//	@Param			email	path	string	true	"User email"
 func AddUsersToOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)

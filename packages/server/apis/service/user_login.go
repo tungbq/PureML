@@ -11,14 +11,15 @@ import (
 )
 
 // UserLogin godoc
-// @Summary User login.
-// @Description User login with email and password.
-// @Tags User
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/user/login [post]
-// @Param org body models.UserLoginRequest true "User details"
+//
+//	@Summary		User login.
+//	@Description	User login with email and password.
+//	@Tags			User
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/user/login [post]
+//	@Param			org	body	models.UserLoginRequest	true	"User details"
 func UserLogin(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email")

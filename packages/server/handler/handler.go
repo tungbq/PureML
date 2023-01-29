@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/PureML-Inc/PureML/server/models"
-	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v4"
 )
 
 type ServiceFunc func(*models.Request) *models.Response

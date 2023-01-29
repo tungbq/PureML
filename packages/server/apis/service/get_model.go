@@ -8,16 +8,17 @@ import (
 )
 
 // GetModel godoc
-// @Security ApiKeyAuth
-// @Summary Get specific model of an organization
-// @Description Get specific model of an organization
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName} [get]
-// @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get specific model of an organization
+//	@Description	Get specific model of an organization
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			modelName	path	string	true	"Model Name"
 func GetModel(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	modelName := request.GetModelName()

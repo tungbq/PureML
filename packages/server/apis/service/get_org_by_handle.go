@@ -8,14 +8,15 @@ import (
 )
 
 // GetOrgByHandle godoc
-// @Summary Get organization details by handle.
-// @Description Get organization details by handle.
-// @Tags Organization
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/handle/{orgHandle} [get]
-// @Param orgHandle path string true "Organization Handle"
+//
+//	@Summary		Get organization details by handle.
+//	@Description	Get organization details by handle.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/handle/{orgHandle} [get]
+//	@Param			orgHandle	path	string	true	"Organization Handle"
 func GetOrgByHandle(request *models.Request) *models.Response {
 	var response *models.Response
 	orgHandle := request.PathParams["orgHandle"]

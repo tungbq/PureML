@@ -57,12 +57,12 @@ type DatasetBranchResponse struct {
 	IsDefault bool                `json:"is_default"`
 }
 
-type DatasetVersionNameResponse struct {
+type DatasetBranchVersionNameResponse struct {
 	UUID    uuid.UUID `json:"uuid"`
 	Version string    `json:"version"`
 }
 
-type DatasetVersionResponse struct {
+type DatasetBranchVersionResponse struct {
 	UUID    uuid.UUID                 `json:"uuid"`
 	Version string                    `json:"version"`
 	Branch  DatasetBranchNameResponse `json:"branch"`

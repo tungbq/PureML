@@ -10,19 +10,20 @@ import (
 )
 
 // RegisterModel godoc
-// @Security ApiKeyAuth
-// @Summary Register model
-// @Description Register model file. Create model and default branches if not exists
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/branch/{branchName}/register [post]
-// @Param file formData file true "Model file"
-// @Param orgId path string true "Organization UUID"
-// @Param modelName path string true "Model name"
-// @Param branchName path string true "Branch name"
-// @Param data formData models.RegisterModelRequest true "Model details"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Register model
+//	@Description	Register model file. Create model and default branches if not exists
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/register [post]
+//	@Param			file		formData	file						true	"Model file"
+//	@Param			orgId		path		string						true	"Organization UUID"
+//	@Param			modelName	path		string						true	"Model name"
+//	@Param			branchName	path		string						true	"Branch name"
+//	@Param			data		formData	models.RegisterModelRequest	true	"Model details"
 func RegisterModel(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	var modelHash string

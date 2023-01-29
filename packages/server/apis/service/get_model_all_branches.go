@@ -8,16 +8,17 @@ import (
 )
 
 // GetModelAllBranches godoc
-// @Security ApiKeyAuth
-// @Summary Get all branches of a model
-// @Description Get all branches of a model
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/branch [get]
-// @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get all branches of a model
+//	@Description	Get all branches of a model
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/branch [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			modelName	path	string	true	"Model Name"
 func GetModelAllBranches(request *models.Request) *models.Response {
 	var response *models.Response
 	modelUUID := request.GetModelUUID()

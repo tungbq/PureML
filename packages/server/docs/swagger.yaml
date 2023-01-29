@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   models.ActivityRequest:
     properties:
@@ -60,6 +59,8 @@ definitions:
   models.LogRequest:
     properties:
       data:
+        type: string
+      key:
         type: string
     type: object
   models.R2SecretRequest:
@@ -131,7 +132,6 @@ definitions:
       name:
         type: string
     type: object
-host: pureml-development.up.railway.app
 info:
   contact:
     email: contact@pureml.com
@@ -140,8 +140,6 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: PureML API Documentation
-  version: "1.0"
 paths:
   /health:
     get:
@@ -765,6 +763,50 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Log data for dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log/{key}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Log data for dataset with specific key
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Log data for dataset with specific key
       tags:
       - Dataset
   /org/{orgId}/dataset/{datasetName}/branch/create:
@@ -1551,6 +1593,50 @@ paths:
       summary: Log data for model
       tags:
       - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log/{key}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Log data for model with specific key
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Log data for model with specific key
+      tags:
+      - Model
   /org/{orgId}/model/{modelName}/branch/create:
     post:
       consumes:
@@ -2230,7 +2316,7 @@ paths:
       parameters:
       - description: User details
         in: body
-        name: org
+        name: user
         required: true
         schema:
           $ref: '#/definitions/models.UserSignupRequest'
@@ -2242,15 +2328,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - ApiKeyAuth: []
       summary: User sign up.
       tags:
       - User
-schemes:
-- https
 securityDefinitions:
   ApiKeyAuth:
+    description: 'Header for logged in user format: Bearer {token}'
     in: header
     name: Authorization
     type: apiKey

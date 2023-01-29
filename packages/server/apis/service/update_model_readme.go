@@ -8,17 +8,18 @@ import (
 )
 
 // UpdateModelReadme godoc
-// @Security ApiKeyAuth
-// @Summary Update readme of a model for a category
-// @Description Update readme of a model for a category
-// @Tags Model
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/model/{modelName}/readme [post]
-// @Param orgId path string true "Organization Id"
-// @Param modelName path string true "Model Name"
-// @Param data body models.ReadmeRequest true "Data"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Update readme of a model for a category
+//	@Description	Update readme of a model for a category
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/readme [post]
+//	@Param			orgId		path	string					true	"Organization Id"
+//	@Param			modelName	path	string					true	"Model Name"
+//	@Param			data		body	models.ReadmeRequest	true	"Data"
 func UpdateModelReadme(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	modelUUID := request.GetModelUUID()

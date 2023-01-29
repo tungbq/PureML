@@ -8,15 +8,16 @@ import (
 )
 
 // CreateOrg godoc
-// @Security ApiKeyAuth
-// @Summary Create an organization.
-// @Description Create an organization and add the user as the owner.
-// @Tags Organization
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/create [post]
-// @Param org body models.CreateOrUpdateOrgRequest true "Organization details"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Create an organization.
+//	@Description	Create an organization and add the user as the owner.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/create [post]
+//	@Param			org	body	models.CreateOrUpdateOrgRequest	true	"Organization details"
 func CreateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgName := request.GetParsedBodyAttribute("name").(string)

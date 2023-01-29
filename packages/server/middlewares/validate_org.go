@@ -5,13 +5,13 @@ import (
 
 	ds "github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
-	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
 
 func ValidateOrg(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
-		orgId := context.PathParam("orgId")
+		orgId := context.Param("orgId")
 		if orgId == "" {
 			context.Response().WriteHeader(http.StatusBadRequest)
 			context.Response().Writer.Write([]byte("Organization Id required"))

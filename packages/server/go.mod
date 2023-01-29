@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.4.3
-	github.com/labstack/echo/v5 v5.0.0-20220717203827-74022662be4a
 	github.com/swaggo/echo-swagger v1.3.5
 	github.com/swaggo/swag v1.8.10
 	gorm.io/driver/mysql v1.4.5

@@ -10,7 +10,7 @@ import (
 
 	config "github.com/PureML-Inc/PureML/server/config"
 	"github.com/fatih/color"
-	"github.com/labstack/echo/v5/middleware"
+	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 )
@@ -72,6 +72,7 @@ func Serve() error {
 	bold := color.New(color.Bold).Add(color.FgGreen)
 	bold.Printf("> Server started at: %s\n", color.CyanString("%s://%s", schema, serverConfig.Addr))
 	regular.Printf("  - REST API: %s\n", color.CyanString("%s://%s/api/", schema, serverConfig.Addr))
+	regular.Printf("  - API Docs: %s\n", color.HiGreenString("%s://%s/api/swagger/index.html", schema, serverConfig.Addr))
 	regular.Printf("  - Admin UI: %s\n", color.CyanString("%s://%s/_/", schema, serverConfig.Addr))
 	// }
 

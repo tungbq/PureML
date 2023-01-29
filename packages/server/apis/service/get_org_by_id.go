@@ -9,15 +9,16 @@ import (
 )
 
 // GetOrgByID godoc
-// @Security ApiKeyAuth
-// @Summary Get organization details by ID.
-// @Description Get organization details by ID.
-// @Tags Organization
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/id/{orgId} [get]
-// @Param orgId path string true "Organization ID"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get organization details by ID.
+//	@Description	Get organization details by ID.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/id/{orgId} [get]
+//	@Param			orgId	path	string	true	"Organization ID"
 func GetOrgByID(request *models.Request) *models.Response {
 	var response *models.Response
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))

@@ -19,6 +19,7 @@ import (
 	"gorm.io/driver/postgres"
 	cgosqlite "gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func NewSQLiteDatastore() *Datastore {
@@ -831,7 +832,7 @@ func (ds *Datastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName stri
 	}, nil
 }
 
-func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelVersionResponse, error) {
+func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelBranchVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -966,7 +967,7 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 		return nil, err
 	}
 
-	return &models.ModelVersionResponse{
+	return &models.ModelBranchVersionResponse{
 		UUID:    modelVersion.UUID,
 		Hash:    modelVersion.Hash,
 		Version: modelVersion.Version,
@@ -986,15 +987,15 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 	}, nil
 }
 
-func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
 	err := ds.DB.Select("model_versions.*").Joins("JOIN model_branches ON model_branches.uuid = model_versions.branch_uuid").Where("model_branches.model_uuid = ?", modelUUID).Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	var modelVersionsResponse []models.ModelVersionResponse
+	var modelVersionsResponse []models.ModelBranchVersionResponse
 	for _, modelVersion := range modelVersions {
-		modelVersionsResponse = append(modelVersionsResponse, models.ModelVersionResponse{
+		modelVersionsResponse = append(modelVersionsResponse, models.ModelBranchVersionResponse{
 			UUID:    modelVersion.UUID,
 			Hash:    modelVersion.Hash,
 			Version: modelVersion.Version,
@@ -1060,15 +1061,15 @@ func (ds *Datastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.Mo
 	}, nil
 }
 
-func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
 	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	var modelVersionsResponse []models.ModelVersionResponse
+	var modelVersionsResponse []models.ModelBranchVersionResponse
 	for _, modelVersion := range modelVersions {
-		modelVersionsResponse = append(modelVersionsResponse, models.ModelVersionResponse{
+		modelVersionsResponse = append(modelVersionsResponse, models.ModelBranchVersionResponse{
 			UUID:    modelVersion.UUID,
 			Hash:    modelVersion.Hash,
 			Version: modelVersion.Version,
@@ -1090,7 +1091,7 @@ func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]mod
 	return modelVersionsResponse, nil
 }
 
-func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelBranchVersionResponse, error) {
 	var modelVersion dbmodels.ModelVersion
 	res := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Where("version = ?", version).Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
 	if res.Error != nil {
@@ -1099,7 +1100,7 @@ func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version st
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
-	return &models.ModelVersionResponse{
+	return &models.ModelBranchVersionResponse{
 		UUID:    modelVersion.UUID,
 		Hash:    modelVersion.Hash,
 		Version: modelVersion.Version,
@@ -1400,7 +1401,7 @@ func (ds *Datastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchNam
 	}, nil
 }
 
-func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetBranchVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -1538,7 +1539,7 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 		return nil, err
 	}
 
-	return &models.DatasetVersionResponse{
+	return &models.DatasetBranchVersionResponse{
 		UUID:    datasetVersion.UUID,
 		Hash:    datasetVersion.Hash,
 		Version: datasetVersion.Version,
@@ -1562,15 +1563,15 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 	}, nil
 }
 
-func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
 	err := ds.DB.Select("dataset_versions.*").Joins("JOIN dataset_branches ON dataset_branches.uuid = dataset_versions.branch_uuid").Where("dataset_branches.dataset_uuid = ?", datasetUUID).Find(&datasetVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	var datasetVersionsResponse []models.DatasetVersionResponse
+	var datasetVersionsResponse []models.DatasetBranchVersionResponse
 	for _, datasetVersion := range datasetVersions {
-		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetVersionResponse{
+		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetBranchVersionResponse{
 			UUID:    datasetVersion.UUID,
 			Hash:    datasetVersion.Hash,
 			Version: datasetVersion.Version,
@@ -1634,15 +1635,15 @@ func (ds *Datastore) GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*model
 	}, nil
 }
 
-func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
 	err := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Find(&datasetVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	var datasetVersionsResponse []models.DatasetVersionResponse
+	var datasetVersionsResponse []models.DatasetBranchVersionResponse
 	for _, datasetVersion := range datasetVersions {
-		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetVersionResponse{
+		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetBranchVersionResponse{
 			UUID:    datasetVersion.UUID,
 			Hash:    datasetVersion.Hash,
 			Version: datasetVersion.Version,
@@ -1668,7 +1669,7 @@ func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([
 	return datasetVersionsResponse, nil
 }
 
-func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetBranchVersionResponse, error) {
 	var datasetVersion dbmodels.DatasetVersion
 	res := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Where("version = ?", version).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
 	if res.Error != nil {
@@ -1677,7 +1678,7 @@ func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, versio
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
-	return &models.DatasetVersionResponse{
+	return &models.DatasetBranchVersionResponse{
 		UUID:    datasetVersion.UUID,
 		Hash:    datasetVersion.Hash,
 		Version: datasetVersion.Version,
@@ -1712,8 +1713,9 @@ func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models
 	var logsResponse []models.LogResponse
 	for _, log := range logs {
 		logsResponse = append(logsResponse, models.LogResponse{
+			Key:  log.Key,
 			Data: log.Data,
-			ModelVersion: models.ModelVersionNameResponse{
+			ModelVersion: models.ModelBranchVersionNameResponse{
 				UUID:    log.ModelVersion.UUID,
 				Version: log.ModelVersion.Version,
 			},
@@ -1722,8 +1724,37 @@ func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models
 	return logsResponse, nil
 }
 
-func (ds *Datastore) CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
+func (ds *Datastore) GetKeyLogForModelVersion(modelVersionUUID uuid.UUID, key string) ([]models.LogResponse, error) {
+	var logs []dbmodels.Log
+	err := ds.DB.Where("key = ?", key).Where("model_version_uuid = ?", modelVersionUUID).Preload("ModelVersion").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	var logsResponse []models.LogResponse
+	for _, log := range logs {
+		logsResponse = append(logsResponse, models.LogResponse{
+			Key:  log.Key,
+			Data: log.Data,
+			ModelVersion: models.ModelBranchVersionNameResponse{
+				UUID:    log.ModelVersion.UUID,
+				Version: log.ModelVersion.Version,
+			},
+		})
+	}
+	return logsResponse, nil
+}
+
+func (ds *Datastore) CreateLogForModelVersion(key string, data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	var keyLog dbmodels.Log
+	err := ds.DB.Where("key = ?", key).Where("model_version_uuid = ?", modelVersionUUID).First(&keyLog).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
 	log := dbmodels.Log{
+		BaseModel: dbmodels.BaseModel{
+			UUID: keyLog.UUID,
+		},
+		Key:  key,
 		Data: data,
 		ModelVersion: dbmodels.ModelVersion{
 			BaseModel: dbmodels.BaseModel{
@@ -1731,13 +1762,16 @@ func (ds *Datastore) CreateLogForModelVersion(data string, modelVersionUUID uuid
 			},
 		},
 	}
-	err := ds.DB.Create(&log).Preload("ModelVersion").Find(&log).Error
+	err = ds.DB.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(&log).Preload("ModelVersion").Find(&log).Error
 	if err != nil {
 		return nil, err
 	}
 	return &models.LogResponse{
+		Key:  log.Key,
 		Data: log.Data,
-		ModelVersion: models.ModelVersionNameResponse{
+		ModelVersion: models.ModelBranchVersionNameResponse{
 			UUID:    log.ModelVersion.UUID,
 			Version: log.ModelVersion.Version,
 		},
@@ -1753,8 +1787,9 @@ func (ds *Datastore) GetLogForDatasetVersion(datasetVersion uuid.UUID) ([]models
 	var logsResponse []models.LogResponse
 	for _, log := range logs {
 		logsResponse = append(logsResponse, models.LogResponse{
+			Key:  log.Key,
 			Data: log.Data,
-			DatasetVersion: models.DatasetVersionNameResponse{
+			DatasetVersion: models.DatasetBranchVersionNameResponse{
 				UUID:    log.DatasetVersion.UUID,
 				Version: log.DatasetVersion.Version,
 			},
@@ -1763,8 +1798,37 @@ func (ds *Datastore) GetLogForDatasetVersion(datasetVersion uuid.UUID) ([]models
 	return logsResponse, nil
 }
 
-func (ds *Datastore) CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
+func (ds *Datastore) GetKeyLogForDatasetVersion(datasetVersion uuid.UUID, key string) ([]models.LogResponse, error) {
+	var logs []dbmodels.Log
+	err := ds.DB.Where("key = ?", key).Where("dataset_version_uuid = ?", datasetVersion).Preload("DatasetVersion").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	var logsResponse []models.LogResponse
+	for _, log := range logs {
+		logsResponse = append(logsResponse, models.LogResponse{
+			Key:  log.Key,
+			Data: log.Data,
+			DatasetVersion: models.DatasetBranchVersionNameResponse{
+				UUID:    log.DatasetVersion.UUID,
+				Version: log.DatasetVersion.Version,
+			},
+		})
+	}
+	return logsResponse, nil
+}
+
+func (ds *Datastore) CreateLogForDatasetVersion(key string, data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	var keyLog dbmodels.Log
+	err := ds.DB.Where("key = ?", key).Where("dataset_version_uuid = ?", datasetVersionUUID).First(&keyLog).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
 	log := dbmodels.Log{
+		BaseModel: dbmodels.BaseModel{
+			UUID: keyLog.UUID,
+		},
+		Key:  key,
 		Data: data,
 		DatasetVersion: dbmodels.DatasetVersion{
 			BaseModel: dbmodels.BaseModel{
@@ -1772,13 +1836,16 @@ func (ds *Datastore) CreateLogForDatasetVersion(data string, datasetVersionUUID 
 			},
 		},
 	}
-	err := ds.DB.Create(&log).Preload("DatasetVersion").Find(&log).Error
+	err = ds.DB.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(&log).Preload("DatasetVersion").Find(&log).Error
 	if err != nil {
 		return nil, err
 	}
 	return &models.LogResponse{
+		Key:  log.Key,
 		Data: log.Data,
-		DatasetVersion: models.DatasetVersionNameResponse{
+		DatasetVersion: models.DatasetBranchVersionNameResponse{
 			UUID:    log.DatasetVersion.UUID,
 			Version: log.DatasetVersion.Version,
 		},

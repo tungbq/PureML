@@ -8,16 +8,17 @@ import (
 )
 
 // LeaveOrg godoc
-// @Security ApiKeyAuth
-// @Summary Leave organization.
-// @Description Leave organization.
-// @Tags Organization
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/leave [post]
-// @Param orgId path string true "Organization ID"
-// @Param email body string true "User email"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Leave organization.
+//	@Description	Leave organization.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/leave [post]
+//	@Param			orgId	path	string	true	"Organization ID"
+//	@Param			email	body	string	true	"User email"
 func LeaveOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)

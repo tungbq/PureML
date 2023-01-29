@@ -8,17 +8,18 @@ import (
 )
 
 // GetDatasetBranch godoc
-// @Security ApiKeyAuth
-// @Summary Get specific branch of a dataset
-// @Description Get specific branch of a dataset
-// @Tags Dataset
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/dataset/{datasetName}/branch/{branchName} [get]
-// @Param orgId path string true "Organization Id"
-// @Param datasetName path string true "Dataset Name"
-// @Param branchName path string true "Branch Name"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get specific branch of a dataset
+//	@Description	Get specific branch of a dataset
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
+//	@Param			branchName	path	string	true	"Branch Name"
 func GetDatasetBranch(request *models.Request) *models.Response {
 	datasetBranchUUID := request.GetDatasetBranchUUID()
 	branch, err := datastore.GetDatasetBranchByUUID(datasetBranchUUID)

@@ -8,16 +8,17 @@ import (
 )
 
 // ConnectR2Secret godoc
-// @Security ApiKeyAuth
-// @Summary Add secrets for source type r2
-// @Description Add secrets for source type r2
-// @Tags Secret
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/secret/r2/connect [post]
-// @Param orgId path string true "Organization Id"
-// @Param secret body models.R2SecretRequest true "Secret"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Add secrets for source type r2
+//	@Description	Add secrets for source type r2
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/r2/connect [post]
+//	@Param			orgId	path	string					true	"Organization Id"
+//	@Param			secret	body	models.R2SecretRequest	true	"Secret"
 func ConnectR2Secret(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()
@@ -78,16 +79,17 @@ func ConnectR2Secret(request *models.Request) *models.Response {
 }
 
 // ConnectS3Secret godoc
-// @Security ApiKeyAuth
-// @Summary Add secrets for source type s3
-// @Description Add secrets for source type s3
-// @Tags Secret
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/{orgId}/secret/s3/connect [post]
-// @Param orgId path string true "Organization Id"
-// @Param secret body models.S3SecretRequest true "Secret"
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Add secrets for source type s3
+//	@Description	Add secrets for source type s3
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/s3/connect [post]
+//	@Param			orgId	path	string					true	"Organization Id"
+//	@Param			secret	body	models.S3SecretRequest	true	"Secret"
 func ConnectS3Secret(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()

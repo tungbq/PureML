@@ -1247,6 +1247,72 @@ const docTemplate = `{
                 }
             }
         },
+        "/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log/{key}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Log data for dataset with specific key",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dataset"
+                ],
+                "summary": "Get Log data for dataset with specific key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dataset Name",
+                        "name": "datasetName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch Name",
+                        "name": "branchName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/{orgId}/dataset/{datasetName}/create": {
             "post": {
                 "security": [
@@ -2446,6 +2512,72 @@ const docTemplate = `{
                 }
             }
         },
+        "/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log/{key}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Log data for model with specific key",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Model"
+                ],
+                "summary": "Get Log data for model with specific key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model Name",
+                        "name": "modelName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch Name",
+                        "name": "branchName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/{orgId}/model/{modelName}/create": {
             "post": {
                 "security": [
@@ -3226,11 +3358,6 @@ const docTemplate = `{
         },
         "/user/signup": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "User sign up with email, name, handle and password.",
                 "consumes": [
                     "*/*"
@@ -3245,7 +3372,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "User details",
-                        "name": "org",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -3360,6 +3487,9 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "type": "string"
+                },
+                "key": {
+                    "type": "string"
                 }
             }
         },
@@ -3473,6 +3603,7 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "ApiKeyAuth": {
+            "description": "Header for logged in user format: Bearer {token}",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
@@ -3482,11 +3613,11 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "pureml-development.up.railway.app",
-	BasePath:         "/",
-	Schemes:          []string{"https"},
-	Title:            "PureML API Documentation",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
+	Schemes:          []string{},
+	Title:            "",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

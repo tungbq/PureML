@@ -10,14 +10,15 @@ import (
 )
 
 // GetAllAdminOrgs godoc
-// @Security ApiKeyAuth
-// @Summary Get all organizations and their details.
-// @Description Get all organizations and their details. Only accessible by admins.
-// @Tags Organization
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /api/org/all [get]
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get all organizations and their details.
+//	@Description	Get all organizations and their details. Only accessible by admins.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/all [get]
 func GetAllAdminOrgs(request *models.Request) *models.Response {
 	var response *models.Response
 	if request.User == nil {

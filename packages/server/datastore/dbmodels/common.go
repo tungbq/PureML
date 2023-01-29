@@ -28,7 +28,6 @@ type Tag struct {
 
 type Log struct {
 	BaseModel          `gorm:"embedded"`
-	Step               string        `json:"step"`
 	Key                string        `json:"key" gorm:""`
 	Data               string        `json:"data"`
 	ModelVersionUUID   uuid.NullUUID `json:"model_version_uuid" gorm:"type:uuid;"`

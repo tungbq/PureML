@@ -20,12 +20,20 @@ var adminAccess = map[string]bool{
 	"demo@aztlan.in":           true,
 }
 
+// Development: localhost:8080
+// Production: host_url
 func GetHost() string {
 	return os.Getenv("HOST_URL")
 }
 
 func GetPort() string {
 	return os.Getenv("PORT")
+}
+
+// Development: http
+// Production: https
+func GetScheme() string {
+	return os.Getenv("SCHEME")
 }
 
 func GetPureMLR2Secrets() map[string]string {

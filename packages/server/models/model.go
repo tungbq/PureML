@@ -55,12 +55,12 @@ type ModelBranchResponse struct {
 	IsDefault bool              `json:"is_default"`
 }
 
-type ModelVersionNameResponse struct {
+type ModelBranchVersionNameResponse struct {
 	UUID    uuid.UUID `json:"uuid"`
 	Version string    `json:"version"`
 }
 
-type ModelVersionResponse struct {
+type ModelBranchVersionResponse struct {
 	UUID    uuid.UUID               `json:"uuid"`
 	Version string                  `json:"version"`
 	Branch  ModelBranchNameResponse `json:"branch"`
