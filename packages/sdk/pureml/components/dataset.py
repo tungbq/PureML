@@ -1,7 +1,7 @@
 import json
 import os
 from urllib.parse import urljoin
-
+import time
 import joblib
 import pandas as pd
 import requests
@@ -28,7 +28,8 @@ def init_branch(branch: str, dataset_name: str):
     data = {"dataset_name": dataset_name, "branchName": branch}
 
     data = json.dumps(data)
-
+    
+    
     response = requests.post(url, data=data, headers=headers)
 
     if response.ok:
@@ -55,7 +56,8 @@ def check_dataset_hash(hash: str, name: str, branch: str):
     data = {"hash": hash, "branch": branch}
 
     data = json.dumps(data)
-
+    
+    
     response = requests.post(url, data=data, headers=headers)
 
     hash_exists = False
@@ -78,6 +80,7 @@ def branch_details(branch: str, dataset_name: str):
         "Authorization": "Bearer {}".format(user_token),
     }
 
+    
     response = requests.get(url, headers=headers)
 
     # print(response.json)
@@ -123,6 +126,7 @@ def branch_delete(branch: str, dataset_name: str) -> str:
         "Authorization": "Bearer {}".format(user_token),
     }
 
+    
     response = requests.delete(url, headers=headers)
 
     if response.ok:
@@ -154,6 +158,7 @@ def list():
         "Authorization": "Bearer {}".format(user_token),
     }
 
+    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -197,6 +202,7 @@ def init(name: str, readme: str = None, branch: str = None):
 
     data = json.dumps(data)
 
+    
     response = requests.post(url, data=data, headers=headers)
 
     if response.ok:
@@ -225,7 +231,7 @@ def register(
     lineage,
     branch: str,
     is_empty: bool = False,
-    storage: str = "pureml-storage",
+    storage: str = "PUREML-STORAGE",
 ) -> str:
     """The function takes in a dataset, a name and a version and saves the dataset locally, then uploads the
     dataset to the PureML server
@@ -287,7 +293,7 @@ def register(
         return True, dataset_hash, "latest"
     else:
 
-        url = "org/{}dataset/{}/branch/{}/register".format(org_id, name, branch)
+        url = "org/{}/dataset/{}/branch/{}/register".format(org_id, name, branch)
         url = urljoin(BASE_URL, url)
 
         headers = {"Authorization": "Bearer {}".format(user_token),
@@ -308,30 +314,35 @@ def register(
 
         # data = json.dumps(data)
 
+        
         response = requests.post(url, files=files, data=data, headers=headers)
 
         # T-1165 Fix invalid json response while registering dataset
         # print(response.json())
-        try:
-            print(response.json())
-        except Exception as e:
-            print('Unable to get response.json()')
-            print(e)
-        print(response.status_code)
 
-        print(response.request.url)
-        print(response.request.body)
-        print(response.request.headers)
+        # print(response.status_code)
+
+        # print(response.request.url)
+        # print(response.request.body)
+        # print(response.request.headers)
 
         if response.ok:
-            if is_empty:
-                print(f"[bold green]Lineage has been registered!")
-            else:
-                print(f"[bold green]Dataset and lineage have been registered!")
 
-            print(response.json())
+            # print(response.json())
+            try:
+                dataset_version = response.json()["Data"][0]["version"]
+               
+                if is_empty:
+                    print(f"[bold green]Lineage has been registered!")
+                else:
+                    print(f"[bold green]Dataset and lineage have been registered!")
+                    
+            except Exception as e:
+                print('[bold red] Incorrect json response. Dataset has not been registered')
+                print(e)
+                dataset_version = None
 
-            dataset_version = response.json()["Data"][0]["version"]
+
 
             return True, dataset_hash, dataset_version
         else:
@@ -378,6 +389,7 @@ def details(
         "Authorization": "Bearer {}".format(user_token),
     }
 
+    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -420,6 +432,7 @@ def version_details(name: str, branch: str, version: str = "latest"):
         "Authorization": "Bearer {}".format(user_token),
     }
 
+    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -478,8 +491,8 @@ def fetch(name: str, branch: str, version: str = "latest"):
 
     # print('url', dataset_url)
 
-    # response = requests.get(dataset_url, headers=headers)
 
+    
     response = requests.get(dataset_url)
 
     if response.ok:
@@ -527,6 +540,7 @@ def delete(name: str, version: str = "latest") -> str:
 
     data = json.dumps(data)
 
+    
     response = requests.delete(url, headers=headers, data=data)
 
     if response.ok:
