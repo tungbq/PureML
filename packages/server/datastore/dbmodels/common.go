@@ -4,9 +4,9 @@ import uuid "github.com/satori/go.uuid"
 
 type Activity struct {
 	BaseModel   `gorm:"embedded"`
-	UserUUID    uuid.UUID `json:"user_uuid" gorm:"type:uuid;not null"`
-	Category    string    `json:"category"`
-	Activity    string    `json:"activity"`
+	UserUUID    uuid.UUID     `json:"user_uuid" gorm:"type:uuid;not null"`
+	Category    string        `json:"category"`
+	Activity    string        `json:"activity"`
 	ModelUUID   uuid.NullUUID `json:"model_uuid" gorm:"type:uuid;"`
 	DatasetUUID uuid.NullUUID `json:"dataset_uuid" gorm:"type:uuid;"`
 
@@ -18,8 +18,8 @@ type Activity struct {
 type Tag struct {
 	ModelUUID        uuid.NullUUID `json:"model_uuid" gorm:"type:uuid;primaryKey"`
 	DatasetUUID      uuid.NullUUID `json:"dataset_uuid" gorm:"type:uuid;primaryKey"`
-	OrganizationUUID uuid.UUID `json:"organization_uuid" gorm:"type:uuid;not null;index:idx_org_tag,unique"`
-	Tag              string    `json:"tag" gorm:"not null;index:idx_org_tag,unique"`
+	OrganizationUUID uuid.UUID     `json:"organization_uuid" gorm:"type:uuid;not null;index:idx_org_tag,unique"`
+	Tag              string        `json:"tag" gorm:"not null;index:idx_org_tag,unique"`
 
 	Model   Model        `gorm:"foreignKey:ModelUUID"`
 	Dataset Dataset      `gorm:"foreignKey:DatasetUUID"`
@@ -28,7 +28,8 @@ type Tag struct {
 
 type Log struct {
 	BaseModel          `gorm:"embedded"`
-	Data               string    `json:"data"`
+	Key                string        `json:"key" gorm:""`
+	Data               string        `json:"data"`
 	ModelVersionUUID   uuid.NullUUID `json:"model_version_uuid" gorm:"type:uuid;"`
 	DatasetVersionUUID uuid.NullUUID `json:"dataset_version_uuid" gorm:"type:uuid;"`
 

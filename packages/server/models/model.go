@@ -21,6 +21,22 @@ type RegisterModelRequest struct {
 	IsEmpty bool   `json:"is_empty"`
 }
 
+type ModelReviewRequest struct {
+	FromBranch  string `json:"from_branch"`
+	ToBranch    string `json:"to_branch"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	IsComplete  bool   `json:"is_complete"`
+	IsAccepted  bool   `json:"is_accepted"`
+}
+
+type ModelReviewUpdateRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	IsComplete  bool   `json:"is_complete"`
+	IsAccepted  bool   `json:"is_accepted"`
+}
+
 // Response models
 
 type ModelNameResponse struct {
@@ -55,12 +71,12 @@ type ModelBranchResponse struct {
 	IsDefault bool              `json:"is_default"`
 }
 
-type ModelVersionNameResponse struct {
+type ModelBranchVersionNameResponse struct {
 	UUID    uuid.UUID `json:"uuid"`
 	Version string    `json:"version"`
 }
 
-type ModelVersionResponse struct {
+type ModelBranchVersionResponse struct {
 	UUID    uuid.UUID               `json:"uuid"`
 	Version string                  `json:"version"`
 	Branch  ModelBranchNameResponse `json:"branch"`
@@ -70,13 +86,14 @@ type ModelVersionResponse struct {
 }
 
 type ModelReviewResponse struct {
-	UUID        uuid.UUID           `json:"uuid"`
-	FromBranch  ModelBranchResponse `json:"from_branch"`
-	ToBranch    ModelBranchResponse `json:"to_branch"`
-	Title       string              `json:"title"`
-	Description string              `json:"description"`
-	CreatedBy   UserHandleResponse  `json:"created_by"`
-	AssignedTo  UserHandleResponse  `json:"assigned_to"`
-	IsComplete  bool                `json:"is_complete"`
-	IsAccepted  bool                `json:"is_accepted"`
+	UUID        uuid.UUID               `json:"uuid"`
+	Model       ModelNameResponse       `json:"model"`
+	FromBranch  ModelBranchNameResponse `json:"from_branch"`
+	ToBranch    ModelBranchNameResponse `json:"to_branch"`
+	Title       string                  `json:"title"`
+	Description string                  `json:"description"`
+	CreatedBy   UserHandleResponse      `json:"created_by"`
+	AssignedTo  UserHandleResponse      `json:"assigned_to"`
+	IsComplete  bool                    `json:"is_complete"`
+	IsAccepted  bool                    `json:"is_accepted"`
 }

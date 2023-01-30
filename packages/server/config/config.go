@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -9,7 +8,7 @@ import (
 )
 
 func init() {
-	fmt.Println("Loading environment variables from .env file")
+	// fmt.Println("Loading environment variables from .env file")
 	godotenv.Load("../.env")
 }
 
@@ -21,12 +20,20 @@ var adminAccess = map[string]bool{
 	"demo@aztlan.in":           true,
 }
 
+// Development: localhost:8080
+// Production: host_url
 func GetHost() string {
 	return os.Getenv("HOST_URL")
 }
 
 func GetPort() string {
 	return os.Getenv("PORT")
+}
+
+// Development: http
+// Production: https
+func GetScheme() string {
+	return os.Getenv("SCHEME")
 }
 
 func GetPureMLR2Secrets() map[string]string {
@@ -39,8 +46,36 @@ func GetPureMLR2Secrets() map[string]string {
 	}
 }
 
+func IsCGOEnabled() bool {
+	return os.Getenv("CGO_ENABLED") == "1"
+}
+
+func GetDatabaseType() string {
+	return os.Getenv("DATABASE")
+}
+
 func GetDatabaseURL() string {
 	return os.Getenv("DATABASE_URL")
+}
+
+func GetDataDir() string {
+	dataDir := os.Getenv("DATA_DIR")
+	if dataDir == "" {
+		dataDir = "./pureml_data"
+	}
+	return dataDir
+}
+
+func GetHttpAddr() string {
+	httpAddr := os.Getenv("HTTP_ADDRESS")
+	if httpAddr == "" {
+		httpAddr = "127.0.0.1:8080"
+	}
+	return httpAddr
+}
+
+func GetHttpsAddr() string {
+	return os.Getenv("HTTPS_ADDRESS")
 }
 
 func HasAdminAccess(email string) bool {

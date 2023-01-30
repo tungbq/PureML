@@ -41,10 +41,10 @@ type ModelBranch struct {
 type ModelVersion struct {
 	BaseModel  `gorm:"embedded"`
 	Version    string        `json:"version" gorm:"not null;index:idx_model_branch_version,unique"`
-	BranchUUID uuid.UUID     `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_model_branch_version,unique"`
-	Hash       string        `json:"hash" gorm:"not null;unique"`
-	PathUUID   uuid.NullUUID `json:"path_uuid" gorm:"type:uuid;"`
+	Hash       string        `json:"hash" gorm:"not null;index:idx_model_branch_hash,unique"`
 	IsEmpty    bool          `json:"is_empty"`
+	BranchUUID uuid.UUID     `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_model_branch_version,unique;index:idx_model_branch_hash,unique"`
+	PathUUID   uuid.NullUUID `json:"path_uuid" gorm:"type:uuid;"`
 
 	Branch ModelBranch `gorm:"foreignKey:BranchUUID"`
 	Path   Path        `gorm:"foreignKey:PathUUID"`
@@ -52,6 +52,7 @@ type ModelVersion struct {
 
 type ModelReview struct {
 	BaseModel      `gorm:"embedded"`
+	ModelUUID      uuid.UUID     `json:"model_uuid" gorm:"type:uuid;not null"`
 	FromBranchUUID uuid.UUID     `json:"from_branch_uuid" gorm:"type:uuid;not null"`
 	ToBranchUUID   uuid.UUID     `json:"to_branch_uuid" gorm:"type:uuid;not null"`
 	Title          string        `json:"title" gorm:"not null"`
@@ -61,6 +62,7 @@ type ModelReview struct {
 	IsComplete     bool          `json:"is_complete" default:"false"`
 	IsAccepted     bool          `json:"is_accepted" default:"false"`
 
+	Model          Model       `gorm:"foreignKey:ModelUUID"`
 	FromBranch     ModelBranch `gorm:"foreignKey:FromBranchUUID"`
 	ToBranch       ModelBranch `gorm:"foreignKey:ToBranchUUID"`
 	CreatedByUser  User        `gorm:"foreignKey:CreatedBy"`

@@ -13,15 +13,26 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	puregosqlite "github.com/glebarez/sqlite"
 	uuid "github.com/satori/go.uuid"
 	"github.com/teris-io/shortid"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
+	cgosqlite "gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func NewSQLiteDatastore() *Datastore {
-	db, err := gorm.Open(sqlite.Open("db/pureml.db"), &gorm.Config{})
+	var dialector gorm.Dialector
+	var err error
+	dataDir := config.GetDataDir()
+	databasePath := fmt.Sprintf("%s/pureml.db", dataDir)
+	if config.IsCGOEnabled() {
+		dialector = cgosqlite.Open(databasePath)
+	} else {
+		dialector = puregosqlite.Open(databasePath)
+	}
+	db, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 		panic("Error connecting to database")
@@ -219,7 +230,7 @@ func (ds *Datastore) GetOrgByHandle(handle string) (*models.OrganizationResponse
 		Handle:      org.Handle,
 		Avatar:      org.Avatar,
 		Description: org.Description,
-		JoinCode:    org.JoinCode,
+		// JoinCode:    org.JoinCode,
 	}, nil
 }
 
@@ -374,11 +385,11 @@ func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) 
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		Name:     user.Name,
-		Email:    user.Email,
-		Handle:   user.Handle,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
 	}, nil
 }
 
@@ -392,11 +403,11 @@ func (ds *Datastore) GetUserByHandle(handle string) (*models.UserResponse, error
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		Name:     user.Name,
-		Email:    user.Email,
-		Handle:   user.Handle,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
 	}, nil
 }
 
@@ -450,12 +461,12 @@ func (ds *Datastore) GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, er
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:     user.UUID,
-		Name:     user.Name,
-		Email:    user.Email,
-		Handle:   user.Handle,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
+		UUID:   user.UUID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Handle: user.Handle,
+		Bio:    user.Bio,
+		Avatar: user.Avatar,
 	}, nil
 }
 
@@ -821,7 +832,7 @@ func (ds *Datastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName stri
 	}, nil
 }
 
-func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelVersionResponse, error) {
+func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelBranchVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -956,7 +967,7 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 		return nil, err
 	}
 
-	return &models.ModelVersionResponse{
+	return &models.ModelBranchVersionResponse{
 		UUID:    modelVersion.UUID,
 		Hash:    modelVersion.Hash,
 		Version: modelVersion.Version,
@@ -976,15 +987,15 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 	}, nil
 }
 
-func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
 	err := ds.DB.Select("model_versions.*").Joins("JOIN model_branches ON model_branches.uuid = model_versions.branch_uuid").Where("model_branches.model_uuid = ?", modelUUID).Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	var modelVersionsResponse []models.ModelVersionResponse
+	var modelVersionsResponse []models.ModelBranchVersionResponse
 	for _, modelVersion := range modelVersions {
-		modelVersionsResponse = append(modelVersionsResponse, models.ModelVersionResponse{
+		modelVersionsResponse = append(modelVersionsResponse, models.ModelBranchVersionResponse{
 			UUID:    modelVersion.UUID,
 			Hash:    modelVersion.Hash,
 			Version: modelVersion.Version,
@@ -1050,15 +1061,15 @@ func (ds *Datastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.Mo
 	}, nil
 }
 
-func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
 	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	var modelVersionsResponse []models.ModelVersionResponse
+	var modelVersionsResponse []models.ModelBranchVersionResponse
 	for _, modelVersion := range modelVersions {
-		modelVersionsResponse = append(modelVersionsResponse, models.ModelVersionResponse{
+		modelVersionsResponse = append(modelVersionsResponse, models.ModelBranchVersionResponse{
 			UUID:    modelVersion.UUID,
 			Hash:    modelVersion.Hash,
 			Version: modelVersion.Version,
@@ -1080,7 +1091,7 @@ func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]mod
 	return modelVersionsResponse, nil
 }
 
-func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelVersionResponse, error) {
+func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelBranchVersionResponse, error) {
 	var modelVersion dbmodels.ModelVersion
 	res := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Where("version = ?", version).Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
 	if res.Error != nil {
@@ -1089,7 +1100,7 @@ func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version st
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
-	return &models.ModelVersionResponse{
+	return &models.ModelBranchVersionResponse{
 		UUID:    modelVersion.UUID,
 		Hash:    modelVersion.Hash,
 		Version: modelVersion.Version,
@@ -1390,7 +1401,7 @@ func (ds *Datastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchNam
 	}, nil
 }
 
-func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetBranchVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -1528,7 +1539,7 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 		return nil, err
 	}
 
-	return &models.DatasetVersionResponse{
+	return &models.DatasetBranchVersionResponse{
 		UUID:    datasetVersion.UUID,
 		Hash:    datasetVersion.Hash,
 		Version: datasetVersion.Version,
@@ -1552,15 +1563,15 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 	}, nil
 }
 
-func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
 	err := ds.DB.Select("dataset_versions.*").Joins("JOIN dataset_branches ON dataset_branches.uuid = dataset_versions.branch_uuid").Where("dataset_branches.dataset_uuid = ?", datasetUUID).Find(&datasetVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	var datasetVersionsResponse []models.DatasetVersionResponse
+	var datasetVersionsResponse []models.DatasetBranchVersionResponse
 	for _, datasetVersion := range datasetVersions {
-		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetVersionResponse{
+		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetBranchVersionResponse{
 			UUID:    datasetVersion.UUID,
 			Hash:    datasetVersion.Hash,
 			Version: datasetVersion.Version,
@@ -1588,11 +1599,11 @@ func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.Data
 
 func (ds *Datastore) GetDatasetBranchByName(orgId uuid.UUID, datasetName string, datasetBranchName string) (*models.DatasetBranchResponse, error) {
 	var datasetBranch dbmodels.DatasetBranch
-	model, err := ds.GetDatasetByName(orgId, datasetName)
+	dataset, err := ds.GetDatasetByName(orgId, datasetName)
 	if err != nil {
 		return nil, err
 	}
-	res := ds.DB.Where("name = ?", datasetBranchName).Where("dataset_uuid = ?", model.UUID).Preload("Dataset").Limit(1).Find(&datasetBranch)
+	res := ds.DB.Where("name = ?", datasetBranchName).Where("dataset_uuid = ?", dataset.UUID).Preload("Dataset").Limit(1).Find(&datasetBranch)
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -1624,15 +1635,15 @@ func (ds *Datastore) GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*model
 	}, nil
 }
 
-func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
 	err := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Find(&datasetVersions).Error
 	if err != nil {
 		return nil, err
 	}
-	var datasetVersionsResponse []models.DatasetVersionResponse
+	var datasetVersionsResponse []models.DatasetBranchVersionResponse
 	for _, datasetVersion := range datasetVersions {
-		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetVersionResponse{
+		datasetVersionsResponse = append(datasetVersionsResponse, models.DatasetBranchVersionResponse{
 			UUID:    datasetVersion.UUID,
 			Hash:    datasetVersion.Hash,
 			Version: datasetVersion.Version,
@@ -1658,7 +1669,7 @@ func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([
 	return datasetVersionsResponse, nil
 }
 
-func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetVersionResponse, error) {
+func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetBranchVersionResponse, error) {
 	var datasetVersion dbmodels.DatasetVersion
 	res := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Where("version = ?", version).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
 	if res.Error != nil {
@@ -1667,7 +1678,7 @@ func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, versio
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
-	return &models.DatasetVersionResponse{
+	return &models.DatasetBranchVersionResponse{
 		UUID:    datasetVersion.UUID,
 		Hash:    datasetVersion.Hash,
 		Version: datasetVersion.Version,
@@ -1702,8 +1713,9 @@ func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models
 	var logsResponse []models.LogResponse
 	for _, log := range logs {
 		logsResponse = append(logsResponse, models.LogResponse{
+			Key:  log.Key,
 			Data: log.Data,
-			ModelVersion: models.ModelVersionNameResponse{
+			ModelVersion: models.ModelBranchVersionNameResponse{
 				UUID:    log.ModelVersion.UUID,
 				Version: log.ModelVersion.Version,
 			},
@@ -1712,8 +1724,37 @@ func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models
 	return logsResponse, nil
 }
 
-func (ds *Datastore) CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
+func (ds *Datastore) GetKeyLogForModelVersion(modelVersionUUID uuid.UUID, key string) ([]models.LogResponse, error) {
+	var logs []dbmodels.Log
+	err := ds.DB.Where("key = ?", key).Where("model_version_uuid = ?", modelVersionUUID).Preload("ModelVersion").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	var logsResponse []models.LogResponse
+	for _, log := range logs {
+		logsResponse = append(logsResponse, models.LogResponse{
+			Key:  log.Key,
+			Data: log.Data,
+			ModelVersion: models.ModelBranchVersionNameResponse{
+				UUID:    log.ModelVersion.UUID,
+				Version: log.ModelVersion.Version,
+			},
+		})
+	}
+	return logsResponse, nil
+}
+
+func (ds *Datastore) CreateLogForModelVersion(key string, data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	var keyLog dbmodels.Log
+	err := ds.DB.Where("key = ?", key).Where("model_version_uuid = ?", modelVersionUUID).First(&keyLog).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
 	log := dbmodels.Log{
+		BaseModel: dbmodels.BaseModel{
+			UUID: keyLog.UUID,
+		},
+		Key:  key,
 		Data: data,
 		ModelVersion: dbmodels.ModelVersion{
 			BaseModel: dbmodels.BaseModel{
@@ -1721,13 +1762,16 @@ func (ds *Datastore) CreateLogForModelVersion(data string, modelVersionUUID uuid
 			},
 		},
 	}
-	err := ds.DB.Create(&log).Preload("ModelVersion").Find(&log).Error
+	err = ds.DB.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(&log).Preload("ModelVersion").Find(&log).Error
 	if err != nil {
 		return nil, err
 	}
 	return &models.LogResponse{
+		Key:  log.Key,
 		Data: log.Data,
-		ModelVersion: models.ModelVersionNameResponse{
+		ModelVersion: models.ModelBranchVersionNameResponse{
 			UUID:    log.ModelVersion.UUID,
 			Version: log.ModelVersion.Version,
 		},
@@ -1743,8 +1787,9 @@ func (ds *Datastore) GetLogForDatasetVersion(datasetVersion uuid.UUID) ([]models
 	var logsResponse []models.LogResponse
 	for _, log := range logs {
 		logsResponse = append(logsResponse, models.LogResponse{
+			Key:  log.Key,
 			Data: log.Data,
-			DatasetVersion: models.DatasetVersionNameResponse{
+			DatasetVersion: models.DatasetBranchVersionNameResponse{
 				UUID:    log.DatasetVersion.UUID,
 				Version: log.DatasetVersion.Version,
 			},
@@ -1753,8 +1798,37 @@ func (ds *Datastore) GetLogForDatasetVersion(datasetVersion uuid.UUID) ([]models
 	return logsResponse, nil
 }
 
-func (ds *Datastore) CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
+func (ds *Datastore) GetKeyLogForDatasetVersion(datasetVersion uuid.UUID, key string) ([]models.LogResponse, error) {
+	var logs []dbmodels.Log
+	err := ds.DB.Where("key = ?", key).Where("dataset_version_uuid = ?", datasetVersion).Preload("DatasetVersion").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	var logsResponse []models.LogResponse
+	for _, log := range logs {
+		logsResponse = append(logsResponse, models.LogResponse{
+			Key:  log.Key,
+			Data: log.Data,
+			DatasetVersion: models.DatasetBranchVersionNameResponse{
+				UUID:    log.DatasetVersion.UUID,
+				Version: log.DatasetVersion.Version,
+			},
+		})
+	}
+	return logsResponse, nil
+}
+
+func (ds *Datastore) CreateLogForDatasetVersion(key string, data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	var keyLog dbmodels.Log
+	err := ds.DB.Where("key = ?", key).Where("dataset_version_uuid = ?", datasetVersionUUID).First(&keyLog).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
 	log := dbmodels.Log{
+		BaseModel: dbmodels.BaseModel{
+			UUID: keyLog.UUID,
+		},
+		Key:  key,
 		Data: data,
 		DatasetVersion: dbmodels.DatasetVersion{
 			BaseModel: dbmodels.BaseModel{
@@ -1762,13 +1836,16 @@ func (ds *Datastore) CreateLogForDatasetVersion(data string, datasetVersionUUID 
 			},
 		},
 	}
-	err := ds.DB.Create(&log).Preload("DatasetVersion").Find(&log).Error
+	err = ds.DB.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(&log).Preload("DatasetVersion").Find(&log).Error
 	if err != nil {
 		return nil, err
 	}
 	return &models.LogResponse{
+		Key:  log.Key,
 		Data: log.Data,
-		DatasetVersion: models.DatasetVersionNameResponse{
+		DatasetVersion: models.DatasetBranchVersionNameResponse{
 			UUID:    log.DatasetVersion.UUID,
 			Version: log.DatasetVersion.Version,
 		},
@@ -2164,4 +2241,368 @@ func (ds *Datastore) DeleteS3Secrets(orgId uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+/////////////////////////////// REVIEW API METHODS ///////////////////////////////
+
+func (ds *Datastore) GetModelReview(reviewUUID uuid.UUID) (*models.ModelReviewResponse, error) {
+	var review dbmodels.ModelReview
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelReviewResponse{
+		UUID: review.UUID,
+		Model: models.ModelNameResponse{
+			UUID: review.Model.UUID,
+			Name: review.Model.Name,
+		},
+		FromBranch: models.ModelBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.ModelBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) GetModelReviews(modelUUID uuid.UUID) ([]models.ModelReviewResponse, error) {
+	var reviews []dbmodels.ModelReview
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("model_uuid = ?", modelUUID).Find(&reviews).Error
+	if err != nil {
+		return nil, err
+	}
+	var reviewResponses []models.ModelReviewResponse
+	for _, review := range reviews {
+		reviewResponses = append(reviewResponses, models.ModelReviewResponse{
+			UUID: review.UUID,
+			Model: models.ModelNameResponse{
+				UUID: review.Model.UUID,
+				Name: review.Model.Name,
+			},
+			FromBranch: models.ModelBranchNameResponse{
+				UUID: review.FromBranch.UUID,
+				Name: review.FromBranch.Name,
+			},
+			ToBranch: models.ModelBranchNameResponse{
+				UUID: review.ToBranch.UUID,
+				Name: review.ToBranch.Name,
+			},
+			Title:       review.Title,
+			Description: review.Description,
+			IsComplete:  review.IsComplete,
+			IsAccepted:  review.IsAccepted,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   review.CreatedByUser.UUID,
+				Handle: review.CreatedByUser.Handle,
+				Name:   review.CreatedByUser.Name,
+				Avatar: review.CreatedByUser.Avatar,
+				Email:  review.CreatedByUser.Email,
+			},
+		})
+	}
+	return reviewResponses, nil
+}
+
+func (ds *Datastore) CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.ModelReviewResponse, error) {
+	review := dbmodels.ModelReview{
+		Model: dbmodels.Model{
+			BaseModel: dbmodels.BaseModel{
+				UUID: modelUUID,
+			},
+		},
+		FromBranch: dbmodels.ModelBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: fromBranch,
+			},
+		},
+		ToBranch: dbmodels.ModelBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: toBranch,
+			},
+		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: userUUID,
+			},
+		},
+		Title:       title,
+		Description: desc,
+		IsComplete:  isComplete,
+		IsAccepted:  isAccepted,
+	}
+	err := ds.DB.Create(&review).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelReviewResponse{
+		UUID: review.UUID,
+		Model: models.ModelNameResponse{
+			UUID: review.Model.UUID,
+			Name: review.Model.Name,
+		},
+		FromBranch: models.ModelBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.ModelBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) UpdateModelReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.ModelReviewResponse, error) {
+	var review dbmodels.ModelReview
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range updatedAttributes {
+		switch key {
+		case "title":
+			review.Title = value.(string)
+		case "description":
+			review.Description = value.(string)
+		case "is_complete":
+			review.IsComplete = value.(bool)
+		case "is_accepted":
+			review.IsAccepted = value.(bool)
+		}
+	}
+	err = ds.DB.Save(&review).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelReviewResponse{
+		UUID: review.UUID,
+		Model: models.ModelNameResponse{
+			UUID: review.Model.UUID,
+			Name: review.Model.Name,
+		},
+		FromBranch: models.ModelBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.ModelBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) GetDatasetReview(reviewUUID uuid.UUID) (*models.DatasetReviewResponse, error) {
+	var review dbmodels.DatasetReview
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetReviewResponse{
+		UUID: review.UUID,
+		Dataset: models.DatasetNameResponse{
+			UUID: review.Dataset.UUID,
+			Name: review.Dataset.Name,
+		},
+		FromBranch: models.DatasetBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.DatasetBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) GetDatasetReviews(datasetUUID uuid.UUID) ([]models.DatasetReviewResponse, error) {
+	var reviews []dbmodels.DatasetReview
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("dataset_uuid = ?", datasetUUID).Find(&reviews).Error
+	if err != nil {
+		return nil, err
+	}
+	var reviewResponses []models.DatasetReviewResponse
+	for _, review := range reviews {
+		reviewResponses = append(reviewResponses, models.DatasetReviewResponse{
+			UUID: review.UUID,
+			Dataset: models.DatasetNameResponse{
+				UUID: review.Dataset.UUID,
+				Name: review.Dataset.Name,
+			},
+			FromBranch: models.DatasetBranchNameResponse{
+				UUID: review.FromBranch.UUID,
+				Name: review.FromBranch.Name,
+			},
+			ToBranch: models.DatasetBranchNameResponse{
+				UUID: review.ToBranch.UUID,
+				Name: review.ToBranch.Name,
+			},
+			Title:       review.Title,
+			Description: review.Description,
+			IsComplete:  review.IsComplete,
+			IsAccepted:  review.IsAccepted,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   review.CreatedByUser.UUID,
+				Handle: review.CreatedByUser.Handle,
+				Name:   review.CreatedByUser.Name,
+				Avatar: review.CreatedByUser.Avatar,
+				Email:  review.CreatedByUser.Email,
+			},
+		})
+	}
+	return reviewResponses, nil
+}
+
+func (ds *Datastore) CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.DatasetReviewResponse, error) {
+	review := dbmodels.DatasetReview{
+		Dataset: dbmodels.Dataset{
+			BaseModel: dbmodels.BaseModel{
+				UUID: datasetUUID,
+			},
+		},
+		FromBranch: dbmodels.DatasetBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: fromBranch,
+			},
+		},
+		ToBranch: dbmodels.DatasetBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: toBranch,
+			},
+		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: userUUID,
+			},
+		},
+		Title:       title,
+		Description: desc,
+		IsComplete:  isComplete,
+		IsAccepted:  isAccepted,
+	}
+	err := ds.DB.Create(&review).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetReviewResponse{
+		UUID: review.UUID,
+		Dataset: models.DatasetNameResponse{
+			UUID: review.Dataset.UUID,
+			Name: review.Dataset.Name,
+		},
+		FromBranch: models.DatasetBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.DatasetBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) UpdateDatasetReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.DatasetReviewResponse, error) {
+	var review dbmodels.DatasetReview
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range updatedAttributes {
+		switch key {
+		case "title":
+			review.Title = value.(string)
+		case "description":
+			review.Description = value.(string)
+		case "is_complete":
+			review.IsComplete = value.(bool)
+		case "is_accepted":
+			review.IsAccepted = value.(bool)
+		}
+	}
+	err = ds.DB.Save(&review).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetReviewResponse{
+		UUID: review.UUID,
+		Dataset: models.DatasetNameResponse{
+			UUID: review.Dataset.UUID,
+			Name: review.Dataset.Name,
+		},
+		FromBranch: models.DatasetBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.DatasetBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
 }

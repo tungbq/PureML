@@ -2,8 +2,8 @@ package datastore
 
 import (
 	"mime/multipart"
-	"os"
 
+	"github.com/PureML-Inc/PureML/server/config"
 	"github.com/PureML-Inc/PureML/server/datastore/impl"
 	"github.com/PureML-Inc/PureML/server/models"
 	uuid "github.com/satori/go.uuid"
@@ -11,14 +11,13 @@ import (
 
 var ds *impl.Datastore
 
-func init() {
-	stage := os.Getenv("STAGE")
-	if stage == "Testing" {
-		//For testing
-		ds = impl.NewTestSQLiteDatastore()
-	} else {
-		//Real db
-		// ds = impl.NewSQLiteDatastore()
+func InitDB() {
+	databaseType := config.GetDatabaseType()
+	if databaseType == "local" {
+		//SQLite db for local
+		ds = impl.NewSQLiteDatastore()
+	} else if databaseType == "postgres" {
+		//Postgres db
 		ds = impl.NewPostgresDatastore()
 	}
 }
@@ -99,16 +98,24 @@ func GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, er
 	return ds.GetLogForModelVersion(modelVersionUUID)
 }
 
-func CreateLogForModelVersion(data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
-	return ds.CreateLogForModelVersion(data, modelVersionUUID)
+func GetKeyLogForModelVersion(modelVersionUUID uuid.UUID, key string) ([]models.LogResponse, error) {
+	return ds.GetKeyLogForModelVersion(modelVersionUUID, key)
+}
+
+func CreateLogForModelVersion(key string, data string, modelVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	return ds.CreateLogForModelVersion(key, data, modelVersionUUID)
 }
 
 func GetLogForDatasetVersion(datasetVersionUUID uuid.UUID) ([]models.LogResponse, error) {
 	return ds.GetLogForDatasetVersion(datasetVersionUUID)
 }
 
-func CreateLogForDatasetVersion(data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
-	return ds.CreateLogForDatasetVersion(data, datasetVersionUUID)
+func GetKeyLogForDatasetVersion(datasetVersionUUID uuid.UUID, key string) ([]models.LogResponse, error) {
+	return ds.GetKeyLogForDatasetVersion(datasetVersionUUID, key)
+}
+
+func CreateLogForDatasetVersion(key string, data string, datasetVersionUUID uuid.UUID) (*models.LogResponse, error) {
+	return ds.CreateLogForDatasetVersion(key, data, datasetVersionUUID)
 }
 
 func GetAllModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
@@ -141,7 +148,7 @@ func CreateModelBranches(modelUUID uuid.UUID, branchNames []string) ([]models.Mo
 	return branches, nil
 }
 
-func UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelVersionResponse, error) {
+func UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelBranchVersionResponse, error) {
 	return ds.UploadAndRegisterModelFile(orgId, modelBranchUUID, file, isEmpty, hash, source)
 }
 
@@ -149,7 +156,7 @@ func GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, err
 	return ds.GetModelAllBranches(modelUUID)
 }
 
-func GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+func GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	return ds.GetModelAllVersions(modelUUID)
 }
 
@@ -161,11 +168,11 @@ func GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchRespons
 	return ds.GetModelBranchByUUID(modelBranchUUID)
 }
 
-func GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelVersionResponse, error) {
+func GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	return ds.GetModelBranchAllVersions(modelBranchUUID)
 }
 
-func GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelVersionResponse, error) {
+func GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelBranchVersionResponse, error) {
 	return ds.GetModelBranchVersion(modelBranchUUID, version)
 }
 
@@ -199,7 +206,7 @@ func CreateDatasetBranches(datasetUUID uuid.UUID, branchNames []string) ([]model
 	return branches, nil
 }
 
-func UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetVersionResponse, error) {
+func UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetBranchVersionResponse, error) {
 	return ds.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, file, isEmpty, hash, source, lineage)
 }
 
@@ -207,7 +214,7 @@ func GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.DatasetBranchRespons
 	return ds.GetDatasetAllBranches(datasetUUID)
 }
 
-func GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+func GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	return ds.GetDatasetAllVersions(datasetUUID)
 }
 
@@ -219,11 +226,11 @@ func GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*models.DatasetBranchR
 	return ds.GetDatasetBranchByUUID(datasetBranchUUID)
 }
 
-func GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetVersionResponse, error) {
+func GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	return ds.GetDatasetBranchAllVersions(datasetBranchUUID)
 }
 
-func GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetVersionResponse, error) {
+func GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetBranchVersionResponse, error) {
 	return ds.GetDatasetBranchVersion(datasetBranchUUID, version)
 }
 
@@ -309,6 +316,38 @@ func GetDatasetReadmeAllVersions(modelUUID uuid.UUID) ([]models.ReadmeVersionRes
 
 func UpdateDatasetReadme(modelUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
 	return ds.UpdateDatasetReadme(modelUUID, fileType, content)
+}
+
+func GetModelReview(reviewUUID uuid.UUID) (*models.ModelReviewResponse, error) {
+	return ds.GetModelReview(reviewUUID)
+}
+
+func GetModelReviews(modelUUID uuid.UUID) ([]models.ModelReviewResponse, error) {
+	return ds.GetModelReviews(modelUUID)
+}
+
+func CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.ModelReviewResponse, error) {
+	return ds.CreateModelReview(modelUUID, userUUID, fromBranch, toBranch, title, desc, isComplete, isAccepted)
+}
+
+func UpdateModelReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.ModelReviewResponse, error) {
+	return ds.UpdateModelReview(reviewUUID, updatedAttributes)
+}
+
+func GetDatasetReview(reviewUUID uuid.UUID) (*models.DatasetReviewResponse, error) {
+	return ds.GetDatasetReview(reviewUUID)
+}
+
+func GetDatasetReviews(datasetUUID uuid.UUID) ([]models.DatasetReviewResponse, error) {
+	return ds.GetDatasetReviews(datasetUUID)
+}
+
+func CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.DatasetReviewResponse, error) {
+	return ds.CreateDatasetReview(datasetUUID, userUUID, fromBranch, toBranch, title, desc, isComplete, isAccepted)
+}
+
+func UpdateDatasetReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.DatasetReviewResponse, error) {
+	return ds.UpdateDatasetReview(reviewUUID, updatedAttributes)
 }
 
 type Datastore interface {

@@ -8,19 +8,21 @@ import (
 )
 
 type Request struct {
-	User          *UserClaims
-	Org           *OrganizationHandleResponse
-	Model         *ModelNameResponse
-	ModelBranch   *ModelBranchNameResponse
-	Dataset       *DatasetNameResponse
-	DatasetBranch *DatasetBranchNameResponse
-	Body          []byte
-	ParsedBody    map[string]interface{}
-	Headers       map[string]string
-	PathParams    map[string]string
-	QueryParams   map[string]string
-	FormFiles     map[string][]*multipart.FileHeader
-	FormValues    map[string][]string
+	User                 *UserClaims
+	Org                  *OrganizationHandleResponse
+	Model                *ModelNameResponse
+	ModelBranch          *ModelBranchNameResponse
+	ModelBranchVersion   *ModelBranchVersionNameResponse
+	Dataset              *DatasetNameResponse
+	DatasetBranch        *DatasetBranchNameResponse
+	DatasetBranchVersion *DatasetBranchVersionNameResponse
+	Body                 []byte
+	ParsedBody           map[string]interface{}
+	Headers              map[string]string
+	PathParams           map[string]string
+	QueryParams          map[string]string
+	FormFiles            map[string][]*multipart.FileHeader
+	FormValues           map[string][]string
 }
 
 func (r *Request) GetUserUUID() uuid.UUID {
@@ -47,6 +49,18 @@ func (r *Request) GetModelBranchUUID() uuid.UUID {
 	return r.ModelBranch.UUID
 }
 
+func (r *Request) GetModelBranchName() string {
+	return r.ModelBranch.Name
+}
+
+func (r *Request) GetModelBranchVersionUUID() uuid.UUID {
+	return r.ModelBranchVersion.UUID
+}
+
+func (r *Request) GetModelBranchVersionName() string {
+	return r.ModelBranchVersion.Version
+}
+
 func (r *Request) GetDatasetUUID() uuid.UUID {
 	return r.Dataset.UUID
 }
@@ -57,6 +71,18 @@ func (r *Request) GetDatasetName() string {
 
 func (r *Request) GetDatasetBranchUUID() uuid.UUID {
 	return r.DatasetBranch.UUID
+}
+
+func (r *Request) GetDatasetBranchName() string {
+	return r.DatasetBranch.Name
+}
+
+func (r *Request) GetDatasetBranchVersionUUID() uuid.UUID {
+	return r.DatasetBranchVersion.UUID
+}
+
+func (r *Request) GetDatasetBranchVersionName() string {
+	return r.DatasetBranchVersion.Version
 }
 
 func (r *Request) GetPathParam(param string) string {

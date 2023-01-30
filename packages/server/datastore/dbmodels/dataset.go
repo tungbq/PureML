@@ -40,11 +40,11 @@ type DatasetBranch struct {
 type DatasetVersion struct {
 	BaseModel   `gorm:"embedded"`
 	Version     string        `json:"version" gorm:"not null;index:idx_dataset_branch_version,unique"`
-	BranchUUID  uuid.UUID     `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_dataset_branch_version,unique"`
-	LineageUUID uuid.NullUUID `json:"lineage_uuid" gorm:"type:uuid;"`
-	Hash        string        `json:"hash" gorm:"not null"`
-	PathUUID    uuid.NullUUID `json:"path_uuid" gorm:"type:uuid;"`
+	Hash        string        `json:"hash" gorm:"not null;index:idx_dataset_branch_hash,unique"`
 	IsEmpty     bool          `json:"is_empty"`
+	BranchUUID  uuid.UUID     `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_dataset_branch_version,unique;index:idx_dataset_branch_hash,unique"`
+	LineageUUID uuid.NullUUID `json:"lineage_uuid" gorm:"type:uuid;"`
+	PathUUID    uuid.NullUUID `json:"path_uuid" gorm:"type:uuid;"`
 
 	Branch  DatasetBranch `gorm:"foreignKey:BranchUUID"`
 	Lineage Lineage       `gorm:"foreignKey:LineageUUID"`
@@ -58,6 +58,7 @@ type Lineage struct {
 
 type DatasetReview struct {
 	BaseModel      `gorm:"embedded"`
+	DatasetUUID    uuid.UUID     `json:"dataset_uuid" gorm:"type:uuid;not null"`
 	FromBranchUUID uuid.UUID     `json:"from_branch_uuid" gorm:"type:uuid;not null"`
 	ToBranchUUID   uuid.UUID     `json:"to_branch_uuid" gorm:"type:uuid;not null"`
 	Title          string        `json:"title" gorm:"not null"`
@@ -67,6 +68,7 @@ type DatasetReview struct {
 	IsComplete     bool          `json:"is_complete" default:"false"`
 	IsAccepted     bool          `json:"is_accepted" default:"false"`
 
+	Dataset        Dataset       `gorm:"foreignKey:DatasetUUID"`
 	FromBranch     DatasetBranch `gorm:"foreignKey:FromBranchUUID"`
 	ToBranch       DatasetBranch `gorm:"foreignKey:ToBranchUUID"`
 	CreatedByUser  User          `gorm:"foreignKey:CreatedBy"`
