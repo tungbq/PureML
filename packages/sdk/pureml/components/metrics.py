@@ -56,7 +56,7 @@ def add(metrics, model_name: str=None, model_branch:str=None, model_version:str=
     '''
 
     metrics = convert_values_to_string(logged_dict=metrics)
-    metrics = merge_step_with_value(values_dict=metrics, step=step)
+    # metrics = merge_step_with_value(values_dict=metrics, step=step)
 
     add_metrics_to_config(values=metrics, model_name=model_name, model_branch=model_branch, model_version=model_version)
     

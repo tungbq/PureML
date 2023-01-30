@@ -56,7 +56,7 @@ def add(params, model_name: str=None, model_branch:str=None, model_version:str='
     '''
 
     params = convert_values_to_string(logged_dict=params)
-    params = merge_step_with_value(values_dict=params, step=step)
+    # params = merge_step_with_value(values_dict=params, step=step)
 
     add_params_to_config(values=params, model_name=model_name, model_branch=model_branch, model_version=model_version)
 
