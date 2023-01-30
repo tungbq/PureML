@@ -13,6 +13,7 @@ from .components import dataset as dataset
 from .components import metrics as metrics
 from .components import params as params
 from .components import artifacts as artifacts
+from .components import auth as auth
 from .components.auth import login
 from .components.log import log
 

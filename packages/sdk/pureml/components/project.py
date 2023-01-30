@@ -18,8 +18,10 @@ def details(name: str=None, id:str = None):
     
     Parameters
     ----------
-    project_id : str
-        The ID of the project you want to get details for.
+    name : str
+        The name of the project to get details for.
+    id : str
+        The ID of the project to get details for.
     
     '''
 
