@@ -5,10 +5,10 @@ lint:
 docs:
 	@echo "Generating docs..."
 	swag fmt
-	swag init -g ./purebackend.go
+	swag init -g purebackend.go
 
 run:
-	go run ./purebackend.go
+	go run purebackend.go
 
 build:
-	go build -o purebackend.exe ./purebackend.go
+	go build -o purebackend.exe purebackend.go
