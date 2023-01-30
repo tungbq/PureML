@@ -52,6 +52,7 @@ type ModelVersion struct {
 
 type ModelReview struct {
 	BaseModel      `gorm:"embedded"`
+	ModelUUID      uuid.UUID     `json:"model_uuid" gorm:"type:uuid;not null"`
 	FromBranchUUID uuid.UUID     `json:"from_branch_uuid" gorm:"type:uuid;not null"`
 	ToBranchUUID   uuid.UUID     `json:"to_branch_uuid" gorm:"type:uuid;not null"`
 	Title          string        `json:"title" gorm:"not null"`
@@ -61,6 +62,7 @@ type ModelReview struct {
 	IsComplete     bool          `json:"is_complete" default:"false"`
 	IsAccepted     bool          `json:"is_accepted" default:"false"`
 
+	Model          Model       `gorm:"foreignKey:ModelUUID"`
 	FromBranch     ModelBranch `gorm:"foreignKey:FromBranchUUID"`
 	ToBranch       ModelBranch `gorm:"foreignKey:ToBranchUUID"`
 	CreatedByUser  User        `gorm:"foreignKey:CreatedBy"`

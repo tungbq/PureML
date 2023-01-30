@@ -63,6 +63,20 @@ func RegisterDataset(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
 	datasetBranchUUID := request.GetDatasetBranchUUID()
+	versions, err := datastore.GetDatasetBranchAllVersions(datasetBranchUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := false
+	for _, version := range versions {
+		if version.Hash == datasetHash {
+			response = true
+			break
+		}
+	}
+	if response {
+		return models.NewErrorResponse(http.StatusBadRequest, "Dataset with this hash already exists")
+	}
 	datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, fileHeader, datasetIsEmpty, datasetHash, datasetSourceType, datasetLineage)
 	if err != nil {
 		return models.NewServerErrorResponse(err)

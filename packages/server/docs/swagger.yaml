@@ -47,8 +47,33 @@ definitions:
       description:
         type: string
       handle:
+        description: Name        string `json:"name"`
         type: string
-      name:
+    type: object
+  models.DatasetReviewRequest:
+    properties:
+      description:
+        type: string
+      from_branch:
+        type: string
+      is_accepted:
+        type: boolean
+      is_complete:
+        type: boolean
+      title:
+        type: string
+      to_branch:
+        type: string
+    type: object
+  models.DatasetReviewUpdateRequest:
+    properties:
+      description:
+        type: string
+      is_accepted:
+        type: boolean
+      is_complete:
+        type: boolean
+      title:
         type: string
     type: object
   models.HashRequest:
@@ -61,6 +86,32 @@ definitions:
       data:
         type: string
       key:
+        type: string
+    type: object
+  models.ModelReviewRequest:
+    properties:
+      description:
+        type: string
+      from_branch:
+        type: string
+      is_accepted:
+        type: boolean
+      is_complete:
+        type: boolean
+      title:
+        type: string
+      to_branch:
+        type: string
+    type: object
+  models.ModelReviewUpdateRequest:
+    properties:
+      description:
+        type: string
+      is_accepted:
+        type: boolean
+      is_complete:
+        type: boolean
+      title:
         type: string
     type: object
   models.R2SecretRequest:
@@ -978,6 +1029,112 @@ paths:
       summary: Get dataset readme
       tags:
       - Dataset
+  /org/{orgId}/dataset/{datasetName}/review:
+    get:
+      consumes:
+      - '*/*'
+      description: Get dataset reviews
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get dataset reviews
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/review/{reviewId}/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update review of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Review UUID
+        in: path
+        name: reviewId
+        required: true
+        type: string
+      - description: Review
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/models.DatasetReviewUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update review of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/review/create:
+    post:
+      consumes:
+      - '*/*'
+      description: |-
+        Create a new review request for dataset
+        From and To branch names are required (Not UUID)
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Review
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.DatasetReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new review request for dataset
+      tags:
+      - Dataset
   /org/{orgId}/dataset/all:
     get:
       consumes:
@@ -1803,6 +1960,112 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get model readme
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/review:
+    get:
+      consumes:
+      - '*/*'
+      description: Get model reviews
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get model reviews
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/review/{reviewId}/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update review of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Review UUID
+        in: path
+        name: reviewId
+        required: true
+        type: string
+      - description: Review
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/models.ModelReviewUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update review of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/review/create:
+    post:
+      consumes:
+      - '*/*'
+      description: |-
+        Create a new review request for model
+        From and To branch names are required (Not UUID)
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Review
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ModelReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new review request for model
       tags:
       - Model
   /org/{orgId}/model/all:

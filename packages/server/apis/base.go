@@ -31,7 +31,7 @@ func InitApi() (*echo.Echo, error) {
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	bindStaticUI(e)
+	// bindStaticUI(e)
 
 	api := e.Group("/api")
 
@@ -89,6 +89,11 @@ func InitApi() (*echo.Echo, error) {
 	modelGroup.GET("/:modelName/branch/:branchName/version", handler.DefaultHandler(service.GetModelBranchAllVersions), middlewares.ValidateModel, middlewares.ValidateModelBranch)
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
 
+	//Model Review APIs
+	// modelGroup.GET("/:modelName/review", handler.DefaultHandler(service.GetModelReviews))
+	// modelGroup.POST("/:modelName/review/create", handler.DefaultHandler(service.CreateModelReview))
+	// modelGroup.POST("/:modelName/review/:reviewId/update", handler.DefaultHandler(service.UpdateModelReview))
+
 	//Model Log APIs
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log", handler.DefaultHandler(service.GetAllLogsModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log/:key", handler.DefaultHandler(service.GetKeyLogsModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
@@ -117,6 +122,11 @@ func InitApi() (*echo.Echo, error) {
 	datasetGroup.POST("/:datasetName/branch/:branchName/register", handler.DefaultHandler(service.RegisterDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
 	datasetGroup.GET("/:datasetName/branch/:branchName/version", handler.DefaultHandler(service.GetDatasetBranchAllVersions), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
 	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetDatasetBranchVersion), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch, middlewares.ValidateDatasetBranchVersion)
+
+	//Dataset Review APIs
+	datasetGroup.GET("/:datasetName/review", handler.DefaultHandler(service.GetDatasetReviews), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/review/create", handler.DefaultHandler(service.CreateDatasetReview), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/review/:reviewId/update", handler.DefaultHandler(service.UpdateDatasetReview), middlewares.ValidateDataset)
 
 	//Dataset Log APIs
 	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version/log", handler.DefaultHandler(service.GetAllLogsDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch, middlewares.ValidateDatasetBranchVersion)

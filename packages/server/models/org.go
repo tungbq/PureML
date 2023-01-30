@@ -5,7 +5,7 @@ import uuid "github.com/satori/go.uuid"
 // Request models
 
 type CreateOrUpdateOrgRequest struct {
-	Name        string `json:"name"`
+	// Name        string `json:"name"`
 	Handle      string `json:"handle"`
 	Description string `json:"description"`
 	Avatar      string `json:"avatar"`

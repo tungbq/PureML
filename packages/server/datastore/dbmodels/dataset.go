@@ -58,6 +58,7 @@ type Lineage struct {
 
 type DatasetReview struct {
 	BaseModel      `gorm:"embedded"`
+	DatasetUUID    uuid.UUID     `json:"dataset_uuid" gorm:"type:uuid;not null"`
 	FromBranchUUID uuid.UUID     `json:"from_branch_uuid" gorm:"type:uuid;not null"`
 	ToBranchUUID   uuid.UUID     `json:"to_branch_uuid" gorm:"type:uuid;not null"`
 	Title          string        `json:"title" gorm:"not null"`
@@ -67,6 +68,7 @@ type DatasetReview struct {
 	IsComplete     bool          `json:"is_complete" default:"false"`
 	IsAccepted     bool          `json:"is_accepted" default:"false"`
 
+	Dataset        Dataset       `gorm:"foreignKey:DatasetUUID"`
 	FromBranch     DatasetBranch `gorm:"foreignKey:FromBranchUUID"`
 	ToBranch       DatasetBranch `gorm:"foreignKey:ToBranchUUID"`
 	CreatedByUser  User          `gorm:"foreignKey:CreatedBy"`

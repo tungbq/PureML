@@ -20,9 +20,10 @@ import (
 //	@Param			org	body	models.CreateOrUpdateOrgRequest	true	"Organization details"
 func CreateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
-	orgName := request.GetParsedBodyAttribute("name").(string)
+	// orgName := request.GetParsedBodyAttribute("name").(string)
 	orgDesc := request.GetParsedBodyAttribute("description").(string)
 	orgHandle := request.GetParsedBodyAttribute("handle").(string)
+	orgName := orgHandle
 	email := request.User.Email
 	org, err := datastore.CreateOrgFromEmail(email, orgName, orgDesc, orgHandle)
 	if err != nil {

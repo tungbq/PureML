@@ -73,7 +73,7 @@ func Serve() error {
 	bold.Printf("> Server started at: %s\n", color.CyanString("%s://%s", schema, serverConfig.Addr))
 	regular.Printf("  - REST API: %s\n", color.CyanString("%s://%s/api/", schema, serverConfig.Addr))
 	regular.Printf("  - API Docs: %s\n", color.HiGreenString("%s://%s/api/swagger/index.html", schema, serverConfig.Addr))
-	regular.Printf("  - Admin UI: %s\n", color.CyanString("%s://%s/_/", schema, serverConfig.Addr))
+	// regular.Printf("  - Admin UI: %s\n", color.CyanString("%s://%s/_/", schema, serverConfig.Addr))
 	// }
 
 	var serveErr error

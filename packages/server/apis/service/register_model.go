@@ -59,6 +59,20 @@ func RegisterModel(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
 	modelBranchUUID := request.GetModelBranchUUID()
+	versions, err := datastore.GetModelBranchAllVersions(modelBranchUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := false
+	for _, version := range versions {
+		if version.Hash == modelHash {
+			response = true
+			break
+		}
+	}
+	if response {
+		return models.NewErrorResponse(http.StatusBadRequest, "Model with this hash already exists")
+	}
 	modelVersion, err := datastore.UploadAndRegisterModelFile(orgId, modelBranchUUID, fileHeader, modelIsEmpty, modelHash, modelSourceType)
 	if err != nil {
 		return models.NewServerErrorResponse(err)

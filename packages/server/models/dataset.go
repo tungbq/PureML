@@ -22,6 +22,22 @@ type RegisterDatasetRequest struct {
 	IsEmpty bool   `json:"is_empty"`
 }
 
+type DatasetReviewRequest struct {
+	FromBranch  string `json:"from_branch"`
+	ToBranch    string `json:"to_branch"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	IsComplete  bool   `json:"is_complete"`
+	IsAccepted  bool   `json:"is_accepted"`
+}
+
+type DatasetReviewUpdateRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	IsComplete  bool   `json:"is_complete"`
+	IsAccepted  bool   `json:"is_accepted"`
+}
+
 // Response models
 
 type DatasetNameResponse struct {
@@ -78,13 +94,14 @@ type LineageResponse struct {
 }
 
 type DatasetReviewResponse struct {
-	UUID        uuid.UUID             `json:"uuid"`
-	FromBranch  DatasetBranchResponse `json:"from_branch"`
-	ToBranch    DatasetBranchResponse `json:"to_branch"`
-	Title       string                `json:"title"`
-	Description string                `json:"description"`
-	CreatedBy   UserHandleResponse    `json:"created_by"`
-	AssignedTo  UserHandleResponse    `json:"assigned_to"`
-	IsComplete  bool                  `json:"is_complete"`
-	IsAccepted  bool                  `json:"is_accepted"`
+	UUID        uuid.UUID                 `json:"uuid"`
+	Dataset     DatasetNameResponse       `json:"dataset"`
+	FromBranch  DatasetBranchNameResponse `json:"from_branch"`
+	ToBranch    DatasetBranchNameResponse `json:"to_branch"`
+	Title       string                    `json:"title"`
+	Description string                    `json:"description"`
+	CreatedBy   UserHandleResponse        `json:"created_by"`
+	AssignedTo  UserHandleResponse        `json:"assigned_to"`
+	IsComplete  bool                      `json:"is_complete"`
+	IsAccepted  bool                      `json:"is_accepted"`
 }

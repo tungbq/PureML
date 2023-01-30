@@ -230,7 +230,7 @@ func (ds *Datastore) GetOrgByHandle(handle string) (*models.OrganizationResponse
 		Handle:      org.Handle,
 		Avatar:      org.Avatar,
 		Description: org.Description,
-		JoinCode:    org.JoinCode,
+		// JoinCode:    org.JoinCode,
 	}, nil
 }
 
@@ -1599,11 +1599,11 @@ func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.Data
 
 func (ds *Datastore) GetDatasetBranchByName(orgId uuid.UUID, datasetName string, datasetBranchName string) (*models.DatasetBranchResponse, error) {
 	var datasetBranch dbmodels.DatasetBranch
-	model, err := ds.GetDatasetByName(orgId, datasetName)
+	dataset, err := ds.GetDatasetByName(orgId, datasetName)
 	if err != nil {
 		return nil, err
 	}
-	res := ds.DB.Where("name = ?", datasetBranchName).Where("dataset_uuid = ?", model.UUID).Preload("Dataset").Limit(1).Find(&datasetBranch)
+	res := ds.DB.Where("name = ?", datasetBranchName).Where("dataset_uuid = ?", dataset.UUID).Preload("Dataset").Limit(1).Find(&datasetBranch)
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -2241,4 +2241,368 @@ func (ds *Datastore) DeleteS3Secrets(orgId uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+/////////////////////////////// REVIEW API METHODS ///////////////////////////////
+
+func (ds *Datastore) GetModelReview(reviewUUID uuid.UUID) (*models.ModelReviewResponse, error) {
+	var review dbmodels.ModelReview
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelReviewResponse{
+		UUID: review.UUID,
+		Model: models.ModelNameResponse{
+			UUID: review.Model.UUID,
+			Name: review.Model.Name,
+		},
+		FromBranch: models.ModelBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.ModelBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) GetModelReviews(modelUUID uuid.UUID) ([]models.ModelReviewResponse, error) {
+	var reviews []dbmodels.ModelReview
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("model_uuid = ?", modelUUID).Find(&reviews).Error
+	if err != nil {
+		return nil, err
+	}
+	var reviewResponses []models.ModelReviewResponse
+	for _, review := range reviews {
+		reviewResponses = append(reviewResponses, models.ModelReviewResponse{
+			UUID: review.UUID,
+			Model: models.ModelNameResponse{
+				UUID: review.Model.UUID,
+				Name: review.Model.Name,
+			},
+			FromBranch: models.ModelBranchNameResponse{
+				UUID: review.FromBranch.UUID,
+				Name: review.FromBranch.Name,
+			},
+			ToBranch: models.ModelBranchNameResponse{
+				UUID: review.ToBranch.UUID,
+				Name: review.ToBranch.Name,
+			},
+			Title:       review.Title,
+			Description: review.Description,
+			IsComplete:  review.IsComplete,
+			IsAccepted:  review.IsAccepted,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   review.CreatedByUser.UUID,
+				Handle: review.CreatedByUser.Handle,
+				Name:   review.CreatedByUser.Name,
+				Avatar: review.CreatedByUser.Avatar,
+				Email:  review.CreatedByUser.Email,
+			},
+		})
+	}
+	return reviewResponses, nil
+}
+
+func (ds *Datastore) CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.ModelReviewResponse, error) {
+	review := dbmodels.ModelReview{
+		Model: dbmodels.Model{
+			BaseModel: dbmodels.BaseModel{
+				UUID: modelUUID,
+			},
+		},
+		FromBranch: dbmodels.ModelBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: fromBranch,
+			},
+		},
+		ToBranch: dbmodels.ModelBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: toBranch,
+			},
+		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: userUUID,
+			},
+		},
+		Title:       title,
+		Description: desc,
+		IsComplete:  isComplete,
+		IsAccepted:  isAccepted,
+	}
+	err := ds.DB.Create(&review).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelReviewResponse{
+		UUID: review.UUID,
+		Model: models.ModelNameResponse{
+			UUID: review.Model.UUID,
+			Name: review.Model.Name,
+		},
+		FromBranch: models.ModelBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.ModelBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) UpdateModelReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.ModelReviewResponse, error) {
+	var review dbmodels.ModelReview
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range updatedAttributes {
+		switch key {
+		case "title":
+			review.Title = value.(string)
+		case "description":
+			review.Description = value.(string)
+		case "is_complete":
+			review.IsComplete = value.(bool)
+		case "is_accepted":
+			review.IsAccepted = value.(bool)
+		}
+	}
+	err = ds.DB.Save(&review).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.ModelReviewResponse{
+		UUID: review.UUID,
+		Model: models.ModelNameResponse{
+			UUID: review.Model.UUID,
+			Name: review.Model.Name,
+		},
+		FromBranch: models.ModelBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.ModelBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) GetDatasetReview(reviewUUID uuid.UUID) (*models.DatasetReviewResponse, error) {
+	var review dbmodels.DatasetReview
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetReviewResponse{
+		UUID: review.UUID,
+		Dataset: models.DatasetNameResponse{
+			UUID: review.Dataset.UUID,
+			Name: review.Dataset.Name,
+		},
+		FromBranch: models.DatasetBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.DatasetBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) GetDatasetReviews(datasetUUID uuid.UUID) ([]models.DatasetReviewResponse, error) {
+	var reviews []dbmodels.DatasetReview
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("dataset_uuid = ?", datasetUUID).Find(&reviews).Error
+	if err != nil {
+		return nil, err
+	}
+	var reviewResponses []models.DatasetReviewResponse
+	for _, review := range reviews {
+		reviewResponses = append(reviewResponses, models.DatasetReviewResponse{
+			UUID: review.UUID,
+			Dataset: models.DatasetNameResponse{
+				UUID: review.Dataset.UUID,
+				Name: review.Dataset.Name,
+			},
+			FromBranch: models.DatasetBranchNameResponse{
+				UUID: review.FromBranch.UUID,
+				Name: review.FromBranch.Name,
+			},
+			ToBranch: models.DatasetBranchNameResponse{
+				UUID: review.ToBranch.UUID,
+				Name: review.ToBranch.Name,
+			},
+			Title:       review.Title,
+			Description: review.Description,
+			IsComplete:  review.IsComplete,
+			IsAccepted:  review.IsAccepted,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   review.CreatedByUser.UUID,
+				Handle: review.CreatedByUser.Handle,
+				Name:   review.CreatedByUser.Name,
+				Avatar: review.CreatedByUser.Avatar,
+				Email:  review.CreatedByUser.Email,
+			},
+		})
+	}
+	return reviewResponses, nil
+}
+
+func (ds *Datastore) CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.DatasetReviewResponse, error) {
+	review := dbmodels.DatasetReview{
+		Dataset: dbmodels.Dataset{
+			BaseModel: dbmodels.BaseModel{
+				UUID: datasetUUID,
+			},
+		},
+		FromBranch: dbmodels.DatasetBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: fromBranch,
+			},
+		},
+		ToBranch: dbmodels.DatasetBranch{
+			BaseModel: dbmodels.BaseModel{
+				UUID: toBranch,
+			},
+		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: userUUID,
+			},
+		},
+		Title:       title,
+		Description: desc,
+		IsComplete:  isComplete,
+		IsAccepted:  isAccepted,
+	}
+	err := ds.DB.Create(&review).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetReviewResponse{
+		UUID: review.UUID,
+		Dataset: models.DatasetNameResponse{
+			UUID: review.Dataset.UUID,
+			Name: review.Dataset.Name,
+		},
+		FromBranch: models.DatasetBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.DatasetBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
+}
+
+func (ds *Datastore) UpdateDatasetReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.DatasetReviewResponse, error) {
+	var review dbmodels.DatasetReview
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range updatedAttributes {
+		switch key {
+		case "title":
+			review.Title = value.(string)
+		case "description":
+			review.Description = value.(string)
+		case "is_complete":
+			review.IsComplete = value.(bool)
+		case "is_accepted":
+			review.IsAccepted = value.(bool)
+		}
+	}
+	err = ds.DB.Save(&review).Find(&review).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.DatasetReviewResponse{
+		UUID: review.UUID,
+		Dataset: models.DatasetNameResponse{
+			UUID: review.Dataset.UUID,
+			Name: review.Dataset.Name,
+		},
+		FromBranch: models.DatasetBranchNameResponse{
+			UUID: review.FromBranch.UUID,
+			Name: review.FromBranch.Name,
+		},
+		ToBranch: models.DatasetBranchNameResponse{
+			UUID: review.ToBranch.UUID,
+			Name: review.ToBranch.Name,
+		},
+		Title:       review.Title,
+		Description: review.Description,
+		IsComplete:  review.IsComplete,
+		IsAccepted:  review.IsAccepted,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   review.CreatedByUser.UUID,
+			Handle: review.CreatedByUser.Handle,
+			Name:   review.CreatedByUser.Name,
+			Avatar: review.CreatedByUser.Avatar,
+			Email:  review.CreatedByUser.Email,
+		},
+	}, nil
 }
