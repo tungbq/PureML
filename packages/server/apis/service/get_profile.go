@@ -19,7 +19,7 @@ import (
 //	@Router			/user/profile [get]
 func GetProfile(request *models.Request) *models.Response {
 	userUUID := request.GetUserUUID()
-	user, err := datastore.GetUserByUUID(userUUID)
+	user, err := datastore.GetUserProfileByUUID(userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

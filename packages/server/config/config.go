@@ -69,7 +69,7 @@ func GetDataDir() string {
 func GetHttpAddr() string {
 	httpAddr := os.Getenv("HTTP_ADDRESS")
 	if httpAddr == "" {
-		httpAddr = "127.0.0.1:8080"
+		httpAddr = "0.0.0.0:8080"
 	}
 	return httpAddr
 }
