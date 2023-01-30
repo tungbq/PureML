@@ -86,6 +86,10 @@ func GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, error) {
 	return ds.GetUserByUUID(userUUID)
 }
 
+func GetUserProfileByUUID(userUUID uuid.UUID) (*models.UserProfileResponse, error) {
+	return ds.GetUserProfileByUUID(userUUID)
+}
+
 func CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
 	return ds.CreateUser(name, email, handle, bio, avatar, hashedPassword)
 }

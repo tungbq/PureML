@@ -470,6 +470,31 @@ func (ds *Datastore) GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, er
 	}, nil
 }
 
+func (ds *Datastore) GetUserProfileByUUID(userUUID uuid.UUID) (*models.UserProfileResponse, error) {
+	var user dbmodels.User
+	result := ds.DB.Limit(1).Find(&user, userUUID)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	numberOfDatasets := int64(0)
+	ds.DB.Model(&dbmodels.DatasetUser{}).Where("user_uuid = ?", userUUID).Count(&numberOfDatasets)
+	numberOfModel := int64(0)
+	ds.DB.Model(&dbmodels.ModelUser{}).Where("user_uuid = ?", userUUID).Count(&numberOfModel)
+	return &models.UserProfileResponse{
+		UUID:             user.UUID,
+		Name:             user.Name,
+		Email:            user.Email,
+		Handle:           user.Handle,
+		Bio:              user.Bio,
+		Avatar:           user.Avatar,
+		NumberOfModels:   numberOfModel,
+		NumberOfDatasets: numberOfDatasets,
+	}, nil
+}
+
 func (ds *Datastore) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
 	user := dbmodels.User{
 		Name:     name,
@@ -734,7 +759,27 @@ func (ds *Datastore) CreateModel(orgId uuid.UUID, name string, wiki string, isPu
 			},
 		},
 	}
-	err := ds.DB.Create(&model).Error
+	var user dbmodels.User
+	err := ds.DB.Transaction(func(tx *gorm.DB) error {
+		result := tx.Create(&model)
+		if result.Error != nil {
+			return result.Error
+		}
+		result = tx.Where("uuid = ?", createdByUser).First(&user)
+		if result.Error != nil {
+			return result.Error
+		}
+		modelUser := dbmodels.ModelUser{
+			UserUUID:  user.UUID,
+			ModelUUID: model.UUID,
+			Role:      "owner",
+		}
+		result = tx.Create(&modelUser)
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -1303,7 +1348,27 @@ func (ds *Datastore) CreateDataset(orgId uuid.UUID, name string, wiki string, is
 			},
 		},
 	}
-	err := ds.DB.Create(&dataset).Error
+	var user dbmodels.User
+	err := ds.DB.Transaction(func(tx *gorm.DB) error {
+		result := tx.Create(&dataset)
+		if result.Error != nil {
+			return result.Error
+		}
+		result = tx.Where("uuid = ?", createdByUser).First(&user)
+		if result.Error != nil {
+			return result.Error
+		}
+		datasetUser := dbmodels.DatasetUser{
+			UserUUID:    user.UUID,
+			DatasetUUID: dataset.UUID,
+			Role:        "owner",
+		}
+		result = tx.Create(&datasetUser)
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
