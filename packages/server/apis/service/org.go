@@ -33,7 +33,6 @@ func GetOrgByHandle(request *models.Request) *models.Response {
 	return response
 }
 
-
 // GetOrgByID godoc
 //
 //	@Security		ApiKeyAuth
@@ -60,6 +59,43 @@ func GetOrgByID(request *models.Request) *models.Response {
 	return response
 }
 
+// GetOrgAllPublicModels godoc
+//
+//	@Summary		Get all public models of an organization.
+//	@Description	Get all public models of an organization.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/public/model [get]
+//	@Param			orgId	path	string	true	"Organization ID"
+func GetOrgAllPublicModels(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	modelsdb, err := datastore.GetOrgAllPublicModels(orgId)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, modelsdb, "Public models of Organization")
+}
+
+// GetOrgAllPublicDatasets godoc
+//
+//	@Summary		Get all public datasets of an organization.
+//	@Description	Get all public datasets of an organization.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/public/dataset [get]
+//	@Param			orgId	path	string	true	"Organization ID"
+func GetOrgAllPublicDatasets(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	datasetsdb, err := datastore.GetOrgAllPublicDatasets(orgId)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, datasetsdb, "Public datasets of Organization")
+}
 
 // CreateOrg godoc
 //

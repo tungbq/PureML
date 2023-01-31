@@ -374,6 +374,70 @@ func (ds *Datastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, 
 	}, nil
 }
 
+func (ds *Datastore) GetOrgAllPublicModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
+	var modelsdb []*dbmodels.Model
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("is_public = ?", true).Where("organization_uuid = ?", orgId).Find(&modelsdb)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var returnModels []models.ModelResponse
+	for _, model := range modelsdb {
+		returnModels = append(returnModels, models.ModelResponse{
+			UUID:     model.UUID,
+			Name:     model.Name,
+			Wiki:     model.Wiki,
+			IsPublic: model.IsPublic,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   model.CreatedByUser.UUID,
+				Handle: model.CreatedByUser.Handle,
+				Avatar: model.CreatedByUser.Avatar,
+				Name:   model.CreatedByUser.Name,
+				Email:  model.CreatedByUser.Email,
+			},
+			UpdatedBy: models.UserHandleResponse{
+				UUID:   model.UpdatedByUser.UUID,
+				Handle: model.UpdatedByUser.Handle,
+				Avatar: model.UpdatedByUser.Avatar,
+				Name:   model.UpdatedByUser.Name,
+				Email:  model.UpdatedByUser.Email,
+			},
+		})
+	}
+	return returnModels, nil
+}
+
+func (ds *Datastore) GetOrgAllPublicDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {
+	var datasetsdb []*dbmodels.Dataset
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("is_public = ?", true).Where("organization_uuid = ?", orgId).Find(&datasetsdb)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var returnDatasets []models.DatasetResponse
+	for _, dataset := range datasetsdb {
+		returnDatasets = append(returnDatasets, models.DatasetResponse{
+			UUID:     dataset.UUID,
+			Name:     dataset.Name,
+			Wiki:     dataset.Wiki,
+			IsPublic: dataset.IsPublic,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   dataset.CreatedByUser.UUID,
+				Handle: dataset.CreatedByUser.Handle,
+				Avatar: dataset.CreatedByUser.Avatar,
+				Name:   dataset.CreatedByUser.Name,
+				Email:  dataset.CreatedByUser.Email,
+			},
+			UpdatedBy: models.UserHandleResponse{
+				UUID:   dataset.UpdatedByUser.UUID,
+				Handle: dataset.UpdatedByUser.Handle,
+				Avatar: dataset.UpdatedByUser.Avatar,
+				Name:   dataset.UpdatedByUser.Name,
+				Email:  dataset.UpdatedByUser.Email,
+			},
+		})
+	}
+	return returnDatasets, nil
+}
+
 /////////////////////////////// USER METHODS /////////////////////////////////
 
 func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) {
@@ -603,10 +667,16 @@ func (ds *Datastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.
 		CreatedBy: models.UserHandleResponse{
 			UUID:   model.CreatedByUser.UUID,
 			Handle: model.CreatedByUser.Handle,
+			Avatar: model.CreatedByUser.Avatar,
+			Name:   model.CreatedByUser.Name,
+			Email:  model.CreatedByUser.Email,
 		},
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   model.UpdatedByUser.UUID,
 			Handle: model.UpdatedByUser.Handle,
+			Avatar: model.UpdatedByUser.Avatar,
+			Name:   model.UpdatedByUser.Name,
+			Email:  model.UpdatedByUser.Email,
 		},
 		IsPublic: model.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -639,10 +709,16 @@ func (ds *Datastore) GetModelByUUID(modelUUID uuid.UUID) (*models.ModelResponse,
 		CreatedBy: models.UserHandleResponse{
 			UUID:   model.CreatedByUser.UUID,
 			Handle: model.CreatedByUser.Handle,
+			Avatar: model.CreatedByUser.Avatar,
+			Name:   model.CreatedByUser.Name,
+			Email:  model.CreatedByUser.Email,
 		},
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   model.UpdatedByUser.UUID,
 			Handle: model.UpdatedByUser.Handle,
+			Avatar: model.UpdatedByUser.Avatar,
+			Name:   model.UpdatedByUser.Name,
+			Email:  model.UpdatedByUser.Email,
 		},
 		IsPublic: model.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -797,10 +873,16 @@ func (ds *Datastore) CreateModel(orgId uuid.UUID, name string, wiki string, isPu
 		CreatedBy: models.UserHandleResponse{
 			UUID:   model.CreatedByUser.UUID,
 			Handle: model.CreatedByUser.Handle,
+			Avatar: model.CreatedByUser.Avatar,
+			Name:   model.CreatedByUser.Name,
+			Email:  model.CreatedByUser.Email,
 		},
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   model.UpdatedByUser.UUID,
 			Handle: model.UpdatedByUser.Handle,
+			Avatar: model.UpdatedByUser.Avatar,
+			Name:   model.UpdatedByUser.Name,
+			Email:  model.UpdatedByUser.Email,
 		},
 		IsPublic: model.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -830,10 +912,16 @@ func (ds *Datastore) GetAllModels(orgId uuid.UUID) ([]models.ModelResponse, erro
 			CreatedBy: models.UserHandleResponse{
 				UUID:   model.CreatedByUser.UUID,
 				Handle: model.CreatedByUser.Handle,
+				Avatar: model.CreatedByUser.Avatar,
+				Name:   model.CreatedByUser.Name,
+				Email:  model.CreatedByUser.Email,
 			},
 			UpdatedBy: models.UserHandleResponse{
 				UUID:   model.UpdatedByUser.UUID,
 				Handle: model.UpdatedByUser.Handle,
+				Avatar: model.UpdatedByUser.Avatar,
+				Name:   model.UpdatedByUser.Name,
+				Email:  model.UpdatedByUser.Email,
 			},
 			IsPublic: model.IsPublic,
 		}
@@ -1250,10 +1338,17 @@ func (ds *Datastore) GetDatasetByName(orgId uuid.UUID, datasetName string) (*mod
 		CreatedBy: models.UserHandleResponse{
 			UUID:   dataset.CreatedByUser.UUID,
 			Handle: dataset.CreatedByUser.Handle,
+			Name:   dataset.CreatedByUser.Name,
+			Avatar: dataset.CreatedByUser.Avatar,
+			Email:  dataset.CreatedByUser.Email,
 		},
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   dataset.UpdatedByUser.UUID,
 			Handle: dataset.UpdatedByUser.Handle,
+			Name: dataset.UpdatedByUser.Name,
+			Avatar: dataset.UpdatedByUser.Avatar,
+			Email: dataset.UpdatedByUser.Email,
+			
 		},
 		IsPublic: dataset.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -1286,10 +1381,17 @@ func (ds *Datastore) GetDatasetByUUID(datasetUUID uuid.UUID) (*models.DatasetRes
 		CreatedBy: models.UserHandleResponse{
 			UUID:   dataset.CreatedByUser.UUID,
 			Handle: dataset.CreatedByUser.Handle,
+			Name:   dataset.CreatedByUser.Name,
+			Avatar: dataset.CreatedByUser.Avatar,
+			Email:  dataset.CreatedByUser.Email,
 		},
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   dataset.UpdatedByUser.UUID,
 			Handle: dataset.UpdatedByUser.Handle,
+			Name: dataset.UpdatedByUser.Name,
+			Avatar: dataset.UpdatedByUser.Avatar,
+			Email: dataset.UpdatedByUser.Email,
+			
 		},
 		IsPublic: dataset.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -1444,10 +1546,17 @@ func (ds *Datastore) CreateDataset(orgId uuid.UUID, name string, wiki string, is
 		CreatedBy: models.UserHandleResponse{
 			UUID:   dataset.CreatedByUser.UUID,
 			Handle: dataset.CreatedByUser.Handle,
+			Name:   dataset.CreatedByUser.Name,
+			Avatar: dataset.CreatedByUser.Avatar,
+			Email:  dataset.CreatedByUser.Email,
 		},
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   dataset.UpdatedByUser.UUID,
 			Handle: dataset.UpdatedByUser.Handle,
+			Name: dataset.UpdatedByUser.Name,
+			Avatar: dataset.UpdatedByUser.Avatar,
+			Email: dataset.UpdatedByUser.Email,
+			
 		},
 		IsPublic: dataset.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -1477,10 +1586,16 @@ func (ds *Datastore) GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, 
 			CreatedBy: models.UserHandleResponse{
 				UUID:   dataset.CreatedByUser.UUID,
 				Handle: dataset.CreatedByUser.Handle,
+				Avatar: dataset.CreatedByUser.Avatar,
+				Name:   dataset.CreatedByUser.Name,
+				Email:  dataset.CreatedByUser.Email,
 			},
 			UpdatedBy: models.UserHandleResponse{
 				UUID:   dataset.UpdatedByUser.UUID,
 				Handle: dataset.UpdatedByUser.Handle,
+				Avatar: dataset.UpdatedByUser.Avatar,
+				Name:   dataset.UpdatedByUser.Name,
+				Email:  dataset.UpdatedByUser.Email,
 			},
 			IsPublic: dataset.IsPublic,
 		}

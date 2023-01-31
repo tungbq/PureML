@@ -66,6 +66,14 @@ func UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, orgAvatar string
 	return ds.UpdateOrg(orgId, orgName, orgDesc, orgAvatar)
 }
 
+func GetOrgAllPublicModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
+	return ds.GetOrgAllPublicModels(orgId)
+}
+
+func GetOrgAllPublicDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {
+	return ds.GetOrgAllPublicDatasets(orgId)
+}
+
 func GetUserByEmail(email string) (*models.UserResponse, error) {
 	return ds.GetUserByEmail(email)
 }

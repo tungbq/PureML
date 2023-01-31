@@ -2096,6 +2096,50 @@ paths:
       summary: Get all models of an organization
       tags:
       - Model
+  /org/{orgId}/public/dataset:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all public datasets of an organization.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all public datasets of an organization.
+      tags:
+      - Organization
+  /org/{orgId}/public/model:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all public models of an organization.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all public models of an organization.
+      tags:
+      - Organization
   /org/{orgId}/remove:
     post:
       consumes:
