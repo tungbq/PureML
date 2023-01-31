@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"strconv"
@@ -899,8 +900,32 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 					return nil, err
 				}
 			} else {
-				sourceType.Name = "PUREML-STORAGE"
-				sourceType.Org.BaseModel.UUID = uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
+				defaultUUID := uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
+				sourceTypeDb := dbmodels.SourceType{
+					BaseModel: dbmodels.BaseModel{
+						UUID: defaultUUID,
+					},
+				}
+				res := ds.DB.Limit(1).Find(&sourceTypeDb)
+				if res.Error != nil {
+					return nil, res.Error
+				}
+				if res.RowsAffected == 0 {
+					ds.DB.Create(&dbmodels.SourceType{
+						BaseModel: dbmodels.BaseModel{
+							UUID: defaultUUID,
+						},
+						Name: "PUREML-STORAGE",
+						Org: dbmodels.Organization{
+							BaseModel: dbmodels.BaseModel{
+								UUID: defaultUUID,
+							},
+							Handle:   "pureml",
+							Name:     "PureML",
+							JoinCode: "",
+						},
+					})
+				}
 			}
 			splitFile := strings.Split(file.Filename, ".")
 			updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
@@ -1031,6 +1056,41 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 		IsEmpty: modelVersion.IsEmpty,
 	}, nil
 }
+
+func (ds *Datastore) MigrateModelVersionBranch(modelVersion uuid.UUID, toBranch uuid.UUID) (*models.ModelBranchVersionResponse, error) {
+	var modelVersionDB dbmodels.ModelVersion
+	err := ds.DB.Preload("Branch").Preload("Lineage").Preload("Path").Where("uuid = ?", modelVersion).First(&modelVersionDB).Error
+	if err != nil {
+		return nil, err
+	}
+	//Update the branch of the model version
+	modelVersionDB.Branch.UUID = toBranch
+	modelVersionDB.BaseModel.UUID = uuid.Nil
+	err = ds.DB.Save(&modelVersionDB).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.ModelBranchVersionResponse{
+		UUID:    modelVersionDB.UUID,
+		Hash:    modelVersionDB.Hash,
+		Version: modelVersionDB.Version,
+		Branch: models.ModelBranchNameResponse{
+			UUID: modelVersionDB.BranchUUID,
+			Name: modelVersionDB.Branch.Name,
+		},
+		Path: models.PathResponse{
+			UUID:       modelVersionDB.Path.UUID,
+			SourcePath: modelVersionDB.Path.SourcePath,
+			SourceType: models.SourceTypeResponse{
+				Name:      modelVersionDB.Path.SourceType.Name,
+				PublicURL: modelVersionDB.Path.SourceType.PublicURL,
+			},
+		},
+		IsEmpty: modelVersionDB.IsEmpty,
+	}, nil
+}
+
 
 func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
@@ -1488,8 +1548,27 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 					return nil, err
 				}
 			} else {
-				sourceType.Name = "PUREML-STORAGE"
-				sourceType.Org.BaseModel.UUID = uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
+				defaultUUID := uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
+				sourceType.BaseModel.UUID = defaultUUID
+				res := ds.DB.Limit(1).Find(&sourceType)
+				if res.Error != nil {
+					return nil, res.Error
+				}
+				if res.RowsAffected == 0 {
+					sourceType.Name = "PUREML-STORAGE"
+					sourceType.Org = dbmodels.Organization{
+							BaseModel: dbmodels.BaseModel{
+								UUID: defaultUUID,
+							},
+							Handle:   "pureml",
+							Name:     "PureML",
+							JoinCode: "",
+						}
+					err = ds.DB.Create(&sourceType).Find(&sourceType).Error
+					if err != nil {
+						return nil, err
+					}
+				}
 			}
 			splitFile := strings.Split(file.Filename, ".")
 			updatedFilename := fmt.Sprintf("%s-%s.%s", splitFile[0], shortid.MustGenerate(), splitFile[1])
@@ -1625,6 +1704,46 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 			Lineage: datasetVersion.Lineage.Lineage,
 		},
 		IsEmpty: datasetVersion.IsEmpty,
+	}, nil
+}
+
+func (ds *Datastore) MigrateDatasetVersionBranch(datasetVersion uuid.UUID, toBranch uuid.UUID) (*models.DatasetBranchVersionResponse, error) {
+	var datasetVersionDB dbmodels.DatasetVersion
+	err := ds.DB.Preload("Branch").Preload("Lineage").Preload("Path").Where("uuid = ?", datasetVersion).First(&datasetVersionDB).Error
+	if err != nil {
+		return nil, err
+	}
+	//Update the branch of the dataset version
+	datasetVersionDB.Branch.UUID = toBranch
+	datasetVersionDB.BaseModel.UUID = uuid.Nil
+	//Create a new lineage record
+	datasetVersionDB.Lineage.UUID = uuid.Nil
+	err = ds.DB.Save(&datasetVersionDB).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.DatasetBranchVersionResponse{
+		UUID:    datasetVersionDB.UUID,
+		Hash:    datasetVersionDB.Hash,
+		Version: datasetVersionDB.Version,
+		Branch: models.DatasetBranchNameResponse{
+			UUID: datasetVersionDB.BranchUUID,
+			Name: datasetVersionDB.Branch.Name,
+		},
+		Path: models.PathResponse{
+			UUID:       datasetVersionDB.Path.UUID,
+			SourcePath: datasetVersionDB.Path.SourcePath,
+			SourceType: models.SourceTypeResponse{
+				Name:      datasetVersionDB.Path.SourceType.Name,
+				PublicURL: datasetVersionDB.Path.SourceType.PublicURL,
+			},
+		},
+		Lineage: models.LineageResponse{
+			UUID:    datasetVersionDB.Lineage.UUID,
+			Lineage: datasetVersionDB.Lineage.Lineage,
+		},
+		IsEmpty: datasetVersionDB.IsEmpty,
 	}, nil
 }
 
@@ -2312,7 +2431,7 @@ func (ds *Datastore) DeleteS3Secrets(orgId uuid.UUID) error {
 
 func (ds *Datastore) GetModelReview(reviewUUID uuid.UUID) (*models.ModelReviewResponse, error) {
 	var review dbmodels.ModelReview
-	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("FromBranchVersion").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
 	if err != nil {
 		return nil, err
 	}
@@ -2325,6 +2444,10 @@ func (ds *Datastore) GetModelReview(reviewUUID uuid.UUID) (*models.ModelReviewRe
 		FromBranch: models.ModelBranchNameResponse{
 			UUID: review.FromBranch.UUID,
 			Name: review.FromBranch.Name,
+		},
+		FromBranchVersion: models.ModelBranchVersionNameResponse{
+			UUID:    review.FromBranchVersion.UUID,
+			Version: review.FromBranchVersion.Version,
 		},
 		ToBranch: models.ModelBranchNameResponse{
 			UUID: review.ToBranch.UUID,
@@ -2346,7 +2469,7 @@ func (ds *Datastore) GetModelReview(reviewUUID uuid.UUID) (*models.ModelReviewRe
 
 func (ds *Datastore) GetModelReviews(modelUUID uuid.UUID) ([]models.ModelReviewResponse, error) {
 	var reviews []dbmodels.ModelReview
-	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("model_uuid = ?", modelUUID).Find(&reviews).Error
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("FromBranchVersion").Preload("ToBranch").Preload("CreatedByUser").Where("model_uuid = ?", modelUUID).Find(&reviews).Error
 	if err != nil {
 		return nil, err
 	}
@@ -2361,6 +2484,10 @@ func (ds *Datastore) GetModelReviews(modelUUID uuid.UUID) ([]models.ModelReviewR
 			FromBranch: models.ModelBranchNameResponse{
 				UUID: review.FromBranch.UUID,
 				Name: review.FromBranch.Name,
+			},
+			FromBranchVersion: models.ModelBranchVersionNameResponse{
+				UUID:    review.FromBranchVersion.UUID,
+				Version: review.FromBranchVersion.Version,
 			},
 			ToBranch: models.ModelBranchNameResponse{
 				UUID: review.ToBranch.UUID,
@@ -2382,7 +2509,7 @@ func (ds *Datastore) GetModelReviews(modelUUID uuid.UUID) ([]models.ModelReviewR
 	return reviewResponses, nil
 }
 
-func (ds *Datastore) CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.ModelReviewResponse, error) {
+func (ds *Datastore) CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, fromBranchVersion uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.ModelReviewResponse, error) {
 	review := dbmodels.ModelReview{
 		Model: dbmodels.Model{
 			BaseModel: dbmodels.BaseModel{
@@ -2392,6 +2519,11 @@ func (ds *Datastore) CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, 
 		FromBranch: dbmodels.ModelBranch{
 			BaseModel: dbmodels.BaseModel{
 				UUID: fromBranch,
+			},
+		},
+		FromBranchVersion: dbmodels.ModelVersion{
+			BaseModel: dbmodels.BaseModel{
+				UUID: fromBranchVersion,
 			},
 		},
 		ToBranch: dbmodels.ModelBranch{
@@ -2423,6 +2555,10 @@ func (ds *Datastore) CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, 
 			UUID: review.FromBranch.UUID,
 			Name: review.FromBranch.Name,
 		},
+		FromBranchVersion: models.ModelBranchVersionNameResponse{
+			UUID:    review.FromBranchVersion.UUID,
+			Version: review.FromBranchVersion.Version,
+		},
 		ToBranch: models.ModelBranchNameResponse{
 			UUID: review.ToBranch.UUID,
 			Name: review.ToBranch.Name,
@@ -2443,10 +2579,14 @@ func (ds *Datastore) CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, 
 
 func (ds *Datastore) UpdateModelReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.ModelReviewResponse, error) {
 	var review dbmodels.ModelReview
-	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	err := ds.DB.Preload("Model").Preload("FromBranch").Preload("FromBranchVersion").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
 	if err != nil {
 		return nil, err
 	}
+	if review.IsComplete {
+		return nil, errors.New("review already complete")
+	}
+	alreadyAccepted := review.IsAccepted
 	for key, value := range updatedAttributes {
 		switch key {
 		case "title":
@@ -2456,10 +2596,27 @@ func (ds *Datastore) UpdateModelReview(reviewUUID uuid.UUID, updatedAttributes m
 		case "is_complete":
 			review.IsComplete = value.(bool)
 		case "is_accepted":
-			review.IsAccepted = value.(bool)
+			// CANNOT UNACCEPT ALREADY ACCEPTED REVIEW
+			if !alreadyAccepted {
+				review.IsAccepted = value.(bool)
+			}
 		}
 	}
-	err = ds.DB.Save(&review).Find(&review).Error
+	err = ds.DB.Transaction(func(tx *gorm.DB) error {
+		// CHECK IF REVIEW ACCEPTED
+		if review.IsAccepted && !alreadyAccepted {
+			// make a new version in to_branch from from_branch specified version
+			_, err := ds.MigrateModelVersionBranch(review.FromBranchVersion.UUID, review.ToBranch.UUID)
+			if err != nil {
+				return err
+			}
+		}
+		result := tx.Save(&review).Find(&review)
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -2493,7 +2650,7 @@ func (ds *Datastore) UpdateModelReview(reviewUUID uuid.UUID, updatedAttributes m
 
 func (ds *Datastore) GetDatasetReview(reviewUUID uuid.UUID) (*models.DatasetReviewResponse, error) {
 	var review dbmodels.DatasetReview
-	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("FromBranchVersion").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
 	if err != nil {
 		return nil, err
 	}
@@ -2506,6 +2663,10 @@ func (ds *Datastore) GetDatasetReview(reviewUUID uuid.UUID) (*models.DatasetRevi
 		FromBranch: models.DatasetBranchNameResponse{
 			UUID: review.FromBranch.UUID,
 			Name: review.FromBranch.Name,
+		},
+		FromBranchVersion: models.DatasetBranchVersionNameResponse{
+			UUID:    review.FromBranchVersion.UUID,
+			Version: review.FromBranchVersion.Version,
 		},
 		ToBranch: models.DatasetBranchNameResponse{
 			UUID: review.ToBranch.UUID,
@@ -2527,7 +2688,7 @@ func (ds *Datastore) GetDatasetReview(reviewUUID uuid.UUID) (*models.DatasetRevi
 
 func (ds *Datastore) GetDatasetReviews(datasetUUID uuid.UUID) ([]models.DatasetReviewResponse, error) {
 	var reviews []dbmodels.DatasetReview
-	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("dataset_uuid = ?", datasetUUID).Find(&reviews).Error
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("FromBranchVersion").Preload("ToBranch").Preload("CreatedByUser").Where("dataset_uuid = ?", datasetUUID).Find(&reviews).Error
 	if err != nil {
 		return nil, err
 	}
@@ -2542,6 +2703,10 @@ func (ds *Datastore) GetDatasetReviews(datasetUUID uuid.UUID) ([]models.DatasetR
 			FromBranch: models.DatasetBranchNameResponse{
 				UUID: review.FromBranch.UUID,
 				Name: review.FromBranch.Name,
+			},
+			FromBranchVersion: models.DatasetBranchVersionNameResponse{
+				UUID:    review.FromBranchVersion.UUID,
+				Version: review.FromBranchVersion.Version,
 			},
 			ToBranch: models.DatasetBranchNameResponse{
 				UUID: review.ToBranch.UUID,
@@ -2563,7 +2728,7 @@ func (ds *Datastore) GetDatasetReviews(datasetUUID uuid.UUID) ([]models.DatasetR
 	return reviewResponses, nil
 }
 
-func (ds *Datastore) CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.DatasetReviewResponse, error) {
+func (ds *Datastore) CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, fromBranchVerison uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.DatasetReviewResponse, error) {
 	review := dbmodels.DatasetReview{
 		Dataset: dbmodels.Dataset{
 			BaseModel: dbmodels.BaseModel{
@@ -2573,6 +2738,11 @@ func (ds *Datastore) CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UU
 		FromBranch: dbmodels.DatasetBranch{
 			BaseModel: dbmodels.BaseModel{
 				UUID: fromBranch,
+			},
+		},
+		FromBranchVersion: dbmodels.DatasetVersion{
+			BaseModel: dbmodels.BaseModel{
+				UUID: fromBranchVerison,
 			},
 		},
 		ToBranch: dbmodels.DatasetBranch{
@@ -2604,6 +2774,10 @@ func (ds *Datastore) CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UU
 			UUID: review.FromBranch.UUID,
 			Name: review.FromBranch.Name,
 		},
+		FromBranchVersion: models.DatasetBranchVersionNameResponse{
+			UUID:    review.FromBranchVersion.UUID,
+			Version: review.FromBranchVersion.Version,
+		},
 		ToBranch: models.DatasetBranchNameResponse{
 			UUID: review.ToBranch.UUID,
 			Name: review.ToBranch.Name,
@@ -2624,10 +2798,14 @@ func (ds *Datastore) CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UU
 
 func (ds *Datastore) UpdateDatasetReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.DatasetReviewResponse, error) {
 	var review dbmodels.DatasetReview
-	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
+	err := ds.DB.Preload("Dataset").Preload("FromBranch").Preload("FromBranchVersion").Preload("ToBranch").Preload("CreatedByUser").Where("uuid = ?", reviewUUID).Find(&review).Error
 	if err != nil {
 		return nil, err
 	}
+	if review.IsComplete {
+		return nil, errors.New("review already complete")
+	}
+	alreadyAccepted := review.IsAccepted
 	for key, value := range updatedAttributes {
 		switch key {
 		case "title":
@@ -2637,10 +2815,27 @@ func (ds *Datastore) UpdateDatasetReview(reviewUUID uuid.UUID, updatedAttributes
 		case "is_complete":
 			review.IsComplete = value.(bool)
 		case "is_accepted":
-			review.IsAccepted = value.(bool)
+			// CANNOT UNACCEPT ALREADY ACCEPTED REVIEW
+			if !alreadyAccepted {
+				review.IsAccepted = value.(bool)
+			}
 		}
 	}
-	err = ds.DB.Save(&review).Find(&review).Error
+	err = ds.DB.Transaction(func(tx *gorm.DB) error {
+		// CHECK IF REVIEW ACCEPTED
+		if review.IsAccepted && !alreadyAccepted {
+			// make a new version in to_branch from from_branch specified version
+			_, err := ds.MigrateDatasetVersionBranch(review.FromBranchVersion.UUID, review.ToBranch.UUID)
+			if err != nil {
+				return err
+			}
+		}
+		result := tx.Save(&review).Find(&review)
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}

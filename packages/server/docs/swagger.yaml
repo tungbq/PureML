@@ -56,6 +56,8 @@ definitions:
         type: string
       from_branch:
         type: string
+      from_branch_version:
+        type: string
       is_accepted:
         type: boolean
       is_complete:
@@ -93,6 +95,8 @@ definitions:
       description:
         type: string
       from_branch:
+        type: string
+      from_branch_version:
         type: string
       is_accepted:
         type: boolean

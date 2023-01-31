@@ -330,8 +330,8 @@ func GetModelReviews(modelUUID uuid.UUID) ([]models.ModelReviewResponse, error) 
 	return ds.GetModelReviews(modelUUID)
 }
 
-func CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.ModelReviewResponse, error) {
-	return ds.CreateModelReview(modelUUID, userUUID, fromBranch, toBranch, title, desc, isComplete, isAccepted)
+func CreateModelReview(modelUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, fromBranchVersion uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.ModelReviewResponse, error) {
+	return ds.CreateModelReview(modelUUID, userUUID, fromBranch, fromBranchVersion, toBranch, title, desc, isComplete, isAccepted)
 }
 
 func UpdateModelReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.ModelReviewResponse, error) {
@@ -346,8 +346,8 @@ func GetDatasetReviews(datasetUUID uuid.UUID) ([]models.DatasetReviewResponse, e
 	return ds.GetDatasetReviews(datasetUUID)
 }
 
-func CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.DatasetReviewResponse, error) {
-	return ds.CreateDatasetReview(datasetUUID, userUUID, fromBranch, toBranch, title, desc, isComplete, isAccepted)
+func CreateDatasetReview(datasetUUID uuid.UUID, userUUID uuid.UUID, fromBranch uuid.UUID, fromBranchVerison uuid.UUID, toBranch uuid.UUID, title string, desc string, isComplete bool, isAccepted bool) (*models.DatasetReviewResponse, error) {
+	return ds.CreateDatasetReview(datasetUUID, userUUID, fromBranch, fromBranchVerison, toBranch, title, desc, isComplete, isAccepted)
 }
 
 func UpdateDatasetReview(reviewUUID uuid.UUID, updatedAttributes map[string]any) (*models.DatasetReviewResponse, error) {

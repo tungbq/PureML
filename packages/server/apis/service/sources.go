@@ -7,6 +7,48 @@ import (
 	"github.com/PureML-Inc/PureML/server/models"
 )
 
+// GetR2Secret godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get secrets for source type r2
+//	@Description	Get secrets for source type r2
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/r2 [get]
+//	@Param			orgId	path	string	true	"Organization Id"
+func GetR2Secret(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	result, err := datastore.GetSourceSecret(orgId, "R2")
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "R2 secrets")
+	return response
+}
+
+// GetS3Secret godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get secrets for source type s3
+//	@Description	Get secrets for source type s3
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/s3 [get]
+//	@Param			orgId	path	string	true	"Organization Id"
+func GetS3Secret(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	result, err := datastore.GetSourceSecret(orgId, "S3")
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "S3 secrets")
+	return response
+}
+
 // ConnectR2Secret godoc
 //
 //	@Security		ApiKeyAuth
@@ -140,4 +182,46 @@ func ConnectS3Secret(request *models.Request) *models.Response {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, createdSource, "S3 connected successfully")
+}
+
+// DeleteR2Secrets godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Delete secrets for source type r2
+//	@Description	Delete secrets for source type r2
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/r2/delete [delete]
+//	@Param			orgId	path	string	true	"Organization Id"
+func DeleteR2Secrets(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	err := datastore.DeleteR2Secrets(orgId)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, nil, "R2 disconnected")
+	return response
+}
+
+// DeleteS3Secrets godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Delete secrets for source type s3
+//	@Description	Delete secrets for source type s3
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/s3/delete [delete]
+//	@Param			orgId	path	string	true	"Organization Id"
+func DeleteS3Secrets(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	err := datastore.DeleteS3Secrets(orgId)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, nil, "S3 disconnected")
+	return response
 }

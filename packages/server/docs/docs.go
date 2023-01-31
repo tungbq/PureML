@@ -3801,6 +3801,9 @@ const docTemplate = `{
                 "from_branch": {
                     "type": "string"
                 },
+                "from_branch_version": {
+                    "type": "string"
+                },
                 "is_accepted": {
                     "type": "boolean"
                 },
@@ -3858,6 +3861,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "from_branch": {
+                    "type": "string"
+                },
+                "from_branch_version": {
                     "type": "string"
                 },
                 "is_accepted": {

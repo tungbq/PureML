@@ -10,6 +10,53 @@ import (
 
 var defaultDatasetBranchNames = []string{"main", "development"}
 
+// GetAllDatasets godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get all datasets of an organization
+//	@Description	Get all datasets of an organization
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/all [get]
+//	@Param			orgId	path	string	true	"Organization Id"
+func GetAllDatasets(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	allDatasets, err := datastore.GetAllDatasets(orgId)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, allDatasets, "Datasets successfully retrieved")
+}
+
+
+// GetDataset godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get specific dataset of an organization
+//	@Description	Get specific dataset of an organization
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
+func GetDataset(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	datasetName := request.GetDatasetName()
+	dataset, err := datastore.GetDatasetByName(orgId, datasetName)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if dataset == nil {
+		return models.NewDataResponse(http.StatusNotFound, nil, "Dataset not found")
+	}
+	return models.NewDataResponse(http.StatusOK, []models.DatasetResponse{*dataset}, "Dataset successfully retrieved")
+}
+
+
 // CreateDataset godoc
 //
 //	@Security		ApiKeyAuth

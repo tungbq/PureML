@@ -3789,6 +3789,9 @@
                 "from_branch": {
                     "type": "string"
                 },
+                "from_branch_version": {
+                    "type": "string"
+                },
                 "is_accepted": {
                     "type": "boolean"
                 },
@@ -3846,6 +3849,9 @@
                     "type": "string"
                 },
                 "from_branch": {
+                    "type": "string"
+                },
+                "from_branch_version": {
                     "type": "string"
                 },
                 "is_accepted": {
