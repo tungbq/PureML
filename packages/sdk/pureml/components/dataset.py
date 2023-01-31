@@ -63,7 +63,7 @@ def check_dataset_hash(hash: str, name: str, branch: str):
     hash_exists = False
 
     if response.ok:
-        hash_exists = response.json()["Data"]
+        hash_exists = response.json()["data"]
 
     return hash_exists
 
@@ -91,9 +91,9 @@ def branch_details(branch: str, dataset_name: str):
     if response.ok:
         response_text = response.json()
         # T-1161 standardize api response to contains Data as a list
-        details = response_text["Data"]
+        details = response_text["data"]
 
-        # details = response_text['Data'][0]
+        # details = response_text['data'][0]
         # print(details)
 
         return details
@@ -165,7 +165,7 @@ def list():
         # print(f"[bold green]Obtained list of models")
 
         response_text = response.json()
-        model_list = response_text["Data"]
+        model_list = response_text["data"]
         # print(model_list)
 
         return model_list
@@ -331,7 +331,7 @@ def register(
 
             # print(response.json())
             try:
-                dataset_version = response.json()["Data"][0]["version"]
+                dataset_version = response.json()["data"][0]["version"]
                
                 if is_empty:
                     print(f"[bold green]Lineage has been registered!")
@@ -396,7 +396,7 @@ def details(
     if response.ok:
         # print(f"[bold green]Dataset details have been fetched")
         response_text = response.json()
-        dataset_details = response_text["Data"][0]
+        dataset_details = response_text["data"][0]
 
         return dataset_details
 
@@ -439,7 +439,7 @@ def version_details(name: str, branch: str, version: str = "latest"):
     if response.ok:
         # print(f"[bold green]Dataset Version details have been fetched")
         response_text = response.json()
-        dataset_details = response_text["Data"][0]
+        dataset_details = response_text["data"][0]
         # print(dataset_details)
 
         return dataset_details

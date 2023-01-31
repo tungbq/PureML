@@ -136,7 +136,7 @@ def details(model_name: str, model_branch:str, model_version:str='latest'):
     if response.ok:
         # T-1161 standardize api response to contains Models as a list
         response_text = response.json()
-        details = response_text["Data"]
+        details = response_text["data"]
 
         # print(model_details)
 

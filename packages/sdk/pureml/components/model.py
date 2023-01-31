@@ -63,7 +63,7 @@ def check_model_hash(hash: str, name: str, branch: str):
     hash_exists = False
 
     if response.ok:
-        hash_exists = response.json()["Data"]
+        hash_exists = response.json()["data"]
 
     return hash_exists
 
@@ -87,7 +87,7 @@ def branch_details(branch: str, model_name: str):
     if response.ok:
         # T-1161 standardize api response to contains Models as a list
         response_text = response.json()
-        details = response_text["Data"]
+        details = response_text["data"]
         # print(model_details)
 
         return details
@@ -157,7 +157,7 @@ def list():
         # print(f"[bold green]Obtained list of models")
 
         response_text = response.json()
-        model_list = response_text["Data"]
+        model_list = response_text["data"]
         # print(model_list)
 
         return model_list
@@ -273,7 +273,7 @@ def register(
         if response.ok:
             print(f"[bold green]Model has been registered!")
 
-            model_version = response.json()["Data"][0]["version"]
+            model_version = response.json()["data"][0]["version"]
             print("Model Version: ", model_version)
 
             return True, model_hash, model_version
@@ -327,7 +327,7 @@ def details(name: str):
     if response.ok:
         # print(f"[bold green]Model details have been fetched")
         response_text = response.json()
-        model_details = response_text["Data"][0]
+        model_details = response_text["data"][0]
         # print(model_details)
 
         return model_details
@@ -368,7 +368,7 @@ def version_details(name: str, branch: str, version: str = "latest"):
     if response.ok:
         # print(f"[bold green]Model Version details have been fetched")
         response_text = response.json()
-        model_details = response_text["Data"][0]
+        model_details = response_text["data"][0]
         # print(model_details)
 
         return model_details
