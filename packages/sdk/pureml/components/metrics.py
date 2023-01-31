@@ -22,7 +22,11 @@ def post_metrics(metrics, model_name: str, model_branch:str, model_version:str):
         'Authorization': 'Bearer {}'.format(user_token)
     }
 
-    data = {'metrics': metrics}
+    data = {
+        'data' : metrics,
+        'key': 'metrics'
+        }
+
     metrics = json.dumps(data)
     
 

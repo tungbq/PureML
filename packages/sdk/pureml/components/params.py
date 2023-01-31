@@ -22,7 +22,11 @@ def post_params(params, model_name: str, model_branch:str, model_version:str):
         'Authorization': 'Bearer {}'.format(user_token)
     }
 
-    data = {'params': params}
+    data = {
+        'data' : params,
+        'key': 'params'
+        }
+
     data = json.dumps(data)
 
     response = requests.post(url, data=data, headers=headers)
