@@ -70,7 +70,7 @@ func GetUserByEmail(email string) (*models.UserResponse, error) {
 	return ds.GetUserByEmail(email)
 }
 
-func GetUserByHandle(handle string) (*models.UserResponse, error) {
+func GetUserByHandle(handle string) (*models.UserProfileResponse, error) {
 	return ds.GetUserByHandle(handle)
 }
 

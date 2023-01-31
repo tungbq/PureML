@@ -394,7 +394,7 @@ func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) 
 	}, nil
 }
 
-func (ds *Datastore) GetUserByHandle(handle string) (*models.UserResponse, error) {
+func (ds *Datastore) GetUserByHandle(handle string) (*models.UserProfileResponse, error) {
 	var user dbmodels.User
 	result := ds.DB.Where("handle = ?", handle).Limit(1).Find(&user)
 	if result.RowsAffected == 0 {
@@ -403,12 +403,18 @@ func (ds *Datastore) GetUserByHandle(handle string) (*models.UserResponse, error
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &models.UserResponse{
-		Name:   user.Name,
-		Email:  user.Email,
-		Handle: user.Handle,
-		Bio:    user.Bio,
-		Avatar: user.Avatar,
+	numberOfDatasets := int64(0)
+	ds.DB.Model(&dbmodels.DatasetUser{}).Where("user_uuid = ?", user.BaseModel.UUID).Count(&numberOfDatasets)
+	numberOfModel := int64(0)
+	ds.DB.Model(&dbmodels.ModelUser{}).Where("user_uuid = ?", user.BaseModel.UUID).Count(&numberOfModel)
+	return &models.UserProfileResponse{
+		Name:             user.Name,
+		Email:            user.Email,
+		Handle:           user.Handle,
+		Bio:              user.Bio,
+		Avatar:           user.Avatar,
+		NumberOfModels:   numberOfModel,
+		NumberOfDatasets: numberOfDatasets,
 	}, nil
 }
 
@@ -582,7 +588,7 @@ func IncrementVersion(latestVersion string) string {
 func (ds *Datastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.ModelResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("readme_versions.version DESC").Limit(1)
+		return db.Order("LENGTH(readme_versions.version) DESC").Order("readme_versions.version DESC").Limit(1)
 	}).Where("name = ?", modelName).Where("organization_uuid = ?", orgId).Limit(1).Find(&model)
 	if result.RowsAffected == 0 {
 		return nil, nil
@@ -618,7 +624,7 @@ func (ds *Datastore) GetModelByName(orgId uuid.UUID, modelName string) (*models.
 func (ds *Datastore) GetModelByUUID(modelUUID uuid.UUID) (*models.ModelResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("readme_versions.version DESC").Limit(1)
+		return db.Order("LENGTH(readme_versions.version) DESC").Order("readme_versions.version DESC").Limit(1)
 	}).Where("uuid = ?", modelUUID).Limit(1).Find(&model)
 	if result.RowsAffected == 0 {
 		return nil, nil
@@ -694,7 +700,7 @@ func (ds *Datastore) GetModelReadmeAllVersions(modelUUID uuid.UUID) ([]models.Re
 func (ds *Datastore) UpdateModelReadme(modelUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
 	var model dbmodels.Model
 	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("version desc").Limit(1)
+		return db.Order("LENGTH(version) DESC").Order("version DESC").Limit(1)
 	}).Where("uuid = ?", modelUUID).Limit(1).Find(&model)
 	if result.RowsAffected == 0 {
 		return nil, nil
@@ -1091,7 +1097,6 @@ func (ds *Datastore) MigrateModelVersionBranch(modelVersion uuid.UUID, toBranch 
 	}, nil
 }
 
-
 func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
 	err := ds.DB.Select("model_versions.*").Joins("JOIN model_branches ON model_branches.uuid = model_versions.branch_uuid").Where("model_branches.model_uuid = ?", modelUUID).Find(&modelVersions).Error
@@ -1230,7 +1235,7 @@ func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version st
 func (ds *Datastore) GetDatasetByName(orgId uuid.UUID, datasetName string) (*models.DatasetResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("readme_versions.version DESC").Limit(1)
+		return db.Order("LENGTH(readme_versions.version) DESC").Order("readme_versions.version DESC").Limit(1)
 	}).Where("name = ?", datasetName).Where("organization_uuid = ?", orgId).Limit(1).Find(&dataset)
 	if result.RowsAffected == 0 {
 		return nil, nil
@@ -1266,7 +1271,7 @@ func (ds *Datastore) GetDatasetByName(orgId uuid.UUID, datasetName string) (*mod
 func (ds *Datastore) GetDatasetByUUID(datasetUUID uuid.UUID) (*models.DatasetResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("readme_versions.version DESC").Limit(1)
+		return db.Order("LENGTH(readme_versions.version) DESC").Order("readme_versions.version DESC").Limit(1)
 	}).Where("uuid = ?", datasetUUID).Limit(1).Find(&dataset)
 	if result.RowsAffected == 0 {
 		return nil, nil
@@ -1342,7 +1347,7 @@ func (ds *Datastore) GetDatasetReadmeAllVersions(datasetUUID uuid.UUID) ([]model
 func (ds *Datastore) UpdateDatasetReadme(datasetUUID uuid.UUID, fileType string, content string) (*models.ReadmeVersionResponse, error) {
 	var dataset dbmodels.Dataset
 	result := ds.DB.Preload("Readme.ReadmeVersions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("version desc").Limit(1)
+		return db.Order("LENGTH(version) DESC").Order("version DESC").Limit(1)
 	}).Where("uuid = ?", datasetUUID).Limit(1).Find(&dataset)
 	if result.RowsAffected == 0 {
 		return nil, nil
@@ -1557,13 +1562,13 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 				if res.RowsAffected == 0 {
 					sourceType.Name = "PUREML-STORAGE"
 					sourceType.Org = dbmodels.Organization{
-							BaseModel: dbmodels.BaseModel{
-								UUID: defaultUUID,
-							},
-							Handle:   "pureml",
-							Name:     "PureML",
-							JoinCode: "",
-						}
+						BaseModel: dbmodels.BaseModel{
+							UUID: defaultUUID,
+						},
+						Handle:   "pureml",
+						Name:     "PureML",
+						JoinCode: "",
+					}
 					err = ds.DB.Create(&sourceType).Find(&sourceType).Error
 					if err != nil {
 						return nil, err
