@@ -172,7 +172,7 @@ def init(name: str, readme: str = None, branch: str = None):
     org_id = get_org_id()
 
     if readme is None:
-        readme = PATH_DATASET_README
+        readme = PATH_MODEL_README
 
     file_content, file_type = load_readme(path=readme)
 
