@@ -5,7 +5,7 @@ import time
 import joblib
 import pandas as pd
 import requests
-from pureml.utils.constants import BASE_URL, PATH_DATASET_DIR
+from pureml.utils.constants import BASE_URL, PATH_DATASET_DIR, PATH_DATASET_README
 from pureml.utils.hash import generate_hash_for_file
 from pureml.utils.readme import load_readme
 from rich import print
@@ -179,6 +179,9 @@ def init(name: str, readme: str = None, branch: str = None):
     user_token = get_token()
     org_id = get_org_id()
 
+    if readme is None:
+        readme = PATH_DATASET_README
+
     file_content, file_type = load_readme(path=readme)
 
     branch_user = "dev" if branch is None else branch
@@ -202,9 +205,10 @@ def init(name: str, readme: str = None, branch: str = None):
 
     data = json.dumps(data)
     files = {'file': (readme, open(readme, "rb"), file_type)}
-    
-
     response = requests.post(url, data=data, headers=headers, files=files)
+    #     
+    # response = requests.post(url, data=data, headers=headers)
+
 
     if response.ok:
         print(f"[bold green]Dataset has been created!")
@@ -348,6 +352,7 @@ def register(
             return True, dataset_hash, dataset_version
         else:
             print(f"[bold red]Dataset has not been registered!")
+            print(response.text)
 
             return True, dataset_hash, None
 

@@ -1,6 +1,5 @@
 import os
 
-
 def create_readme():
     file_content = 'Readme.md'
     file_type = 'md'
@@ -24,6 +23,12 @@ def load_readme(path:str=None):
             except Exception as e:
                 print('Unable to read the ReadME file.')
                 print('Creating an Empty ReadME file')
+    else:
+        with open(path, 'r') as f:
+            f.write(file_content)
+        print('ReadME file doesnot exist.')
+        print('Creating an Empty ReadME file')
+        
 
         
     return file_content, file_type

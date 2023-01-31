@@ -7,7 +7,7 @@ import json
 
 
 from . import get_token, get_org_id
-from pureml.utils.constants import BASE_URL, PATH_MODEL_DIR
+from pureml.utils.constants import BASE_URL, PATH_MODEL_DIR, PATH_MODEL_README
 from pureml import save_model, load_model
 from urllib.parse import urljoin
 import joblib
@@ -170,6 +170,9 @@ def list():
 def init(name: str, readme: str = None, branch: str = None):
     user_token = get_token()
     org_id = get_org_id()
+
+    if readme is None:
+        readme = PATH_DATASET_README
 
     file_content, file_type = load_readme(path=readme)
 
