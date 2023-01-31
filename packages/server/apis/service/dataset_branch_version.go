@@ -1,0 +1,182 @@
+package service
+
+import (
+	_ "fmt"
+	"net/http"
+	"strings"
+
+	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/models"
+	uuid "github.com/satori/go.uuid"
+)
+
+// GetDatasetBranchAllVersions godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get all branch versions of a dataset
+//	@Description	Get all branch versions of a dataset
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
+//	@Param			branchName	path	string	true	"Branch Name"
+func GetDatasetBranchAllVersions(request *models.Request) *models.Response {
+	var response *models.Response
+	branchUUID := request.GetDatasetBranchUUID()
+	allVersions, err := datastore.GetDatasetBranchAllVersions(branchUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	} else {
+		response = models.NewDataResponse(http.StatusOK, allVersions, "All dataset branch versions")
+	}
+	return response
+}
+
+// GetDatasetBranchVersion godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get specific branch version of a dataset
+//	@Description	Get specific branch version of a dataset
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
+//	@Param			branchName	path	string	true	"Branch Name"
+//	@Param			version		path	string	true	"Version"
+func GetDatasetBranchVersion(request *models.Request) *models.Response {
+	branchUUID := request.GetDatasetBranchUUID()
+	versionName := request.PathParams["version"]
+	version, err := datastore.GetDatasetBranchVersion(branchUUID, versionName)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+	if version == nil {
+		return models.NewErrorResponse(http.StatusNotFound, "Version not found")
+	}
+	return models.NewDataResponse(http.StatusOK, version, "Dataset branch version details")
+}
+
+// VerifyDatasetBranchHashStatus godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Verify dataset hash status
+//	@Description	Verify dataset hash status to determine if dataset is already uploaded
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/hash-status [post]
+//	@Param			orgId		path	string				true	"Organization Id"
+//	@Param			datasetName	path	string				true	"Dataset Name"
+//	@Param			branchName	path	string				true	"Branch Name"
+//	@Param			hash		body	models.HashRequest	true	"Hash value"
+func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
+	datasetName := request.GetDatasetName()
+	datasetBranchName := request.GetPathParam("branchName")
+	orgId := uuid.Must(uuid.FromString(request.GetPathParam("orgId")))
+	message := "Hash validity (False - does not exist in db)"
+	dataset, err := datastore.GetDatasetBranchByName(orgId, datasetName, datasetBranchName)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if dataset == nil {
+		return models.NewDataResponse(http.StatusOK, false, message)
+	}
+	datasetBranchUUID := dataset.UUID
+	request.ParseJsonBody()
+	hashValue := request.GetParsedBodyAttribute("hash").(string)
+	versions, err := datastore.GetDatasetBranchAllVersions(datasetBranchUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := false
+	for _, version := range versions {
+		if version.Hash == hashValue {
+			response = true
+			message = "Hash validity (True - exists in db)"
+			break
+		}
+	}
+	return models.NewDataResponse(http.StatusOK, response, message)
+}
+
+// RegisterDataset godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Register dataset
+//	@Description	Register dataset file. Create dataset and default branches if not exists
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/register [post]
+//	@Param			file		formData	file							true	"Dataset file"
+//	@Param			orgId		path		string							true	"Organization UUID"
+//	@Param			datasetName	path		string							true	"Dataset name"
+//	@Param			branchName	path		string							true	"Branch name"
+//	@Param			data		formData	models.RegisterDatasetRequest	true	"Dataset details"
+func RegisterDataset(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	var datasetHash string
+	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
+		datasetHash = request.FormValues["hash"][0]
+	} else {
+		return models.NewErrorResponse(http.StatusBadRequest, "Hash is required")
+	}
+	var datasetSourceType string
+	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
+		datasetSourceType = strings.ToUpper(request.FormValues["storage"][0])
+	}
+	var datasetIsEmpty bool
+	if request.FormValues["is_empty"] != nil && len(request.FormValues["is_empty"]) > 0 {
+		datasetIsEmpty = request.FormValues["is_empty"][0] == "true"
+	}
+	var datasetLineage string
+	if request.FormValues["lineage"] != nil && len(request.FormValues["lineage"]) > 0 {
+		datasetLineage = request.FormValues["lineage"][0]
+	}
+	fileHeader := request.GetFormFile("file")
+	if fileHeader == nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "File is required")
+	}
+	datasetBranchName := request.GetPathParam("branchName")
+	if datasetBranchName == "main" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Cannot register model directly to main branch")
+	}
+	sourceValid := false
+	for source := range models.SupportedSources {
+		if models.SupportedSources[source] == datasetSourceType {
+			sourceValid = true
+			break
+		}
+	}
+	if !sourceValid {
+		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
+	}
+	datasetBranchUUID := request.GetDatasetBranchUUID()
+	versions, err := datastore.GetDatasetBranchAllVersions(datasetBranchUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := false
+	for _, version := range versions {
+		if version.Hash == datasetHash {
+			response = true
+			break
+		}
+	}
+	if response {
+		return models.NewErrorResponse(http.StatusBadRequest, "Dataset with this hash already exists")
+	}
+	datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, fileHeader, datasetIsEmpty, datasetHash, datasetSourceType, datasetLineage)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, datasetVersion, "Dataset successfully registered")
+}

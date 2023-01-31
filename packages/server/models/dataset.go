@@ -23,12 +23,13 @@ type RegisterDatasetRequest struct {
 }
 
 type DatasetReviewRequest struct {
-	FromBranch  string `json:"from_branch"`
-	ToBranch    string `json:"to_branch"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	IsComplete  bool   `json:"is_complete"`
-	IsAccepted  bool   `json:"is_accepted"`
+	FromBranch        string `json:"from_branch"`
+	FromBranchVersion string `json:"from_branch_version"`
+	ToBranch          string `json:"to_branch"`
+	Title             string `json:"title"`
+	Description       string `json:"description"`
+	IsComplete        bool   `json:"is_complete"`
+	IsAccepted        bool   `json:"is_accepted"`
 }
 
 type DatasetReviewUpdateRequest struct {
@@ -94,14 +95,15 @@ type LineageResponse struct {
 }
 
 type DatasetReviewResponse struct {
-	UUID        uuid.UUID                 `json:"uuid"`
-	Dataset     DatasetNameResponse       `json:"dataset"`
-	FromBranch  DatasetBranchNameResponse `json:"from_branch"`
-	ToBranch    DatasetBranchNameResponse `json:"to_branch"`
-	Title       string                    `json:"title"`
-	Description string                    `json:"description"`
-	CreatedBy   UserHandleResponse        `json:"created_by"`
-	AssignedTo  UserHandleResponse        `json:"assigned_to"`
-	IsComplete  bool                      `json:"is_complete"`
-	IsAccepted  bool                      `json:"is_accepted"`
+	UUID              uuid.UUID                        `json:"uuid"`
+	Dataset           DatasetNameResponse              `json:"dataset"`
+	FromBranch        DatasetBranchNameResponse        `json:"from_branch"`
+	FromBranchVersion DatasetBranchVersionNameResponse `json:"from_branch_version"`
+	ToBranch          DatasetBranchNameResponse        `json:"to_branch"`
+	Title             string                           `json:"title"`
+	Description       string                           `json:"description"`
+	CreatedBy         UserHandleResponse               `json:"created_by"`
+	AssignedTo        UserHandleResponse               `json:"assigned_to"`
+	IsComplete        bool                             `json:"is_complete"`
+	IsAccepted        bool                             `json:"is_accepted"`
 }

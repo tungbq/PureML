@@ -26,7 +26,7 @@ func GetModelReviews(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
-	response := models.NewDataResponse(http.StatusOK, reviews, "Model Readme version")
+	response := models.NewDataResponse(http.StatusOK, reviews, "Model review version")
 	return response
 }
 
@@ -62,6 +62,18 @@ func CreateModelReview(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch not found")
 	}
 	fromBranchUUID := fromBranchDb.UUID
+	fromBranchVersion := request.GetParsedBodyAttribute("from_branch_version")
+	if fromBranchVersion == nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "From Branch Version not found in request body")
+	} else if fromBranchVersion.(string) == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "From Branch Version cannot be empty")
+	}
+	fromBranchVersionData := fromBranchVersion.(string)
+	fromBranchVersionDb, err := datastore.GetModelBranchVersion(fromBranchUUID, fromBranchVersionData)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "From Branch not found")
+	}
+	fromBranchVersionUUID := fromBranchVersionDb.UUID
 	toBranch := request.GetParsedBodyAttribute("to_branch")
 	if toBranch == nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "To Branch not found in request body")
@@ -98,11 +110,11 @@ func CreateModelReview(request *models.Request) *models.Response {
 		isAcceptedData = false
 	}
 	isAcceptedData = IsAccepted.(bool)
-	createdReview, err := datastore.CreateModelReview(modelUUID, userUUID, fromBranchUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
+	createdReview, err := datastore.CreateModelReview(modelUUID, userUUID, fromBranchUUID, fromBranchVersionUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	return models.NewDataResponse(http.StatusOK, []models.ModelReviewResponse{*createdReview}, "Activity created")
+	return models.NewDataResponse(http.StatusOK, []models.ModelReviewResponse{*createdReview}, "Model review created")
 }
 
 // UpdateModelReview godoc
@@ -148,7 +160,10 @@ func UpdateModelReview(request *models.Request) *models.Response {
 	}
 	updatedDbReview, err := datastore.UpdateModelReview(reviewUUID, updatedAttributes)
 	if err != nil {
+		if err.Error() == "review already complete" {
+			return models.NewErrorResponse(http.StatusBadRequest, err.Error())
+		}
 		return models.NewServerErrorResponse(err)
 	}
-	return models.NewDataResponse(http.StatusOK, []models.ModelReviewResponse{*updatedDbReview}, "Model Activity updated")
+	return models.NewDataResponse(http.StatusOK, []models.ModelReviewResponse{*updatedDbReview}, "Model review updated")
 }

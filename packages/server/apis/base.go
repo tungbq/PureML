@@ -49,6 +49,8 @@ func InitApi() (*echo.Echo, error) {
 
 	//Org APIs
 	api.GET("/org/handle/:orgHandle", handler.DefaultHandler(service.GetOrgByHandle))
+	api.GET("/org/:orgId/public/model", handler.DefaultHandler(service.GetOrgAllPublicModels), middlewares.ValidateOrg)
+	api.GET("/org/:orgId/public/dataset", handler.DefaultHandler(service.GetOrgAllPublicDatasets), middlewares.ValidateOrg)
 
 	orgGroup := api.Group("/org", middlewares.AuthenticateJWT)
 	orgGroup.GET("/all", handler.DefaultHandler(service.GetAllAdminOrgs))
@@ -60,6 +62,7 @@ func InitApi() (*echo.Echo, error) {
 	orgGroup.POST("/join", handler.DefaultHandler(service.JoinOrg))
 	orgGroup.POST("/:orgId/remove", handler.DefaultHandler(service.RemoveOrg), middlewares.ValidateOrg)
 	orgGroup.POST("/:orgId/leave", handler.DefaultHandler(service.LeaveOrg), middlewares.ValidateOrg)
+
 
 	//User APIs
 	userGroup := api.Group("/user")

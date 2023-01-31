@@ -26,7 +26,7 @@ func GetDatasetReviews(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
-	response := models.NewDataResponse(http.StatusOK, reviews, "Dataset Readme version")
+	response := models.NewDataResponse(http.StatusOK, reviews, "Dataset review version")
 	return response
 }
 
@@ -62,6 +62,18 @@ func CreateDatasetReview(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch not found")
 	}
 	fromBranchUUID := fromBranchDb.UUID
+	fromBranchVersion := request.GetParsedBodyAttribute("from_branch_version")
+	if fromBranchVersion == nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "From Branch Version not found in request body")
+	} else if fromBranchVersion.(string) == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "From Branch Version cannot be empty")
+	}
+	fromBranchVersionData := fromBranchVersion.(string)
+	fromBranchVersionDb, err := datastore.GetDatasetBranchVersion(fromBranchUUID, fromBranchVersionData)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "From Branch not found")
+	}
+	fromBranchVersionUUID := fromBranchVersionDb.UUID
 	toBranch := request.GetParsedBodyAttribute("to_branch")
 	if toBranch == nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "To Branch not found in request body")
@@ -98,11 +110,11 @@ func CreateDatasetReview(request *models.Request) *models.Response {
 		isAcceptedData = false
 	}
 	isAcceptedData = IsAccepted.(bool)
-	createdReview, err := datastore.CreateDatasetReview(datasetUUID, userUUID, fromBranchUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
+	createdReview, err := datastore.CreateDatasetReview(datasetUUID, userUUID, fromBranchUUID, fromBranchVersionUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	return models.NewDataResponse(http.StatusOK, []models.DatasetReviewResponse{*createdReview}, "Activity created")
+	return models.NewDataResponse(http.StatusOK, []models.DatasetReviewResponse{*createdReview}, "Dataset review created")
 }
 
 // UpdateDatasetReview godoc
@@ -148,7 +160,10 @@ func UpdateDatasetReview(request *models.Request) *models.Response {
 	}
 	updatedDbReview, err := datastore.UpdateDatasetReview(reviewUUID, updatedAttributes)
 	if err != nil {
+		if err.Error() == "review already complete" {
+			return models.NewErrorResponse(http.StatusBadRequest, err.Error())
+		}
 		return models.NewServerErrorResponse(err)
 	}
-	return models.NewDataResponse(http.StatusOK, []models.DatasetReviewResponse{*updatedDbReview}, "Dataset Activity updated")
+	return models.NewDataResponse(http.StatusOK, []models.DatasetReviewResponse{*updatedDbReview}, "Dataset review updated")
 }

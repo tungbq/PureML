@@ -23,7 +23,7 @@ type Model struct {
 type ModelUser struct {
 	ModelUUID uuid.UUID `json:"model_uuid" gorm:"type:uuid;primaryKey"`
 	UserUUID  uuid.UUID `json:"user_uuid" gorm:"type:uuid;primaryKey"`
-	Role      string
+	Role      string    `json:"role" gorm:"not null default:member"`
 }
 
 type ModelBranch struct {
@@ -51,20 +51,22 @@ type ModelVersion struct {
 }
 
 type ModelReview struct {
-	BaseModel      `gorm:"embedded"`
-	ModelUUID      uuid.UUID     `json:"model_uuid" gorm:"type:uuid;not null"`
-	FromBranchUUID uuid.UUID     `json:"from_branch_uuid" gorm:"type:uuid;not null"`
-	ToBranchUUID   uuid.UUID     `json:"to_branch_uuid" gorm:"type:uuid;not null"`
-	Title          string        `json:"title" gorm:"not null"`
-	Description    string        `json:"description"`
-	CreatedBy      uuid.UUID     `json:"created_by" gorm:"type:uuid;not null"`
-	AssignedTo     uuid.NullUUID `json:"assigned_to" gorm:"type:uuid;"`
-	IsComplete     bool          `json:"is_complete" default:"false"`
-	IsAccepted     bool          `json:"is_accepted" default:"false"`
+	BaseModel             `gorm:"embedded"`
+	ModelUUID             uuid.UUID     `json:"model_uuid" gorm:"type:uuid;not null"`
+	FromBranchUUID        uuid.UUID     `json:"from_branch_uuid" gorm:"type:uuid;not null"`
+	FromBranchVersionUUID uuid.UUID     `json:"from_branch_version_uuid" gorm:"type:uuid;not null"`
+	ToBranchUUID          uuid.UUID     `json:"to_branch_uuid" gorm:"type:uuid;not null"`
+	Title                 string        `json:"title" gorm:"not null"`
+	Description           string        `json:"description"`
+	CreatedBy             uuid.UUID     `json:"created_by" gorm:"type:uuid;not null"`
+	AssignedTo            uuid.NullUUID `json:"assigned_to" gorm:"type:uuid;"`
+	IsComplete            bool          `json:"is_complete" default:"false"`
+	IsAccepted            bool          `json:"is_accepted" default:"false"`
 
-	Model          Model       `gorm:"foreignKey:ModelUUID"`
-	FromBranch     ModelBranch `gorm:"foreignKey:FromBranchUUID"`
-	ToBranch       ModelBranch `gorm:"foreignKey:ToBranchUUID"`
-	CreatedByUser  User        `gorm:"foreignKey:CreatedBy"`
-	AssignedToUser User        `gorm:"foreignKey:AssignedTo"`
+	Model             Model        `gorm:"foreignKey:ModelUUID"`
+	FromBranch        ModelBranch  `gorm:"foreignKey:FromBranchUUID"`
+	FromBranchVersion ModelVersion `gorm:"foreignKey:FromBranchVersionUUID"`
+	ToBranch          ModelBranch  `gorm:"foreignKey:ToBranchUUID"`
+	CreatedByUser     User         `gorm:"foreignKey:CreatedBy"`
+	AssignedToUser    User         `gorm:"foreignKey:AssignedTo"`
 }
