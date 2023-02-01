@@ -326,18 +326,9 @@ def register(
         }
 
         # data = json.dumps(data)
-
         
         response = requests.post(url, files=files, data=data, headers=headers)
 
-
-        # print(response.json())
-
-        # print(response.status_code)
-
-        # print(response.request.url)
-        # print(response.request.body)
-        # print(response.request.headers)
 
         if response.ok:
 
