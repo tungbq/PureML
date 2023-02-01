@@ -48,6 +48,8 @@ func InitApi() (*echo.Echo, error) {
 	docs.SwaggerInfo.Schemes = []string{config.GetScheme()}
 
 	//Org APIs
+	api.GET("/public/model", handler.DefaultHandler(service.GetAllPublicModels))
+	api.GET("/public/dataset", handler.DefaultHandler(service.GetAllPublicDatasets))
 	api.GET("/org/handle/:orgHandle", handler.DefaultHandler(service.GetOrgByHandle))
 	api.GET("/org/:orgId/public/model", handler.DefaultHandler(service.GetOrgAllPublicModels), middlewares.ValidateOrg)
 	api.GET("/org/:orgId/public/dataset", handler.DefaultHandler(service.GetOrgAllPublicDatasets), middlewares.ValidateOrg)

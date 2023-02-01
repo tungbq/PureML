@@ -10,6 +10,23 @@ import (
 
 var defaultModelBranchNames = []string{"main", "development"}
 
+// GetAllPublicModels godoc
+//
+//	@Summary		Get all public models
+//	@Description	Get all public models
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/public/model [get]
+func GetAllPublicModels(request *models.Request) *models.Response {
+	allModels, err := datastore.GetAllPublicModels()
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, allModels, "Models successfully retrieved")
+}
+
 // GetAllModels godoc
 //
 //	@Security		ApiKeyAuth
