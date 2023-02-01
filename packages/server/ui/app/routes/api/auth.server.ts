@@ -1,12 +1,12 @@
 // ############################## contactus api ##############################
-import Airtable from "airtable";
+// import Airtable from "airtable";
 
-const base = new Airtable({
-  endpointUrl: "https://api.airtable.com",
-  apiKey: process.env.NEXT_PUBLIC_AIRTABLE_API_KEY,
-}).base("appAR7Cxhflh7YVe9");
+// const base = new Airtable({
+//   endpointUrl: "https://api.airtable.com",
+//   apiKey: process.env.NEXT_PUBLIC_AIRTABLE_API_KEY,
+// }).base("appAR7Cxhflh7YVe9");
 
-export default base;
+// export default base;
 
 // ###########################################################################
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;

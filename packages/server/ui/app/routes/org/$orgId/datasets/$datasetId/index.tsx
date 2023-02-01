@@ -4,7 +4,7 @@ import Tabbar from "~/components/Tabbar"
 import {
 	fetchDatasetReadme,
 	writeDatasetReadme,
-} from "~/routes/datasets.server"
+} from "~/routes/api/datasets.server"
 import { getSession } from "~/session"
 import { marked } from "marked"
 import quillCss from "quill/dist/quill.snow.css"

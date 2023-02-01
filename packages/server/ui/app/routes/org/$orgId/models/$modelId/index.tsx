@@ -1,6 +1,6 @@
 import { Form, Meta, useLoaderData, useSubmit } from "@remix-run/react"
 import Tabbar from "~/components/Tabbar"
-import { fetchModelReadme, writeModelReadme } from "~/routes/models.server"
+import { fetchModelReadme, writeModelReadme } from "~/routes/api/models.server"
 import { getSession } from "~/session"
 import { marked } from "marked"
 import Button from "~/components/ui/Button"

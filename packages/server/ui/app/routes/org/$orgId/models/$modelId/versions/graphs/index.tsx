@@ -4,7 +4,10 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import Tabbar from "~/components/Tabbar"
 import { useSubmit, useTransition } from "@remix-run/react"
 
-import { fetchModelMetrics, fetchModelVersions } from "~/routes/models.server"
+import {
+	fetchModelMetrics,
+	fetchModelVersions,
+} from "~/routes/api/models.server"
 import { getSession } from "~/session"
 import Dropdown from "~/components/ui/Dropdown"
 

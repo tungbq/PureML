@@ -10,6 +10,23 @@ import (
 
 var defaultDatasetBranchNames = []string{"main", "development"}
 
+// GetAllPublicDatasets godoc
+//
+//	@Summary		Get all public datasets
+//	@Description	Get all public datasets
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/public/dataset [get]
+func GetAllPublicDatasets(request *models.Request) *models.Response {
+	allDatasets, err := datastore.GetAllPublicDatasets()
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, allDatasets, "Datasets successfully retrieved")
+}
+
 // GetAllDatasets godoc
 //
 //	@Security		ApiKeyAuth
@@ -29,7 +46,6 @@ func GetAllDatasets(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, allDatasets, "Datasets successfully retrieved")
 }
-
 
 // GetDataset godoc
 //
@@ -55,7 +71,6 @@ func GetDataset(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, []models.DatasetResponse{*dataset}, "Dataset successfully retrieved")
 }
-
 
 // CreateDataset godoc
 //

@@ -130,6 +130,10 @@ func CreateLogForDatasetVersion(key string, data string, datasetVersionUUID uuid
 	return ds.CreateLogForDatasetVersion(key, data, datasetVersionUUID)
 }
 
+func GetAllPublicModels() ([]models.ModelResponse, error) {
+	return ds.GetAllPublicModels()
+}
+
 func GetAllModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
 	return ds.GetAllModels(orgId)
 }
@@ -186,6 +190,10 @@ func GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelBranchV
 
 func GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelBranchVersionResponse, error) {
 	return ds.GetModelBranchVersion(modelBranchUUID, version)
+}
+
+func GetAllPublicDatasets() ([]models.DatasetResponse, error) {
+	return ds.GetAllPublicDatasets()
 }
 
 func GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {

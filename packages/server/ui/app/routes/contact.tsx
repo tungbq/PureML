@@ -3,7 +3,7 @@ import { redirect } from "@remix-run/node"
 import { Meta, useActionData, useNavigate } from "@remix-run/react"
 import Button from "~/components/ui/Button"
 import { getSession } from "~/session"
-import base, { fetchUserSettings } from "./auth.server"
+import base, { fetchUserSettings } from "./api/auth.server"
 
 export const action = async ({ request }: any) => {
 	const form = await request.formData()
@@ -12,21 +12,21 @@ export const action = async ({ request }: any) => {
 	const accessToken = session.get("accessToken")
 	const userDetails = await fetchUserSettings(accessToken)
 	const email = userDetails[0].email
-	const submit = base("tbl7qXTTBN3Ln6KyE").create(
-		[
-			{
-				fields: {
-					Email: email,
-					Comment: comment,
-				},
-			},
-		],
-		(err: string) => {
-			if (err) {
-				console.error(err)
-			}
-		}
-	)
+	// const submit = base("tbl7qXTTBN3Ln6KyE").create(
+	// 	[
+	// 		{
+	// 			fields: {
+	// 				Email: email,
+	// 				Comment: comment,
+	// 			},
+	// 		},
+	// 	],
+	// 	(err: string) => {
+	// 		if (err) {
+	// 			console.error(err)
+	// 		}
+	// 	}
+	// )
 	return redirect("/models", {})
 }
 

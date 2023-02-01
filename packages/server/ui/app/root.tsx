@@ -21,7 +21,7 @@ import HeroSection from "./components/landingPage/HeroSection"
 import Navbar from "./components/landingPage/Navbar"
 import ModelSection from "./components/landingPage/ModelSection"
 import TransformerSection from "./components/landingPage/TransformerSection"
-import { fetchUserSettings } from "./routes/auth.server"
+import { fetchUserSettings } from "./routes/api/auth.server"
 import { getSession } from "./session"
 
 // Tailwind CSS---------------------------------------------------------------

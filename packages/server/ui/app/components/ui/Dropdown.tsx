@@ -104,14 +104,14 @@ export default function Dropdown({
             >
               Settings
             </DropdownMenu.Item>
-            <DropdownMenu.Item
+            {/* <DropdownMenu.Item
               className={dropdownItems({ space })}
               onClick={() => {
                 navigate(`/contact`);
               }}
             >
               Contact Us
-            </DropdownMenu.Item>
+            </DropdownMenu.Item> */}
             <DropdownMenu.Item
               className={dropdownItems({ space })}
               onClick={() => {

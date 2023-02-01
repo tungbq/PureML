@@ -2470,6 +2470,38 @@ paths:
       summary: Join organization by join code.
       tags:
       - Organization
+  /public/dataset:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all public datasets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all public datasets
+      tags:
+      - Dataset
+  /public/model:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all public models
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all public models
+      tags:
+      - Model
   /user/delete:
     delete:
       consumes:

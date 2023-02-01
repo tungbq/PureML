@@ -1,7 +1,7 @@
 import { Link, useLoaderData } from "@remix-run/react"
 import Card from "~/components/Card"
 import { getSession } from "~/session"
-import { fetchModels } from "../models.server"
+import { fetchModels } from "../api/models.server"
 import EmptyModel from "./EmptyModel"
 
 export type model = {

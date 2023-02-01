@@ -897,6 +897,38 @@ func (ds *Datastore) CreateModel(orgId uuid.UUID, name string, wiki string, isPu
 	}, nil
 }
 
+func (ds *Datastore) GetAllPublicModels() ([]models.ModelResponse, error) {
+	var mymodels []dbmodels.Model
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Org").Where("is_public = ?", true).Find(&mymodels)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	modelResponses := make([]models.ModelResponse, len(mymodels))
+	for i, model := range mymodels {
+		modelResponses[i] = models.ModelResponse{
+			UUID: model.UUID,
+			Name: model.Name,
+			Wiki: model.Wiki,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   model.CreatedByUser.UUID,
+				Handle: model.CreatedByUser.Handle,
+				Avatar: model.CreatedByUser.Avatar,
+				Name:   model.CreatedByUser.Name,
+				Email:  model.CreatedByUser.Email,
+			},
+			UpdatedBy: models.UserHandleResponse{
+				UUID:   model.UpdatedByUser.UUID,
+				Handle: model.UpdatedByUser.Handle,
+				Avatar: model.UpdatedByUser.Avatar,
+				Name:   model.UpdatedByUser.Name,
+				Email:  model.UpdatedByUser.Email,
+			},
+			IsPublic: model.IsPublic,
+		}
+	}
+	return modelResponses, nil
+}
+
 func (ds *Datastore) GetAllModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
 	var mymodels []dbmodels.Model
 	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("organization_uuid = ?", orgId).Find(&mymodels)
@@ -995,30 +1027,25 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 				}
 			} else {
 				defaultUUID := uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
-				sourceTypeDb := dbmodels.SourceType{
-					BaseModel: dbmodels.BaseModel{
-						UUID: defaultUUID,
-					},
-				}
-				res := ds.DB.Limit(1).Find(&sourceTypeDb)
+				sourceType.BaseModel.UUID = defaultUUID
+				res := ds.DB.Limit(1).Find(&sourceType)
 				if res.Error != nil {
 					return nil, res.Error
 				}
 				if res.RowsAffected == 0 {
-					ds.DB.Create(&dbmodels.SourceType{
+					sourceType.Name = "PUREML-STORAGE"
+					sourceType.Org = dbmodels.Organization{
 						BaseModel: dbmodels.BaseModel{
 							UUID: defaultUUID,
 						},
-						Name: "PUREML-STORAGE",
-						Org: dbmodels.Organization{
-							BaseModel: dbmodels.BaseModel{
-								UUID: defaultUUID,
-							},
-							Handle:   "pureml",
-							Name:     "PureML",
-							JoinCode: "",
-						},
-					})
+						Handle:   "pureml",
+						Name:     "PureML",
+						JoinCode: "",
+					}
+					err = ds.DB.Create(&sourceType).Find(&sourceType).Error
+					if err != nil {
+						return nil, err
+					}
 				}
 			}
 			splitFile := strings.Split(file.Filename, ".")
@@ -1569,6 +1596,38 @@ func (ds *Datastore) CreateDataset(orgId uuid.UUID, name string, wiki string, is
 			},
 		},
 	}, nil
+}
+
+func (ds *Datastore) GetAllPublicDatasets() ([]models.DatasetResponse, error) {
+	var datasets []dbmodels.Dataset
+	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Preload("Org").Where("is_public = ?", true).Find(&datasets)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	modelResponses := make([]models.DatasetResponse, len(datasets))
+	for i, dataset := range datasets {
+		modelResponses[i] = models.DatasetResponse{
+			UUID: dataset.UUID,
+			Name: dataset.Name,
+			Wiki: dataset.Wiki,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   dataset.CreatedByUser.UUID,
+				Handle: dataset.CreatedByUser.Handle,
+				Avatar: dataset.CreatedByUser.Avatar,
+				Name:   dataset.CreatedByUser.Name,
+				Email:  dataset.CreatedByUser.Email,
+			},
+			UpdatedBy: models.UserHandleResponse{
+				UUID:   dataset.UpdatedByUser.UUID,
+				Handle: dataset.UpdatedByUser.Handle,
+				Avatar: dataset.UpdatedByUser.Avatar,
+				Name:   dataset.UpdatedByUser.Name,
+				Email:  dataset.UpdatedByUser.Email,
+			},
+			IsPublic: dataset.IsPublic,
+		}
+	}
+	return modelResponses, nil
 }
 
 func (ds *Datastore) GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {

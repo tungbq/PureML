@@ -12,3 +12,18 @@ run:
 
 build:
 	go build -o purebackend.exe purebackend.go
+
+.PHONY: ui
+ui:
+	cd ui && pnpm serve-static
+
+ui-server:
+	cd ui && pnpm start
+
+serve:
+	purebackend.exe
+
+# TO BE USED AS `make -j deploy` to run parallel tasks
+deploy: serve ui
+
+deploy-server: serve ui-server
