@@ -97,14 +97,14 @@ app = FastAPI()
 
 @app.post('/predict')
 async def predict(request: Request):
-    input_type = {INPUT_TYPE}
-    input_shape = {INPUT_SHAPE}
-    output_type = {OUTPUT_TYPE}
-    output_shape = {OUTPUT_SHAPE}
+    input_type = '{INPUT_TYPE}'
+    input_shape = '{INPUT_SHAPE}'
+    output_type = '{OUTPUT_TYPE}'
+    output_shape = '{OUTPUT_SHAPE}'
 
-    if input_type:
+    if input_type == 'None':
         print('Rebuild the docker container with non null input_type')
-        predictions = json.dumps({'predictions': None})
+        predictions = json.dumps(None)
         return predictions
 
     req_json = await request.json()
@@ -116,7 +116,7 @@ async def predict(request: Request):
 
     if data is None:
         print('Error in data input format')
-        predictions = json.dumps({'predictions': None})
+        predictions = json.dumps(None)
         return predictions
 
 

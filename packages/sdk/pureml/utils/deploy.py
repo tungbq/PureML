@@ -6,7 +6,7 @@ import json
 
 def process_input(input):
 
-    input_type = None
+    input_type = ''
     input_shape = None
 
 
@@ -24,7 +24,7 @@ def process_input(input):
 
 def process_output(output):
 
-    output_type = None
+    output_type = ''
     output_shape = None
 
 
@@ -71,6 +71,9 @@ def parse_output(data, output_type, output_shape):
         data = json.dumps(data)
     elif output_type == 'text':
         data = json.dumps(data)
+    else:
+        data = json.dumps(data)
+
 
 
     return data
