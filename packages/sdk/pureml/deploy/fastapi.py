@@ -2,6 +2,7 @@ from pureml.utils.constants import PATH_PREDICT_DIR, PORT_FASTAPI, API_IP_DOCKER
 from pureml.utils.constants import PATH_PREDICT_USER, PATH_PREDICT, PATH_PREDICT_REQUIREMENTS_USER, PATH_PREDICT_REQUIREMENTS
 import os
 import shutil
+from pureml.utils.deploy import process_input, process_output
 
 
 def get_project_file():
@@ -58,13 +59,16 @@ def get_requirements_file(requirements_path):
 
 
 def create_fastapi_file(model_name, model_version, predict_path, 
-                        requirements_path, org_id, access_token):
+                        requirements_path, input, output):
 
     get_project_file()
     
     get_predict_file(predict_path)
 
     get_requirements_file(requirements_path)
+
+    input_type, input_shape = process_input(input=input)
+    output_type, output_shape = process_output(output=output)
 
       
     query = """
@@ -77,7 +81,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import json
 import numpy as np
-
+from pureml.utils.deploy import parse_input, parse_output
 
 load_dotenv()
 
@@ -93,19 +97,33 @@ app = FastAPI()
 
 @app.post('/predict')
 async def predict(request: Request):
+    input_type = {INPUT_TYPE}
+    input_shape = {INPUT_SHAPE}
+    output_type = {OUTPUT_TYPE}
+    output_shape = {OUTPUT_SHAPE}
+
+    if input_type:
+        print('Rebuild the docker container with non null input_type')
+        predictions = json.dumps({'predictions': None})
+        return predictions
+
     req_json = await request.json()
 
     data_json = req_json['test_data']
-    data = pd.DataFrame.from_dict(data_json)
-
-    results = model_predict(model, data)
-
-    if isinstance(results, np.ndarray):
-        results = results.tolist()
 
 
+    data = parse_input(data=data_json, input_type=input_type, input_shape=input_shape)
 
-    predictions = json.dumps({'predictions': results})
+    if data is None:
+        print('Error in data input format')
+        predictions = json.dumps({'predictions': None})
+        return predictions
+
+
+    predictions = model_predict(model, data)
+
+    predictions = parse_output(data=predictions, output_type=output_type, output_shape=output_shape)
+
 
     return predictions
 
@@ -115,7 +133,11 @@ if __name__ == '__main__':
         HOST=API_IP_DOCKER,
         PORT=PORT_FASTAPI,
         MODEL_NAME=model_name,
-        MODEL_VERSION=model_version
+        MODEL_VERSION=model_version,
+        INPUT_TYPE=input_type,
+        INPUT_SHAPE=input_shape,
+        OUTPUT_TYPE=output_type,
+        OUTPUT_SHAPE=output_shape,
     )
 
 
