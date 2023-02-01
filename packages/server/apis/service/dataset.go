@@ -18,7 +18,7 @@ var defaultDatasetBranchNames = []string{"main", "development"}
 //	@Accept			*/*
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
-//	@Router			/public/model [get]
+//	@Router			/public/dataset [get]
 func GetAllPublicDatasets(request *models.Request) *models.Response {
 	allDatasets, err := datastore.GetAllPublicDatasets()
 	if err != nil {

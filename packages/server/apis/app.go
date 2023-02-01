@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 
 	config "github.com/PureML-Inc/PureML/server/config"
@@ -68,12 +69,16 @@ func Serve() error {
 	if httpsAddr != "" {
 		schema = "https"
 	}
+	address := serverConfig.Addr
+	if strings.HasPrefix(address, "0.0.0.0") {
+		address = strings.Replace(address, "0.0.0.0", "localhost", 1)
+	}
 	regular := color.New()
 	bold := color.New(color.Bold).Add(color.FgGreen)
-	bold.Printf("> Server started at: %s\n", color.CyanString("%s://%s", schema, serverConfig.Addr))
-	regular.Printf("  - REST API: %s\n", color.CyanString("%s://%s/api/", schema, serverConfig.Addr))
-	regular.Printf("  - API Docs: %s\n", color.HiGreenString("%s://%s/api/swagger/index.html", schema, serverConfig.Addr))
-	// regular.Printf("  - Admin UI: %s\n", color.CyanString("%s://%s/_/", schema, serverConfig.Addr))
+	bold.Printf("> Server started at: %s\n", color.CyanString("%s://%s", schema, address))
+	regular.Printf("  - REST API: %s\n", color.CyanString("%s://%s/api/", schema, address))
+	regular.Printf("  - API Docs: %s\n", color.HiGreenString("%s://%s/api/swagger/index.html", schema, address))
+	// regular.Printf("  - Admin UI: %s\n", color.CyanString("%s://%s/_/", schema, address))
 	// }
 
 	var serveErr error
