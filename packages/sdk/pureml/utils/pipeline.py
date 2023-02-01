@@ -157,7 +157,8 @@ def add_metrics_to_config(values, model_name=None, model_branch=None, model_vers
 
     if len(config['metrics']) != 0:
         metric_values = config['metrics']['values']
-        metric_values = update_step_dict(metric_values, values)
+        # metric_values = update_step_dict(metric_values, values)
+        metric_values.update(values)
         # print('default',metric_values)
     else:
         metric_values = values
@@ -201,7 +202,8 @@ def add_params_to_config(values, model_name=None, model_branch=None, model_versi
 
     if len(config['params']) != 0:
         param_values = config['params']['values']
-        param_values = update_step_dict(param_values, values)
+        # param_values = update_step_dict(param_values, values)
+        param_values.update(values)
     else:
         param_values = values
 
