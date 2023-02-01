@@ -29,7 +29,8 @@ def dataset(name:str, branch:str, parent:str=None, upload=False):
 
             #Uncomment this if there any components that depend on dataset version, or dataset hash
             # if dataset_exists_in_remote:
-            #     add_dataset_to_config(name=name, hash=dataset_hash, version=dataset_version, parent=parent, func=func)
+            #     add_dataset_to_config(name=name, branch=branch, hash=dataset_hash, version=dataset_version, parent=parent, func=func)
+            add_dataset_to_config(name=name, branch=branch, hash=dataset_hash, parent=parent, func=func)
 
             return func_output
 

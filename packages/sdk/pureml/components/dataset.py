@@ -191,10 +191,10 @@ def init(name: str, readme: str = None, branch: str = None):
     url = urljoin(BASE_URL, url)
 
     headers = {
-        "Content-Type": "application/json",
+        # "Content-Type": "application/json",
         "Authorization": "Bearer {}".format(user_token),
         # 'accept': 'application/json',
-        # 'Content-Type': '*/*',
+        'Content-Type': '*/*',
     }
 
     data = {
@@ -202,19 +202,23 @@ def init(name: str, readme: str = None, branch: str = None):
         "branch_names": [branch_main, branch_user],
         "readme": {"file_type": file_type, "content": file_content},
     }
-
+    
     data = json.dumps(data)
     files = {'file': (readme, open(readme, "rb"), file_type)}
-    response = requests.post(url, data=data, headers=headers, files=files)
+    # response = requests.post(url, data=data, headers=headers, files=files)
     #     
-    # response = requests.post(url, data=data, headers=headers)
+    response = requests.post(url, data=data, headers=headers)
 
 
     if response.ok:
         print(f"[bold green]Dataset has been created!")
 
+        return True
+
     else:
         print(f"[bold red]Dataset has not been created!")
+
+        return False
 
 
 def save_dataset(dataset, name: str):
@@ -268,9 +272,11 @@ def register(
 
 
     dataset_exists = dataset_status(name)
+    # print('Dataset status', dataset_exists)
 
     if not dataset_exists:
         dataset_created = init(name=name, branch=branch)
+        # print('dataset_created', dataset_created)
         if not dataset_created:
             print("[bold red] Unable to register the dataset")
             return False, dataset_hash, None
@@ -278,9 +284,11 @@ def register(
         print("[bold green] Connected to Dataset")
 
     branch_exists = branch_status(branch=branch, dataset_name=name)
+    # print('Branch status', branch_exists)
 
     if not branch_exists:
         branch_created = init_branch(branch=branch, dataset_name=name)
+        # print('branch_created', branch_created)
 
         if not branch_created:
             print("[bold red] Unable to register the dataset")
@@ -322,7 +330,7 @@ def register(
         
         response = requests.post(url, files=files, data=data, headers=headers)
 
-        # T-1165 Fix invalid json response while registering dataset
+
         # print(response.json())
 
         # print(response.status_code)

@@ -197,13 +197,17 @@ def init(name: str, readme: str = None, branch: str = None):
 
     files = {'file': (readme, open(readme, "rb"), file_type)}
 
-    response = requests.post(url, data=data, headers=headers, files=files)
+    response = requests.post(url, data=data, headers=headers)
+    # response = requests.post(url, data=data, headers=headers, files=files)
 
     if response.ok:
         print(f"[bold green]Model has been created!")
 
+        return True
     else:
         print(f"[bold red]Model has not been created!")
+
+        return False
 
 
 def register(
@@ -231,14 +235,17 @@ def register(
 
     if not model_exists:
         model_created = init(name=name, branch=branch)
+        print('model_created', model_created)
         if not model_created:
             print("[bold red] Unable to register the model")
             return False, model_hash, "latest"
 
     branch_exists = branch_status(branch=branch, model_name=name)
+    print('branch_exists', branch_exists)
 
     if not branch_exists:
         branch_created = init_branch(branch=branch, model_name=name)
+        print('branch_created', branch_created)
 
         if not branch_created:
             print("[bold red] Unable to register the model")

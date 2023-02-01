@@ -24,7 +24,7 @@ def load_readme(path:str=None):
                 print('Unable to read the ReadME file.')
                 print('Creating an Empty ReadME file')
     else:
-        with open(path, 'r') as f:
+        with open(path, 'w') as f:
             f.write(file_content)
         print('ReadME file doesnot exist.')
         print('Creating an Empty ReadME file')

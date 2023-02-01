@@ -34,6 +34,10 @@ def model(name:str, branch:str):
                 figure_file_paths = load_figures_from_config()
                 if len(figure_file_paths) !=0 :
                     figure.add(file_paths=figure_file_paths, model_name=name, model_branch=branch, model_version=model_version)
+
+            else:
+                add_model_to_config(name=name, branch=branch, hash=model_hash, func=func)
+
  
 
             return func_output
