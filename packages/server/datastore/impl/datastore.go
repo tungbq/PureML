@@ -995,30 +995,25 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 				}
 			} else {
 				defaultUUID := uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
-				sourceTypeDb := dbmodels.SourceType{
-					BaseModel: dbmodels.BaseModel{
-						UUID: defaultUUID,
-					},
-				}
-				res := ds.DB.Limit(1).Find(&sourceTypeDb)
+				sourceType.BaseModel.UUID = defaultUUID
+				res := ds.DB.Limit(1).Find(&sourceType)
 				if res.Error != nil {
 					return nil, res.Error
 				}
 				if res.RowsAffected == 0 {
-					ds.DB.Create(&dbmodels.SourceType{
+					sourceType.Name = "PUREML-STORAGE"
+					sourceType.Org = dbmodels.Organization{
 						BaseModel: dbmodels.BaseModel{
 							UUID: defaultUUID,
 						},
-						Name: "PUREML-STORAGE",
-						Org: dbmodels.Organization{
-							BaseModel: dbmodels.BaseModel{
-								UUID: defaultUUID,
-							},
-							Handle:   "pureml",
-							Name:     "PureML",
-							JoinCode: "",
-						},
-					})
+						Handle:   "pureml",
+						Name:     "PureML",
+						JoinCode: "",
+					}
+					err = ds.DB.Create(&sourceType).Find(&sourceType).Error
+					if err != nil {
+						return nil, err
+					}
 				}
 			}
 			splitFile := strings.Split(file.Filename, ".")

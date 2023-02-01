@@ -4,7 +4,7 @@ import toast from "react-hot-toast"
 import Button from "~/components/ui/Button"
 import Input from "~/components/ui/Input"
 import Link from "~/components/ui/Link"
-import { fetchSignUp } from "~/routes/auth.server"
+import { fetchSignUp } from "~/routes/api/auth.server"
 import { commitSession, getSession } from "~/session"
 
 export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {

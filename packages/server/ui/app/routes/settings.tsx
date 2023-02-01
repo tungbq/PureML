@@ -1,7 +1,7 @@
 import { Meta, Outlet, useLoaderData } from "@remix-run/react"
 import NavBar from "~/components/Navbar"
 import { getSession } from "~/session"
-import { fetchUserSettings } from "./auth.server"
+import { fetchUserSettings } from "./api/auth.server"
 import type { MetaFunction } from "@remix-run/node"
 
 export const meta: MetaFunction = () => ({

@@ -1,7 +1,7 @@
 import { redirect } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
 import { getSession } from "~/session"
-import { fetchPublicProfile, fetchUserSettings } from "./auth.server"
+import { fetchPublicProfile, fetchUserSettings } from "./api/auth.server"
 
 export async function loader({ request }: any) {
 	const session = await getSession(request.headers.get("Cookie"))

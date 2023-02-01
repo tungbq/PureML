@@ -1,7 +1,7 @@
 import Tabbar from "~/components/Tabbar"
 import { Link, Meta, useLoaderData, useMatches } from "@remix-run/react"
 import { getSession } from "~/session"
-import { fetchDatasetVersions } from "~/routes/datasets.server"
+import { fetchDatasetVersions } from "~/routes/api/datasets.server"
 import Pipeline from "../Pipeline"
 import { useEffect, useState } from "react"
 import type { MetaFunction } from "@remix-run/node"

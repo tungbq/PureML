@@ -1,7 +1,7 @@
 import { Link, useLoaderData } from "@remix-run/react"
 import Card from "~/components/Card"
 import { getSession } from "~/session"
-import { fetchDatasets } from "../datasets.server"
+import { fetchDatasets } from "../api/datasets.server"
 import EmptyDataset from "./EmptyDataset"
 
 export type dataset = {

@@ -1,5 +1,5 @@
 import { Meta, useLoaderData } from "@remix-run/react"
-import { fetchPublicProfile, fetchUserSettings } from "~/routes/auth.server"
+import { fetchPublicProfile, fetchUserSettings } from "~/routes/api/auth.server"
 import Avatar from "~/components/ui/Avatar"
 import Button from "~/components/ui/Button"
 import { Edit2 } from "lucide-react"
