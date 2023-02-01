@@ -43,28 +43,33 @@ def process_output(output):
 def parse_input(data, input_type, input_shape):
     # if input_type == 'json':
     #     data = data
-    data = None
 
     if input_type == 'numpy ndarray':
-        data = json.loads(data)
+        if type(data) == str:
+            data = json.loads(data)
         data = np.array(data)
         data = data.reshape(input_shape)
     elif input_type == 'pandas dataframe':
-        data = json.loads(data)
+        if type(data) == str:
+            data = json.loads(data)
         data =  pd.DataFrame.from_dict(data)
     elif input_type == 'text':
         data = json.loads(data)
+    else:
+        data = None
 
+
+    print(type(data), data)
 
     return data
 
 def parse_output(data, output_type, output_shape):
     # if input_type == 'json':
     #     data = data
-    data = None
+
 
     if output_type == 'numpy ndarray':
-        data = data.to_list()
+        data = data.tolist()
         data = json.dumps(data)
     elif output_type == 'pandas dataframe':
         data = data.to_dict()
