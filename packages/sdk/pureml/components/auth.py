@@ -48,7 +48,7 @@ def login(org_id:str, access_token:str) -> str:
         #     print('[green] Invalid Org Id and Access token')
     elif response.status_code == 403:
         print('[red] Invalid Access token')
-    elif response.staus_code == 404:
+    elif response.status_code == 404:
         print('[red] Invalid Org Id')
     else:
         print("[red] Unable to obtain the organization details")
