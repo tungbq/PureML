@@ -40,7 +40,7 @@ def post_figures(figure_paths, model_name: str, model_branch:str, model_version:
     
     # print('figure_paths', figure_paths)
 
-    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = 'org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
     url = urljoin(BASE_URL, url)
 
     headers = {
@@ -61,7 +61,7 @@ def post_figures(figure_paths, model_name: str, model_branch:str, model_version:
             'model_version': model_branch,
             'model_version': model_version}
 
-    data = json.dumps(data)
+    # data = json.dumps(data)
 
     # try:
 
@@ -121,7 +121,7 @@ def details(model_name: str, model_branch:str, model_version:str='latest'):
     user_token = get_token()
     org_id = get_org_id()
 
-    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = 'org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
     url = urljoin(BASE_URL, url)
 
 

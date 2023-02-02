@@ -11,26 +11,29 @@ from . import convert_values_to_string, get_org_id, get_token
 
 
 def post_metrics(metrics, model_name: str, model_branch:str, model_version:str):
+
     user_token = get_token()
     org_id = get_org_id()
     
-    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = 'org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
     url = urljoin(BASE_URL, url)
 
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'accept': 'application/json',
+        'Content-Type': '*/*',
         'Authorization': 'Bearer {}'.format(user_token)
     }
 
+    metrics = json.dumps(metrics)
     data = {
         'data' : metrics,
         'key': 'metrics'
         }
 
-    metrics = json.dumps(data)
-    
+    data = json.dumps(data)
 
     response = requests.post(url, data=data, headers=headers)
+
 
     if response.ok:
         print(f"[bold green]Metrics have been registered!")
@@ -95,7 +98,7 @@ def fetch(model_name: str, model_branch:str, model_version:str='latest', metric:
     org_id = get_org_id()
     
 
-    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = 'org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
     url = urljoin(BASE_URL, url)
 
 
@@ -163,7 +166,7 @@ def delete(metric:str, model_name:str, model_branch:str, model_version:str='late
     org_id = get_org_id()
     
 
-    url = '/org/{}/model/{}/branch/{}/version/{}/log/delete'.format(org_id, model_name, model_branch, model_version)
+    url = 'org/{}/model/{}/branch/{}/version/{}/log/delete'.format(org_id, model_name, model_branch, model_version)
     url = urljoin(BASE_URL, url)
 
 

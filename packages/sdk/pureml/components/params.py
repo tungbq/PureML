@@ -14,13 +14,15 @@ def post_params(params, model_name: str, model_branch:str, model_version:str):
     user_token = get_token()
     org_id = get_org_id()
     
-    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = 'org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
     url = urljoin(BASE_URL, url)
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': 'Bearer {}'.format(user_token)
     }
+
+    params = json.dumps(params)
 
     data = {
         'data' : params,
@@ -98,7 +100,7 @@ def fetch(model_name: str, model_branch:str, model_version:str='latest', param:s
     org_id = get_org_id()
     
 
-    url = '/org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
+    url = 'org/{}/model/{}/branch/{}/version/{}/log'.format(org_id, model_name, model_branch, model_version)
     url = urljoin(BASE_URL, url)
 
 
@@ -166,7 +168,7 @@ def delete(param:str, model_name:str, model_branch:str, model_version:str='lates
     org_id = get_org_id()
     
 
-    url = '/org/{}/model/{}/branch/{}/version/{}/log/delete'.format(org_id, model_name, model_branch, model_version)
+    url = 'org/{}/model/{}/branch/{}/version/{}/log/delete'.format(org_id, model_name, model_branch, model_version)
     url = urljoin(BASE_URL, url)
 
 

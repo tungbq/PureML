@@ -275,8 +275,8 @@ def register(
         response = requests.post(url, files=files, data=data, headers=headers)
 
 
-        print(response.json())
-        print(response.request.url)
+        # print(response.json())
+        # print(response.request.url)
         # print(response.request.body)
         # print(response.request.headers)
 
