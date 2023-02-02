@@ -55,11 +55,15 @@ def parse_input(data, input_type, input_shape):
         data =  pd.DataFrame.from_dict(data)
     elif input_type == 'text':
         data = json.loads(data)
+    elif input_type == 'image':
+        data = Image.open(data)
+        data = np.array(data)
+        print(data.shape)
     else:
         data = None
 
-
-    print(type(data), data)
+    print(type(data))
+    # print(data)
 
     return data
 

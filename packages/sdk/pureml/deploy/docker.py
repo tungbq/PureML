@@ -36,7 +36,7 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir -r {REQUIREMENTS_PATH}
 
-RUN pip install pureml fastapi uvicorn
+RUN pip install pureml fastapi uvicorn python-multipart
 
 EXPOSE {PORT}
 CMD ["python", "{API_PATH}"]    
