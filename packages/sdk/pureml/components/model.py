@@ -369,7 +369,7 @@ def version_details(name: str, branch: str, version: str = "latest"):
     url = urljoin(BASE_URL, url)
 
     headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'accept': 'application/json',
         "Authorization": "Bearer {}".format(user_token),
     }
 
@@ -423,8 +423,8 @@ def fetch(name: str, branch: str, version: str = "latest"):
     storage_source_type = model_details["path"]["source_type"]["public_url"]
 
     model_url = urljoin(storage_source_type, storage_path)
-
-    # print(model_url)
+    
+    print(model_url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
