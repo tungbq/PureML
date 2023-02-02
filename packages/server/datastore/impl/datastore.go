@@ -23,10 +23,16 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func NewSQLiteDatastore() *Datastore {
+func NewSQLiteDatastore(optDataDir ...string) *Datastore {
 	var dialector gorm.Dialector
 	var err error
-	dataDir := config.GetDataDir()
+	var dataDir string
+	if len(optDataDir) == 0 || optDataDir[0] == "" {
+		// fallback to the default test data directory
+		dataDir = config.GetDataDir()
+	} else {
+		dataDir = optDataDir[0]
+	}
 	databasePath := fmt.Sprintf("%s/pureml.db", dataDir)
 	if config.IsCGOEnabled() {
 		dialector = cgosqlite.Open(databasePath)

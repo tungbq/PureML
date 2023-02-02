@@ -22,6 +22,11 @@ func InitDB() {
 	}
 }
 
+func InitTestDB(dataDir string) {
+	//SQLite db for testing
+	ds = impl.NewSQLiteDatastore(dataDir)
+}
+
 func GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	return ds.GetAllAdminOrgs()
 }
