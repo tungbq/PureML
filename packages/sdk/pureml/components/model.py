@@ -424,8 +424,6 @@ def fetch(name: str, branch: str, version: str = "latest"):
 
     model_url = urljoin(storage_source_type, storage_path)
     
-    # print(model_url)
-
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
