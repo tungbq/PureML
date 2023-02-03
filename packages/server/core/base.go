@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/PureML-Inc/PureML/server/config"
@@ -31,6 +32,7 @@ func Cleanup(optDataDir ...string) error {
 		dataDir = optDataDir[0]
 	}
 	if err := os.RemoveAll(dataDir); err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil

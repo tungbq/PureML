@@ -15,7 +15,9 @@ func TestHealthCheck(t *testing.T) {
 			Url:            "/api/health",
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
-				`"code":200`,
+				`"status":200`,
+				`"data":`,
+				`"message":"Server is up and running🚀🎉"`,
 			},
 		},
 	}

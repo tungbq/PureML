@@ -1025,6 +1025,16 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 	if !isEmpty {
 		switch strings.ToUpper(source) {
 		case "R2", "PUREML-STORAGE":
+			r2Secrets := R2Secrets{}
+			if source == "R2" {
+				err = r2Secrets.Load(org.Secrets)
+			} else {
+				err = r2Secrets.LoadPureMLCloudSecrets()
+				sourceType.PublicURL = r2Secrets.PublicURL
+			}
+			if err != nil {
+				return nil, err
+			}
 			if source == "R2" {
 				sourceType.Name = "R2"
 				err := ds.DB.Where(&sourceType).First(&sourceType).Error
@@ -1059,16 +1069,6 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 			var uploadPath string
 
 			fileData, err := file.Open()
-			if err != nil {
-				return nil, err
-			}
-			r2Secrets := R2Secrets{}
-			if source == "R2" {
-				err = r2Secrets.Load(org.Secrets)
-			} else {
-				err = r2Secrets.LoadPureMLCloudSecrets()
-				sourceType.PublicURL = r2Secrets.PublicURL
-			}
 			if err != nil {
 				return nil, err
 			}
@@ -1726,6 +1726,16 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 	if !isEmpty {
 		switch strings.ToUpper(source) {
 		case "R2", "PUREML-STORAGE":
+			r2Secrets := R2Secrets{}
+			if source == "R2" {
+				err = r2Secrets.Load(org.Secrets)
+			} else {
+				err = r2Secrets.LoadPureMLCloudSecrets()
+				sourceType.PublicURL = r2Secrets.PublicURL
+			}
+			if err != nil {
+				return nil, err
+			}
 			if source == "R2" {
 				sourceType.Name = "R2"
 				err := ds.DB.Where(&sourceType).First(&sourceType).Error
@@ -1760,16 +1770,6 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 			var uploadPath string
 
 			fileData, err := file.Open()
-			if err != nil {
-				return nil, err
-			}
-			r2Secrets := R2Secrets{}
-			if source == "R2" {
-				err = r2Secrets.Load(org.Secrets)
-			} else {
-				err = r2Secrets.LoadPureMLCloudSecrets()
-				sourceType.PublicURL = r2Secrets.PublicURL
-			}
 			if err != nil {
 				return nil, err
 			}
