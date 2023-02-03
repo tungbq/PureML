@@ -11,6 +11,10 @@
     - Pandas DataFrame
     - text
     - Any json serializable output
+
+### Bug fixes
+- Building docker images without cache to utilize modified files
+- Remove duplicate edges between two nodes in the data lineage
     
 
 ## Release of V0.1.5
