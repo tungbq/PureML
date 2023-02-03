@@ -1292,7 +1292,7 @@ func (ds *Datastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.Mo
 	}, nil
 }
 
-func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
+func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID, withLogs bool) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
 	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Find(&modelVersions).Error
 	if err != nil {
@@ -1300,7 +1300,7 @@ func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]mod
 	}
 	var modelVersionsResponse []models.ModelBranchVersionResponse
 	for _, modelVersion := range modelVersions {
-		modelVersionsResponse = append(modelVersionsResponse, models.ModelBranchVersionResponse{
+		modelBranchVersion := models.ModelBranchVersionResponse{
 			UUID:    modelVersion.UUID,
 			Hash:    modelVersion.Hash,
 			Version: modelVersion.Version,
@@ -1317,14 +1317,28 @@ func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]mod
 				},
 			},
 			IsEmpty: modelVersion.IsEmpty,
-		})
+		}
+		if withLogs {
+			modelBranchVersion.Logs, err = ds.GetLogForModelVersion(modelVersion.UUID)
+			if err != nil {
+				return nil, err
+			}
+		}
+		modelVersionsResponse = append(modelVersionsResponse, modelBranchVersion)
 	}
 	return modelVersionsResponse, nil
 }
 
 func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelBranchVersionResponse, error) {
-	var modelVersion dbmodels.ModelVersion
-	res := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Where("version = ?", version).Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
+	modelVersion := dbmodels.ModelVersion{
+		BranchUUID: modelBranchUUID,
+	}
+	var res *gorm.DB
+	if strings.ToLower(version) == "latest" {
+		res = ds.DB.Order("created_at desc").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
+	} else {
+		res = ds.DB.Where("version = ?", version).Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
+	}
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -2039,8 +2053,15 @@ func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([
 }
 
 func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetBranchVersionResponse, error) {
-	var datasetVersion dbmodels.DatasetVersion
-	res := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Where("version = ?", version).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
+	datasetVersion := dbmodels.DatasetVersion{
+		BranchUUID: datasetBranchUUID,
+	}
+	var res *gorm.DB
+	if strings.ToLower(version) == "latest" {
+		res = ds.DB.Preload("Branch").Preload("Lineage").Preload("Path.SourceType").Order("created_at desc").Limit(1).Find(&datasetVersion)
+	} else {
+		res = ds.DB.Where("version = ?", version).Preload("Branch").Preload("Lineage").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
+	}
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -2073,21 +2094,17 @@ func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, versio
 
 //////////////////////////////// LOG METHODS /////////////////////////////////
 
-func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
+func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogDataResponse, error) {
 	var logs []dbmodels.Log
 	err := ds.DB.Where("model_version_uuid = ?", modelVersionUUID).Preload("ModelVersion").Find(&logs).Error
 	if err != nil {
 		return nil, err
 	}
-	var logsResponse []models.LogResponse
+	var logsResponse []models.LogDataResponse
 	for _, log := range logs {
-		logsResponse = append(logsResponse, models.LogResponse{
+		logsResponse = append(logsResponse, models.LogDataResponse{
 			Key:  log.Key,
 			Data: log.Data,
-			ModelVersion: models.ModelBranchVersionNameResponse{
-				UUID:    log.ModelVersion.UUID,
-				Version: log.ModelVersion.Version,
-			},
 		})
 	}
 	return logsResponse, nil

@@ -83,6 +83,7 @@ type ModelBranchVersionResponse struct {
 	Branch  ModelBranchNameResponse `json:"branch"`
 	Hash    string                  `json:"hash"`
 	Path    PathResponse            `json:"path"`
+	Logs    []LogDataResponse       `json:"logs"`
 	IsEmpty bool                    `json:"is_empty"`
 }
 

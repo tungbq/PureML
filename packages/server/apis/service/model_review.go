@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/PureML-Inc/PureML/server/datastore"
@@ -22,6 +23,7 @@ import (
 //	@Param			modelName	path	string	true	"Model Name"
 func GetModelReviews(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
+	fmt.Println(modelUUID)
 	reviews, err := datastore.GetModelReviews(modelUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())

@@ -22,14 +22,16 @@ import (
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			branchName	path	string	true	"Branch Name"
+//	@Param			withLogs	query	bool	false	"Include logs"
 func GetModelBranchAllVersions(request *models.Request) *models.Response {
 	var response *models.Response
 	branchUUID := request.GetModelBranchUUID()
-	allVersions, err := datastore.GetModelBranchAllVersions(branchUUID)
+	withLogs := strings.ToLower(request.GetQueryParam("withLogs")) == "true"
+	allVersions, err := datastore.GetModelBranchAllVersions(branchUUID, withLogs)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {
-		response = models.NewDataResponse(http.StatusOK, allVersions, "All organizations")
+		response = models.NewDataResponse(http.StatusOK, allVersions, "Model branch all version details")
 	}
 	return response
 }
@@ -91,7 +93,7 @@ func VerifyModelBranchHashStatus(request *models.Request) *models.Response {
 	modelBranchUUID := model.UUID
 	request.ParseJsonBody()
 	hashValue := request.GetParsedBodyAttribute("hash").(string)
-	versions, err := datastore.GetModelBranchAllVersions(modelBranchUUID)
+	versions, err := datastore.GetModelBranchAllVersions(modelBranchUUID, false)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -156,7 +158,7 @@ func RegisterModel(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
 	modelBranchUUID := request.GetModelBranchUUID()
-	versions, err := datastore.GetModelBranchAllVersions(modelBranchUUID)
+	versions, err := datastore.GetModelBranchAllVersions(modelBranchUUID, false)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
