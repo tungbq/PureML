@@ -1,3 +1,42 @@
+## Release of V0.1.6
+### Changes
+- Added support for more input types for fastAPI and Docker container
+- Input types:
+    - Numpy Ndarray
+    - Pandas DataFrame
+    - text
+    - Image
+- Output types:
+    - Numpy Ndarray
+    - Pandas DataFrame
+    - text
+    - Any json serializable output
+    
+
+## Release of V0.1.5
+
+
+## Release of V0.1.4
+### Changes
+- Added templates for bug report, feature request
+- Added source code extraction
+- Added support for creating FastAPI server for a model
+- Added support for creating Docker container for a model
+### Bug fixes
+- Bug fix related to unconnected node when parent is not given in leange
+
+
+## Release of V0.1.3
+### Changes
+- Added support for pytorch tabnet for model packaging
+- Added ReadMe file to enable collaboration guidelines for PureML repository
+
+
+### Bug fixes
+- Bug fix related to missing packages
+- Bug fix to generate nodes given in parents parameter of the decorators if they are not already available.
+
+
 ## Release of V0.1.2
 ### Changes
 
