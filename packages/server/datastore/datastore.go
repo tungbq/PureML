@@ -22,6 +22,11 @@ func InitDB() {
 	}
 }
 
+func InitTestDB(dataDir string) {
+	//SQLite db for testing
+	ds = impl.NewSQLiteDatastore(dataDir)
+}
+
 func GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	return ds.GetAllAdminOrgs()
 }
@@ -106,7 +111,7 @@ func UpdateUser(email string, name string, avatar string, bio string) (*models.U
 	return ds.UpdateUser(email, name, avatar, bio)
 }
 
-func GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
+func GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogDataResponse, error) {
 	return ds.GetLogForModelVersion(modelVersionUUID)
 }
 
@@ -184,8 +189,8 @@ func GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.ModelBranchRespons
 	return ds.GetModelBranchByUUID(modelBranchUUID)
 }
 
-func GetModelBranchAllVersions(modelBranchUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
-	return ds.GetModelBranchAllVersions(modelBranchUUID)
+func GetModelBranchAllVersions(modelBranchUUID uuid.UUID, withLogs bool) ([]models.ModelBranchVersionResponse, error) {
+	return ds.GetModelBranchAllVersions(modelBranchUUID, withLogs)
 }
 
 func GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelBranchVersionResponse, error) {

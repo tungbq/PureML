@@ -95,9 +95,9 @@ func InitApi() (*echo.Echo, error) {
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version", handler.DefaultHandler(service.GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
 
 	//Model Review APIs
-	// modelGroup.GET("/:modelName/review", handler.DefaultHandler(service.GetModelReviews))
-	// modelGroup.POST("/:modelName/review/create", handler.DefaultHandler(service.CreateModelReview))
-	// modelGroup.POST("/:modelName/review/:reviewId/update", handler.DefaultHandler(service.UpdateModelReview))
+	modelGroup.GET("/:modelName/review", handler.DefaultHandler(service.GetModelReviews), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/review/create", handler.DefaultHandler(service.CreateModelReview), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/review/:reviewId/update", handler.DefaultHandler(service.UpdateModelReview), middlewares.ValidateModel)
 
 	//Model Log APIs
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log", handler.DefaultHandler(service.GetAllLogsModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)

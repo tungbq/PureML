@@ -32,6 +32,11 @@ type TagResponse struct {
 	Org     OrganizationHandleResponse `json:"org"`
 }
 
+type LogDataResponse struct {
+	Key  string `json:"key"`
+	Data string `json:"data"`
+}
+
 type LogResponse struct {
 	Key            string                           `json:"key"`
 	Data           string                           `json:"data"`
