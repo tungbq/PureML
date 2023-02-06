@@ -116,6 +116,18 @@ type Datastore struct {
 	DB *gorm.DB
 }
 
+func (ds *Datastore) ExecuteSQL(sql string) error {
+	return ds.DB.Exec(sql).Error
+}
+
+func (ds *Datastore) Close() error {
+	sqlDB, err := ds.DB.DB()
+	if err != nil {
+		return err
+	}
+	return sqlDB.Close()
+}
+
 //////////////////////////// ORGANIZATION METHODS ////////////////////////////
 
 func (ds *Datastore) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
@@ -1294,7 +1306,7 @@ func (ds *Datastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.Mo
 
 func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID, withLogs bool) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
-	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Find(&modelVersions).Error
+	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Order("LENGTH(version) DESC").Order("version DESC").Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1392,10 +1404,9 @@ func (ds *Datastore) GetDatasetByName(orgId uuid.UUID, datasetName string) (*mod
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   dataset.UpdatedByUser.UUID,
 			Handle: dataset.UpdatedByUser.Handle,
-			Name: dataset.UpdatedByUser.Name,
+			Name:   dataset.UpdatedByUser.Name,
 			Avatar: dataset.UpdatedByUser.Avatar,
-			Email: dataset.UpdatedByUser.Email,
-			
+			Email:  dataset.UpdatedByUser.Email,
 		},
 		IsPublic: dataset.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -1435,10 +1446,9 @@ func (ds *Datastore) GetDatasetByUUID(datasetUUID uuid.UUID) (*models.DatasetRes
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   dataset.UpdatedByUser.UUID,
 			Handle: dataset.UpdatedByUser.Handle,
-			Name: dataset.UpdatedByUser.Name,
+			Name:   dataset.UpdatedByUser.Name,
 			Avatar: dataset.UpdatedByUser.Avatar,
-			Email: dataset.UpdatedByUser.Email,
-			
+			Email:  dataset.UpdatedByUser.Email,
 		},
 		IsPublic: dataset.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -1600,10 +1610,9 @@ func (ds *Datastore) CreateDataset(orgId uuid.UUID, name string, wiki string, is
 		UpdatedBy: models.UserHandleResponse{
 			UUID:   dataset.UpdatedByUser.UUID,
 			Handle: dataset.UpdatedByUser.Handle,
-			Name: dataset.UpdatedByUser.Name,
+			Name:   dataset.UpdatedByUser.Name,
 			Avatar: dataset.UpdatedByUser.Avatar,
-			Email: dataset.UpdatedByUser.Email,
-			
+			Email:  dataset.UpdatedByUser.Email,
 		},
 		IsPublic: dataset.IsPublic,
 		Readme: models.ReadmeResponse{
@@ -2020,7 +2029,7 @@ func (ds *Datastore) GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*model
 
 func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
-	err := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Find(&datasetVersions).Error
+	err := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Order("LENGTH(version) DESC").Order("version DESC").Find(&datasetVersions).Error
 	if err != nil {
 		return nil, err
 	}

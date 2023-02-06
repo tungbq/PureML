@@ -13,6 +13,12 @@ run:
 build:
 	go build -o purebackend.exe purebackend.go
 
+seed:
+	cd datastore/seeder && seeder
+
+seed-test:
+	cd datastore/seeder && seeder test
+
 .PHONY: ui
 ui:
 	cd ui && pnpm serve-static
