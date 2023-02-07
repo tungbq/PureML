@@ -1,20 +1,25 @@
 package service_test
 
-import ("testing"
+import (
+	"testing"
 )
 
-func TestGetModelActivity(t *testing.T) {
+// TODO
+func (api *Api) TestGetModelActivity(t *testing.T) {
 	return
 }
 
-func TestCreateModelActivity(t *testing.T) {
+// TODO
+func (api *Api) TestCreateModelActivity(t *testing.T) {
 	return
 }
 
-func TestUpdateModelActivity(t *testing.T) {
+// TODO
+func (api *Api) TestUpdateModelActivity(t *testing.T) {
 	return
 }
 
-func TestDeleteModelActivity(t *testing.T) {
+// TODO
+func (api *Api) TestDeleteModelActivity(t *testing.T) {
 	return
 }

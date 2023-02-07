@@ -4,26 +4,32 @@ import (
 	"testing"
 )
 
-func TestGetOrgByHandle(t *testing.T) {
+// TODO
+func (api *Api) TestGetOrgByHandle(t *testing.T) {
 	return
 }
 
-func TestGetOrgByID(t *testing.T) {
+// TODO
+func (api *Api) TestGetOrgByID(t *testing.T) {
 	return
 }
 
-func TestGetOrgAllPublicModels(t *testing.T) {
+// TODO
+func (api *Api) TestGetOrgAllPublicModels(t *testing.T) {
 	return
 }
 
-func TestGetOrgAllPublicDatasets(t *testing.T) {
+// TODO
+func (api *Api) TestGetOrgAllPublicDatasets(t *testing.T) {
 	return
 }
 
-func TestCreateOrg(t *testing.T) {
+// TODO
+func (api *Api) TestCreateOrg(t *testing.T) {
 	return
 }
 
-func TestUpdateOrg(t *testing.T) {
+// TODO
+func (api *Api) TestUpdateOrg(t *testing.T) {
 	return
 }

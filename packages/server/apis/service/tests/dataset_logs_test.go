@@ -4,14 +4,17 @@ import (
 	"testing"
 )
 
-func TestLogDataset(t *testing.T) {
+// TODO
+func (api *Api) TestLogDataset(t *testing.T) {
 	return
 }
 
-func TestGetAllLogsDataset(t *testing.T) {
+// TODO
+func (api *Api) TestGetAllLogsDataset(t *testing.T) {
 	return
 }
 
-func TestGetKeyLogsDataset(t *testing.T) {
+// TODO
+func (api *Api) TestGetKeyLogsDataset(t *testing.T) {
 	return
 }

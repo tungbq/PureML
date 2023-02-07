@@ -4,23 +4,27 @@ import (
 	"testing"
 )
 
-func TestGetOrgsForUser(t *testing.T) {
-	return
-}
-
-func TestAddUsersToOrg(t *testing.T) {
-	return
-}
-
-func TestJoinOrg(t *testing.T) {
-	return
-}
-
-func TestLeaveOrg(t *testing.T) {
+// TODO
+func (api *Api) TestGetOrgsForUser(t *testing.T) {
 	return
 }
 
 // TODO
-func TestRemoveOrg(t *testing.T) {
+func (api *Api) TestAddUsersToOrg(t *testing.T) {
+	return
+}
+
+// TODO
+func (api *Api) TestJoinOrg(t *testing.T) {
+	return
+}
+
+// TODO
+func (api *Api) TestLeaveOrg(t *testing.T) {
+	return
+}
+
+// TODO
+func (api *Api) TestRemoveOrg(t *testing.T) {
 	return
 }

@@ -4,18 +4,22 @@ import (
 	"testing"
 )
 
-func TestGetModelBranchAllVersions(t *testing.T) {
+// TODO
+func (api *Api) TestGetModelBranchAllVersions(t *testing.T) {
 	return
 }
 
-func TestGetModelBranchVersion(t *testing.T) {
+// TODO
+func (api *Api) TestGetModelBranchVersion(t *testing.T) {
 	return
 }
 
-func TestVerifyModelBranchHashStatus(t *testing.T) {
+// TODO
+func (api *Api) TestVerifyModelBranchHashStatus(t *testing.T) {
 	return
 }
 
-func TestRegisterModel(t *testing.T) {
+// TODO
+func (api *Api) TestRegisterModel(t *testing.T) {
 	return
 }

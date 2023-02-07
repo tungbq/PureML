@@ -4,7 +4,7 @@ import (
 	_ "fmt"
 	"net/http"
 
-	ds "github.com/PureML-Inc/PureML/server/datastore"
+	ds "github.com/PureML-Inc/PureML/server/daos"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"

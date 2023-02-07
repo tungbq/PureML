@@ -4,18 +4,22 @@ import (
 	"testing"
 )
 
-func TestGetAllPublicModels(t *testing.T) {
+// TODO
+func (api *Api) TestGetAllPublicModels(t *testing.T) {
 	return
 }
 
-func TestGetAllModels(t *testing.T) {
+// TODO
+func (api *Api) TestGetAllModels(t *testing.T) {
 	return
 }
 
-func TestGetModel(t *testing.T) {
+// TODO
+func (api *Api) TestGetModel(t *testing.T) {
 	return
 }
 
-func TestCreateModel(t *testing.T) {
+// TODO
+func (api *Api) TestCreateModel(t *testing.T) {
 	return
 }

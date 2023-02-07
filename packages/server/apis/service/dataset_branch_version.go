@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 	uuid "github.com/satori/go.uuid"
 )
@@ -23,10 +22,10 @@ import (
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			datasetName	path	string	true	"Dataset Name"
 //	@Param			branchName	path	string	true	"Branch Name"
-func GetDatasetBranchAllVersions(request *models.Request) *models.Response {
+func (api *Api) GetDatasetBranchAllVersions(request *models.Request) *models.Response {
 	var response *models.Response
 	branchUUID := request.GetDatasetBranchUUID()
-	allVersions, err := datastore.GetDatasetBranchAllVersions(branchUUID)
+	allVersions, err := api.app.Dao().GetDatasetBranchAllVersions(branchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {
@@ -49,10 +48,10 @@ func GetDatasetBranchAllVersions(request *models.Request) *models.Response {
 //	@Param			datasetName	path	string	true	"Dataset Name"
 //	@Param			branchName	path	string	true	"Branch Name"
 //	@Param			version		path	string	true	"Version"
-func GetDatasetBranchVersion(request *models.Request) *models.Response {
+func (api *Api) GetDatasetBranchVersion(request *models.Request) *models.Response {
 	branchUUID := request.GetDatasetBranchUUID()
 	versionName := request.PathParams["version"]
-	version, err := datastore.GetDatasetBranchVersion(branchUUID, versionName)
+	version, err := api.app.Dao().GetDatasetBranchVersion(branchUUID, versionName)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -76,12 +75,12 @@ func GetDatasetBranchVersion(request *models.Request) *models.Response {
 //	@Param			datasetName	path	string				true	"Dataset Name"
 //	@Param			branchName	path	string				true	"Branch Name"
 //	@Param			hash		body	models.HashRequest	true	"Hash value"
-func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
+func (api *Api) VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 	datasetName := request.GetDatasetName()
 	datasetBranchName := request.GetPathParam("branchName")
 	orgId := uuid.Must(uuid.FromString(request.GetPathParam("orgId")))
 	message := "Hash validity (False - does not exist in db)"
-	dataset, err := datastore.GetDatasetBranchByName(orgId, datasetName, datasetBranchName)
+	dataset, err := api.app.Dao().GetDatasetBranchByName(orgId, datasetName, datasetBranchName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -91,7 +90,7 @@ func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 	datasetBranchUUID := dataset.UUID
 	request.ParseJsonBody()
 	hashValue := request.GetParsedBodyAttribute("hash").(string)
-	versions, err := datastore.GetDatasetBranchAllVersions(datasetBranchUUID)
+	versions, err := api.app.Dao().GetDatasetBranchAllVersions(datasetBranchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -121,7 +120,7 @@ func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 //	@Param			datasetName	path		string							true	"Dataset name"
 //	@Param			branchName	path		string							true	"Branch name"
 //	@Param			data		formData	models.RegisterDatasetRequest	true	"Dataset details"
-func RegisterDataset(request *models.Request) *models.Response {
+func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	var datasetHash string
 	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
@@ -160,7 +159,7 @@ func RegisterDataset(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
 	datasetBranchUUID := request.GetDatasetBranchUUID()
-	versions, err := datastore.GetDatasetBranchAllVersions(datasetBranchUUID)
+	versions, err := api.app.Dao().GetDatasetBranchAllVersions(datasetBranchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -174,7 +173,7 @@ func RegisterDataset(request *models.Request) *models.Response {
 	if response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Dataset with this hash already exists")
 	}
-	datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, fileHeader, datasetIsEmpty, datasetHash, datasetSourceType, datasetLineage)
+	datasetVersion, err := api.app.Dao().UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, fileHeader, datasetIsEmpty, datasetHash, datasetSourceType, datasetLineage)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

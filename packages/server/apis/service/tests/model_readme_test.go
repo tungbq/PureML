@@ -4,14 +4,17 @@ import (
 	"testing"
 )
 
-func TestGetModelReadmeAllVersions(t *testing.T) {
+// TODO
+func (api *Api) TestGetModelReadmeAllVersions(t *testing.T) {
 	return
 }
 
-func TestGetModelReadmeVersion(t *testing.T) {
+// TODO
+func (api *Api) TestGetModelReadmeVersion(t *testing.T) {
 	return
 }
 
-func TestUpdateModelReadme(t *testing.T) {
+// TODO
+func (api *Api) TestUpdateModelReadme(t *testing.T) {
 	return
 }

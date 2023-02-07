@@ -3,10 +3,8 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 )
-
 
 // GetModelAllBranches godoc
 //
@@ -20,10 +18,10 @@ import (
 //	@Router			/org/{orgId}/model/{modelName}/branch [get]
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
-func GetModelAllBranches(request *models.Request) *models.Response {
+func (api *Api) GetModelAllBranches(request *models.Request) *models.Response {
 	var response *models.Response
 	modelUUID := request.GetModelUUID()
-	allOrgs, err := datastore.GetModelAllBranches(modelUUID)
+	allOrgs, err := api.app.Dao().GetModelAllBranches(modelUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {
@@ -45,9 +43,9 @@ func GetModelAllBranches(request *models.Request) *models.Response {
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			branchName	path	string	true	"Branch Name"
-func GetModelBranch(request *models.Request) *models.Response {
+func (api *Api) GetModelBranch(request *models.Request) *models.Response {
 	modelBranchUUID := request.GetModelBranchUUID()
-	branch, err := datastore.GetModelBranchByUUID(modelBranchUUID)
+	branch, err := api.app.Dao().GetModelBranchByUUID(modelBranchUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -56,7 +54,6 @@ func GetModelBranch(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, branch, "Model branch details")
 }
-
 
 // CreateModelBranch godoc
 //
@@ -71,14 +68,14 @@ func GetModelBranch(request *models.Request) *models.Response {
 //	@Param			orgId		path	string							true	"Organization Id"
 //	@Param			modelName	path	string							true	"Model Name"
 //	@Param			branchName	body	models.CreateModelBranchRequest	true	"Data"
-func CreateModelBranch(request *models.Request) *models.Response {
+func (api *Api) CreateModelBranch(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	modelUUID := request.GetModelUUID()
 	modelBranchName := request.GetParsedBodyAttribute("branch_name").(string)
 	if modelBranchName == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Branch name cannot be empty")
 	}
-	modelBranches, err := datastore.GetModelAllBranches(modelUUID)
+	modelBranches, err := api.app.Dao().GetModelAllBranches(modelUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -87,7 +84,7 @@ func CreateModelBranch(request *models.Request) *models.Response {
 			return models.NewErrorResponse(http.StatusBadRequest, "Branch already exists")
 		}
 	}
-	modelBranch, err := datastore.CreateModelBranch(modelUUID, modelBranchName)
+	modelBranch, err := api.app.Dao().CreateModelBranch(modelUUID, modelBranchName)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -95,6 +92,7 @@ func CreateModelBranch(request *models.Request) *models.Response {
 }
 
 // TODO: UpdateModelBranch godoc
+//
 //	@Security		ApiKeyAuth
 //	@Summary		Update a branch of a model
 //	@Description	Update a branch of a model
@@ -106,10 +104,12 @@ func CreateModelBranch(request *models.Request) *models.Response {
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			branchName	path	string	true	"Branch Name"
-func UpdateModelBranch(request *models.Request) *models.Response {
+func (api *Api) UpdateModelBranch(request *models.Request) *models.Response {
 	return nil
 }
+
 // TODO: DeleteModelBranch godoc
+//
 //	@Security		ApiKeyAuth
 //	@Summary		Delete a branch of a model
 //	@Description	Delete a branch of a model
@@ -121,7 +121,6 @@ func UpdateModelBranch(request *models.Request) *models.Response {
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			branchName	path	string	true	"Branch Name"
-func DeleteModelBranch(request *models.Request) *models.Response {
+func (api *Api) DeleteModelBranch(request *models.Request) *models.Response {
 	return nil
 }
-

@@ -4,14 +4,17 @@ import (
 	"testing"
 )
 
-func TestGetDatasetReviews(t *testing.T) {
+// TODO
+func (api *Api) TestGetDatasetReviews(t *testing.T) {
 	return
 }
 
-func TestCreateDatasetReview(t *testing.T) {
+// TODO
+func (api *Api) TestCreateDatasetReview(t *testing.T) {
 	return
 }
 
-func TestUpdateDatasetReview(t *testing.T) {
+// TODO
+func (api *Api) TestUpdateDatasetReview(t *testing.T) {
 	return
 }

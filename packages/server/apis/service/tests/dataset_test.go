@@ -4,18 +4,22 @@ import (
 	"testing"
 )
 
-func TestGetAllPublicDatasets(t *testing.T) {
+// TODO
+func (api *Api) TestGetAllPublicDatasets(t *testing.T) {
 	return
 }
 
-func TestGetAllDatasets(t *testing.T) {
+// TODO
+func (api *Api) TestGetAllDatasets(t *testing.T) {
 	return
 }
 
-func TestGetDataset(t *testing.T) {
+// TODO
+func (api *Api) TestGetDataset(t *testing.T) {
 	return
 }
 
-func TestCreateDataset(t *testing.T) {
+// TODO
+func (api *Api) TestCreateDataset(t *testing.T) {
 	return
 }

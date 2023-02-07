@@ -4,18 +4,22 @@ import (
 	"testing"
 )
 
-func TestGetDatasetActivity(t *testing.T) {
+// TODO
+func (api *Api) TestGetDatasetActivity(t *testing.T) {
 	return
 }
 
-func TestCreateDatasetActivity(t *testing.T) {
+// TODO
+func (api *Api) TestCreateDatasetActivity(t *testing.T) {
 	return
 }
 
-func TestUpdateDatasetActivity(t *testing.T) {
+// TODO
+func (api *Api) TestUpdateDatasetActivity(t *testing.T) {
 	return
 }
 
-func TestDeleteDatasetActivity(t *testing.T) {
+// TODO
+func (api *Api) TestDeleteDatasetActivity(t *testing.T) {
 	return
 }

@@ -4,14 +4,17 @@ import (
 	"testing"
 )
 
-func TestLogModel(t *testing.T) {
+// TODO
+func (api *Api) TestLogModel(t *testing.T) {
 	return
 }
 
-func TestGetAllLogsModel(t *testing.T) {
+// TODO
+func (api *Api) TestGetAllLogsModel(t *testing.T) {
 	return
 }
 
-func TestGetKeyLogsModel(t *testing.T) {
+// TODO
+func (api *Api) TestGetKeyLogsModel(t *testing.T) {
 	return
 }

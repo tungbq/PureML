@@ -7,7 +7,7 @@ import (
 	"github.com/PureML-Inc/PureML/server/tests"
 )
 
-func TestHealthCheck(t *testing.T) {
+func (api *Api) TestHealthCheck(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
 			Name:           "health status returns 200",

@@ -130,4 +130,5 @@ func (scenario *ApiScenario) Test(t *testing.T) {
 	if scenario.AfterTestFunc != nil {
 		scenario.AfterTestFunc(t, e)
 	}
+	daos.Close()
 }

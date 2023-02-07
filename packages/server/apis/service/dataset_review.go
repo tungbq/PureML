@@ -3,7 +3,6 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 	uuid "github.com/satori/go.uuid"
 )
@@ -20,9 +19,9 @@ import (
 //	@Router			/org/{orgId}/dataset/{datasetName}/review [get]
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			datasetName	path	string	true	"Dataset Name"
-func GetDatasetReviews(request *models.Request) *models.Response {
+func (api *Api) GetDatasetReviews(request *models.Request) *models.Response {
 	datasetUUID := request.GetDatasetUUID()
-	reviews, err := datastore.GetDatasetReviews(datasetUUID)
+	reviews, err := api.app.Dao().GetDatasetReviews(datasetUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -44,7 +43,7 @@ func GetDatasetReviews(request *models.Request) *models.Response {
 //	@Param			orgId		path	string						true	"Organization Id"
 //	@Param			datasetName	path	string						true	"Dataset Name"
 //	@Param			data		body	models.DatasetReviewRequest	true	"Review"
-func CreateDatasetReview(request *models.Request) *models.Response {
+func (api *Api) CreateDatasetReview(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()
 	datasetName := request.GetDatasetName()
@@ -57,7 +56,7 @@ func CreateDatasetReview(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch cannot be empty")
 	}
 	fromBranchData := fromBranch.(string)
-	fromBranchDb, err := datastore.GetDatasetBranchByName(orgId, datasetName, fromBranchData)
+	fromBranchDb, err := api.app.Dao().GetDatasetBranchByName(orgId, datasetName, fromBranchData)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch not found")
 	}
@@ -69,7 +68,7 @@ func CreateDatasetReview(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch Version cannot be empty")
 	}
 	fromBranchVersionData := fromBranchVersion.(string)
-	fromBranchVersionDb, err := datastore.GetDatasetBranchVersion(fromBranchUUID, fromBranchVersionData)
+	fromBranchVersionDb, err := api.app.Dao().GetDatasetBranchVersion(fromBranchUUID, fromBranchVersionData)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch not found")
 	}
@@ -81,7 +80,7 @@ func CreateDatasetReview(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "To Branch cannot be empty")
 	}
 	toBranchData := toBranch.(string)
-	toBranchDb, err := datastore.GetDatasetBranchByName(orgId, datasetName, toBranchData)
+	toBranchDb, err := api.app.Dao().GetDatasetBranchByName(orgId, datasetName, toBranchData)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "To Branch not found")
 	}
@@ -110,7 +109,7 @@ func CreateDatasetReview(request *models.Request) *models.Response {
 		isAcceptedData = false
 	}
 	isAcceptedData = IsAccepted.(bool)
-	createdReview, err := datastore.CreateDatasetReview(datasetUUID, userUUID, fromBranchUUID, fromBranchVersionUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
+	createdReview, err := api.app.Dao().CreateDatasetReview(datasetUUID, userUUID, fromBranchUUID, fromBranchVersionUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -131,10 +130,10 @@ func CreateDatasetReview(request *models.Request) *models.Response {
 //	@Param			datasetName	path	string								true	"Dataset Name"
 //	@Param			reviewId	path	string								true	"Review UUID"
 //	@Param			review		body	models.DatasetReviewUpdateRequest	true	"Review"
-func UpdateDatasetReview(request *models.Request) *models.Response {
+func (api *Api) UpdateDatasetReview(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	reviewUUID := uuid.Must(uuid.FromString(request.GetPathParam("reviewId")))
-	review, err := datastore.GetDatasetReview(reviewUUID)
+	review, err := api.app.Dao().GetDatasetReview(reviewUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -158,7 +157,7 @@ func UpdateDatasetReview(request *models.Request) *models.Response {
 	if isAccepted != nil {
 		updatedAttributes["is_accepted"] = isAccepted.(bool)
 	}
-	updatedDbReview, err := datastore.UpdateDatasetReview(reviewUUID, updatedAttributes)
+	updatedDbReview, err := api.app.Dao().UpdateDatasetReview(reviewUUID, updatedAttributes)
 	if err != nil {
 		if err.Error() == "review already complete" {
 			return models.NewErrorResponse(http.StatusBadRequest, err.Error())

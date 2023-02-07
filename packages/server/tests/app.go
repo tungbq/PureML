@@ -8,7 +8,6 @@ import (
 	"runtime"
 
 	"github.com/PureML-Inc/PureML/server/core"
-	"github.com/PureML-Inc/PureML/server/datastore"
 )
 
 func NewTestApp(optTestDataDir ...string) (*string, error) {
@@ -30,7 +29,7 @@ func NewTestApp(optTestDataDir ...string) (*string, error) {
 	if err := core.Bootstrap(tempDir); err != nil {
 		return nil, err
 	}
-	datastore.InitTestDB(tempDir)
+	daos.InitTestDB(tempDir)
 	return &tempDir, nil
 }
 

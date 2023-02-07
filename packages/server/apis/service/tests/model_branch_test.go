@@ -4,24 +4,27 @@ import (
 	"testing"
 )
 
-func TestGetModelAllBranches(t *testing.T) {
-	return
-}
-
-func TestGetModelBranch(t *testing.T) {
-	return
-}
-
-func TestCreateModelBranch(t *testing.T) {
+// TODO
+func (api *Api) TestGetModelAllBranches(t *testing.T) {
 	return
 }
 
 // TODO
-func TestUpdateModelBranch(t *testing.T) {
+func (api *Api) TestGetModelBranch(t *testing.T) {
 	return
 }
 
 // TODO
-func TestDeleteModelBranch(t *testing.T) {
+func (api *Api) TestCreateModelBranch(t *testing.T) {
+	return
+}
+
+// TODO
+func (api *Api) TestUpdateModelBranch(t *testing.T) {
+	return
+}
+
+// TODO
+func (api *Api) TestDeleteModelBranch(t *testing.T) {
 	return
 }

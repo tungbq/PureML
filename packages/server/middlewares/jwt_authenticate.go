@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/PureML-Inc/PureML/server/config"
-	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -20,12 +19,12 @@ func AuthenticateJWT(next echo.HandlerFunc) echo.HandlerFunc {
 		authHeaderValue := extractRequestHeader(AuthHeaderName, context)
 		if authHeaderValue == "" {
 			context.Response().WriteHeader(http.StatusUnauthorized)
-			context.Response().Writer.Write([]byte("Authentication Token Required"))
+			context.Response().Writer.Write([]byte("Authentication token required"))
 			return nil
 		}
 		if !strings.HasPrefix(authHeaderValue, "Bearer ") {
 			context.Response().WriteHeader(http.StatusUnauthorized)
-			context.Response().Writer.Write([]byte("Invalid Authentication Token"))
+			context.Response().Writer.Write([]byte("Invalid authentication token format"))
 			return nil
 		}
 		authHeaderValue = strings.Split(authHeaderValue, " ")[1] //Splitting the bearer part?? yep
@@ -38,12 +37,12 @@ func AuthenticateJWT(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			// fmt.Println(err)
 			context.Response().WriteHeader(http.StatusForbidden)
-			context.Response().Writer.Write([]byte("Could not parse Authentication Token"))
+			context.Response().Writer.Write([]byte("Could not parse authentication token"))
 			return nil
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userUUID := uuid.Must(uuid.FromString(claims["uuid"].(string)))
-			user, err := datastore.GetUserByUUID(userUUID)
+			user, err := api.app.Dao().GetUserByUUID(userUUID)
 			if err != nil || user == nil {
 				context.Response().WriteHeader(http.StatusNotFound)
 				context.Response().Writer.Write([]byte("User not found"))
@@ -57,7 +56,7 @@ func AuthenticateJWT(next echo.HandlerFunc) echo.HandlerFunc {
 			next(context)
 		} else {
 			context.Response().WriteHeader(http.StatusForbidden)
-			context.Response().Writer.Write([]byte("Invalid Authentication Token"))
+			context.Response().Writer.Write([]byte("Invalid authentication token"))
 		}
 		return nil
 	}

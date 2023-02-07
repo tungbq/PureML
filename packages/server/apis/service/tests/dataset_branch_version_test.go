@@ -4,18 +4,22 @@ import (
 	"testing"
 )
 
-func TestGetDatasetBranchAllVersions(t *testing.T) {
+// TODO
+func (api *Api) TestGetDatasetBranchAllVersions(t *testing.T) {
 	return
 }
 
-func TestGetDatasetBranchVersion(t *testing.T) {
+// TODO
+func (api *Api) TestGetDatasetBranchVersion(t *testing.T) {
 	return
 }
 
-func TestVerifyDatasetBranchHashStatus(t *testing.T) {
+// TODO
+func (api *Api) TestVerifyDatasetBranchHashStatus(t *testing.T) {
 	return
 }
 
-func TestRegisterDataset(t *testing.T) {
+// TODO
+func (api *Api) TestRegisterDataset(t *testing.T) {
 	return
 }

@@ -3,7 +3,6 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 )
 
@@ -18,9 +17,9 @@ import (
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/secret/r2 [get]
 //	@Param			orgId	path	string	true	"Organization Id"
-func GetR2Secret(request *models.Request) *models.Response {
+func (api *Api) GetR2Secret(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	result, err := datastore.GetSourceSecret(orgId, "R2")
+	result, err := api.app.Dao().GetSourceSecret(orgId, "R2")
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -39,9 +38,9 @@ func GetR2Secret(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/secret/s3 [get]
 //	@Param			orgId	path	string	true	"Organization Id"
-func GetS3Secret(request *models.Request) *models.Response {
+func (api *Api) GetS3Secret(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	result, err := datastore.GetSourceSecret(orgId, "S3")
+	result, err := api.app.Dao().GetSourceSecret(orgId, "S3")
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -61,7 +60,7 @@ func GetS3Secret(request *models.Request) *models.Response {
 //	@Router			/org/{orgId}/secret/r2/connect [post]
 //	@Param			orgId	path	string					true	"Organization Id"
 //	@Param			secret	body	models.R2SecretRequest	true	"Secret"
-func ConnectR2Secret(request *models.Request) *models.Response {
+func (api *Api) ConnectR2Secret(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()
 	accountId := request.GetParsedBodyAttribute("account_id")
@@ -100,12 +99,12 @@ func ConnectR2Secret(request *models.Request) *models.Response {
 	}
 	publicURLData := publicURL.(string)
 	// Delete existing secrets
-	err := datastore.DeleteR2Secrets(orgId)
+	err := api.app.Dao().DeleteR2Secrets(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	// Create new secrets
-	createdR2Secret, err := datastore.CreateR2Secrets(orgId, accountIdData, accessKeyIdData, accessKeySecretData, bucketNameData, publicURLData)
+	createdR2Secret, err := api.app.Dao().CreateR2Secrets(orgId, accountIdData, accessKeyIdData, accessKeySecretData, bucketNameData, publicURLData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -113,7 +112,7 @@ func ConnectR2Secret(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	createdSource, err := datastore.CreateR2Source(orgId, publicURLData)
+	createdSource, err := api.app.Dao().CreateR2Source(orgId, publicURLData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -132,7 +131,7 @@ func ConnectR2Secret(request *models.Request) *models.Response {
 //	@Router			/org/{orgId}/secret/s3/connect [post]
 //	@Param			orgId	path	string					true	"Organization Id"
 //	@Param			secret	body	models.S3SecretRequest	true	"Secret"
-func ConnectS3Secret(request *models.Request) *models.Response {
+func (api *Api) ConnectS3Secret(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()
 	accessKeyId := request.GetParsedBodyAttribute("access_key_id")
@@ -164,12 +163,12 @@ func ConnectS3Secret(request *models.Request) *models.Response {
 	}
 	bucketLocationData := bucketLocation.(string)
 	// Delete existing secrets
-	err := datastore.DeleteS3Secrets(orgId)
+	err := api.app.Dao().DeleteS3Secrets(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	// Create new secrets
-	createdS3Secret, err := datastore.CreateS3Secrets(orgId, accessKeyIdData, accessKeySecretData, bucketNameData, bucketLocationData)
+	createdS3Secret, err := api.app.Dao().CreateS3Secrets(orgId, accessKeyIdData, accessKeySecretData, bucketNameData, bucketLocationData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -177,7 +176,7 @@ func ConnectS3Secret(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	createdSource, err := datastore.CreateS3Source(orgId, createdS3Secret.PublicURL)
+	createdSource, err := api.app.Dao().CreateS3Source(orgId, createdS3Secret.PublicURL)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -195,9 +194,9 @@ func ConnectS3Secret(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/secret/r2/delete [delete]
 //	@Param			orgId	path	string	true	"Organization Id"
-func DeleteR2Secrets(request *models.Request) *models.Response {
+func (api *Api) DeleteR2Secrets(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	err := datastore.DeleteR2Secrets(orgId)
+	err := api.app.Dao().DeleteR2Secrets(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -216,9 +215,9 @@ func DeleteR2Secrets(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/secret/s3/delete [delete]
 //	@Param			orgId	path	string	true	"Organization Id"
-func DeleteS3Secrets(request *models.Request) *models.Response {
+func (api *Api) DeleteS3Secrets(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	err := datastore.DeleteS3Secrets(orgId)
+	err := api.app.Dao().DeleteS3Secrets(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

@@ -3,7 +3,6 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 	uuid "github.com/satori/go.uuid"
 )
@@ -18,10 +17,10 @@ import (
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/handle/{orgHandle} [get]
 //	@Param			orgHandle	path	string	true	"Organization Handle"
-func GetOrgByHandle(request *models.Request) *models.Response {
+func (api *Api) GetOrgByHandle(request *models.Request) *models.Response {
 	var response *models.Response
 	orgHandle := request.PathParams["orgHandle"]
-	organization, err := datastore.GetOrgByHandle(orgHandle)
+	organization, err := api.app.Dao().GetOrgByHandle(orgHandle)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -44,10 +43,10 @@ func GetOrgByHandle(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/id/{orgId} [get]
 //	@Param			orgId	path	string	true	"Organization ID"
-func GetOrgByID(request *models.Request) *models.Response {
+func (api *Api) GetOrgByID(request *models.Request) *models.Response {
 	var response *models.Response
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))
-	organization, err := datastore.GetOrgById(orgId)
+	organization, err := api.app.Dao().GetOrgById(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -69,9 +68,9 @@ func GetOrgByID(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/public/model [get]
 //	@Param			orgId	path	string	true	"Organization ID"
-func GetOrgAllPublicModels(request *models.Request) *models.Response {
+func (api *Api) GetOrgAllPublicModels(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	modelsdb, err := datastore.GetOrgAllPublicModels(orgId)
+	modelsdb, err := api.app.Dao().GetOrgAllPublicModels(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -88,9 +87,9 @@ func GetOrgAllPublicModels(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/public/dataset [get]
 //	@Param			orgId	path	string	true	"Organization ID"
-func GetOrgAllPublicDatasets(request *models.Request) *models.Response {
+func (api *Api) GetOrgAllPublicDatasets(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	datasetsdb, err := datastore.GetOrgAllPublicDatasets(orgId)
+	datasetsdb, err := api.app.Dao().GetOrgAllPublicDatasets(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -108,14 +107,14 @@ func GetOrgAllPublicDatasets(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/create [post]
 //	@Param			org	body	models.CreateOrUpdateOrgRequest	true	"Organization details"
-func CreateOrg(request *models.Request) *models.Response {
+func (api *Api) CreateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	// orgName := request.GetParsedBodyAttribute("name").(string)
 	orgDesc := request.GetParsedBodyAttribute("description").(string)
 	orgHandle := request.GetParsedBodyAttribute("handle").(string)
 	orgName := orgHandle
 	email := request.User.Email
-	org, err := datastore.CreateOrgFromEmail(email, orgName, orgDesc, orgHandle)
+	org, err := api.app.Dao().CreateOrgFromEmail(email, orgName, orgDesc, orgHandle)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -135,14 +134,14 @@ func CreateOrg(request *models.Request) *models.Response {
 //	@Router			/org/{orgId}/update [post]
 //	@Param			orgId	path	string							true	"Organization ID"
 //	@Param			org		body	models.CreateOrUpdateOrgRequest	true	"Organization details"
-func UpdateOrg(request *models.Request) *models.Response {
+func (api *Api) UpdateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))
 	orgName := request.GetParsedBodyAttribute("name").(string)
 	orgDesc := request.GetParsedBodyAttribute("description").(string)
 	orgAvatar := request.GetParsedBodyAttribute("avatar").(string)
 	email := request.User.Email
-	UserOrganization, err := datastore.GetUserOrganizationByOrgIdAndEmail(orgId, email)
+	UserOrganization, err := api.app.Dao().GetUserOrganizationByOrgIdAndEmail(orgId, email)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -151,7 +150,7 @@ func UpdateOrg(request *models.Request) *models.Response {
 		response = models.NewErrorResponse(http.StatusForbidden, "You are not authorized to update this organization")
 		return response
 	}
-	updatedOrg, err := datastore.UpdateOrg(orgId, orgName, orgDesc, orgAvatar)
+	updatedOrg, err := api.app.Dao().UpdateOrg(orgId, orgName, orgDesc, orgAvatar)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

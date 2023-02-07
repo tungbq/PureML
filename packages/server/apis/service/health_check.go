@@ -15,6 +15,6 @@ import (
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/health [get]
-func HealthCheck(request *models.Request) *models.Response {
+func (api *Api) HealthCheck(request *models.Request) *models.Response {
 	return models.NewDataResponse(http.StatusOK, nil, "Server is up and running🚀🎉")
 }

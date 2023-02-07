@@ -3,7 +3,6 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 )
 
@@ -22,7 +21,7 @@ import (
 //	@Param			branchName	path	string				true	"Branch Name"
 //	@Param			version		path	string				true	"Version"
 //	@Param			data		body	models.LogRequest	true	"Data to log"
-func LogDataset(request *models.Request) *models.Response {
+func (api *Api) LogDataset(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	key := request.GetParsedBodyAttribute("key")
 	var keyData string
@@ -39,7 +38,7 @@ func LogDataset(request *models.Request) *models.Response {
 		dataData = ""
 	}
 	versionUUID := request.GetDatasetBranchVersionUUID()
-	result, err := datastore.CreateLogForDatasetVersion(keyData, dataData, versionUUID)
+	result, err := api.app.Dao().CreateLogForDatasetVersion(keyData, dataData, versionUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -61,9 +60,9 @@ func LogDataset(request *models.Request) *models.Response {
 //	@Param			datasetName	path	string	true	"Dataset Name"
 //	@Param			branchName	path	string	true	"Branch Name"
 //	@Param			version		path	string	true	"Version"
-func GetAllLogsDataset(request *models.Request) *models.Response {
+func (api *Api) GetAllLogsDataset(request *models.Request) *models.Response {
 	versionUUID := request.GetDatasetBranchVersionUUID()
-	result, err := datastore.GetLogForDatasetVersion(versionUUID)
+	result, err := api.app.Dao().GetLogForDatasetVersion(versionUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -86,10 +85,10 @@ func GetAllLogsDataset(request *models.Request) *models.Response {
 //	@Param			branchName	path	string	true	"Branch Name"
 //	@Param			version		path	string	true	"Version"
 //	@Param			key			path	string	true	"Key"
-func GetKeyLogsDataset(request *models.Request) *models.Response {
+func (api *Api) GetKeyLogsDataset(request *models.Request) *models.Response {
 	versionUUID := request.GetDatasetBranchVersionUUID()
 	key := request.PathParams["key"]
-	result, err := datastore.GetKeyLogForDatasetVersion(versionUUID, key)
+	result, err := api.app.Dao().GetKeyLogForDatasetVersion(versionUUID, key)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

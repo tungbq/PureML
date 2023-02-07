@@ -60,7 +60,7 @@ func NewErrorResponse(statusCode int, message string) *Response {
 }
 
 func NewDataResponse(statusCode int, data interface{}, message string) *Response {
-	if data != nil && reflect.TypeOf(data).Kind() != reflect.Slice {
+	if data != nil && !(reflect.ValueOf(data).Kind() == reflect.Ptr && reflect.ValueOf(data).IsNil()) && reflect.TypeOf(data).Kind() != reflect.Slice {
 		data = []interface{}{data}
 	}
 	return &Response{
