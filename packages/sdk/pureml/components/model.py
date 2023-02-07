@@ -131,6 +131,34 @@ def branch_delete(branch: str, model_name: str) -> str:
     return response.text
 
 
+def branch_list(model_name: str) -> str:
+
+    user_token = get_token()
+    org_id = get_org_id()
+
+    url = "org/{}/model/{}/branch".format(org_id, model_name)
+    url = urljoin(BASE_URL, url)
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
+    }
+
+    
+    response = requests.get(url, headers=headers)
+
+    if response.ok:
+        response_text = response.json()
+        branch_list = response_text["data"]
+
+        return branch_list
+
+    else:
+        print(f"[bold red]Unable to obtain the list of branches!")
+
+    return response.text
+
+
 def list():
     """This function will return a list of all the modelst
 

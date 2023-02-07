@@ -83,11 +83,6 @@ def branch_details(branch: str, dataset_name: str):
     
     response = requests.get(url, headers=headers)
 
-    # print(response.json)
-    # print(response.request.url)
-    # print(response.request.body)
-    # print(response.request.headers)
-
     if response.ok:
         response_text = response.json()
         # T-1161 standardize api response to contains Data as a list
@@ -138,6 +133,34 @@ def branch_delete(branch: str, dataset_name: str) -> str:
     return response.text
 
 
+def branch_list(dataset_name: str) -> str:
+
+    user_token = get_token()
+    org_id = get_org_id()
+
+    url = "org/{}/dataset/{}/branch".format(org_id, dataset_name)
+    url = urljoin(BASE_URL, url)
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {}".format(user_token),
+    }
+
+    
+    response = requests.get(url, headers=headers)
+
+    if response.ok:
+        response_text = response.json()
+        branch_list = response_text["data"]
+
+        return branch_list
+
+    else:
+        print(f"[bold red]Unable to obtain the list of branches!")
+
+    return response.text
+
+
 def list():
     """This function will return a list of all the datasets
 
@@ -165,10 +188,10 @@ def list():
         # print(f"[bold green]Obtained list of models")
 
         response_text = response.json()
-        model_list = response_text["data"]
+        dataset_list = response_text["data"]
         # print(model_list)
 
-        return model_list
+        return dataset_list
     else:
         print(f"[bold red]Unable to obtain the list of dataset!")
 
