@@ -3,9 +3,24 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindUserOrgApi registers the admin api endpoints and the corresponding handlers.
+func BindUserOrgApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT)
+	orgGroup.GET("/", api.DefaultHandler(GetOrgsForUser))
+	orgGroup.POST("/:orgId/add", api.DefaultHandler(AddUsersToOrg), middlewares.ValidateOrg)
+	orgGroup.POST("/join", api.DefaultHandler(JoinOrg))
+	orgGroup.POST("/:orgId/remove", api.DefaultHandler(RemoveOrg), middlewares.ValidateOrg)
+	orgGroup.POST("/:orgId/leave", api.DefaultHandler(LeaveOrg), middlewares.ValidateOrg)
+}
 
 // GetOrgsForUser godoc
 //
@@ -130,3 +145,9 @@ func (api *Api) LeaveOrg(request *models.Request) *models.Response {
 func (api *Api) RemoveOrg(request *models.Request) *models.Response {
 	return nil
 }
+
+var GetOrgsForUser ServiceFunc = (*Api).GetOrgsForUser
+var AddUsersToOrg ServiceFunc = (*Api).AddUsersToOrg
+var JoinOrg ServiceFunc = (*Api).JoinOrg
+var LeaveOrg ServiceFunc = (*Api).LeaveOrg
+var RemoveOrg ServiceFunc = (*Api).RemoveOrg

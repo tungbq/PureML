@@ -3,8 +3,21 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindModelLogsApi registers the admin api endpoints and the corresponding handlers.
+func BindModelLogsApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log", api.DefaultHandler(GetAllLogsModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log/:key", api.DefaultHandler(GetKeyLogsModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
+	modelGroup.POST("/:modelName/branch/:branchName/version/:version/log", api.DefaultHandler(LogModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
+}
 
 // LogModel godoc
 //
@@ -95,3 +108,7 @@ func (api *Api) GetKeyLogsModel(request *models.Request) *models.Response {
 	response := models.NewDataResponse(http.StatusOK, result, "Specific Key Logs for model version")
 	return response
 }
+
+var LogModel ServiceFunc = (*Api).LogModel
+var GetAllLogsModel ServiceFunc = (*Api).GetAllLogsModel
+var GetKeyLogsModel ServiceFunc = (*Api).GetKeyLogsModel

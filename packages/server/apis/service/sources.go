@@ -3,8 +3,25 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindSecretsApi registers the admin api endpoints and the corresponding handlers.
+func BindSecretsApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	secretGroup := rg.Group("/org/:orgId/secret", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	// secretGroup.GET("/all", api.DefaultHandler(GetAllSecrets))
+	secretGroup.GET("/r2", api.DefaultHandler(GetR2Secret))
+	secretGroup.POST("/r2/connect", api.DefaultHandler(ConnectR2Secret))
+	secretGroup.DELETE("/r2/delete", api.DefaultHandler(DeleteR2Secrets))
+	secretGroup.GET("/s3", api.DefaultHandler(GetS3Secret))
+	secretGroup.POST("/s3/connect", api.DefaultHandler(ConnectS3Secret))
+	secretGroup.DELETE("/s3/delete", api.DefaultHandler(DeleteS3Secrets))
+}
 
 // GetR2Secret godoc
 //
@@ -224,3 +241,10 @@ func (api *Api) DeleteS3Secrets(request *models.Request) *models.Response {
 	response := models.NewDataResponse(http.StatusOK, nil, "S3 disconnected")
 	return response
 }
+
+var GetR2Secret ServiceFunc = (*Api).GetR2Secret
+var GetS3Secret ServiceFunc = (*Api).GetS3Secret
+var ConnectR2Secret ServiceFunc = (*Api).ConnectR2Secret
+var ConnectS3Secret ServiceFunc = (*Api).ConnectS3Secret
+var DeleteR2Secrets ServiceFunc = (*Api).DeleteR2Secrets
+var DeleteS3Secrets ServiceFunc = (*Api).DeleteS3Secrets

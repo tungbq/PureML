@@ -3,9 +3,23 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindModelActivityApi registers the admin api endpoints and the corresponding handlers.
+func BindModelActivityApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup.GET("/:modelName/activity/:category", api.DefaultHandler(GetModelActivity), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/activity/:category", api.DefaultHandler(CreateModelActivity), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/activity/:category/:activityUUID", api.DefaultHandler(UpdateModelActivity), middlewares.ValidateModel)
+	modelGroup.DELETE("/:modelName/activity/:category/:activityUUID/delete", api.DefaultHandler(DeleteModelActivity), middlewares.ValidateModel)
+}
 
 // GetModelActivity godoc
 //
@@ -118,3 +132,8 @@ func (api *Api) DeleteModelActivity(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, nil, "Model Activity deleted")
 }
+
+var GetModelActivity ServiceFunc = (*Api).GetModelActivity
+var CreateModelActivity ServiceFunc = (*Api).CreateModelActivity
+var UpdateModelActivity ServiceFunc = (*Api).UpdateModelActivity
+var DeleteModelActivity ServiceFunc = (*Api).DeleteModelActivity

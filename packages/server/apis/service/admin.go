@@ -11,8 +11,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// bindAdminApi registers the admin api endpoints and the corresponding handlers.
-func bindAdminApi(app core.App, rg *echo.Group) {
+// BindAdminApi registers the admin api endpoints and the corresponding handlers.
+func BindAdminApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
 	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT)

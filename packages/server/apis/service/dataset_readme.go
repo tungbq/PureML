@@ -3,8 +3,21 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindDatasetReadmeApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetReadmeApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup.GET("/:datasetName/readme/version/:version", api.DefaultHandler(GetDatasetReadmeVersion), middlewares.ValidateDataset)
+	datasetGroup.GET("/:datasetName/readme/version", api.DefaultHandler(GetDatasetReadmeAllVersions), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/readme", api.DefaultHandler(UpdateDatasetReadme), middlewares.ValidateDataset)
+}
 
 // GetDatasetReadmeAllVersions godoc
 //
@@ -91,3 +104,7 @@ func (api *Api) UpdateDatasetReadme(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, readme, "Dataset readme updated")
 }
+
+var GetDatasetReadmeAllVersions ServiceFunc = (*Api).GetDatasetReadmeAllVersions
+var GetDatasetReadmeVersion ServiceFunc = (*Api).GetDatasetReadmeVersion
+var UpdateDatasetReadme ServiceFunc = (*Api).UpdateDatasetReadme

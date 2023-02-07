@@ -10,12 +10,15 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// bindDatasetActivityApi registers the dataset activity api endpoints and the corresponding handlers.
-func bindDatasetActivityApi(app core.App, rg *echo.Group) {
+// BindDatasetActivityApi registers the dataset activity api endpoints and the corresponding handlers.
+func BindDatasetActivityApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT)
-	orgGroup.GET("/all", api.DefaultHandler(GetAllAdminOrgs))
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup.GET("/:datasetName/activity/:category", api.DefaultHandler(GetDatasetActivity), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/activity/:category", api.DefaultHandler(CreateDatasetActivity), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/activity/:category/:activityUUID", api.DefaultHandler(UpdateDatasetActivity), middlewares.ValidateDataset)
+	datasetGroup.DELETE("/:datasetName/activity/:category/:activityUUID/delete", api.DefaultHandler(DeleteDatasetActivity), middlewares.ValidateDataset)
 }
 
 // GetDatasetActivity godoc
@@ -129,3 +132,8 @@ func (api *Api) DeleteDatasetActivity(request *models.Request) *models.Response 
 	}
 	return models.NewDataResponse(http.StatusOK, nil, "Dataset Activity deleted")
 }
+
+var GetDatasetActivity ServiceFunc = (*Api).GetDatasetActivity
+var CreateDatasetActivity ServiceFunc = (*Api).CreateDatasetActivity
+var UpdateDatasetActivity ServiceFunc = (*Api).UpdateDatasetActivity
+var DeleteDatasetActivity ServiceFunc = (*Api).DeleteDatasetActivity

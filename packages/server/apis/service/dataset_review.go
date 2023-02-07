@@ -3,9 +3,22 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindDatasetReviewApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetReviewApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup.GET("/:datasetName/review", api.DefaultHandler(GetDatasetReviews), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/review/create", api.DefaultHandler(CreateDatasetReview), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/review/:reviewId/update", api.DefaultHandler(UpdateDatasetReview), middlewares.ValidateDataset)
+}
 
 // GetDatasetReviews godoc
 //
@@ -166,3 +179,7 @@ func (api *Api) UpdateDatasetReview(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, []models.DatasetReviewResponse{*updatedDbReview}, "Dataset review updated")
 }
+
+var GetDatasetReviews ServiceFunc = (*Api).GetDatasetReviews
+var CreateDatasetReview ServiceFunc = (*Api).CreateDatasetReview
+var UpdateDatasetReview ServiceFunc = (*Api).UpdateDatasetReview

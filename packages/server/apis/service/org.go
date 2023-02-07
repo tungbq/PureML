@@ -3,9 +3,25 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindOrgApi registers the admin api endpoints and the corresponding handlers.
+func BindOrgApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	rg.GET("/org/handle/:orgHandle", api.DefaultHandler(GetOrgByHandle))
+	rg.GET("/org/:orgId/public/model", api.DefaultHandler(GetOrgAllPublicModels), middlewares.ValidateOrg)
+	rg.GET("/org/:orgId/public/dataset", api.DefaultHandler(GetOrgAllPublicDatasets), middlewares.ValidateOrg)
+	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT)
+	orgGroup.GET("/id/:orgId", api.DefaultHandler(GetOrgByID), middlewares.ValidateOrg)
+	orgGroup.POST("/create", api.DefaultHandler(CreateOrg))
+	orgGroup.POST("/:orgId/update", api.DefaultHandler(UpdateOrg), middlewares.ValidateOrg)
+}
 
 // GetOrgByHandle godoc
 //
@@ -158,3 +174,10 @@ func (api *Api) UpdateOrg(request *models.Request) *models.Response {
 	return response
 
 }
+
+var GetOrgByHandle ServiceFunc = (*Api).GetOrgByHandle
+var GetOrgByID ServiceFunc = (*Api).GetOrgByID
+var GetOrgAllPublicModels ServiceFunc = (*Api).GetOrgAllPublicModels
+var GetOrgAllPublicDatasets ServiceFunc = (*Api).GetOrgAllPublicDatasets
+var CreateOrg ServiceFunc = (*Api).CreateOrg
+var UpdateOrg ServiceFunc = (*Api).UpdateOrg

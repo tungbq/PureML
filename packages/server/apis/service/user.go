@@ -4,10 +4,27 @@ import (
 	"net/http"
 
 	"github.com/PureML-Inc/PureML/server/config"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
+
+// BindUserApi registers the admin api endpoints and the corresponding handlers.
+func BindUserApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	userGroup := rg.Group("/user")
+	userGroup.GET("/profile", api.DefaultHandler(GetProfile), middlewares.AuthenticateJWT)
+	userGroup.GET("/profile/:userHandle", api.DefaultHandler(GetProfileByHandle))
+	userGroup.POST("/profile", api.DefaultHandler(UpdateProfile), middlewares.AuthenticateJWT)
+	userGroup.POST("/signup", api.DefaultHandler(UserSignUp))
+	userGroup.POST("/login", api.DefaultHandler(UserLogin))
+	userGroup.POST("/forgot-password", api.DefaultHandler(UserForgotPassword))
+	userGroup.POST("/reset-password", api.DefaultHandler(UserResetPassword)) //TODO To complete the logic here and update middlewares
+}
 
 // UserSignUp godoc
 //
@@ -304,3 +321,12 @@ func (api *Api) UpdateProfile(request *models.Request) *models.Response {
 func (api *Api) DeleteProfile(request *models.Request) *models.Response {
 	return nil
 }
+
+var UserSignUp ServiceFunc = (*Api).UserSignUp
+var UserLogin ServiceFunc = (*Api).UserLogin
+var UserResetPassword ServiceFunc = (*Api).UserResetPassword
+var UserForgotPassword ServiceFunc = (*Api).UserForgotPassword
+var GetProfile ServiceFunc = (*Api).GetProfile
+var GetProfileByHandle ServiceFunc = (*Api).GetProfileByHandle
+var UpdateProfile ServiceFunc = (*Api).UpdateProfile
+var DeleteProfile ServiceFunc = (*Api).DeleteProfile

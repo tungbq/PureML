@@ -4,10 +4,24 @@ import (
 	_ "fmt"
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
 
 var defaultDatasetBranchNames = []string{"main", "development"}
+
+// BindDatasetApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	rg.GET("/public/dataset", api.DefaultHandler(GetAllPublicDatasets))
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup.GET("/all", api.DefaultHandler(GetAllDatasets))
+	datasetGroup.GET("/:datasetName", api.DefaultHandler(GetDataset), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/create", api.DefaultHandler(CreateDataset))
+}
 
 // GetAllPublicDatasets godoc
 //
@@ -143,3 +157,8 @@ func (api *Api) CreateDataset(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, dataset, "Dataset and branches successfully created")
 }
+
+var GetAllPublicDatasets ServiceFunc = (*Api).GetAllPublicDatasets
+var GetAllDatasets ServiceFunc = (*Api).GetAllDatasets
+var GetDataset ServiceFunc = (*Api).GetDataset
+var CreateDataset ServiceFunc = (*Api).CreateDataset

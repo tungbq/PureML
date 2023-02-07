@@ -3,8 +3,23 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindDatasetBranchApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetBranchApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup.GET("/:datasetName/branch", api.DefaultHandler(GetDatasetAllBranches), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/branch/create", api.DefaultHandler(CreateDatasetBranch), middlewares.ValidateDataset)
+	datasetGroup.GET("/:datasetName/branch/:branchName", api.DefaultHandler(GetDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.POST("/:datasetName/branch/:branchName/update", api.DefaultHandler(UpdateDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.DELETE("/:datasetName/branch/:branchName/delete", api.DefaultHandler(DeleteDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+}
 
 // GetDatasetAllBranches godoc
 //
@@ -124,3 +139,9 @@ func (api *Api) UpdateDatasetBranch(request *models.Request) *models.Response {
 func (api *Api) DeleteDatasetBranch(request *models.Request) *models.Response {
 	return nil
 }
+
+var GetDatasetAllBranches ServiceFunc = (*Api).GetDatasetAllBranches
+var GetDatasetBranch ServiceFunc = (*Api).GetDatasetBranch
+var CreateDatasetBranch ServiceFunc = (*Api).CreateDatasetBranch
+var UpdateDatasetBranch ServiceFunc = (*Api).UpdateDatasetBranch
+var DeleteDatasetBranch ServiceFunc = (*Api).DeleteDatasetBranch

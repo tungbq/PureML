@@ -78,13 +78,14 @@ type ModelBranchVersionNameResponse struct {
 }
 
 type ModelBranchVersionResponse struct {
-	UUID    uuid.UUID               `json:"uuid"`
-	Version string                  `json:"version"`
-	Branch  ModelBranchNameResponse `json:"branch"`
-	Hash    string                  `json:"hash"`
-	Path    PathResponse            `json:"path"`
-	Logs    []LogDataResponse       `json:"logs"`
-	IsEmpty bool                    `json:"is_empty"`
+	UUID      uuid.UUID               `json:"uuid"`
+	Version   string                  `json:"version"`
+	Branch    ModelBranchNameResponse `json:"branch"`
+	Hash      string                  `json:"hash"`
+	Path      PathResponse            `json:"path"`
+	Logs      []LogDataResponse       `json:"logs"`
+	IsEmpty   bool                    `json:"is_empty"`
+	CreatedBy UserHandleResponse      `json:"created_by"`
 }
 
 type ModelReviewResponse struct {

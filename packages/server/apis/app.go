@@ -26,7 +26,7 @@ func Serve(app core.App, hideStartBanner bool) error {
 	httpAddr := config.GetHttpAddr()
 	httpsAddr := config.GetHttpsAddr()
 
-	router, err := InitApi(&app)
+	router, err := InitApi(app)
 	if err != nil {
 		panic(err)
 	}

@@ -3,8 +3,21 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindModelReadmeApi registers the admin api endpoints and the corresponding handlers.
+func BindModelReadmeApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup.GET("/:modelName/readme/version/:version", api.DefaultHandler(GetModelReadmeVersion), middlewares.ValidateModel)
+	modelGroup.GET("/:modelName/readme/version", api.DefaultHandler(GetModelReadmeAllVersions), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/readme", api.DefaultHandler(UpdateModelReadme), middlewares.ValidateModel)
+}
 
 // GetModelReadmeAllVersions godoc
 //
@@ -91,3 +104,7 @@ func (api *Api) UpdateModelReadme(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, readme, "Model readme updated")
 }
+
+var GetModelReadmeAllVersions ServiceFunc = (*Api).GetModelReadmeAllVersions
+var GetModelReadmeVersion ServiceFunc = (*Api).GetModelReadmeVersion
+var UpdateModelReadme ServiceFunc = (*Api).UpdateModelReadme

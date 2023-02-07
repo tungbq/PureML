@@ -5,9 +5,23 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindDatasetBranchVersionApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetBranchVersionApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup.POST("/:datasetName/branch/:branchName/hash-status", api.DefaultHandler(VerifyDatasetBranchHashStatus), middlewares.ValidateDataset)
+	datasetGroup.POST("/:datasetName/branch/:branchName/register", api.DefaultHandler(RegisterDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.GET("/:datasetName/branch/:branchName/version", api.DefaultHandler(GetDatasetBranchAllVersions), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version", api.DefaultHandler(GetDatasetBranchVersion), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch, middlewares.ValidateDatasetBranchVersion)
+}
 
 // GetDatasetBranchAllVersions godoc
 //
@@ -179,3 +193,8 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, datasetVersion, "Dataset successfully registered")
 }
+
+var GetDatasetBranchAllVersions ServiceFunc = (*Api).GetDatasetBranchAllVersions
+var GetDatasetBranchVersion ServiceFunc = (*Api).GetDatasetBranchVersion
+var VerifyDatasetBranchHashStatus ServiceFunc = (*Api).VerifyDatasetBranchHashStatus
+var RegisterDataset ServiceFunc = (*Api).RegisterDataset

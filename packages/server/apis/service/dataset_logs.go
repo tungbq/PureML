@@ -3,8 +3,21 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindDatasetLogsApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetLogsApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version/log", api.DefaultHandler(GetAllLogsDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch, middlewares.ValidateDatasetBranchVersion)
+	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version/log/:key", api.DefaultHandler(GetKeyLogsDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch, middlewares.ValidateDatasetBranchVersion)
+	datasetGroup.POST("/:datasetName/branch/:branchName/version/:version/log", api.DefaultHandler(LogDataset), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch, middlewares.ValidateDatasetBranchVersion)
+}
 
 // LogDataset godoc
 //
@@ -95,3 +108,7 @@ func (api *Api) GetKeyLogsDataset(request *models.Request) *models.Response {
 	response := models.NewDataResponse(http.StatusOK, result, "Specific Key Logs for dataset version")
 	return response
 }
+
+var LogDataset ServiceFunc = (*Api).LogDataset
+var GetAllLogsDataset ServiceFunc = (*Api).GetAllLogsDataset
+var GetKeyLogsDataset ServiceFunc = (*Api).GetKeyLogsDataset

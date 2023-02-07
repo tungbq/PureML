@@ -4,10 +4,24 @@ import (
 	_ "fmt"
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
 
 var defaultModelBranchNames = []string{"main", "development"}
+
+// BindModelApi registers the admin api endpoints and the corresponding handlers.
+func BindModelApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	rg.GET("/public/model", api.DefaultHandler(GetAllPublicModels))
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup.GET("/all", api.DefaultHandler(GetAllModels))
+	modelGroup.GET("/:modelName", api.DefaultHandler(GetModel), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/create", api.DefaultHandler(CreateModel))
+}
 
 // GetAllPublicModels godoc
 //
@@ -143,3 +157,8 @@ func (api *Api) CreateModel(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, model, "Model and branches successfully created")
 }
+
+var GetAllPublicModels ServiceFunc = (*Api).GetAllPublicModels
+var GetAllModels ServiceFunc = (*Api).GetAllModels
+var GetModel ServiceFunc = (*Api).GetModel
+var CreateModel ServiceFunc = (*Api).CreateModel

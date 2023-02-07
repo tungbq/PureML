@@ -5,9 +5,25 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindModelBranchVersionApi registers the admin api endpoints and the corresponding handlers.
+func BindModelBranchVersionApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup.POST("/:modelName/branch/:branchName/update", api.DefaultHandler(UpdateModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.POST("/:modelName/branch/:branchName/hash-status", api.DefaultHandler(VerifyModelBranchHashStatus), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/branch/:branchName/register", api.DefaultHandler(RegisterModel), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.DELETE("/:modelName/branch/:branchName/delete", api.DefaultHandler(DeleteModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.GET("/:modelName/branch/:branchName/version", api.DefaultHandler(GetModelBranchAllVersions), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version", api.DefaultHandler(GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
+}
 
 // GetModelBranchAllVersions godoc
 //
@@ -177,3 +193,8 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, modelVersion, "Model successfully registered")
 }
+
+var GetModelBranchAllVersions ServiceFunc = (*Api).GetModelBranchAllVersions
+var GetModelBranchVersion ServiceFunc = (*Api).GetModelBranchVersion
+var VerifyModelBranchHashStatus ServiceFunc = (*Api).VerifyModelBranchHashStatus
+var RegisterModel ServiceFunc = (*Api).RegisterModel

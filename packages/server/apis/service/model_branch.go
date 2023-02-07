@@ -3,8 +3,21 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindModelBranchApi registers the admin api endpoints and the corresponding handlers.
+func BindModelBranchApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup.GET("/:modelName/branch", api.DefaultHandler(GetModelAllBranches), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/branch/create", api.DefaultHandler(CreateModelBranch), middlewares.ValidateModel)
+	modelGroup.GET("/:modelName/branch/:branchName", api.DefaultHandler(GetModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
+}
 
 // GetModelAllBranches godoc
 //
@@ -124,3 +137,9 @@ func (api *Api) UpdateModelBranch(request *models.Request) *models.Response {
 func (api *Api) DeleteModelBranch(request *models.Request) *models.Response {
 	return nil
 }
+
+var GetModelAllBranches ServiceFunc = (*Api).GetModelAllBranches
+var GetModelBranch ServiceFunc = (*Api).GetModelBranch
+var CreateModelBranch ServiceFunc = (*Api).CreateModelBranch
+var UpdateModelBranch ServiceFunc = (*Api).UpdateModelBranch
+var DeleteModelBranch ServiceFunc = (*Api).DeleteModelBranch

@@ -3,9 +3,22 @@ package service
 import (
 	"net/http"
 
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindModelReviewApi registers the admin api endpoints and the corresponding handlers.
+func BindModelReviewApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
+	modelGroup.GET("/:modelName/review", api.DefaultHandler(GetModelReviews), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/review/create", api.DefaultHandler(CreateModelReview), middlewares.ValidateModel)
+	modelGroup.POST("/:modelName/review/:reviewId/update", api.DefaultHandler(UpdateModelReview), middlewares.ValidateModel)
+}
 
 // GetModelReviews godoc
 //
@@ -166,3 +179,7 @@ func (api *Api) UpdateModelReview(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, []models.ModelReviewResponse{*updatedDbReview}, "Model review updated")
 }
+
+var GetModelReviews ServiceFunc = (*Api).GetModelReviews
+var CreateModelReview ServiceFunc = (*Api).CreateModelReview
+var UpdateModelReview ServiceFunc = (*Api).UpdateModelReview
