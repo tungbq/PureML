@@ -74,8 +74,8 @@ func NewSQLiteDatastore(optDataDir ...string) *Datastore {
 	}
 }
 
-func NewPostgresDatastore() *Datastore {
-	dsn := config.GetDatabaseURL()
+func NewPostgresDatastore(databaseUrl string) *Datastore {
+	dsn := databaseUrl
 	// fmt.Println(dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

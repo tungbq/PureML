@@ -16,13 +16,13 @@ import (
 func BindModelBranchVersionApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	modelGroup.POST("/:modelName/branch/:branchName/update", api.DefaultHandler(UpdateModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
-	modelGroup.POST("/:modelName/branch/:branchName/hash-status", api.DefaultHandler(VerifyModelBranchHashStatus), middlewares.ValidateModel)
-	modelGroup.POST("/:modelName/branch/:branchName/register", api.DefaultHandler(RegisterModel), middlewares.ValidateModel, middlewares.ValidateModelBranch)
-	modelGroup.DELETE("/:modelName/branch/:branchName/delete", api.DefaultHandler(DeleteModelBranch), middlewares.ValidateModel, middlewares.ValidateModelBranch)
-	modelGroup.GET("/:modelName/branch/:branchName/version", api.DefaultHandler(GetModelBranchAllVersions), middlewares.ValidateModel, middlewares.ValidateModelBranch)
-	modelGroup.GET("/:modelName/branch/:branchName/version/:version", api.DefaultHandler(GetModelBranchVersion), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	modelGroup.POST("/:modelName/branch/:branchName/update", api.DefaultHandler(UpdateModelBranch), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
+	modelGroup.POST("/:modelName/branch/:branchName/hash-status", api.DefaultHandler(VerifyModelBranchHashStatus), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/branch/:branchName/register", api.DefaultHandler(RegisterModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
+	modelGroup.DELETE("/:modelName/branch/:branchName/delete", api.DefaultHandler(DeleteModelBranch), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
+	modelGroup.GET("/:modelName/branch/:branchName/version", api.DefaultHandler(GetModelBranchAllVersions), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version", api.DefaultHandler(GetModelBranchVersion), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
 }
 
 // GetModelBranchAllVersions godoc

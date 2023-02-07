@@ -1,12 +1,14 @@
 package main
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/PureML-Inc/PureML/server/apis"
 	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/config"
 )
 
 //	@contact.name	API Support
@@ -20,6 +22,20 @@ import (
 // @in							header
 // @name						Authorization
 // @description				Header for logged in user format: Bearer {token}
+
+func main() {
+	app := NewWithConfig(&Config{
+		DefaultDebug: true,
+		DatabaseType: config.GetDatabaseType(),
+		DatabaseUrl:  config.GetDatabaseURL(),
+	})
+	if err := app.Bootstrap(); err != nil {
+		log.Fatal(err)
+	}
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
+}
 
 var _ core.App = (*PureBackend)(nil)
 
@@ -48,6 +64,8 @@ type Config struct {
 	// optional default values for the console flags
 	DefaultDebug   bool
 	DefaultDataDir string // if not set, it will fallback to "./pureml_data"
+	DatabaseType   string // if not set, it will fallback to "sqlite3"
+	DatabaseUrl    string // if not set, it will fallback to "file:./pureml_data/pureml.db"
 
 	// hide the default console server info on app startup
 	HideStartBanner bool
@@ -84,7 +102,7 @@ func NewWithConfig(config *Config) *PureBackend {
 	// initialize a default data directory based on the executable baseDir
 	if config.DefaultDataDir == "" {
 		baseDir, _ := inspectRuntime()
-		config.DefaultDataDir = filepath.Join(baseDir, "pb_data")
+		config.DefaultDataDir = filepath.Join(baseDir, "pureml_data")
 	}
 
 	pb := &PureBackend{
@@ -95,8 +113,10 @@ func NewWithConfig(config *Config) *PureBackend {
 
 	// initialize the app instance
 	pb.appWrapper = &appWrapper{core.NewBaseApp(&core.BaseAppConfig{
-		DataDir: pb.dataDirFlag,
-		IsDebug: pb.debugFlag,
+		DataDir:      pb.dataDirFlag,
+		IsDebug:      pb.debugFlag,
+		DatabaseType: config.DatabaseType,
+		DatabaseUrl:  config.DatabaseUrl,
 	})}
 
 	return pb

@@ -45,7 +45,7 @@ type DatasetVersion struct {
 	BranchUUID  uuid.UUID     `json:"branch_uuid" gorm:"type:uuid;not null;index:idx_dataset_branch_version,unique;index:idx_dataset_branch_hash,unique"`
 	LineageUUID uuid.NullUUID `json:"lineage_uuid" gorm:"type:uuid;"`
 	PathUUID    uuid.NullUUID `json:"path_uuid" gorm:"type:uuid;"`
-	CreatedBy   uuid.UUID     `json:"created_by" gorm:"type:uuid;not null"`
+	CreatedBy   uuid.UUID     `json:"created_by" gorm:"type:uuid;"`
 
 	Branch        DatasetBranch `gorm:"foreignKey:BranchUUID"`
 	Lineage       Lineage       `gorm:"foreignKey:LineageUUID"`

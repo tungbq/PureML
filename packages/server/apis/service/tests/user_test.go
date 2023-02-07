@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (api *Api) TestUserSignUp(t *testing.T) {
+func TestUserSignUp(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
 			Name:           "unauthorized",
@@ -107,9 +107,9 @@ func (api *Api) TestUserSignUp(t *testing.T) {
 				"name":"test",
 				"password":"test"
 			}`),
-			BeforeTestFunc: func(t *testing.T, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
 				// Create user
-				_, err := api.app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.")
+				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.")
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -129,9 +129,9 @@ func (api *Api) TestUserSignUp(t *testing.T) {
 				"name":"test",
 				"password":"test"
 			}`),
-			BeforeTestFunc: func(t *testing.T, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
 				// Delete user if exists
-				err := api.app.Dao().ExecuteSQL(fmt.Sprintf("DELETE FROM users WHERE email = '%s'", "test@test.com"))
+				err := app.Dao().ExecuteSQL(fmt.Sprintf("DELETE FROM users WHERE email = '%s'", "test@test.com"))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -153,7 +153,7 @@ func (api *Api) TestUserSignUp(t *testing.T) {
 	}
 }
 
-func (api *Api) TestUserLogin(t *testing.T) {
+func TestUserLogin(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
 			Name:   "login + no email & no handle",
@@ -271,16 +271,16 @@ func (api *Api) TestUserLogin(t *testing.T) {
 }
 
 // TODO
-func (api *Api) TestUserResetPassword(t *testing.T) {
+func TestUserResetPassword(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUserForgotPassword(t *testing.T) {
+func TestUserForgotPassword(t *testing.T) {
 	return
 }
 
-func (api *Api) TestGetProfile(t *testing.T) {
+func TestGetProfile(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
 			Name:           "get profile + unauthorized",
@@ -353,16 +353,16 @@ func (api *Api) TestGetProfile(t *testing.T) {
 }
 
 // TODO
-func (api *Api) TestGetProfileByHandle(t *testing.T) {
+func TestGetProfileByHandle(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUpdateProfile(t *testing.T) {
+func TestUpdateProfile(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestDeleteProfile(t *testing.T) {
+func TestDeleteProfile(t *testing.T) {
 	return
 }

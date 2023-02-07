@@ -3,13 +3,14 @@ package middlewares
 import (
 	"net/http"
 
-	ds "github.com/PureML-Inc/PureML/server/daos"
+	"github.com/PureML-Inc/PureML/server/core"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
 
-func ValidateDataset(next echo.HandlerFunc) echo.HandlerFunc {
+func ValidateDataset(app core.App) func(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
 		datasetName := context.Param("datasetName")
 		orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
@@ -18,7 +19,7 @@ func ValidateDataset(next echo.HandlerFunc) echo.HandlerFunc {
 			context.Response().Writer.Write([]byte("Dataset name required"))
 			return nil
 		}
-		dataset, err := ds.GetDatasetByName(orgId, datasetName)
+		dataset, err := app.Dao().GetDatasetByName(orgId, datasetName)
 		if err != nil {
 			context.Response().WriteHeader(http.StatusInternalServerError)
 			context.Response().Writer.Write([]byte(err.Error()))
@@ -35,4 +36,5 @@ func ValidateDataset(next echo.HandlerFunc) echo.HandlerFunc {
 		})
 		return next(context)
 	}
+}
 }

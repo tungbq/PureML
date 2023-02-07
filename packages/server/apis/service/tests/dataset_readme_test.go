@@ -5,16 +5,16 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetDatasetReadmeAllVersions(t *testing.T) {
+func TestGetDatasetReadmeAllVersions(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetDatasetReadmeVersion(t *testing.T) {
+func TestGetDatasetReadmeVersion(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUpdateDatasetReadme(t *testing.T) {
+func TestUpdateDatasetReadme(t *testing.T) {
 	return
 }

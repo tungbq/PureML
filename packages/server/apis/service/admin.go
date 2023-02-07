@@ -15,7 +15,7 @@ import (
 func BindAdminApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT)
+	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT(api.app))
 	orgGroup.GET("/all", api.DefaultHandler(GetAllAdminOrgs))
 }
 

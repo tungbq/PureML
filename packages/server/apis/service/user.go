@@ -17,9 +17,9 @@ func BindUserApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
 	userGroup := rg.Group("/user")
-	userGroup.GET("/profile", api.DefaultHandler(GetProfile), middlewares.AuthenticateJWT)
+	userGroup.GET("/profile", api.DefaultHandler(GetProfile), middlewares.AuthenticateJWT(api.app))
 	userGroup.GET("/profile/:userHandle", api.DefaultHandler(GetProfileByHandle))
-	userGroup.POST("/profile", api.DefaultHandler(UpdateProfile), middlewares.AuthenticateJWT)
+	userGroup.POST("/profile", api.DefaultHandler(UpdateProfile), middlewares.AuthenticateJWT(api.app))
 	userGroup.POST("/signup", api.DefaultHandler(UserSignUp))
 	userGroup.POST("/login", api.DefaultHandler(UserLogin))
 	userGroup.POST("/forgot-password", api.DefaultHandler(UserForgotPassword))

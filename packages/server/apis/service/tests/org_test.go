@@ -5,31 +5,31 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetOrgByHandle(t *testing.T) {
+func TestGetOrgByHandle(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetOrgByID(t *testing.T) {
+func TestGetOrgByID(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetOrgAllPublicModels(t *testing.T) {
+func TestGetOrgAllPublicModels(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetOrgAllPublicDatasets(t *testing.T) {
+func TestGetOrgAllPublicDatasets(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestCreateOrg(t *testing.T) {
+func TestCreateOrg(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUpdateOrg(t *testing.T) {
+func TestUpdateOrg(t *testing.T) {
 	return
 }

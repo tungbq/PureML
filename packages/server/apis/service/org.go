@@ -15,12 +15,12 @@ func BindOrgApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
 	rg.GET("/org/handle/:orgHandle", api.DefaultHandler(GetOrgByHandle))
-	rg.GET("/org/:orgId/public/model", api.DefaultHandler(GetOrgAllPublicModels), middlewares.ValidateOrg)
-	rg.GET("/org/:orgId/public/dataset", api.DefaultHandler(GetOrgAllPublicDatasets), middlewares.ValidateOrg)
-	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT)
-	orgGroup.GET("/id/:orgId", api.DefaultHandler(GetOrgByID), middlewares.ValidateOrg)
+	rg.GET("/org/:orgId/public/model", api.DefaultHandler(GetOrgAllPublicModels), middlewares.ValidateOrg(api.app))
+	rg.GET("/org/:orgId/public/dataset", api.DefaultHandler(GetOrgAllPublicDatasets), middlewares.ValidateOrg(api.app))
+	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT(api.app))
+	orgGroup.GET("/id/:orgId", api.DefaultHandler(GetOrgByID), middlewares.ValidateOrg(api.app))
 	orgGroup.POST("/create", api.DefaultHandler(CreateOrg))
-	orgGroup.POST("/:orgId/update", api.DefaultHandler(UpdateOrg), middlewares.ValidateOrg)
+	orgGroup.POST("/:orgId/update", api.DefaultHandler(UpdateOrg), middlewares.ValidateOrg(api.app))
 }
 
 // GetOrgByHandle godoc

@@ -5,21 +5,21 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetDatasetActivity(t *testing.T) {
+func TestGetDatasetActivity(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestCreateDatasetActivity(t *testing.T) {
+func TestCreateDatasetActivity(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUpdateDatasetActivity(t *testing.T) {
+func TestUpdateDatasetActivity(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestDeleteDatasetActivity(t *testing.T) {
+func TestDeleteDatasetActivity(t *testing.T) {
 	return
 }

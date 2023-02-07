@@ -5,21 +5,21 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetModelBranchAllVersions(t *testing.T) {
+func TestGetModelBranchAllVersions(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetModelBranchVersion(t *testing.T) {
+func TestGetModelBranchVersion(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestVerifyModelBranchHashStatus(t *testing.T) {
+func TestVerifyModelBranchHashStatus(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestRegisterModel(t *testing.T) {
+func TestRegisterModel(t *testing.T) {
 	return
 }

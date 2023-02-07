@@ -13,10 +13,10 @@ import (
 func BindModelLogsApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log", api.DefaultHandler(GetAllLogsModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
-	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log/:key", api.DefaultHandler(GetKeyLogsModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
-	modelGroup.POST("/:modelName/branch/:branchName/version/:version/log", api.DefaultHandler(LogModel), middlewares.ValidateModel, middlewares.ValidateModelBranch, middlewares.ValidateModelBranchVersion)
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log", api.DefaultHandler(GetAllLogsModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log/:key", api.DefaultHandler(GetKeyLogsModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
+	modelGroup.POST("/:modelName/branch/:branchName/version/:version/log", api.DefaultHandler(LogModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
 }
 
 // LogModel godoc

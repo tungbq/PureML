@@ -14,11 +14,11 @@ import (
 func BindModelActivityApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	modelGroup.GET("/:modelName/activity/:category", api.DefaultHandler(GetModelActivity), middlewares.ValidateModel)
-	modelGroup.POST("/:modelName/activity/:category", api.DefaultHandler(CreateModelActivity), middlewares.ValidateModel)
-	modelGroup.POST("/:modelName/activity/:category/:activityUUID", api.DefaultHandler(UpdateModelActivity), middlewares.ValidateModel)
-	modelGroup.DELETE("/:modelName/activity/:category/:activityUUID/delete", api.DefaultHandler(DeleteModelActivity), middlewares.ValidateModel)
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	modelGroup.GET("/:modelName/activity/:category", api.DefaultHandler(GetModelActivity), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/activity/:category", api.DefaultHandler(CreateModelActivity), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/activity/:category/:activityUUID", api.DefaultHandler(UpdateModelActivity), middlewares.ValidateModel(api.app))
+	modelGroup.DELETE("/:modelName/activity/:category/:activityUUID/delete", api.DefaultHandler(DeleteModelActivity), middlewares.ValidateModel(api.app))
 }
 
 // GetModelActivity godoc

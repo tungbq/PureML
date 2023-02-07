@@ -12,14 +12,16 @@ type Dao struct {
 	datastore *impl.Datastore
 }
 
-func InitDB(databaseType string) (*Dao, error) {
-	var dao *Dao
+func InitDB(dataDir string, databaseType string, databaseUrl string) (*Dao, error) {
+	dao := &Dao{
+		datastore: nil,
+	}
 	if databaseType == "sqlite3" {
 		//SQLite3 db
-		dao.datastore = impl.NewSQLiteDatastore()
+		dao.datastore = impl.NewSQLiteDatastore(dataDir)
 	} else if databaseType == "postgres" {
 		//Postgres db
-		dao.datastore = impl.NewPostgresDatastore()
+		dao.datastore = impl.NewPostgresDatastore(databaseUrl)
 	}
 	return dao, nil
 }

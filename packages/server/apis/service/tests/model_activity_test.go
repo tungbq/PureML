@@ -5,21 +5,21 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetModelActivity(t *testing.T) {
+func TestGetModelActivity(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestCreateModelActivity(t *testing.T) {
+func TestCreateModelActivity(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUpdateModelActivity(t *testing.T) {
+func TestUpdateModelActivity(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestDeleteModelActivity(t *testing.T) {
+func TestDeleteModelActivity(t *testing.T) {
 	return
 }

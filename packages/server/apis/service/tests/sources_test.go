@@ -5,31 +5,31 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetR2Secret(t *testing.T) {
+func TestGetR2Secret(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetS3Secret(t *testing.T) {
+func TestGetS3Secret(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestConnectR2Secret(t *testing.T) {
+func TestConnectR2Secret(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestConnectS3Secret(t *testing.T) {
+func TestConnectS3Secret(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestDeleteR2Secrets(t *testing.T) {
+func TestDeleteR2Secrets(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestDeleteS3Secrets(t *testing.T) {
+func TestDeleteS3Secrets(t *testing.T) {
 	return
 }

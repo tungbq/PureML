@@ -5,16 +5,16 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetModelReviews(t *testing.T) {
+func TestGetModelReviews(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestCreateModelReview(t *testing.T) {
+func TestCreateModelReview(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUpdateModelReview(t *testing.T) {
+func TestUpdateModelReview(t *testing.T) {
 	return
 }

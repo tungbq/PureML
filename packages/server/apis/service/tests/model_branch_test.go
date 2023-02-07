@@ -5,26 +5,26 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetModelAllBranches(t *testing.T) {
+func TestGetModelAllBranches(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetModelBranch(t *testing.T) {
+func TestGetModelBranch(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestCreateModelBranch(t *testing.T) {
+func TestCreateModelBranch(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUpdateModelBranch(t *testing.T) {
+func TestUpdateModelBranch(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestDeleteModelBranch(t *testing.T) {
+func TestDeleteModelBranch(t *testing.T) {
 	return
 }

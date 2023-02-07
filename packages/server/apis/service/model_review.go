@@ -14,10 +14,10 @@ import (
 func BindModelReviewApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	modelGroup.GET("/:modelName/review", api.DefaultHandler(GetModelReviews), middlewares.ValidateModel)
-	modelGroup.POST("/:modelName/review/create", api.DefaultHandler(CreateModelReview), middlewares.ValidateModel)
-	modelGroup.POST("/:modelName/review/:reviewId/update", api.DefaultHandler(UpdateModelReview), middlewares.ValidateModel)
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	modelGroup.GET("/:modelName/review", api.DefaultHandler(GetModelReviews), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/review/create", api.DefaultHandler(CreateModelReview), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/review/:reviewId/update", api.DefaultHandler(UpdateModelReview), middlewares.ValidateModel(api.app))
 }
 
 // GetModelReviews godoc

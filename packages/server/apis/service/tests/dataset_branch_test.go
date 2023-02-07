@@ -5,26 +5,26 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetDatasetAllBranches(t *testing.T) {
+func TestGetDatasetAllBranches(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetDatasetBranch(t *testing.T) {
+func TestGetDatasetBranch(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestCreateDatasetBranch(t *testing.T) {
+func TestCreateDatasetBranch(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestUpdateDatasetBranch(t *testing.T) {
+func TestUpdateDatasetBranch(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestDeleteDatasetBranch(t *testing.T) {
+func TestDeleteDatasetBranch(t *testing.T) {
 	return
 }

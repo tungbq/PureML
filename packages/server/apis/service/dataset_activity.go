@@ -14,11 +14,11 @@ import (
 func BindDatasetActivityApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	datasetGroup.GET("/:datasetName/activity/:category", api.DefaultHandler(GetDatasetActivity), middlewares.ValidateDataset)
-	datasetGroup.POST("/:datasetName/activity/:category", api.DefaultHandler(CreateDatasetActivity), middlewares.ValidateDataset)
-	datasetGroup.POST("/:datasetName/activity/:category/:activityUUID", api.DefaultHandler(UpdateDatasetActivity), middlewares.ValidateDataset)
-	datasetGroup.DELETE("/:datasetName/activity/:category/:activityUUID/delete", api.DefaultHandler(DeleteDatasetActivity), middlewares.ValidateDataset)
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	datasetGroup.GET("/:datasetName/activity/:category", api.DefaultHandler(GetDatasetActivity), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/activity/:category", api.DefaultHandler(CreateDatasetActivity), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/activity/:category/:activityUUID", api.DefaultHandler(UpdateDatasetActivity), middlewares.ValidateDataset(api.app))
+	datasetGroup.DELETE("/:datasetName/activity/:category/:activityUUID/delete", api.DefaultHandler(DeleteDatasetActivity), middlewares.ValidateDataset(api.app))
 }
 
 // GetDatasetActivity godoc

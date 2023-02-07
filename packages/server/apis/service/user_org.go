@@ -14,12 +14,12 @@ import (
 func BindUserOrgApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT)
+	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT(api.app))
 	orgGroup.GET("/", api.DefaultHandler(GetOrgsForUser))
-	orgGroup.POST("/:orgId/add", api.DefaultHandler(AddUsersToOrg), middlewares.ValidateOrg)
+	orgGroup.POST("/:orgId/add", api.DefaultHandler(AddUsersToOrg), middlewares.ValidateOrg(api.app))
 	orgGroup.POST("/join", api.DefaultHandler(JoinOrg))
-	orgGroup.POST("/:orgId/remove", api.DefaultHandler(RemoveOrg), middlewares.ValidateOrg)
-	orgGroup.POST("/:orgId/leave", api.DefaultHandler(LeaveOrg), middlewares.ValidateOrg)
+	orgGroup.POST("/:orgId/remove", api.DefaultHandler(RemoveOrg), middlewares.ValidateOrg(api.app))
+	orgGroup.POST("/:orgId/leave", api.DefaultHandler(LeaveOrg), middlewares.ValidateOrg(api.app))
 }
 
 // GetOrgsForUser godoc

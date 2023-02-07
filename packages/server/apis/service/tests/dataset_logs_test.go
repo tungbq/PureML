@@ -5,16 +5,16 @@ import (
 )
 
 // TODO
-func (api *Api) TestLogDataset(t *testing.T) {
+func TestLogDataset(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetAllLogsDataset(t *testing.T) {
+func TestGetAllLogsDataset(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestGetKeyLogsDataset(t *testing.T) {
+func TestGetKeyLogsDataset(t *testing.T) {
 	return
 }

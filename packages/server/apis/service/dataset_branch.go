@@ -13,12 +13,12 @@ import (
 func BindDatasetBranchApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	datasetGroup.GET("/:datasetName/branch", api.DefaultHandler(GetDatasetAllBranches), middlewares.ValidateDataset)
-	datasetGroup.POST("/:datasetName/branch/create", api.DefaultHandler(CreateDatasetBranch), middlewares.ValidateDataset)
-	datasetGroup.GET("/:datasetName/branch/:branchName", api.DefaultHandler(GetDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
-	datasetGroup.POST("/:datasetName/branch/:branchName/update", api.DefaultHandler(UpdateDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
-	datasetGroup.DELETE("/:datasetName/branch/:branchName/delete", api.DefaultHandler(DeleteDatasetBranch), middlewares.ValidateDataset, middlewares.ValidateDatasetBranch)
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	datasetGroup.GET("/:datasetName/branch", api.DefaultHandler(GetDatasetAllBranches), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/branch/create", api.DefaultHandler(CreateDatasetBranch), middlewares.ValidateDataset(api.app))
+	datasetGroup.GET("/:datasetName/branch/:branchName", api.DefaultHandler(GetDatasetBranch), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app))
+	datasetGroup.POST("/:datasetName/branch/:branchName/update", api.DefaultHandler(UpdateDatasetBranch), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app))
+	datasetGroup.DELETE("/:datasetName/branch/:branchName/delete", api.DefaultHandler(DeleteDatasetBranch), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app))
 }
 
 // GetDatasetAllBranches godoc

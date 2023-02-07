@@ -4,12 +4,13 @@ import (
 	_ "fmt"
 	"net/http"
 
-	ds "github.com/PureML-Inc/PureML/server/daos"
+	"github.com/PureML-Inc/PureML/server/core"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/labstack/echo/v4"
 )
 
-func ValidateDatasetBranchVersion(next echo.HandlerFunc) echo.HandlerFunc {
+func ValidateDatasetBranchVersion(app core.App) func(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
 		datasetBranchVersion := context.Param("version")
 		datasetBranchUUID := context.Get("DatasetBranch").(*models.DatasetBranchNameResponse).UUID
@@ -18,7 +19,7 @@ func ValidateDatasetBranchVersion(next echo.HandlerFunc) echo.HandlerFunc {
 			context.Response().Writer.Write([]byte("Version required"))
 			return nil
 		}
-		version, err := ds.GetDatasetBranchVersion(datasetBranchUUID, datasetBranchVersion)
+		version, err := app.Dao().GetDatasetBranchVersion(datasetBranchUUID, datasetBranchVersion)
 		if err != nil {
 			context.Response().WriteHeader(http.StatusInternalServerError)
 			context.Response().Writer.Write([]byte(err.Error()))
@@ -35,4 +36,5 @@ func ValidateDatasetBranchVersion(next echo.HandlerFunc) echo.HandlerFunc {
 		})
 		return next(context)
 	}
+}
 }

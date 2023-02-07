@@ -14,10 +14,10 @@ import (
 func BindDatasetReviewApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	datasetGroup.GET("/:datasetName/review", api.DefaultHandler(GetDatasetReviews), middlewares.ValidateDataset)
-	datasetGroup.POST("/:datasetName/review/create", api.DefaultHandler(CreateDatasetReview), middlewares.ValidateDataset)
-	datasetGroup.POST("/:datasetName/review/:reviewId/update", api.DefaultHandler(UpdateDatasetReview), middlewares.ValidateDataset)
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	datasetGroup.GET("/:datasetName/review", api.DefaultHandler(GetDatasetReviews), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/review/create", api.DefaultHandler(CreateDatasetReview), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/review/:reviewId/update", api.DefaultHandler(UpdateDatasetReview), middlewares.ValidateDataset(api.app))
 }
 
 // GetDatasetReviews godoc

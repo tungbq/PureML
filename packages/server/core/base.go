@@ -35,6 +35,7 @@ type BaseApp struct {
 	isDebug      bool
 	dataDir      string
 	databaseType string
+	databaseUrl  string
 
 	// internals
 	settings *settings.Settings
@@ -46,6 +47,7 @@ type BaseAppConfig struct {
 	DataDir      string
 	IsDebug      bool
 	DatabaseType string
+	DatabaseUrl  string
 }
 
 // NewBaseApp creates and returns a new BaseApp instance
@@ -57,7 +59,8 @@ func NewBaseApp(appConfig *BaseAppConfig) *BaseApp {
 		dataDir:      appConfig.DataDir,
 		isDebug:      appConfig.IsDebug,
 		settings:     settings.New(),
-		databaseType: config.GetDatabaseType(),
+		databaseType: appConfig.DatabaseType,
+		databaseUrl:  appConfig.DatabaseUrl,
 	}
 
 	return app
@@ -119,10 +122,16 @@ func (app *BaseApp) DataDir() string {
 	return app.dataDir
 }
 
-// DatabaseType returns the app data directory path.
+// DatabaseType returns the database type (eg. "sqlite3").
 func (app *BaseApp) DatabaseType() string {
 	return app.databaseType
 }
+
+// DatabaseUrl returns the database connection url.
+func (app *BaseApp) DatabaseUrl() string {
+	return app.databaseUrl
+}
+
 
 // IsDebug returns whether the app is in debug mode
 // (showing more detailed error logs, executed sql statements, etc.).
@@ -157,7 +166,7 @@ func (app *BaseApp) NewFilesystem() (*filesystem.System, error) {
 }
 
 func (app *BaseApp) initDataDB() error {
-	dao, err := daos.InitDB(app.DatabaseType())
+	dao, err := daos.InitDB(app.DataDir(), app.DatabaseType(), app.DatabaseUrl())
 	if err != nil {
 		return err
 	}

@@ -5,26 +5,26 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetOrgsForUser(t *testing.T) {
+func TestGetOrgsForUser(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestAddUsersToOrg(t *testing.T) {
+func TestAddUsersToOrg(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestJoinOrg(t *testing.T) {
+func TestJoinOrg(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestLeaveOrg(t *testing.T) {
+func TestLeaveOrg(t *testing.T) {
 	return
 }
 
 // TODO
-func (api *Api) TestRemoveOrg(t *testing.T) {
+func TestRemoveOrg(t *testing.T) {
 	return
 }

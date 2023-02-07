@@ -5,6 +5,6 @@ import (
 )
 
 // TODO
-func (api *Api) TestGetAllAdminOrgs(t *testing.T) {
+func TestGetAllAdminOrgs(t *testing.T) {
 	return
 }

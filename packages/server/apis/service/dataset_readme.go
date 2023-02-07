@@ -13,10 +13,10 @@ import (
 func BindDatasetReadmeApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT, middlewares.ValidateOrg)
-	datasetGroup.GET("/:datasetName/readme/version/:version", api.DefaultHandler(GetDatasetReadmeVersion), middlewares.ValidateDataset)
-	datasetGroup.GET("/:datasetName/readme/version", api.DefaultHandler(GetDatasetReadmeAllVersions), middlewares.ValidateDataset)
-	datasetGroup.POST("/:datasetName/readme", api.DefaultHandler(UpdateDatasetReadme), middlewares.ValidateDataset)
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	datasetGroup.GET("/:datasetName/readme/version/:version", api.DefaultHandler(GetDatasetReadmeVersion), middlewares.ValidateDataset(api.app))
+	datasetGroup.GET("/:datasetName/readme/version", api.DefaultHandler(GetDatasetReadmeAllVersions), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/readme", api.DefaultHandler(UpdateDatasetReadme), middlewares.ValidateDataset(api.app))
 }
 
 // GetDatasetReadmeAllVersions godoc
