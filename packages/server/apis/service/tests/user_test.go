@@ -13,25 +13,6 @@ import (
 func TestUserSignUp(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
-			Name:           "unauthorized",
-			Method:         http.MethodGet,
-			Url:            "/api/user/profile",
-			ExpectedStatus: 401,
-			ExpectedContent: []string{
-				"Authentication token required",
-			},
-		},
-		{
-			Name:           "user does not exist",
-			Method:         http.MethodGet,
-			Url:            "/api/user/profile/test",
-			ExpectedStatus: 200,
-			ExpectedContent: []string{
-				`"status":200`,
-				`"data":null`,
-			},
-		},
-		{
 			Name:   "signup + no email",
 			Method: http.MethodPost,
 			Url:    "/api/user/signup",
@@ -292,18 +273,6 @@ func TestGetProfile(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get profile + invalid token format",
-			Method: http.MethodGet,
-			Url:    "/api/user/profile",
-			RequestHeaders: map[string]string{
-				"Authorization": InvalidTokenFormat,
-			},
-			ExpectedStatus: 401,
-			ExpectedContent: []string{
-				`Invalid authentication token format`,
-			},
-		},
-		{
 			Name:   "get profile + invalid token",
 			Method: http.MethodGet,
 			Url:    "/api/user/profile",
@@ -324,7 +293,7 @@ func TestGetProfile(t *testing.T) {
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`"User not found"`,
+				`User not found`,
 			},
 		},
 		{
@@ -332,7 +301,7 @@ func TestGetProfile(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidToken,
+				"Authorization": ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
@@ -354,12 +323,231 @@ func TestGetProfile(t *testing.T) {
 
 // TODO
 func TestGetProfileByHandle(t *testing.T) {
-	return
+	scenarios := []tests.ApiScenario{
+		{
+			Name:           "get profile by handle + unauthorized + user not found",
+			Method:         http.MethodGet,
+			Url:            "/api/user/profile/noone",
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":null`,
+				`"message":"Public User profile"`,
+			},
+		},
+		{
+			Name:           "get profile by handle + unauthorized + user found",
+			Method:         http.MethodGet,
+			Url:            "/api/user/profile/demo",
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":[{`,
+				`"email":"demo@aztlan.in"`,
+				`"handle":"demo"`,
+				`"name":"Demo User"`,
+				`"message":"Public User profile"`,
+			},
+		},
+		{
+			Name:   "get profile by handle + invalid token",
+			Method: http.MethodGet,
+			Url:    "/api/user/profile/demo",
+			RequestHeaders: map[string]string{
+				"Authorization": InvalidToken,
+			},
+			ExpectedStatus: 403,
+			ExpectedContent: []string{
+				`Could not parse authentication token`,
+			},
+		},
+		{
+			Name:   "get profile by handle + valid token + user not found",
+			Method: http.MethodGet,
+			Url:    "/api/user/profile/noone",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidTokenNoUser,
+			},
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":null`,
+				`"message":"Public User profile"`,
+			},
+		},
+		{
+			Name:   "get profile + valid token + user found",
+			Method: http.MethodGet,
+			Url:    "/api/user/profile/demo",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":[{`,
+				`"email":"demo@aztlan.in"`,
+				`"handle":"demo"`,
+				`"name":"Demo User"`,
+				`"message":"Public User profile"`,
+			},
+		},
+	}
+
+	for _, scenario := range scenarios {
+		scenario.Test(t)
+	}
 }
 
-// TODO
 func TestUpdateProfile(t *testing.T) {
-	return
+	scenarios := []tests.ApiScenario{
+		{
+			Name:           "update profile + unauthorized",
+			Method:         http.MethodPost,
+			Url:            "/api/user/profile",
+			ExpectedStatus: 401,
+			ExpectedContent: []string{
+				`Authentication token required`,
+			},
+		},
+		{
+			Name:   "update profile + invalid token",
+			Method: http.MethodPost,
+			Url:    "/api/user/profile",
+			RequestHeaders: map[string]string{
+				"Authorization": InvalidToken,
+			},
+			ExpectedStatus: 403,
+			ExpectedContent: []string{
+				`Could not parse authentication token`,
+			},
+		},
+		{
+			Name:   "update profile + valid token + user not found",
+			Method: http.MethodPost,
+			Url:    "/api/user/profile",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidTokenNoUser,
+			},
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`User not found`,
+			},
+		},
+		{
+			Name:   "update profile + valid token + user found + empty name",
+			Method: http.MethodPost,
+			Url:    "/api/user/profile",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"name":"",
+				"avatar":"",
+				"bio":""
+			}`),
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`"status":400`,
+				`"data":null`,
+				`"message":"Name cannot be empty"`,
+			},
+		},
+		{
+			Name:   "update profile + valid token + user found + update name",
+			Method: http.MethodPost,
+			Url:    "/api/user/profile",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"name":"Demo User New"
+			}`),
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":[{`,
+				`"email":"demo@aztlan.in"`,
+				`"handle":"demo"`,
+				`"name":"Demo User New"`,
+				`"avatar":""`,
+				`"bio":"Demo User Bio"`,
+				`"message":"User profile updated"`,
+			},
+		},
+		{
+			Name:   "update profile + valid token + user found + update avatar",
+			Method: http.MethodPost,
+			Url:    "/api/user/profile",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"avatar":"test"
+			}`),
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":[{`,
+				`"email":"demo@aztlan.in"`,
+				`"handle":"demo"`,
+				`"name":"Demo User"`,
+				`"avatar":"test"`,
+				`"bio":"Demo User Bio"`,
+				`"message":"User profile updated"`,
+			},
+		},
+		{
+			Name:   "update profile + valid token + user found + update bio",
+			Method: http.MethodPost,
+			Url:    "/api/user/profile",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"bio":"Demo User Bio New"
+			}`),
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":[{`,
+				`"email":"demo@aztlan.in"`,
+				`"handle":"demo"`,
+				`"name":"Demo User"`,
+				`"avatar":""`,
+				`"bio":"Demo User Bio New"`,
+				`"message":"User profile updated"`,
+			},
+		},
+		{
+			Name:   "update profile + valid token + user found + update all",
+			Method: http.MethodPost,
+			Url:    "/api/user/profile",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"name":"Demo User New",
+				"avatar":"avatar",
+				"bio":"bio"
+			}`),
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":[{`,
+				`"email":"demo@aztlan.in"`,
+				`"handle":"demo"`,
+				`"name":"Demo User New"`,
+				`"avatar":"avatar"`,
+				`"bio":"bio"`,
+				`"message":"User profile updated"`,
+			},
+		},
+	}
+
+	for _, scenario := range scenarios {
+		scenario.Test(t)
+	}
 }
 
 // TODO

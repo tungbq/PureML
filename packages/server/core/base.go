@@ -91,6 +91,8 @@ func (app *BaseApp) Bootstrap() error {
 		return err
 	}
 
+	app.RefreshSettings()
+
 	return nil
 }
 
@@ -164,6 +166,16 @@ func (app *BaseApp) NewFilesystem() (*filesystem.System, error) {
 	// fallback to local filesystem
 	return filesystem.NewLocal(filepath.Join(app.DataDir(), "storage"))
 }
+
+
+// RefreshSettings reinitializes and reloads the stored application settings.
+func (app *BaseApp) RefreshSettings() error {
+	if app.settings == nil {
+		app.settings = settings.New()
+	}
+	return nil
+}
+
 
 func (app *BaseApp) initDataDB() error {
 	dao, err := daos.InitDB(app.DataDir(), app.DatabaseType(), app.DatabaseUrl())

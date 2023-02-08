@@ -9,7 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func ValidateOrg(app core.App) func(next echo.HandlerFunc) echo.HandlerFunc {
+func ValidateOrg(app core.App) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(context echo.Context) error {
 			orgId := context.Param("orgId")
@@ -29,7 +29,7 @@ func ValidateOrg(app core.App) func(next echo.HandlerFunc) echo.HandlerFunc {
 				context.Response().Writer.Write([]byte("Organization not found"))
 				return nil
 			}
-			context.Set("Org", &models.OrganizationHandleResponse{
+			context.Set(ContextOrgKey, &models.OrganizationHandleResponse{
 				Name:   org.Name,
 				UUID:   org.UUID,
 				Handle: org.Handle,

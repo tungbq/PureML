@@ -17,9 +17,9 @@ func BindUserApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
 	userGroup := rg.Group("/user")
-	userGroup.GET("/profile", api.DefaultHandler(GetProfile), middlewares.AuthenticateJWT(api.app))
+	userGroup.GET("/profile", api.DefaultHandler(GetProfile), middlewares.RequireAuthContext)
 	userGroup.GET("/profile/:userHandle", api.DefaultHandler(GetProfileByHandle))
-	userGroup.POST("/profile", api.DefaultHandler(UpdateProfile), middlewares.AuthenticateJWT(api.app))
+	userGroup.POST("/profile", api.DefaultHandler(UpdateProfile), middlewares.RequireAuthContext)
 	userGroup.POST("/signup", api.DefaultHandler(UserSignUp))
 	userGroup.POST("/login", api.DefaultHandler(UserLogin))
 	userGroup.POST("/forgot-password", api.DefaultHandler(UserForgotPassword))
@@ -146,11 +146,9 @@ func (api *Api) UserLogin(request *models.Request) *models.Response {
 	var user *models.UserResponse
 	var err error
 	if email != nil {
-		email := email.(string)
-		user, err = api.app.Dao().GetSecureUserByEmail(email)
+		user, err = api.app.Dao().GetSecureUserByEmail(emailData)
 	} else {
-		handle := handle.(string)
-		user, err = api.app.Dao().GetSecureUserByHandle(handle)
+		user, err = api.app.Dao().GetSecureUserByHandle(handleData)
 	}
 	if err != nil {
 		return models.NewServerErrorResponse(err)
@@ -167,7 +165,7 @@ func (api *Api) UserLogin(request *models.Request) *models.Response {
 		"email":  user.Email,
 		"handle": user.Handle,
 	})
-	signedString, err := token.SignedString(config.TokenSigningSecret())
+	signedString, err := token.SignedString([]byte(api.app.Settings().AdminAuthToken.Secret))
 	if err != nil {
 		panic(err)
 	}
@@ -280,9 +278,12 @@ func (api *Api) UpdateProfile(request *models.Request) *models.Response {
 	name := request.GetParsedBodyAttribute("name")
 	avatar := request.GetParsedBodyAttribute("avatar")
 	bio := request.GetParsedBodyAttribute("bio")
-	updatedAttributes := map[string]string{}
+	updatedAttributes := map[string]interface{}{}
 	if name != nil {
 		updatedAttributes["name"] = name.(string)
+		if name.(string) == "" {
+			return models.NewErrorResponse(http.StatusBadRequest, "Name cannot be empty")
+		}
 	}
 	if avatar != nil {
 		updatedAttributes["avatar"] = avatar.(string)
@@ -291,21 +292,11 @@ func (api *Api) UpdateProfile(request *models.Request) *models.Response {
 		updatedAttributes["bio"] = bio.(string)
 	}
 	email := request.GetUserMail()
-	user, err := api.app.Dao().UpdateUser(email, updatedAttributes["name"], updatedAttributes["avatar"], updatedAttributes["bio"])
+	user, err := api.app.Dao().UpdateUser(email, updatedAttributes)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	response := &models.Response{}
-	response.StatusCode = http.StatusOK
-	response.Body.Message = "User profile updated"
-	response.Body.Data = []map[string]interface{}{
-		{
-			"email":  user.Email,
-			"avatar": user.Avatar,
-			"name":   user.Avatar,
-		},
-	}
-	return response
+	return models.NewDataResponse(http.StatusOK, user, "User profile updated")
 }
 
 // TODO: DeleteProfile godoc

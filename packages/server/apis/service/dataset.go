@@ -17,7 +17,7 @@ func BindDatasetApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
 	rg.GET("/public/dataset", api.DefaultHandler(GetAllPublicDatasets))
-	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	datasetGroup.GET("/all", api.DefaultHandler(GetAllDatasets))
 	datasetGroup.GET("/:datasetName", api.DefaultHandler(GetDataset), middlewares.ValidateDataset(api.app))
 	datasetGroup.POST("/:datasetName/create", api.DefaultHandler(CreateDataset))

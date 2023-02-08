@@ -10,7 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func ValidateModelBranch(app core.App) func(next echo.HandlerFunc) echo.HandlerFunc {
+func ValidateModelBranch(app core.App) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(context echo.Context) error {
 			branchName := context.Param("branchName")
@@ -32,7 +32,7 @@ func ValidateModelBranch(app core.App) func(next echo.HandlerFunc) echo.HandlerF
 				context.Response().Writer.Write([]byte("Branch not found"))
 				return nil
 			}
-			context.Set("ModelBranch", &models.ModelBranchNameResponse{
+			context.Set(ContextModelBranchKey, &models.ModelBranchNameResponse{
 				Name: branch.Name,
 				UUID: branch.UUID,
 			})

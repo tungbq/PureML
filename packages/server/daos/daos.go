@@ -66,8 +66,8 @@ func (dao *Dao) GetUserOrganizationsByEmail(email string) ([]models.UserOrganiza
 	return dao.Datastore().GetUserOrganizationsByEmail(email)
 }
 
-func (dao *Dao) GetUserOrganizationByOrgIdAndEmail(orgId uuid.UUID, email string) (*models.UserOrganizationsResponse, error) {
-	return dao.Datastore().GetUserOrganizationByOrgIdAndEmail(orgId, email)
+func (dao *Dao) GetUserOrganizationByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.UUID) (*models.UserOrganizationsRoleResponse, error) {
+	return dao.Datastore().GetUserOrganizationByOrgIdAndUserUUID(orgId, userUUID)
 }
 
 func (dao *Dao) CreateUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) (*models.UserOrganizationsResponse, error) {
@@ -82,8 +82,8 @@ func (dao *Dao) CreateUserOrganizationFromEmailAndJoinCode(email string, joinCod
 	return dao.Datastore().CreateUserOrganizationFromEmailAndJoinCode(email, joinCode)
 }
 
-func (dao *Dao) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, orgAvatar string) (*models.OrganizationResponse, error) {
-	return dao.Datastore().UpdateOrg(orgId, orgName, orgDesc, orgAvatar)
+func (dao *Dao) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]interface{}) (*models.OrganizationResponse, error) {
+	return dao.Datastore().UpdateOrg(orgId, updatedAttributes)
 }
 
 func (dao *Dao) GetOrgAllPublicModels(orgId uuid.UUID) ([]models.ModelResponse, error) {
@@ -122,8 +122,8 @@ func (dao *Dao) CreateUser(name string, email string, handle string, bio string,
 	return dao.Datastore().CreateUser(name, email, handle, bio, avatar, hashedPassword)
 }
 
-func (dao *Dao) UpdateUser(email string, name string, avatar string, bio string) (*models.UserResponse, error) {
-	return dao.Datastore().UpdateUser(email, name, avatar, bio)
+func (dao *Dao) UpdateUser(email string, updatedAttributes map[string]interface{}) (*models.UserResponse, error) {
+	return dao.Datastore().UpdateUser(email, updatedAttributes)
 }
 
 func (dao *Dao) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogDataResponse, error) {

@@ -14,7 +14,7 @@ import (
 func BindDatasetActivityApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	datasetGroup.GET("/:datasetName/activity/:category", api.DefaultHandler(GetDatasetActivity), middlewares.ValidateDataset(api.app))
 	datasetGroup.POST("/:datasetName/activity/:category", api.DefaultHandler(CreateDatasetActivity), middlewares.ValidateDataset(api.app))
 	datasetGroup.POST("/:datasetName/activity/:category/:activityUUID", api.DefaultHandler(UpdateDatasetActivity), middlewares.ValidateDataset(api.app))

@@ -9,7 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func ValidateModel(app core.App) func(next echo.HandlerFunc) echo.HandlerFunc {
+func ValidateModel(app core.App) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(context echo.Context) error {
 			modelName := context.Param("modelName")
@@ -30,7 +30,7 @@ func ValidateModel(app core.App) func(next echo.HandlerFunc) echo.HandlerFunc {
 				context.Response().Writer.Write([]byte("Model not found"))
 				return nil
 			}
-			context.Set("Model", &models.ModelNameResponse{
+			context.Set(ContextModelKey, &models.ModelNameResponse{
 				Name: model.Name,
 				UUID: model.UUID,
 			})

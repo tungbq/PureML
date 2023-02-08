@@ -10,7 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func ValidateDatasetBranch(app core.App) func(next echo.HandlerFunc) echo.HandlerFunc {
+func ValidateDatasetBranch(app core.App) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(context echo.Context) error {
 			datasetBranchName := context.Param("branchName")
@@ -32,7 +32,7 @@ func ValidateDatasetBranch(app core.App) func(next echo.HandlerFunc) echo.Handle
 				context.Response().Writer.Write([]byte("Branch not found"))
 				return nil
 			}
-			context.Set("DatasetBranch", &models.DatasetBranchNameResponse{
+			context.Set(ContextDatasetBranchKey, &models.DatasetBranchNameResponse{
 				Name: branch.Name,
 				UUID: branch.UUID,
 			})

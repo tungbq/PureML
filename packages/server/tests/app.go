@@ -47,11 +47,13 @@ func NewTestApp(optTestDataDir ...string) (*TestApp, error) {
 		DatabaseType: "sqlite3",
 	})
 
+	
 	// load data dir and db connections
 	if err := app.Bootstrap(); err != nil {
 		return nil, err
 	}
-
+	app.Settings().AdminAuthToken.Secret = "pureml-test-secret"
+	
 	t := &TestApp{
 		BaseApp: app,
 	}

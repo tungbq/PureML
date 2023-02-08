@@ -17,7 +17,7 @@ func BindModelApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
 	rg.GET("/public/model", api.DefaultHandler(GetAllPublicModels))
-	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	modelGroup.GET("/all", api.DefaultHandler(GetAllModels))
 	modelGroup.GET("/:modelName", api.DefaultHandler(GetModel), middlewares.ValidateModel(api.app))
 	modelGroup.POST("/:modelName/create", api.DefaultHandler(CreateModel))

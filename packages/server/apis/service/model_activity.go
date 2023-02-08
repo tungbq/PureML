@@ -14,7 +14,7 @@ import (
 func BindModelActivityApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	modelGroup.GET("/:modelName/activity/:category", api.DefaultHandler(GetModelActivity), middlewares.ValidateModel(api.app))
 	modelGroup.POST("/:modelName/activity/:category", api.DefaultHandler(CreateModelActivity), middlewares.ValidateModel(api.app))
 	modelGroup.POST("/:modelName/activity/:category/:activityUUID", api.DefaultHandler(UpdateModelActivity), middlewares.ValidateModel(api.app))

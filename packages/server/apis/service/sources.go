@@ -13,7 +13,7 @@ import (
 func BindSecretsApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	secretGroup := rg.Group("/org/:orgId/secret", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	secretGroup := rg.Group("/org/:orgId/secret", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	// secretGroup.GET("/all", api.DefaultHandler(GetAllSecrets))
 	secretGroup.GET("/r2", api.DefaultHandler(GetR2Secret))
 	secretGroup.POST("/r2/connect", api.DefaultHandler(ConnectR2Secret))

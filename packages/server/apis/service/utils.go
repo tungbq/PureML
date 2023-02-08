@@ -7,49 +7,50 @@ import (
 	"mime/multipart"
 	"strings"
 
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
 	"github.com/labstack/echo/v4"
 )
 
 func extractRequest(context echo.Context) *models.Request {
 	request := &models.Request{}
-	if context.Get("User") != nil {
-		request.User = context.Get("User").(*models.UserClaims)
+	if context.Get(middlewares.ContextAuthKey) != nil {
+		request.User = context.Get(middlewares.ContextAuthKey).(*models.UserClaims)
 	} else {
 		request.User = &models.UserClaims{}
 	}
-	if context.Get("Org") != nil {
-		request.Org = context.Get("Org").(*models.OrganizationHandleResponse)
+	if context.Get(middlewares.ContextOrgKey) != nil {
+		request.Org = context.Get(middlewares.ContextOrgKey).(*models.OrganizationHandleResponse)
 	} else {
 		request.Org = &models.OrganizationHandleResponse{}
 	}
-	if context.Get("Model") != nil {
-		request.Model = context.Get("Model").(*models.ModelNameResponse)
+	if context.Get(middlewares.ContextModelKey) != nil {
+		request.Model = context.Get(middlewares.ContextModelKey).(*models.ModelNameResponse)
 	} else {
 		request.Model = &models.ModelNameResponse{}
 	}
-	if context.Get("ModelBranch") != nil {
-		request.ModelBranch = context.Get("ModelBranch").(*models.ModelBranchNameResponse)
+	if context.Get(middlewares.ContextModelBranchKey) != nil {
+		request.ModelBranch = context.Get(middlewares.ContextModelBranchKey).(*models.ModelBranchNameResponse)
 	} else {
 		request.ModelBranch = &models.ModelBranchNameResponse{}
 	}
-	if context.Get("ModelBranchVersion") != nil {
-		request.ModelBranchVersion = context.Get("ModelBranchVersion").(*models.ModelBranchVersionNameResponse)
+	if context.Get(middlewares.ContextModelBranchVersionKey) != nil {
+		request.ModelBranchVersion = context.Get(middlewares.ContextModelBranchVersionKey).(*models.ModelBranchVersionNameResponse)
 	} else {
 		request.ModelBranchVersion = &models.ModelBranchVersionNameResponse{}
 	}
-	if context.Get("Dataset") != nil {
-		request.Dataset = context.Get("Dataset").(*models.DatasetNameResponse)
+	if context.Get(middlewares.ContextDatasetKey) != nil {
+		request.Dataset = context.Get(middlewares.ContextDatasetKey).(*models.DatasetNameResponse)
 	} else {
 		request.Dataset = &models.DatasetNameResponse{}
 	}
-	if context.Get("DatasetBranch") != nil {
-		request.DatasetBranch = context.Get("DatasetBranch").(*models.DatasetBranchNameResponse)
+	if context.Get(middlewares.ContextDatasetBranchKey) != nil {
+		request.DatasetBranch = context.Get(middlewares.ContextDatasetBranchKey).(*models.DatasetBranchNameResponse)
 	} else {
 		request.DatasetBranch = &models.DatasetBranchNameResponse{}
 	}
-	if context.Get("DatasetBranchVersion") != nil {
-		request.DatasetBranchVersion = context.Get("DatasetBranchVersion").(*models.DatasetBranchVersionNameResponse)
+	if context.Get(middlewares.ContextDatasetBranchVersionKey) != nil {
+		request.DatasetBranchVersion = context.Get(middlewares.ContextDatasetBranchVersionKey).(*models.DatasetBranchVersionNameResponse)
 	} else {
 		request.DatasetBranchVersion = &models.DatasetBranchVersionNameResponse{}
 	}

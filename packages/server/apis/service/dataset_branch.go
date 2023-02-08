@@ -13,7 +13,7 @@ import (
 func BindDatasetBranchApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	datasetGroup.GET("/:datasetName/branch", api.DefaultHandler(GetDatasetAllBranches), middlewares.ValidateDataset(api.app))
 	datasetGroup.POST("/:datasetName/branch/create", api.DefaultHandler(CreateDatasetBranch), middlewares.ValidateDataset(api.app))
 	datasetGroup.GET("/:datasetName/branch/:branchName", api.DefaultHandler(GetDatasetBranch), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app))

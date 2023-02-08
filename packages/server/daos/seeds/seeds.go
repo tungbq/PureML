@@ -1,6 +1,8 @@
 package seeds
 
 import (
+	"fmt"
+
 	"github.com/PureML-Inc/PureML/server/daos/dbmodels"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -13,9 +15,15 @@ var defaultUUID2 = uuid.Must(uuid.FromString("22222222-2222-2222-2222-2222222222
 func All() []Seed {
 	return []Seed{
 		{
-			Name: "CreateDemoUserAndOrg",
+			Name: "CreateDemoAdminUserAndOrg",
 			Run: func(d *gorm.DB) error {
-				return CreateUser(d, "Demo User", "demo@aztlan.in", "demo", "demo", "Demo User Bio", "")
+				return CreateUser(d, defaultUUID, "Demo User", "demo@aztlan.in", "demo", "demo", "Demo User Bio", "")
+			},
+		},
+		{
+			Name: "CreateNonAdminUserAndOrg",
+			Run: func(d *gorm.DB) error {
+				return CreateUser(d, defaultUUID2, "Normal User", "notadmin@aztlan.in", "notadmin", "notadmin", "User Bio", "")
 			},
 		},
 		{
@@ -33,14 +41,14 @@ func All() []Seed {
 	}
 }
 
-func CreateUser(db *gorm.DB, name string, email string, handle string, password string, bio string, avatar string) error {
+func CreateUser(db *gorm.DB, uuid uuid.UUID, name string, email string, handle string, password string, bio string, avatar string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
 		return err
 	}
-	return db.Create(&dbmodels.User{
+	err = db.Create(&dbmodels.User{
 		BaseModel: dbmodels.BaseModel{
-			UUID: defaultUUID,
+			UUID: uuid,
 		},
 		Name:     name,
 		Email:    email,
@@ -51,16 +59,20 @@ func CreateUser(db *gorm.DB, name string, email string, handle string, password 
 		Orgs: []dbmodels.Organization{
 			{
 				BaseModel: dbmodels.BaseModel{
-					UUID: defaultUUID,
+					UUID: uuid,
 				},
 				Name:        "Demo Org",
-				Handle:      "demo",
+				Handle:      handle,
 				Avatar:      "",
 				Description: "Demo Org Description",
-				JoinCode:    "iwanttojoin",
+				JoinCode:    fmt.Sprintf("iwanttojoin%s", handle),
 			},
 		},
 	}).Error
+	if err != nil {
+		return err
+	}
+	return db.Table("user_organizations").Where("user_uuid = ?", uuid).Where("organization_uuid = ?", uuid).Update("role", "owner").Error
 }
 
 func CreateModel(db *gorm.DB, name string, wiki string) error {

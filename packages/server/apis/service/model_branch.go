@@ -13,7 +13,7 @@ import (
 func BindModelBranchApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	modelGroup.GET("/:modelName/branch", api.DefaultHandler(GetModelAllBranches), middlewares.ValidateModel(api.app))
 	modelGroup.POST("/:modelName/branch/create", api.DefaultHandler(CreateModelBranch), middlewares.ValidateModel(api.app))
 	modelGroup.GET("/:modelName/branch/:branchName", api.DefaultHandler(GetModelBranch), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))

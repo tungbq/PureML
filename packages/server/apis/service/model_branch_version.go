@@ -16,7 +16,7 @@ import (
 func BindModelBranchVersionApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	modelGroup := rg.Group("/org/:orgId/model", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	modelGroup.POST("/:modelName/branch/:branchName/update", api.DefaultHandler(UpdateModelBranch), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
 	modelGroup.POST("/:modelName/branch/:branchName/hash-status", api.DefaultHandler(VerifyModelBranchHashStatus), middlewares.ValidateModel(api.app))
 	modelGroup.POST("/:modelName/branch/:branchName/register", api.DefaultHandler(RegisterModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))

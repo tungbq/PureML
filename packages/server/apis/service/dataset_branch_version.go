@@ -16,7 +16,7 @@ import (
 func BindDatasetBranchVersionApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.AuthenticateJWT(api.app), middlewares.ValidateOrg(api.app))
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
 	datasetGroup.POST("/:datasetName/branch/:branchName/hash-status", api.DefaultHandler(VerifyDatasetBranchHashStatus), middlewares.ValidateDataset(api.app))
 	datasetGroup.POST("/:datasetName/branch/:branchName/register", api.DefaultHandler(RegisterDataset), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app))
 	datasetGroup.GET("/:datasetName/branch/:branchName/version", api.DefaultHandler(GetDatasetBranchAllVersions), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app))

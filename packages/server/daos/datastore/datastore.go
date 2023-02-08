@@ -280,13 +280,24 @@ func (ds *Datastore) GetUserOrganizationsByEmail(email string) ([]models.UserOrg
 	return orgs, nil
 }
 
-func (ds *Datastore) GetUserOrganizationByOrgIdAndEmail(orgId uuid.UUID, email string) (*models.UserOrganizationsResponse, error) {
-	var org models.UserOrganizationsResponse
-	result := ds.DB.Table("organizations").Select("organizations.uuid, organizations.handle, organizations.name, organizations.avatar, user_organization.role").Joins("JOIN user_organizations ON user_organizations.organization_uuid = organizations.uuid").Joins("JOIN users ON users.uuid = user_organizations.user_uuid").Where("users.email = ?", email).Where("organizations.uuid = ?", orgId).Scan(&org)
+func (ds *Datastore) GetUserOrganizationByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.UUID) (*models.UserOrganizationsRoleResponse, error) {
+	userOrganizations := dbmodels.UserOrganizations{
+		UserUUID:         userUUID,
+		OrganizationUUID: orgId,
+	}
+	result := ds.DB.Limit(1).Find(&userOrganizations)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &org, nil
+	userOrgResponse := models.UserOrganizationsRoleResponse{
+		UserUUID: userOrganizations.UserUUID,
+		OrgUUID:  userOrganizations.OrganizationUUID,
+		Role:     userOrganizations.Role,
+	}
+	return &userOrgResponse, nil
 }
 
 func (ds *Datastore) CreateUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) (*models.UserOrganizationsResponse, error) {
@@ -369,15 +380,21 @@ func (ds *Datastore) CreateUserOrganizationFromEmailAndJoinCode(email string, jo
 	}, nil
 }
 
-func (ds *Datastore) UpdateOrg(orgId uuid.UUID, orgName string, orgDesc string, orgAvatar string) (*models.OrganizationResponse, error) {
+func (ds *Datastore) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]interface{}) (*models.OrganizationResponse, error) {
 	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	org.Name = orgName
-	org.Description = orgDesc
-	org.Avatar = orgAvatar
+	if updatedAttributes["name"] != nil {
+		org.Name = updatedAttributes["name"].(string)
+	}
+	if updatedAttributes["desc"] != nil {
+		org.Description = updatedAttributes["desc"].(string)
+	}
+	if updatedAttributes["avatar"] != nil {
+		org.Avatar = updatedAttributes["avatar"].(string)
+	}
 	result = ds.DB.Save(&org)
 	if result.Error != nil {
 		return nil, result.Error
@@ -627,20 +644,20 @@ func (ds *Datastore) CreateUser(name string, email string, handle string, bio st
 	}, nil
 }
 
-func (ds *Datastore) UpdateUser(email string, name string, bio string, avatar string) (*models.UserResponse, error) {
+func (ds *Datastore) UpdateUser(email string, updatedAttributes map[string]interface{}) (*models.UserResponse, error) {
 	var user dbmodels.User
 	result := ds.DB.Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	if name != "" {
-		user.Name = name
+	if updatedAttributes["name"] != nil {
+		user.Name = updatedAttributes["name"].(string)
 	}
-	if bio != "" {
-		user.Bio = bio
+	if updatedAttributes["bio"] != nil {
+		user.Bio = updatedAttributes["bio"].(string)
 	}
-	if avatar != "" {
-		user.Avatar = avatar
+	if updatedAttributes["avatar"] != nil {
+		user.Avatar = updatedAttributes["avatar"].(string)
 	}
 	result = ds.DB.Save(&user)
 	if result.Error != nil {

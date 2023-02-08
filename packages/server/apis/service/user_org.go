@@ -14,7 +14,7 @@ import (
 func BindUserOrgApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
-	orgGroup := rg.Group("/org", middlewares.AuthenticateJWT(api.app))
+	orgGroup := rg.Group("/org", middlewares.RequireAuthContext)
 	orgGroup.GET("/", api.DefaultHandler(GetOrgsForUser))
 	orgGroup.POST("/:orgId/add", api.DefaultHandler(AddUsersToOrg), middlewares.ValidateOrg(api.app))
 	orgGroup.POST("/join", api.DefaultHandler(JoinOrg))
