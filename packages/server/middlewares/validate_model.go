@@ -13,13 +13,19 @@ func ValidateModel(app core.App) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(context echo.Context) error {
 			modelName := context.Param("modelName")
-			orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
+			orgId := context.Param("orgId")
+			orgUUID, err := uuid.FromString(orgId)
+			if err != nil {
+				context.Response().WriteHeader(http.StatusBadRequest)
+				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				return nil
+			}
 			if modelName == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
 				context.Response().Writer.Write([]byte("Model name required"))
 				return nil
 			}
-			model, err := app.Dao().GetModelByName(orgId, modelName)
+			model, err := app.Dao().GetModelByName(orgUUID, modelName)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
 				context.Response().Writer.Write([]byte(err.Error()))

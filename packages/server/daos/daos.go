@@ -1,8 +1,6 @@
 package daos
 
 import (
-	"mime/multipart"
-
 	impl "github.com/PureML-Inc/PureML/server/daos/datastore"
 	"github.com/PureML-Inc/PureML/server/models"
 	uuid "github.com/satori/go.uuid"
@@ -184,8 +182,8 @@ func (dao *Dao) CreateModelBranches(modelUUID uuid.UUID, branchNames []string) (
 	return branches, nil
 }
 
-func (dao *Dao) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelBranchVersionResponse, error) {
-	return dao.Datastore().UploadAndRegisterModelFile(orgId, modelBranchUUID, file, isEmpty, hash, source)
+func (dao *Dao) RegisterModelFile(modelBranchUUID uuid.UUID, sourceTypeUUID uuid.UUID, path string, isEmpty bool, hash string, userUUID uuid.UUID) (*models.ModelBranchVersionResponse, error) {
+	return dao.Datastore().RegisterModelFile(modelBranchUUID, sourceTypeUUID, path, isEmpty, hash, userUUID)
 }
 
 func (dao *Dao) GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBranchResponse, error) {
@@ -246,8 +244,8 @@ func (dao *Dao) CreateDatasetBranches(datasetUUID uuid.UUID, branchNames []strin
 	return branches, nil
 }
 
-func (dao *Dao) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetBranchVersionResponse, error) {
-	return dao.Datastore().UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, file, isEmpty, hash, source, lineage)
+func (dao *Dao) RegisterDatasetFile(datasetBranchUUID uuid.UUID, sourceTypeUUID uuid.UUID, path string, isEmpty bool, hash string, lineage string, userUUID uuid.UUID) (*models.DatasetBranchVersionResponse, error) {
+	return dao.Datastore().RegisterDatasetFile(datasetBranchUUID, sourceTypeUUID, path, isEmpty, hash, lineage, userUUID)
 }
 
 func (dao *Dao) GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.DatasetBranchResponse, error) {
@@ -306,6 +304,10 @@ func (dao *Dao) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 	return dao.Datastore().DeleteDatasetActivity(activityUUID)
 }
 
+func (dao *Dao) GetSourceTypeByName(orgId uuid.UUID, sourceName string) (uuid.UUID, error) {
+	return dao.Datastore().GetSourceTypeByName(orgId, sourceName)
+}
+
 func (dao *Dao) GetSourceSecret(orgId uuid.UUID, source string) (*models.SourceSecrets, error) {
 	return dao.Datastore().GetSourceSecret(orgId, source)
 }
@@ -322,16 +324,20 @@ func (dao *Dao) DeleteR2Secrets(orgId uuid.UUID) error {
 	return dao.Datastore().DeleteR2Secrets(orgId)
 }
 
-func (dao *Dao) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*impl.S3Secrets, error) {
-	return dao.Datastore().CreateS3Secrets(orgId, accessKeyId, accessKeySecret, bucketName, bucketLocation)
-}
+// func (dao *Dao) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*impl.S3Secrets, error) {
+// 	return dao.Datastore().CreateS3Secrets(orgId, accessKeyId, accessKeySecret, bucketName, bucketLocation)
+// }
 
 func (dao *Dao) CreateS3Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
 	return dao.Datastore().CreateS3Source(orgId, publicURL)
 }
 
-func (dao *Dao) DeleteS3Secrets(orgId uuid.UUID) error {
-	return dao.Datastore().DeleteS3Secrets(orgId)
+// func (dao *Dao) DeleteS3Secrets(orgId uuid.UUID) error {
+// 	return dao.Datastore().DeleteS3Secrets(orgId)
+// }
+
+func (dao *Dao) CreateLocalSource(orgId uuid.UUID) (*models.SourceTypeResponse, error) {
+	return dao.Datastore().CreateLocalSource(orgId)
 }
 
 func (dao *Dao) GetModelReadmeVersion(modelUUID uuid.UUID, version string) (*models.ReadmeVersionResponse, error) {

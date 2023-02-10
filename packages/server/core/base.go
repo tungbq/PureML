@@ -9,6 +9,7 @@ import (
 	"github.com/PureML-Inc/PureML/server/core/settings"
 	"github.com/PureML-Inc/PureML/server/daos"
 	"github.com/PureML-Inc/PureML/server/tools/filesystem"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func Cleanup(optDataDir ...string) error {
@@ -48,6 +49,7 @@ type BaseAppConfig struct {
 	IsDebug      bool
 	DatabaseType string
 	DatabaseUrl  string
+	Settings     *settings.Settings
 }
 
 // NewBaseApp creates and returns a new BaseApp instance
@@ -61,6 +63,15 @@ func NewBaseApp(appConfig *BaseAppConfig) *BaseApp {
 		settings:     settings.New(),
 		databaseType: appConfig.DatabaseType,
 		databaseUrl:  appConfig.DatabaseUrl,
+	}
+
+	if appConfig.Settings != nil {
+		if appConfig.Settings.S3.Enabled {
+			app.settings.S3 = appConfig.Settings.S3
+		}
+		if appConfig.Settings.AdminAuthToken.Secret != "" {
+			app.settings.AdminAuthToken = appConfig.Settings.AdminAuthToken
+		}
 	}
 
 	return app
@@ -91,7 +102,7 @@ func (app *BaseApp) Bootstrap() error {
 		return err
 	}
 
-	app.RefreshSettings()
+	// app.RefreshSettings()
 
 	return nil
 }
@@ -109,7 +120,7 @@ func (app *BaseApp) ResetBootstrapState() error {
 	}
 
 	app.dao = nil
-	app.settings = nil
+	// app.settings = nil
 
 	return nil
 }
@@ -133,7 +144,6 @@ func (app *BaseApp) DatabaseType() string {
 func (app *BaseApp) DatabaseUrl() string {
 	return app.databaseUrl
 }
-
 
 // IsDebug returns whether the app is in debug mode
 // (showing more detailed error logs, executed sql statements, etc.).
@@ -167,15 +177,34 @@ func (app *BaseApp) NewFilesystem() (*filesystem.System, error) {
 	return filesystem.NewLocal(filepath.Join(app.DataDir(), "storage"))
 }
 
+// UploadFile uploads a file to the app storage.
+func (app *BaseApp) UploadFile(file *filesystem.File, basePath string) (string, error) {
+	fs, err := app.NewFilesystem()
+	if err != nil {
+		return "", err
+	}
+	defer fs.Close()
+
+	path := basePath + "/" + file.Name
+	if err := fs.UploadFile(file, path); err != nil {
+		return "", err
+	}
+	return path, nil
+}
 
 // RefreshSettings reinitializes and reloads the stored application settings.
 func (app *BaseApp) RefreshSettings() error {
 	if app.settings == nil {
 		app.settings = settings.New()
 	}
+
+	// Load S3 settings from db
+	// if err := app.settings.LoadFromDB(app.dao, "S3"); err != nil {
+	// 	return err
+	// }
+
 	return nil
 }
-
 
 func (app *BaseApp) initDataDB() error {
 	dao, err := daos.InitDB(app.DataDir(), app.DatabaseType(), app.DatabaseUrl())

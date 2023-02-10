@@ -1,6 +1,8 @@
 package settings
 
-import "github.com/PureML-Inc/PureML/server/tools/security"
+import (
+	"github.com/PureML-Inc/PureML/server/tools/security"
+)
 
 // Settings defines common app configuration options.
 type Settings struct {
@@ -33,3 +35,20 @@ type S3Config struct {
 	Secret         string `form:"secret" json:"secret"`
 	ForcePathStyle bool   `form:"forcePathStyle" json:"forcePathStyle"`
 }
+
+// func (s *Settings) LoadFromDB(dao *daos.Dao, source string) error {
+// 	source = strings.ToUpper(source)
+// 	defaultUUID := uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111"))
+// 	sourceSecrets, err := dao.GetSourceSecret(defaultUUID, source)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	switch source {
+// 	case "S3":
+// 		s.S3.AccessKey = sourceSecrets.AccessKeyId
+// 		s.S3.Secret = sourceSecrets.AccessKeySecret
+// 		s.S3.Bucket = sourceSecrets.BucketName
+// 		s.S3.Region = sourceSecrets.BucketLocation
+// 	}
+// 	return nil
+// }

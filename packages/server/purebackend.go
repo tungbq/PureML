@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	"github.com/PureML-Inc/PureML/server/apis"
-	"github.com/PureML-Inc/PureML/server/core"
 	"github.com/PureML-Inc/PureML/server/config"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/core/settings"
 )
 
 //	@contact.name	API Support
@@ -18,16 +19,27 @@ import (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @securityDefinitions.apikey	ApiKeyAuth
-// @in							header
-// @name						Authorization
-// @description				Header for logged in user format: Bearer {token}
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@description				Header for logged in user format: Bearer {token}
 
 func main() {
 	app := NewWithConfig(&Config{
 		DefaultDebug: true,
 		DatabaseType: config.GetDatabaseType(),
 		DatabaseUrl:  config.GetDatabaseURL(),
+		Settings: &settings.Settings{
+			// set the default settings
+			S3: settings.S3Config{
+				Enabled:   false,
+				Bucket:    os.Getenv("PURE_S3_BUCKET"),
+				Region:    os.Getenv("PURE_S3_REGION"),
+				Endpoint:  os.Getenv("PURE_S3_ENDPOINT"),
+				AccessKey: os.Getenv("PURE_S3_ACCESS_KEY"),
+				Secret:    os.Getenv("PURE_S3_SECRET"),
+			},
+		},
 	})
 	if err := app.Bootstrap(); err != nil {
 		log.Fatal(err)
@@ -66,6 +78,7 @@ type Config struct {
 	DefaultDataDir string // if not set, it will fallback to "./pureml_data"
 	DatabaseType   string // if not set, it will fallback to "sqlite3"
 	DatabaseUrl    string // if not set, it will fallback to "file:./pureml_data/pureml.db"
+	Settings       *settings.Settings
 
 	// hide the default console server info on app startup
 	HideStartBanner bool
@@ -117,6 +130,7 @@ func NewWithConfig(config *Config) *PureBackend {
 		IsDebug:      pb.debugFlag,
 		DatabaseType: config.DatabaseType,
 		DatabaseUrl:  config.DatabaseUrl,
+		Settings:     config.Settings,
 	})}
 
 	return pb

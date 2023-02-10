@@ -2330,6 +2330,30 @@ paths:
       summary: Delete secrets for source type s3
       tags:
       - Secret
+  /org/{orgId}/secret/s3/test:
+    get:
+      consumes:
+      - '*/*'
+      description: Test secrets for source type s3
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Test secrets for source type s3
+      tags:
+      - Secret
   /org/{orgId}/update:
     post:
       consumes:

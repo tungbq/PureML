@@ -1,13 +1,14 @@
 package service
 
 import (
-	_ "fmt"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/PureML-Inc/PureML/server/core"
 	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/PureML-Inc/PureML/server/tools/filesystem"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
@@ -140,6 +141,7 @@ func (api *Api) VerifyModelBranchHashStatus(request *models.Request) *models.Res
 //	@Param			data		formData	models.RegisterModelRequest	true	"Model details"
 func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
+	userUUID := request.GetUserUUID()
 	var modelHash string
 	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
 		modelHash = request.FormValues["hash"][0]
@@ -187,7 +189,43 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	if response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Model with this hash already exists")
 	}
-	modelVersion, err := api.app.Dao().UploadAndRegisterModelFile(orgId, modelBranchUUID, fileHeader, modelIsEmpty, modelHash, modelSourceType)
+	if modelSourceType == "S3" && !api.app.Settings().S3.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "S3 source not enabled")
+	}
+	sourceTypeUUID, err := api.app.Dao().GetSourceTypeByName(orgId, modelSourceType)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
+	}
+	if sourceTypeUUID == uuid.Nil {
+		if modelSourceType == "S3" && api.app.Settings().S3.Enabled {
+			publicUrl := fmt.Sprintf("https://%s.%s", api.app.Settings().S3.Bucket, api.app.Settings().S3.Endpoint)
+			sourceType, err := api.app.Dao().CreateS3Source(orgId, publicUrl)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else if modelSourceType == "LOCAL" {
+			sourceType, err := api.app.Dao().CreateLocalSource(orgId)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else {
+			return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not enabled", modelSourceType))
+		}
+	}
+	var filePath string
+	if !modelIsEmpty {
+		file, err := filesystem.NewFileFromMultipart(fileHeader)
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+		filePath, err = api.app.UploadFile(file, "model-registry")
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+	}
+	modelVersion, err := api.app.Dao().RegisterModelFile(modelBranchUUID, sourceTypeUUID, filePath, modelIsEmpty, modelHash, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

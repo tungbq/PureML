@@ -28,8 +28,9 @@ type PathResponse struct {
 }
 
 type SourceTypeResponse struct {
-	Name      string `json:"name"`
-	PublicURL string `json:"public_url"`
+	UUID      uuid.UUID `json:"uuid"`
+	Name      string    `json:"name"`
+	PublicURL string    `json:"public_url"`
 }
 
 type SourceSecretResponse struct {
@@ -46,4 +47,4 @@ type SourceSecrets struct {
 	PublicURL       string `json:"public_url"`
 }
 
-var SupportedSources = []string{"S3", "R2", "PUREML-STORAGE"}
+var SupportedSources = []string{"S3", "R2", "LOCAL"}

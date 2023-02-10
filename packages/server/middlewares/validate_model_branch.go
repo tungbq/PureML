@@ -15,13 +15,19 @@ func ValidateModelBranch(app core.App) echo.MiddlewareFunc {
 		return func(context echo.Context) error {
 			branchName := context.Param("branchName")
 			modelName := context.Param("modelName")
-			orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
+			orgId := context.Param("orgId")
+			orgUUID, err := uuid.FromString(orgId)
+			if err != nil {
+				context.Response().WriteHeader(http.StatusBadRequest)
+				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				return nil
+			}
 			if branchName == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
 				context.Response().Writer.Write([]byte("Branch name required"))
 				return nil
 			}
-			branch, err := app.Dao().GetModelBranchByName(orgId, modelName, branchName)
+			branch, err := app.Dao().GetModelBranchByName(orgUUID, modelName, branchName)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
 				context.Response().Writer.Write([]byte(err.Error()))

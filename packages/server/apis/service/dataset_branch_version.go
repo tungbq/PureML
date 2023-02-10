@@ -1,13 +1,14 @@
 package service
 
 import (
-	_ "fmt"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/PureML-Inc/PureML/server/core"
 	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/PureML-Inc/PureML/server/tools/filesystem"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
@@ -136,6 +137,7 @@ func (api *Api) VerifyDatasetBranchHashStatus(request *models.Request) *models.R
 //	@Param			data		formData	models.RegisterDatasetRequest	true	"Dataset details"
 func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
+	userUUID := request.GetUserUUID()
 	var datasetHash string
 	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
 		datasetHash = request.FormValues["hash"][0]
@@ -187,7 +189,43 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	if response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Dataset with this hash already exists")
 	}
-	datasetVersion, err := api.app.Dao().UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, fileHeader, datasetIsEmpty, datasetHash, datasetSourceType, datasetLineage)
+	if datasetSourceType == "S3" && !api.app.Settings().S3.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "S3 source not enabled")
+	}
+	sourceTypeUUID, err := api.app.Dao().GetSourceTypeByName(orgId, datasetSourceType)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", datasetSourceType))
+	}
+	if sourceTypeUUID == uuid.Nil {
+		if api.app.Settings().S3.Enabled {
+			publicUrl := fmt.Sprintf("https://%s.%s", api.app.Settings().S3.Bucket, api.app.Settings().S3.Endpoint)
+			sourceType, err := api.app.Dao().CreateS3Source(orgId, publicUrl)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else if datasetSourceType == "LOCAL" {
+			sourceType, err := api.app.Dao().CreateLocalSource(orgId)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else {
+			return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not enabled", datasetSourceType))
+		}
+	}
+	var filePath string
+	if !datasetIsEmpty {
+		file, err := filesystem.NewFileFromMultipart(fileHeader)
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+		filePath, err = api.app.UploadFile(file, "dataset-registry")
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+	}
+	datasetVersion, err := api.app.Dao().RegisterDatasetFile(datasetBranchUUID, sourceTypeUUID, filePath, datasetIsEmpty, datasetHash, datasetLineage, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

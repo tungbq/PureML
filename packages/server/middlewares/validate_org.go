@@ -18,7 +18,13 @@ func ValidateOrg(app core.App) echo.MiddlewareFunc {
 				context.Response().Writer.Write([]byte("Organization Id required"))
 				return nil
 			}
-			org, err := app.Dao().GetOrgById(uuid.Must(uuid.FromString(orgId)))
+			orgUUID, err := uuid.FromString(orgId)
+			if err != nil {
+				context.Response().WriteHeader(http.StatusBadRequest)
+				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				return nil
+			}
+			org, err := app.Dao().GetOrgById(orgUUID)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
 				context.Response().Writer.Write([]byte(err.Error()))

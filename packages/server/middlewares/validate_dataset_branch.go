@@ -15,13 +15,19 @@ func ValidateDatasetBranch(app core.App) echo.MiddlewareFunc {
 		return func(context echo.Context) error {
 			datasetBranchName := context.Param("branchName")
 			datasetName := context.Param("datasetName")
-			orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
+			orgId := context.Param("orgId")
+			orgUUID, err := uuid.FromString(orgId)
+			if err != nil {
+				context.Response().WriteHeader(http.StatusBadRequest)
+				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				return nil
+			}
 			if datasetBranchName == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
 				context.Response().Writer.Write([]byte("Branch name required"))
 				return nil
 			}
-			branch, err := app.Dao().GetDatasetBranchByName(orgId, datasetName, datasetBranchName)
+			branch, err := app.Dao().GetDatasetBranchByName(orgUUID, datasetName, datasetBranchName)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
 				context.Response().Writer.Write([]byte(err.Error()))

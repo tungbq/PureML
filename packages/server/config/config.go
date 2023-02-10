@@ -6,6 +6,7 @@ import (
 	"github.com/PureML-Inc/PureML/server/tools/security"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
+	uuid "github.com/satori/go.uuid"
 )
 
 func init() {
@@ -81,6 +82,19 @@ func GetHttpAddr() string {
 
 func GetHttpsAddr() string {
 	return os.Getenv("HTTPS_ADDRESS")
+}
+
+func GetAdminDetails() map[string]interface{} {
+	adminUUID := os.Getenv("ADMIN_UUID")
+	adminDetails := map[string]interface{}{
+		"uuid":       uuid.Must(uuid.FromString(adminUUID)),
+		"email":      os.Getenv("ADMIN_EMAIL"),
+		"password":   os.Getenv("ADMIN_PASSWORD"),
+		"handle":     os.Getenv("ADMIN_HANDLE"),
+		"org_name":   os.Getenv("ADMIN_ORG_NAME"),
+		"org_handle": os.Getenv("ADMIN_ORG_HANDLE"),
+	}
+	return adminDetails
 }
 
 func HasAdminAccess(email string) bool {

@@ -13,13 +13,19 @@ func ValidateDataset(app core.App) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(context echo.Context) error {
 			datasetName := context.Param("datasetName")
-			orgId := uuid.Must(uuid.FromString(context.Param("orgId")))
+			orgId := context.Param("orgId")
+			orgUUID, err := uuid.FromString(orgId)
+			if err != nil {
+				context.Response().WriteHeader(http.StatusBadRequest)
+				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				return nil
+			}
 			if datasetName == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
 				context.Response().Writer.Write([]byte("Dataset name required"))
 				return nil
 			}
-			dataset, err := app.Dao().GetDatasetByName(orgId, datasetName)
+			dataset, err := app.Dao().GetDatasetByName(orgUUID, datasetName)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
 				context.Response().Writer.Write([]byte(err.Error()))
