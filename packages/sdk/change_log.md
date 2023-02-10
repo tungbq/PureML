@@ -1,3 +1,16 @@
+## Release of V0.2.0
+### Changes
+- Removed projects. There will be no project related actions(creation, deletion etc.) in PureML
+- `project.init()` equivalent for datasets is `dataset.init()`. This will create an empty an empty Dataset that will contain all the information about a dataset like **ReadME.md**, **branches**, **versions**, **reviews** etc
+- - Each dataset registered using `@dataset` will be assigned a version 
+- `project.init()` equivalent for models is `model.init()`. This will create an empty an empty Models that will contain all the information about a dataset like **ReadME.md**, **branches**, **versions**, **reviews** etc
+- - Each model registered using `@model` will be assigned a version
+- Added branching for datasets, and models
+
+
+
+
+
 ## Release of V0.1.6
 ### Changes
 - Added support for more input types for fastAPI and Docker container
