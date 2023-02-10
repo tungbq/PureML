@@ -120,6 +120,11 @@ func CreateModel(db *gorm.DB, name string, wiki string) error {
 						Version: "v1",
 						Hash:    "1234567890",
 						IsEmpty: true,
+						CreatedByUser: dbmodels.User{
+							BaseModel: dbmodels.BaseModel{
+								UUID: defaultUUID,
+							},
+						},
 					},
 				},
 			},
@@ -192,6 +197,11 @@ func CreateDataset(db *gorm.DB, name string, wiki string) error {
 								UUID: defaultUUID,
 							},
 							Lineage: "{}",
+						},
+						CreatedByUser: dbmodels.User{
+							BaseModel: dbmodels.BaseModel{
+								UUID: defaultUUID,
+							},
 						},
 					},
 				},

@@ -1039,7 +1039,7 @@ func (ds *Datastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName stri
 	}, nil
 }
 
-func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string) (*models.ModelBranchVersionResponse, error) {
+func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, userUUID uuid.UUID) (*models.ModelBranchVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -1185,10 +1185,15 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 				UUID: modelBranchUUID,
 			},
 		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: userUUID,
+			},
+		},
 		Path:    sourcePath,
 		IsEmpty: isEmpty,
 	}
-	err = ds.DB.Create(&modelVersion).Preload("Branch").Preload("Path.SourceType").Error
+	err = ds.DB.Create(&modelVersion).Preload("Branch").Preload("CreatedByUser").Preload("Path.SourceType").Error
 	if err != nil {
 		return nil, err
 	}
@@ -1208,6 +1213,13 @@ func (ds *Datastore) UploadAndRegisterModelFile(orgId uuid.UUID, modelBranchUUID
 				Name:      modelVersion.Path.SourceType.Name,
 				PublicURL: modelVersion.Path.SourceType.PublicURL,
 			},
+		},
+		CreatedBy: models.UserHandleResponse{
+			UUID:   modelVersion.CreatedByUser.UUID,
+			Name:   modelVersion.CreatedByUser.Name,
+			Avatar: modelVersion.CreatedByUser.Avatar,
+			Email:  modelVersion.CreatedByUser.Email,
+			Handle: modelVersion.CreatedByUser.Handle,
 		},
 		IsEmpty: modelVersion.IsEmpty,
 	}, nil
@@ -1751,7 +1763,7 @@ func (ds *Datastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchNam
 	}, nil
 }
 
-func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string) (*models.DatasetBranchVersionResponse, error) {
+func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranchUUID uuid.UUID, file *multipart.FileHeader, isEmpty bool, hash string, source string, lineage string, userUUID uuid.UUID) (*models.DatasetBranchVersionResponse, error) {
 	var sourceType dbmodels.SourceType
 	var sourcePath dbmodels.Path
 	org := dbmodels.Organization{
@@ -1900,10 +1912,15 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 		Lineage: dbmodels.Lineage{
 			Lineage: lineage,
 		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: userUUID,
+			},
+		},
 		Path:    sourcePath,
 		IsEmpty: isEmpty,
 	}
-	err = ds.DB.Create(&datasetVersion).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Error
+	err = ds.DB.Create(&datasetVersion).Preload("Lineage").Preload("Branch").Preload("CreatedByUser").Preload("Path.SourceType").Error
 	if err != nil {
 		return nil, err
 	}
@@ -1927,6 +1944,13 @@ func (ds *Datastore) UploadAndRegisterDatasetFile(orgId uuid.UUID, datasetBranch
 		Lineage: models.LineageResponse{
 			UUID:    datasetVersion.Lineage.UUID,
 			Lineage: datasetVersion.Lineage.Lineage,
+		},
+		CreatedBy: models.UserHandleResponse{
+			UUID:   datasetVersion.CreatedByUser.UUID,
+			Name:   datasetVersion.CreatedByUser.Name,
+			Avatar: datasetVersion.CreatedByUser.Avatar,
+			Email:  datasetVersion.CreatedByUser.Email,
+			Handle: datasetVersion.CreatedByUser.Handle,
 		},
 		IsEmpty: datasetVersion.IsEmpty,
 	}, nil
