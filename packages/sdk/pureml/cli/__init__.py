@@ -61,7 +61,7 @@ def get_org_id():
 
         creds_json = json.loads(creds)
 
-        org_id = creds_json['email']
+        org_id = creds_json['org_id']
         print(f"[bold green]Organization exists!")
 
         # print(org_id)

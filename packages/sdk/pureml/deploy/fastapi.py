@@ -15,18 +15,18 @@ from pureml.utils.constants import (
 from pureml.utils.deploy import process_input, process_output
 
 
-def get_project_file():
-    os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
+# def get_project_file():
+#     os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
 
-    project_dir_name = PATH_USER_PROJECT.split(os.path.sep)[-2]
-    predict_project_dir = os.path.join(PATH_PREDICT_DIR, project_dir_name)
+#     project_dir_name = PATH_USER_PROJECT.split(os.path.sep)[-2]
+#     predict_project_dir = os.path.join(PATH_PREDICT_DIR, project_dir_name)
 
-    os.makedirs(predict_project_dir, exist_ok=True)
+#     os.makedirs(predict_project_dir, exist_ok=True)
 
-    project_file_name = PATH_USER_PROJECT.split(os.path.sep)[-1]
-    predict_project_file_name = os.path.join(predict_project_dir, project_file_name)
+#     project_file_name = PATH_USER_PROJECT.split(os.path.sep)[-1]
+#     predict_project_file_name = os.path.join(predict_project_dir, project_file_name)
 
-    shutil.copy(PATH_USER_PROJECT, predict_project_file_name)
+#     shutil.copy(PATH_USER_PROJECT, predict_project_file_name)
 
 
 def get_predict_file(predict_path):
@@ -62,7 +62,7 @@ def get_requirements_file(requirements_path):
 
 
 def generate_file_upload_api(
-    model_name, model_version, input_type, input_shape, output_type, output_shape
+    model_name, model_branch, model_version, input_type, input_shape, output_type, output_shape
 ):
 
     query = """
@@ -84,7 +84,7 @@ access_token = os.getenv('ACCESS_TOKEN')
 
 pureml.login(org_id=org_id, access_token=access_token)
 
-model = pureml.model.fetch('{MODEL_NAME}', '{MODEL_VERSION}')
+model = pureml.model.fetch('{MODEL_NAME}', '{MODEL_BRANCH}', '{MODEL_VERSION}')
 
 # Create the app
 app = FastAPI()     
@@ -140,6 +140,7 @@ if __name__ == '__main__':
         HOST=API_IP_DOCKER,
         PORT=PORT_FASTAPI,
         MODEL_NAME=model_name,
+        MODEL_BRANCH=model_branch,
         MODEL_VERSION=model_version,
         INPUT_TYPE=input_type,
         INPUT_SHAPE=input_shape,
@@ -151,7 +152,7 @@ if __name__ == '__main__':
 
 
 def generate_json_api(
-    model_name, model_version, input_type, input_shape, output_type, output_shape
+    model_name, model_branch, model_version, input_type, input_shape, output_type, output_shape
 ):
 
     query = """
@@ -173,7 +174,7 @@ access_token = os.getenv('ACCESS_TOKEN')
 
 pureml.login(org_id=org_id, access_token=access_token)
 
-model = pureml.model.fetch('{MODEL_NAME}', '{MODEL_VERSION}')
+model = pureml.model.fetch('{MODEL_NAME}', '{MODEL_BRANCH}', '{MODEL_VERSION}')
 
 # Create the app
 app = FastAPI()     
@@ -216,6 +217,7 @@ if __name__ == '__main__':
         HOST=API_IP_DOCKER,
         PORT=PORT_FASTAPI,
         MODEL_NAME=model_name,
+        MODEL_BRANCH=model_branch,
         MODEL_VERSION=model_version,
         INPUT_TYPE=input_type,
         INPUT_SHAPE=input_shape,
@@ -226,14 +228,15 @@ if __name__ == '__main__':
     return query
 
 
-def generate_api(input, output, model_name, model_version):
+def generate_api(input, output, model_name, model_branch, model_version):
 
     input_type, input_shape = process_input(input=input)
     output_type, output_shape = process_output(output=output)
 
     if input_type == "image":
         api = generate_file_upload_api(
-            model_name=model_name,
+            model_name=model_name, 
+            model_branch=model_branch,
             model_version=model_version,
             input_type=input_type,
             input_shape=input_shape,
@@ -243,6 +246,7 @@ def generate_api(input, output, model_name, model_version):
     else:
         api = generate_json_api(
             model_name=model_name,
+            model_branch=model_branch,
             model_version=model_version,
             input_type=input_type,
             input_shape=input_shape,
@@ -254,17 +258,17 @@ def generate_api(input, output, model_name, model_version):
 
 
 def create_fastapi_file(
-    model_name, model_version, predict_path, requirements_path, input, output
+    model_name, model_branch, model_version, predict_path, requirements_path, input, output
 ):
 
-    get_project_file()
+    # get_project_file()
 
     get_predict_file(predict_path)
 
     get_requirements_file(requirements_path)
 
     api = generate_api(
-        input=input, output=output, model_name=model_name, model_version=model_version
+        input=input, output=output, model_name=model_name, model_branch=model_branch, model_version=model_version
     )
 
     with open(PATH_FASTAPI_FILE, "w") as api_writer:

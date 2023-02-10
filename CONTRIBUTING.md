@@ -20,8 +20,9 @@ But perhaps the most useful thing you can do is **use the tool**. Join the [Disc
 
 There are three main parts to the codebase:
 
-- `pureml/`: This contains the `pureml` Python Library. 
-- `tests/`: This are the tests for `pureml` Python library. 
+- `packages/sdk/pureml/`: This contains the `pureml` Python Library. 
+- `packages/sdk/tests/`: This are the tests for `pureml` Python library. 
+- `packages/server/`: This contains the backend server using go library. 
 
 
 
@@ -73,6 +74,7 @@ PureML is build using poetry. You can install it following these [instructions](
 
 Run this to install the Python library and its dependencies locally for development:
 
+    cd packages/sdk/
     poetry install
     poetry build    
 
@@ -84,18 +86,20 @@ PureML uses pytest to run the test suites
 
 Run this to run the test suite:
 
+    cd packages/sdk/
     pytest
 
-This will run the three test suites in the `test/` directories. 
+This will run the three test suites in the `packages/sdk/test/` directories. 
 
 
 ## Build
 
 This will build the Python package:
-
+    
+    cd packages/sdk/
     poetry build
 
-The built Python package in `pureml/`. This contains the Python library.
+The built Python package in `packages/sdk/pureml/`. This contains the Python library.
 
 
 

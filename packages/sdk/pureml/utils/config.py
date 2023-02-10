@@ -1,10 +1,12 @@
 import os
 import joblib
 from collections import defaultdict, OrderedDict
-from .constants import PATH_CONFIG
+from .constants import PATH_CONFIG, PATH_USER_PROJECT_DIR
 
 
 def load_config():
+    os.makedirs(PATH_USER_PROJECT_DIR, exist_ok=True)
+
     if os.path.exists(PATH_CONFIG):
         config = joblib.load(PATH_CONFIG)
     else:
@@ -18,6 +20,7 @@ def load_config():
         
         config['params'] = defaultdict()
         config['metrics'] = defaultdict()
+        config['figure'] = defaultdict()
         config['artifacts'] = defaultdict()
 
         config['predict'] = defaultdict()
