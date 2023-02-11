@@ -3,9 +3,21 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindModelReadmeApi registers the admin api endpoints and the corresponding handlers.
+func BindModelReadmeApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	modelGroup.GET("/:modelName/readme/version/:version", api.DefaultHandler(GetModelReadmeVersion), middlewares.ValidateModel(api.app))
+	modelGroup.GET("/:modelName/readme/version", api.DefaultHandler(GetModelReadmeAllVersions), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/readme", api.DefaultHandler(UpdateModelReadme), middlewares.ValidateModel(api.app))
+}
 
 // GetModelReadmeAllVersions godoc
 //
@@ -19,9 +31,9 @@ import (
 //	@Router			/org/{orgId}/model/{modelName}/readme/version [get]
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
-func GetModelReadmeAllVersions(request *models.Request) *models.Response {
+func (api *Api) GetModelReadmeAllVersions(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
-	readme, err := datastore.GetModelReadmeAllVersions(modelUUID)
+	readme, err := api.app.Dao().GetModelReadmeAllVersions(modelUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -42,10 +54,10 @@ func GetModelReadmeAllVersions(request *models.Request) *models.Response {
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			version		path	string	true	"Version"
-func GetModelReadmeVersion(request *models.Request) *models.Response {
+func (api *Api) GetModelReadmeVersion(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
 	versionName := request.GetPathParam("version")
-	readme, err := datastore.GetModelReadmeVersion(modelUUID, versionName)
+	readme, err := api.app.Dao().GetModelReadmeVersion(modelUUID, versionName)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -55,7 +67,6 @@ func GetModelReadmeVersion(request *models.Request) *models.Response {
 	response := models.NewDataResponse(http.StatusOK, readme, "Model Readme version")
 	return response
 }
-
 
 // UpdateModelReadme godoc
 //
@@ -70,7 +81,7 @@ func GetModelReadmeVersion(request *models.Request) *models.Response {
 //	@Param			orgId		path	string					true	"Organization Id"
 //	@Param			modelName	path	string					true	"Model Name"
 //	@Param			data		body	models.ReadmeRequest	true	"Data"
-func UpdateModelReadme(request *models.Request) *models.Response {
+func (api *Api) UpdateModelReadme(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	modelUUID := request.GetModelUUID()
 	modelFileType := request.GetParsedBodyAttribute("file_type")
@@ -87,9 +98,13 @@ func UpdateModelReadme(request *models.Request) *models.Response {
 	} else {
 		modelContentData = modelContent.(string)
 	}
-	readme, err := datastore.UpdateModelReadme(modelUUID, modelFileTypeData, modelContentData)
+	readme, err := api.app.Dao().UpdateModelReadme(modelUUID, modelFileTypeData, modelContentData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, readme, "Model readme updated")
 }
+
+var GetModelReadmeAllVersions ServiceFunc = (*Api).GetModelReadmeAllVersions
+var GetModelReadmeVersion ServiceFunc = (*Api).GetModelReadmeVersion
+var UpdateModelReadme ServiceFunc = (*Api).UpdateModelReadme

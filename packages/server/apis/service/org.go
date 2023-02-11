@@ -3,10 +3,25 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindOrgApi registers the admin api endpoints and the corresponding handlers.
+func BindOrgApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	rg.GET("/org/handle/:orgHandle", api.DefaultHandler(GetOrgByHandle))
+	rg.GET("/org/:orgId/public/model", api.DefaultHandler(GetOrgAllPublicModels), middlewares.ValidateOrg(api.app))
+	rg.GET("/org/:orgId/public/dataset", api.DefaultHandler(GetOrgAllPublicDatasets), middlewares.ValidateOrg(api.app))
+	orgGroup := rg.Group("/org", middlewares.RequireAuthContext)
+	orgGroup.GET("/id/:orgId", api.DefaultHandler(GetOrgByID), middlewares.ValidateOrg(api.app))
+	orgGroup.POST("/create", api.DefaultHandler(CreateOrg))
+	orgGroup.POST("/:orgId/update", api.DefaultHandler(UpdateOrg), middlewares.ValidateOrg(api.app))
+}
 
 // GetOrgByHandle godoc
 //
@@ -18,17 +33,17 @@ import (
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/handle/{orgHandle} [get]
 //	@Param			orgHandle	path	string	true	"Organization Handle"
-func GetOrgByHandle(request *models.Request) *models.Response {
+func (api *Api) GetOrgByHandle(request *models.Request) *models.Response {
 	var response *models.Response
 	orgHandle := request.PathParams["orgHandle"]
-	organization, err := datastore.GetOrgByHandle(orgHandle)
+	organization, err := api.app.Dao().GetOrgByHandle(orgHandle)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	if organization == nil {
 		response = models.NewErrorResponse(http.StatusNotFound, "Organization not found")
 	} else {
-		response = models.NewDataResponse(http.StatusOK, []models.OrganizationResponse{*organization}, "Organization Details")
+		response = models.NewDataResponse(http.StatusOK, []models.OrganizationResponse{*organization}, "Organization details")
 	}
 	return response
 }
@@ -44,17 +59,17 @@ func GetOrgByHandle(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/id/{orgId} [get]
 //	@Param			orgId	path	string	true	"Organization ID"
-func GetOrgByID(request *models.Request) *models.Response {
+func (api *Api) GetOrgByID(request *models.Request) *models.Response {
 	var response *models.Response
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))
-	organization, err := datastore.GetOrgById(orgId)
+	organization, err := api.app.Dao().GetOrgById(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	if organization == nil {
 		response = models.NewErrorResponse(http.StatusNotFound, "Organization not found")
 	} else {
-		response = models.NewDataResponse(http.StatusOK, []models.OrganizationResponse{*organization}, "Organization Details")
+		response = models.NewDataResponse(http.StatusOK, []models.OrganizationResponse{*organization}, "Organization details")
 	}
 	return response
 }
@@ -69,9 +84,9 @@ func GetOrgByID(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/public/model [get]
 //	@Param			orgId	path	string	true	"Organization ID"
-func GetOrgAllPublicModels(request *models.Request) *models.Response {
+func (api *Api) GetOrgAllPublicModels(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	modelsdb, err := datastore.GetOrgAllPublicModels(orgId)
+	modelsdb, err := api.app.Dao().GetOrgAllPublicModels(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -88,9 +103,9 @@ func GetOrgAllPublicModels(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/public/dataset [get]
 //	@Param			orgId	path	string	true	"Organization ID"
-func GetOrgAllPublicDatasets(request *models.Request) *models.Response {
+func (api *Api) GetOrgAllPublicDatasets(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	datasetsdb, err := datastore.GetOrgAllPublicDatasets(orgId)
+	datasetsdb, err := api.app.Dao().GetOrgAllPublicDatasets(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -108,14 +123,29 @@ func GetOrgAllPublicDatasets(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/create [post]
 //	@Param			org	body	models.CreateOrUpdateOrgRequest	true	"Organization details"
-func CreateOrg(request *models.Request) *models.Response {
+func (api *Api) CreateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	// orgName := request.GetParsedBodyAttribute("name").(string)
-	orgDesc := request.GetParsedBodyAttribute("description").(string)
-	orgHandle := request.GetParsedBodyAttribute("handle").(string)
-	orgName := orgHandle
+	orgDesc := request.GetParsedBodyAttribute("description")
+	var orgDescData string
+	if orgDesc == nil {
+		orgDescData = ""
+	} else {
+		orgDescData = orgDesc.(string)
+	}
+	orgHandle := request.GetParsedBodyAttribute("handle")
+	var orgHandleData string
+	if orgHandle == nil {
+		orgHandleData = ""
+	} else {
+		orgHandleData = orgHandle.(string)
+	}
+	if orgHandleData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Organization handle is required")
+	}
+	orgName := orgHandleData
 	email := request.User.Email
-	org, err := datastore.CreateOrgFromEmail(email, orgName, orgDesc, orgHandle)
+	org, err := api.app.Dao().CreateOrgFromEmail(email, orgName, orgDescData, orgHandleData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -135,23 +165,36 @@ func CreateOrg(request *models.Request) *models.Response {
 //	@Router			/org/{orgId}/update [post]
 //	@Param			orgId	path	string							true	"Organization ID"
 //	@Param			org		body	models.CreateOrUpdateOrgRequest	true	"Organization details"
-func UpdateOrg(request *models.Request) *models.Response {
+func (api *Api) UpdateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))
-	orgName := request.GetParsedBodyAttribute("name").(string)
-	orgDesc := request.GetParsedBodyAttribute("description").(string)
-	orgAvatar := request.GetParsedBodyAttribute("avatar").(string)
-	email := request.User.Email
-	UserOrganization, err := datastore.GetUserOrganizationByOrgIdAndEmail(orgId, email)
+	userUUID := request.GetUserUUID()
+	UserOrganization, err := api.app.Dao().GetUserOrganizationByOrgIdAndUserUUID(orgId, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	var response *models.Response
-	if UserOrganization.Role != "owner" {
+	if UserOrganization == nil || UserOrganization.Role != "owner" {
 		response = models.NewErrorResponse(http.StatusForbidden, "You are not authorized to update this organization")
 		return response
 	}
-	updatedOrg, err := datastore.UpdateOrg(orgId, orgName, orgDesc, orgAvatar)
+	orgName := request.GetParsedBodyAttribute("name")
+	orgDesc := request.GetParsedBodyAttribute("description")
+	orgAvatar := request.GetParsedBodyAttribute("avatar")
+	updatedAttributes := map[string]interface{}{}
+	if orgName != nil {
+		updatedAttributes["name"] = orgName.(string)
+		if orgName == "" {
+			return models.NewErrorResponse(http.StatusBadRequest, "Name cannot be empty")
+		}
+	}
+	if orgAvatar != nil {
+		updatedAttributes["avatar"] = orgAvatar.(string)
+	}
+	if orgDesc != nil {
+		updatedAttributes["desc"] = orgDesc.(string)
+	}
+	updatedOrg, err := api.app.Dao().UpdateOrg(orgId, updatedAttributes)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -159,3 +202,10 @@ func UpdateOrg(request *models.Request) *models.Response {
 	return response
 
 }
+
+var GetOrgByHandle ServiceFunc = (*Api).GetOrgByHandle
+var GetOrgByID ServiceFunc = (*Api).GetOrgByID
+var GetOrgAllPublicModels ServiceFunc = (*Api).GetOrgAllPublicModels
+var GetOrgAllPublicDatasets ServiceFunc = (*Api).GetOrgAllPublicDatasets
+var CreateOrg ServiceFunc = (*Api).CreateOrg
+var UpdateOrg ServiceFunc = (*Api).UpdateOrg

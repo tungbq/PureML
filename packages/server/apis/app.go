@@ -10,6 +10,7 @@ import (
 	"time"
 
 	config "github.com/PureML-Inc/PureML/server/config"
+	"github.com/PureML-Inc/PureML/server/core"
 	"github.com/fatih/color"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/crypto/acme"
@@ -20,12 +21,12 @@ var (
 	allowedOrigins = []string{"*"}
 )
 
-func Serve() error {
-	dataDir := config.GetDataDir()
+func Serve(app core.App, hideStartBanner bool) error {
+	dataDir := app.DataDir()
 	httpAddr := config.GetHttpAddr()
 	httpsAddr := config.GetHttpsAddr()
 
-	router, err := InitApi()
+	router, err := InitApi(app)
 	if err != nil {
 		panic(err)
 	}
@@ -73,13 +74,14 @@ func Serve() error {
 	if strings.HasPrefix(address, "0.0.0.0") {
 		address = strings.Replace(address, "0.0.0.0", "localhost", 1)
 	}
-	regular := color.New()
-	bold := color.New(color.Bold).Add(color.FgGreen)
-	bold.Printf("> Server started at: %s\n", color.CyanString("%s://%s", schema, address))
-	regular.Printf("  - REST API: %s\n", color.CyanString("%s://%s/api/", schema, address))
-	regular.Printf("  - API Docs: %s\n", color.HiGreenString("%s://%s/api/swagger/index.html", schema, address))
-	// regular.Printf("  - Admin UI: %s\n", color.CyanString("%s://%s/_/", schema, address))
-	// }
+	if !hideStartBanner {
+		regular := color.New()
+		bold := color.New(color.Bold).Add(color.FgGreen)
+		bold.Printf("> Server started at: %s\n", color.CyanString("%s://%s", schema, address))
+		regular.Printf("  - REST API: %s\n", color.CyanString("%s://%s/api/", schema, address))
+		regular.Printf("  - API Docs: %s\n", color.HiGreenString("%s://%s/api/swagger/index.html", schema, address))
+		// regular.Printf("  - Admin UI: %s\n", color.CyanString("%s://%s/_/", schema, address))
+	}
 
 	var serveErr error
 	if httpsAddr != "" {

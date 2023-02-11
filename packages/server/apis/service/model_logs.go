@@ -3,9 +3,21 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindModelLogsApi registers the admin api endpoints and the corresponding handlers.
+func BindModelLogsApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log", api.DefaultHandler(GetAllLogsModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version/log/:key", api.DefaultHandler(GetKeyLogsModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
+	modelGroup.POST("/:modelName/branch/:branchName/version/:version/log", api.DefaultHandler(LogModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
+}
 
 // LogModel godoc
 //
@@ -22,7 +34,7 @@ import (
 //	@Param			branchName	path	string				true	"Branch Name"
 //	@Param			version		path	string				true	"Version"
 //	@Param			data		body	models.LogRequest	true	"Data to log"
-func LogModel(request *models.Request) *models.Response {
+func (api *Api) LogModel(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	key := request.GetParsedBodyAttribute("key")
 	var keyData string
@@ -39,7 +51,7 @@ func LogModel(request *models.Request) *models.Response {
 		dataData = ""
 	}
 	versionUUID := request.GetModelBranchVersionUUID()
-	result, err := datastore.CreateLogForModelVersion(keyData, dataData, versionUUID)
+	result, err := api.app.Dao().CreateLogForModelVersion(keyData, dataData, versionUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -61,9 +73,9 @@ func LogModel(request *models.Request) *models.Response {
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			branchName	path	string	true	"Branch Name"
 //	@Param			version		path	string	true	"Version"
-func GetAllLogsModel(request *models.Request) *models.Response {
+func (api *Api) GetAllLogsModel(request *models.Request) *models.Response {
 	versionUUID := request.GetModelBranchVersionUUID()
-	result, err := datastore.GetLogForModelVersion(versionUUID)
+	result, err := api.app.Dao().GetLogForModelVersion(versionUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -86,13 +98,17 @@ func GetAllLogsModel(request *models.Request) *models.Response {
 //	@Param			branchName	path	string	true	"Branch Name"
 //	@Param			version		path	string	true	"Version"
 //	@Param			key			path	string	true	"Key"
-func GetKeyLogsModel(request *models.Request) *models.Response {
+func (api *Api) GetKeyLogsModel(request *models.Request) *models.Response {
 	versionUUID := request.GetModelBranchVersionUUID()
 	key := request.PathParams["key"]
-	result, err := datastore.GetKeyLogForModelVersion(versionUUID, key)
+	result, err := api.app.Dao().GetKeyLogForModelVersion(versionUUID, key)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	response := models.NewDataResponse(http.StatusOK, result, "Specific Key Logs for model version")
 	return response
 }
+
+var LogModel ServiceFunc = (*Api).LogModel
+var GetAllLogsModel ServiceFunc = (*Api).GetAllLogsModel
+var GetKeyLogsModel ServiceFunc = (*Api).GetKeyLogsModel

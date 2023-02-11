@@ -3,10 +3,23 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindModelActivityApi registers the admin api endpoints and the corresponding handlers.
+func BindModelActivityApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	modelGroup.GET("/:modelName/activity/:category", api.DefaultHandler(GetModelActivity), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/activity/:category", api.DefaultHandler(CreateModelActivity), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/activity/:category/:activityUUID", api.DefaultHandler(UpdateModelActivity), middlewares.ValidateModel(api.app))
+	modelGroup.DELETE("/:modelName/activity/:category/:activityUUID/delete", api.DefaultHandler(DeleteModelActivity), middlewares.ValidateModel(api.app))
+}
 
 // GetModelActivity godoc
 //
@@ -21,10 +34,10 @@ import (
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			category	path	string	true	"Category"
-func GetModelActivity(request *models.Request) *models.Response {
+func (api *Api) GetModelActivity(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
 	category := request.GetPathParam("category")
-	activity, err := datastore.GetModelActivity(modelUUID, category)
+	activity, err := api.app.Dao().GetModelActivity(modelUUID, category)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -48,7 +61,7 @@ func GetModelActivity(request *models.Request) *models.Response {
 //	@Param			modelName	path	string					true	"Model Name"
 //	@Param			category	path	string					true	"Category"
 //	@Param			data		body	models.ActivityRequest	true	"Activity"
-func CreateModelActivity(request *models.Request) *models.Response {
+func (api *Api) CreateModelActivity(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	modelUUID := request.GetModelUUID()
 	userUUID := request.GetUserUUID()
@@ -60,7 +73,7 @@ func CreateModelActivity(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Activity cannot be empty")
 	}
 	activityData := activity.(string)
-	createdActivity, err := datastore.CreateModelActivity(modelUUID, userUUID, category, activityData)
+	createdActivity, err := api.app.Dao().CreateModelActivity(modelUUID, userUUID, category, activityData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -82,7 +95,7 @@ func CreateModelActivity(request *models.Request) *models.Response {
 //	@Param			category		path	string	true	"Category"
 //	@Param			activityUUID	path	string	true	"Activity UUID"
 //	@Param			activity		body	string	true	"Activity"
-func UpdateModelActivity(request *models.Request) *models.Response {
+func (api *Api) UpdateModelActivity(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	activityUUID := uuid.Must(uuid.FromString(request.GetPathParam("activityUUID")))
 	updatedActivity := request.GetParsedBodyAttribute("activity").(string)
@@ -90,7 +103,7 @@ func UpdateModelActivity(request *models.Request) *models.Response {
 	if updatedActivity != "" {
 		updatedAttributes["activity"] = updatedActivity
 	}
-	updatedDbActivity, err := datastore.UpdateModelActivity(activityUUID, updatedAttributes)
+	updatedDbActivity, err := api.app.Dao().UpdateModelActivity(activityUUID, updatedAttributes)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -111,11 +124,16 @@ func UpdateModelActivity(request *models.Request) *models.Response {
 //	@Param			modelName		path	string	true	"Model Name"
 //	@Param			category		path	string	true	"Category"
 //	@Param			activityUUID	path	string	true	"Activity UUID"
-func DeleteModelActivity(request *models.Request) *models.Response {
+func (api *Api) DeleteModelActivity(request *models.Request) *models.Response {
 	activityUUID := uuid.Must(uuid.FromString(request.GetPathParam("activityUUID")))
-	err := datastore.DeleteModelActivity(activityUUID)
+	err := api.app.Dao().DeleteModelActivity(activityUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, nil, "Model Activity deleted")
 }
+
+var GetModelActivity ServiceFunc = (*Api).GetModelActivity
+var CreateModelActivity ServiceFunc = (*Api).CreateModelActivity
+var UpdateModelActivity ServiceFunc = (*Api).UpdateModelActivity
+var DeleteModelActivity ServiceFunc = (*Api).DeleteModelActivity

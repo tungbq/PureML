@@ -3,9 +3,21 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindDatasetReadmeApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetReadmeApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	datasetGroup.GET("/:datasetName/readme/version/:version", api.DefaultHandler(GetDatasetReadmeVersion), middlewares.ValidateDataset(api.app))
+	datasetGroup.GET("/:datasetName/readme/version", api.DefaultHandler(GetDatasetReadmeAllVersions), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/readme", api.DefaultHandler(UpdateDatasetReadme), middlewares.ValidateDataset(api.app))
+}
 
 // GetDatasetReadmeAllVersions godoc
 //
@@ -19,9 +31,9 @@ import (
 //	@Router			/org/{orgId}/dataset/{datasetName}/readme/version [get]
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			datasetName	path	string	true	"Dataset Name"
-func GetDatasetReadmeAllVersions(request *models.Request) *models.Response {
+func (api *Api) GetDatasetReadmeAllVersions(request *models.Request) *models.Response {
 	modelUUID := request.GetDatasetUUID()
-	readme, err := datastore.GetDatasetReadmeAllVersions(modelUUID)
+	readme, err := api.app.Dao().GetDatasetReadmeAllVersions(modelUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -42,10 +54,10 @@ func GetDatasetReadmeAllVersions(request *models.Request) *models.Response {
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			datasetName	path	string	true	"Dataset Name"
 //	@Param			version		path	string	true	"Version"
-func GetDatasetReadmeVersion(request *models.Request) *models.Response {
+func (api *Api) GetDatasetReadmeVersion(request *models.Request) *models.Response {
 	modelUUID := request.GetDatasetUUID()
 	versionName := request.GetPathParam("version")
-	readme, err := datastore.GetDatasetReadmeVersion(modelUUID, versionName)
+	readme, err := api.app.Dao().GetDatasetReadmeVersion(modelUUID, versionName)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -69,7 +81,7 @@ func GetDatasetReadmeVersion(request *models.Request) *models.Response {
 //	@Param			orgId		path	string					true	"Organization Id"
 //	@Param			datasetName	path	string					true	"Dataset Name"
 //	@Param			data		body	models.ReadmeRequest	true	"Data"
-func UpdateDatasetReadme(request *models.Request) *models.Response {
+func (api *Api) UpdateDatasetReadme(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	datasetUUID := request.GetDatasetUUID()
 	datasetFileType := request.GetParsedBodyAttribute("file_type")
@@ -86,9 +98,13 @@ func UpdateDatasetReadme(request *models.Request) *models.Response {
 	} else {
 		datasetContentData = datasetContent.(string)
 	}
-	readme, err := datastore.UpdateDatasetReadme(datasetUUID, datasetFileTypeData, datasetContentData)
+	readme, err := api.app.Dao().UpdateDatasetReadme(datasetUUID, datasetFileTypeData, datasetContentData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, readme, "Dataset readme updated")
 }
+
+var GetDatasetReadmeAllVersions ServiceFunc = (*Api).GetDatasetReadmeAllVersions
+var GetDatasetReadmeVersion ServiceFunc = (*Api).GetDatasetReadmeVersion
+var UpdateDatasetReadme ServiceFunc = (*Api).UpdateDatasetReadme

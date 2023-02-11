@@ -8,10 +8,25 @@ import (
 	"runtime"
 
 	"github.com/PureML-Inc/PureML/server/core"
-	"github.com/PureML-Inc/PureML/server/datastore"
 )
 
-func NewTestApp(optTestDataDir ...string) (*string, error) {
+type TestApp struct {
+	*core.BaseApp
+}
+
+// Cleanup resets the test application state and removes the test
+// app's dataDir from the filesystem.
+//
+// After this call, the app instance shouldn't be used anymore.
+func (t *TestApp) Cleanup() {
+	t.ResetBootstrapState()
+
+	if t.DataDir() != "" {
+		os.RemoveAll(t.DataDir())
+	}
+}
+
+func NewTestApp(optTestDataDir ...string) (*TestApp, error) {
 	var testDataDir string
 	if len(optTestDataDir) == 0 || optTestDataDir[0] == "" {
 		// fallback to the default test data directory
@@ -26,12 +41,23 @@ func NewTestApp(optTestDataDir ...string) (*string, error) {
 		return nil, err
 	}
 
+	app := core.NewBaseApp(&core.BaseAppConfig{
+		DataDir:      tempDir,
+		IsDebug:      false,
+		DatabaseType: "sqlite3",
+	})
+
+	
 	// load data dir and db connections
-	if err := core.Bootstrap(tempDir); err != nil {
+	if err := app.Bootstrap(); err != nil {
 		return nil, err
 	}
-	datastore.InitTestDB(tempDir)
-	return &tempDir, nil
+	app.Settings().AdminAuthToken.Secret = "pureml-test-secret"
+	
+	t := &TestApp{
+		BaseApp: app,
+	}
+	return t, nil
 }
 
 // TempDirClone creates a new temporary directory copy from the

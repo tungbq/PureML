@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/PureML-Inc/PureML/server/apis"
-	"github.com/PureML-Inc/PureML/server/core"
 	"github.com/labstack/echo/v4"
 )
 
@@ -36,25 +35,32 @@ type ApiScenario struct {
 
 	// test hooks
 	// ---
-	BeforeTestFunc func(t *testing.T, e *echo.Echo)
-	AfterTestFunc  func(t *testing.T, e *echo.Echo)
+	TestAppFactory func() (*TestApp, error)
+	BeforeTestFunc func(t *testing.T, app *TestApp, e *echo.Echo)
+	AfterTestFunc  func(t *testing.T, app *TestApp, e *echo.Echo)
 }
 
 // Test executes the test case/scenario.
 func (scenario *ApiScenario) Test(t *testing.T) {
-	testDir, testAppErr := NewTestApp()
+	var testApp *TestApp
+	var testAppErr error
+	if scenario.TestAppFactory != nil {
+		testApp, testAppErr = scenario.TestAppFactory()
+	} else {
+		testApp, testAppErr = NewTestApp()
+	}
 	if testAppErr != nil {
 		t.Fatalf("Failed to initialize the test app instance: %v", testAppErr)
 	}
-	defer core.Cleanup(*testDir)
+	defer testApp.Cleanup()
 
-	e, err := apis.InitApi()
+	e, err := apis.InitApi(testApp)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if scenario.BeforeTestFunc != nil {
-		scenario.BeforeTestFunc(t, e)
+		scenario.BeforeTestFunc(t, testApp, e)
 	}
 
 	recorder := httptest.NewRecorder()
@@ -128,6 +134,6 @@ func (scenario *ApiScenario) Test(t *testing.T) {
 	}
 
 	if scenario.AfterTestFunc != nil {
-		scenario.AfterTestFunc(t, e)
+		scenario.AfterTestFunc(t, testApp, e)
 	}
 }

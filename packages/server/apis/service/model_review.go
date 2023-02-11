@@ -3,10 +3,22 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindModelReviewApi registers the admin api endpoints and the corresponding handlers.
+func BindModelReviewApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	modelGroup.GET("/:modelName/review", api.DefaultHandler(GetModelReviews), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/review/create", api.DefaultHandler(CreateModelReview), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/review/:reviewId/update", api.DefaultHandler(UpdateModelReview), middlewares.ValidateModel(api.app))
+}
 
 // GetModelReviews godoc
 //
@@ -20,9 +32,9 @@ import (
 //	@Router			/org/{orgId}/model/{modelName}/review [get]
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
-func GetModelReviews(request *models.Request) *models.Response {
+func (api *Api) GetModelReviews(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
-	reviews, err := datastore.GetModelReviews(modelUUID)
+	reviews, err := api.app.Dao().GetModelReviews(modelUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -44,7 +56,7 @@ func GetModelReviews(request *models.Request) *models.Response {
 //	@Param			orgId		path	string						true	"Organization Id"
 //	@Param			modelName	path	string						true	"Model Name"
 //	@Param			data		body	models.ModelReviewRequest	true	"Review"
-func CreateModelReview(request *models.Request) *models.Response {
+func (api *Api) CreateModelReview(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()
 	modelName := request.GetModelName()
@@ -57,7 +69,7 @@ func CreateModelReview(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch cannot be empty")
 	}
 	fromBranchData := fromBranch.(string)
-	fromBranchDb, err := datastore.GetModelBranchByName(orgId, modelName, fromBranchData)
+	fromBranchDb, err := api.app.Dao().GetModelBranchByName(orgId, modelName, fromBranchData)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch not found")
 	}
@@ -69,7 +81,7 @@ func CreateModelReview(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch Version cannot be empty")
 	}
 	fromBranchVersionData := fromBranchVersion.(string)
-	fromBranchVersionDb, err := datastore.GetModelBranchVersion(fromBranchUUID, fromBranchVersionData)
+	fromBranchVersionDb, err := api.app.Dao().GetModelBranchVersion(fromBranchUUID, fromBranchVersionData)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "From Branch not found")
 	}
@@ -81,7 +93,7 @@ func CreateModelReview(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "To Branch cannot be empty")
 	}
 	toBranchData := toBranch.(string)
-	toBranchDb, err := datastore.GetModelBranchByName(orgId, modelName, toBranchData)
+	toBranchDb, err := api.app.Dao().GetModelBranchByName(orgId, modelName, toBranchData)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "To Branch not found")
 	}
@@ -110,7 +122,7 @@ func CreateModelReview(request *models.Request) *models.Response {
 		isAcceptedData = false
 	}
 	isAcceptedData = IsAccepted.(bool)
-	createdReview, err := datastore.CreateModelReview(modelUUID, userUUID, fromBranchUUID, fromBranchVersionUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
+	createdReview, err := api.app.Dao().CreateModelReview(modelUUID, userUUID, fromBranchUUID, fromBranchVersionUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -131,10 +143,10 @@ func CreateModelReview(request *models.Request) *models.Response {
 //	@Param			modelName	path	string							true	"Model Name"
 //	@Param			reviewId	path	string							true	"Review UUID"
 //	@Param			review		body	models.ModelReviewUpdateRequest	true	"Review"
-func UpdateModelReview(request *models.Request) *models.Response {
+func (api *Api) UpdateModelReview(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	reviewUUID := uuid.Must(uuid.FromString(request.GetPathParam("reviewId")))
-	review, err := datastore.GetModelReview(reviewUUID)
+	review, err := api.app.Dao().GetModelReview(reviewUUID)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -158,7 +170,7 @@ func UpdateModelReview(request *models.Request) *models.Response {
 	if isAccepted != nil {
 		updatedAttributes["is_accepted"] = isAccepted.(bool)
 	}
-	updatedDbReview, err := datastore.UpdateModelReview(reviewUUID, updatedAttributes)
+	updatedDbReview, err := api.app.Dao().UpdateModelReview(reviewUUID, updatedAttributes)
 	if err != nil {
 		if err.Error() == "review already complete" {
 			return models.NewErrorResponse(http.StatusBadRequest, err.Error())
@@ -167,3 +179,7 @@ func UpdateModelReview(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, []models.ModelReviewResponse{*updatedDbReview}, "Model review updated")
 }
+
+var GetModelReviews ServiceFunc = (*Api).GetModelReviews
+var CreateModelReview ServiceFunc = (*Api).CreateModelReview
+var UpdateModelReview ServiceFunc = (*Api).UpdateModelReview

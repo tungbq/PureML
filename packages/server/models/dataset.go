@@ -80,13 +80,14 @@ type DatasetBranchVersionNameResponse struct {
 }
 
 type DatasetBranchVersionResponse struct {
-	UUID    uuid.UUID                 `json:"uuid"`
-	Version string                    `json:"version"`
-	Branch  DatasetBranchNameResponse `json:"branch"`
-	Lineage LineageResponse           `json:"lineage"`
-	Hash    string                    `json:"hash"`
-	Path    PathResponse              `json:"path"`
-	IsEmpty bool                      `json:"is_empty"`
+	UUID      uuid.UUID                 `json:"uuid"`
+	Version   string                    `json:"version"`
+	Branch    DatasetBranchNameResponse `json:"branch"`
+	Lineage   LineageResponse           `json:"lineage"`
+	Hash      string                    `json:"hash"`
+	Path      PathResponse              `json:"path"`
+	IsEmpty   bool                      `json:"is_empty"`
+	CreatedBy UserHandleResponse        `json:"created_by"`
 }
 
 type LineageResponse struct {

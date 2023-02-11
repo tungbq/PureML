@@ -5,9 +5,19 @@ import (
 	"net/http"
 
 	"github.com/PureML-Inc/PureML/server/config"
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
+
+// BindAdminApi registers the admin api endpoints and the corresponding handlers.
+func BindAdminApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	orgGroup := rg.Group("/org", middlewares.RequireAuthContext)
+	orgGroup.GET("/all", api.DefaultHandler(GetAllAdminOrgs))
+}
 
 // GetAllAdminOrgs godoc
 //
@@ -19,14 +29,14 @@ import (
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/all [get]
-func GetAllAdminOrgs(request *models.Request) *models.Response {
+func (api *Api) GetAllAdminOrgs(request *models.Request) *models.Response {
 	var response *models.Response
 	if request.User == nil {
 		response = models.NewErrorResponse(http.StatusUnauthorized, "Unauthorized")
 		return response
 	}
 	if config.HasAdminAccess(request.User.Email) {
-		allOrgs, err := datastore.GetAllAdminOrgs()
+		allOrgs, err := api.app.Dao().GetAllAdminOrgs()
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		} else {
@@ -37,3 +47,5 @@ func GetAllAdminOrgs(request *models.Request) *models.Response {
 	}
 	return response
 }
+
+var GetAllAdminOrgs ServiceFunc = (*Api).GetAllAdminOrgs

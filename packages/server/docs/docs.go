@@ -3222,14 +3222,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/{orgId}/secret/r2": {
+        "/org/{orgId}/secret/r2/test": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get secrets for source type r2",
+                "description": "Test secrets for source type r2",
                 "consumes": [
                     "*/*"
                 ],
@@ -3239,7 +3239,7 @@ const docTemplate = `{
                 "tags": [
                     "Secret"
                 ],
-                "summary": "Get secrets for source type r2",
+                "summary": "Test secrets for source type r2",
                 "parameters": [
                     {
                         "type": "string",
@@ -3260,99 +3260,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/{orgId}/secret/r2/connect": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Add secrets for source type r2",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Secret"
-                ],
-                "summary": "Add secrets for source type r2",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Secret",
-                        "name": "secret",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.R2SecretRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/secret/r2/delete": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete secrets for source type r2",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Secret"
-                ],
-                "summary": "Delete secrets for source type r2",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/secret/s3": {
+        "/org/{orgId}/secret/s3/test": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get secrets for source type s3",
+                "description": "Test secrets for source type s3",
                 "consumes": [
                     "*/*"
                 ],
@@ -3362,92 +3277,7 @@ const docTemplate = `{
                 "tags": [
                     "Secret"
                 ],
-                "summary": "Get secrets for source type s3",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/secret/s3/connect": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Add secrets for source type s3",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Secret"
-                ],
-                "summary": "Add secrets for source type s3",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Secret",
-                        "name": "secret",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.S3SecretRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/secret/s3/delete": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete secrets for source type s3",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Secret"
-                ],
-                "summary": "Delete secrets for source type s3",
+                "summary": "Test secrets for source type s3",
                 "parameters": [
                     {
                         "type": "string",
@@ -4017,26 +3847,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.R2SecretRequest": {
-            "type": "object",
-            "properties": {
-                "access_key_id": {
-                    "type": "string"
-                },
-                "access_key_secret": {
-                    "type": "string"
-                },
-                "account_id": {
-                    "type": "string"
-                },
-                "bucket_name": {
-                    "type": "string"
-                },
-                "public_url": {
-                    "type": "string"
-                }
-            }
-        },
         "models.ReadmeRequest": {
             "type": "object",
             "properties": {
@@ -4044,23 +3854,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "file_type": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.S3SecretRequest": {
-            "type": "object",
-            "properties": {
-                "access_key_id": {
-                    "type": "string"
-                },
-                "access_key_secret": {
-                    "type": "string"
-                },
-                "bucket_location": {
-                    "type": "string"
-                },
-                "bucket_name": {
                     "type": "string"
                 }
             }

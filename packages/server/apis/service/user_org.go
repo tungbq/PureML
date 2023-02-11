@@ -3,11 +3,24 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
 
+// BindUserOrgApi registers the admin api endpoints and the corresponding handlers.
+func BindUserOrgApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	orgGroup := rg.Group("/org", middlewares.RequireAuthContext)
+	orgGroup.GET("/", api.DefaultHandler(GetOrgsForUser))
+	orgGroup.POST("/:orgId/add", api.DefaultHandler(AddUsersToOrg), middlewares.ValidateOrg(api.app))
+	orgGroup.POST("/join", api.DefaultHandler(JoinOrg))
+	orgGroup.POST("/:orgId/remove", api.DefaultHandler(RemoveOrg), middlewares.ValidateOrg(api.app))
+	orgGroup.POST("/:orgId/leave", api.DefaultHandler(LeaveOrg), middlewares.ValidateOrg(api.app))
+}
 
 // GetOrgsForUser godoc
 //
@@ -19,16 +32,15 @@ import (
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/ [get]
-func GetOrgsForUser(request *models.Request) *models.Response {
+func (api *Api) GetOrgsForUser(request *models.Request) *models.Response {
 	email := request.GetUserMail()
-	UserOrganization, err := datastore.GetUserOrganizationsByEmail(email)
+	UserOrganization, err := api.app.Dao().GetUserOrganizationsByEmail(email)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	response := models.NewDataResponse(http.StatusAccepted, UserOrganization, "User Organizations")
 	return response
 }
-
 
 // AddUsersToOrg godoc
 //
@@ -41,11 +53,11 @@ func GetOrgsForUser(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/add [post]
 //	@Param			email	path	string	true	"User email"
-func AddUsersToOrg(request *models.Request) *models.Response {
+func (api *Api) AddUsersToOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))
-	user, err := datastore.GetUserByEmail(email)
+	user, err := api.app.Dao().GetUserByEmail(email)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -54,7 +66,7 @@ func AddUsersToOrg(request *models.Request) *models.Response {
 		response = models.NewErrorResponse(http.StatusNotFound, "User not found")
 		return response
 	}
-	_, err = datastore.CreateUserOrganizationFromEmailAndOrgId(email, orgId)
+	_, err = api.app.Dao().CreateUserOrganizationFromEmailAndOrgId(email, orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -73,10 +85,10 @@ func AddUsersToOrg(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/join [post]
 //	@Param			join_code	body	string	true	"Organization join code"
-func JoinOrg(request *models.Request) *models.Response {
+func (api *Api) JoinOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	joinCode := request.GetParsedBodyAttribute("join_code").(string)
-	org, err := datastore.GetOrgByJoinCode(joinCode)
+	org, err := api.app.Dao().GetOrgByJoinCode(joinCode)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -86,7 +98,7 @@ func JoinOrg(request *models.Request) *models.Response {
 		return response
 	}
 	email := request.GetUserMail()
-	_, err = datastore.CreateUserOrganizationFromEmailAndJoinCode(email, joinCode)
+	_, err = api.app.Dao().CreateUserOrganizationFromEmailAndJoinCode(email, joinCode)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -106,11 +118,11 @@ func JoinOrg(request *models.Request) *models.Response {
 //	@Router			/org/{orgId}/leave [post]
 //	@Param			orgId	path	string	true	"Organization ID"
 //	@Param			email	body	string	true	"User email"
-func LeaveOrg(request *models.Request) *models.Response {
+func (api *Api) LeaveOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)
 	orgId := request.GetOrgId()
-	err := datastore.DeleteUserOrganizationFromEmailAndOrgId(email, orgId)
+	err := api.app.Dao().DeleteUserOrganizationFromEmailAndOrgId(email, orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -130,6 +142,12 @@ func LeaveOrg(request *models.Request) *models.Response {
 //	@Router			/org/{orgId}/remove [post]
 //	@Param			orgId	path	string	true	"Organization ID"
 //	@Param			email	body	string	true	"User email"
-func RemoveOrg(request *models.Request) *models.Response {
+func (api *Api) RemoveOrg(request *models.Request) *models.Response {
 	return nil
 }
+
+var GetOrgsForUser ServiceFunc = (*Api).GetOrgsForUser
+var AddUsersToOrg ServiceFunc = (*Api).AddUsersToOrg
+var JoinOrg ServiceFunc = (*Api).JoinOrg
+var LeaveOrg ServiceFunc = (*Api).LeaveOrg
+var RemoveOrg ServiceFunc = (*Api).RemoveOrg

@@ -4,11 +4,24 @@ import (
 	_ "fmt"
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
 
 var defaultDatasetBranchNames = []string{"main", "development"}
+
+// BindDatasetApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	rg.GET("/public/dataset", api.DefaultHandler(GetAllPublicDatasets))
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	datasetGroup.GET("/all", api.DefaultHandler(GetAllDatasets))
+	datasetGroup.GET("/:datasetName", api.DefaultHandler(GetDataset), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/create", api.DefaultHandler(CreateDataset))
+}
 
 // GetAllPublicDatasets godoc
 //
@@ -19,8 +32,8 @@ var defaultDatasetBranchNames = []string{"main", "development"}
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/public/dataset [get]
-func GetAllPublicDatasets(request *models.Request) *models.Response {
-	allDatasets, err := datastore.GetAllPublicDatasets()
+func (api *Api) GetAllPublicDatasets(request *models.Request) *models.Response {
+	allDatasets, err := api.app.Dao().GetAllPublicDatasets()
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -38,9 +51,9 @@ func GetAllPublicDatasets(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/dataset/all [get]
 //	@Param			orgId	path	string	true	"Organization Id"
-func GetAllDatasets(request *models.Request) *models.Response {
+func (api *Api) GetAllDatasets(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	allDatasets, err := datastore.GetAllDatasets(orgId)
+	allDatasets, err := api.app.Dao().GetAllDatasets(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -59,10 +72,10 @@ func GetAllDatasets(request *models.Request) *models.Response {
 //	@Router			/org/{orgId}/dataset/{datasetName} [get]
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			datasetName	path	string	true	"Dataset Name"
-func GetDataset(request *models.Request) *models.Response {
+func (api *Api) GetDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	datasetName := request.GetDatasetName()
-	dataset, err := datastore.GetDatasetByName(orgId, datasetName)
+	dataset, err := api.app.Dao().GetDatasetByName(orgId, datasetName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -85,7 +98,7 @@ func GetDataset(request *models.Request) *models.Response {
 //	@Param			orgId		path	string						true	"Organization UUID"
 //	@Param			datasetName	path	string						true	"Dataset name"
 //	@Param			data		body	models.CreateDatasetRequest	true	"Dataset details"
-func CreateDataset(request *models.Request) *models.Response {
+func (api *Api) CreateDataset(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()
 	userUUID := request.GetUserUUID()
@@ -127,20 +140,25 @@ func CreateDataset(request *models.Request) *models.Response {
 			Content:  datasetReadme.(map[string]interface{})["content"].(string),
 		}
 	}
-	dataset, err := datastore.GetDatasetByName(orgId, datasetName)
+	dataset, err := api.app.Dao().GetDatasetByName(orgId, datasetName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	if dataset != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "Dataset already exists")
 	}
-	dataset, err = datastore.CreateDataset(orgId, datasetName, datasetWikiData, datasetIsPublicData, datasetReadmeData, userUUID)
+	dataset, err = api.app.Dao().CreateDataset(orgId, datasetName, datasetWikiData, datasetIsPublicData, datasetReadmeData, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	_, err = datastore.CreateDatasetBranches(dataset.UUID, datasetBranchNamesData)
+	_, err = api.app.Dao().CreateDatasetBranches(dataset.UUID, datasetBranchNamesData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, dataset, "Dataset and branches successfully created")
 }
+
+var GetAllPublicDatasets ServiceFunc = (*Api).GetAllPublicDatasets
+var GetAllDatasets ServiceFunc = (*Api).GetAllDatasets
+var GetDataset ServiceFunc = (*Api).GetDataset
+var CreateDataset ServiceFunc = (*Api).CreateDataset

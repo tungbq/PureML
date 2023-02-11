@@ -4,11 +4,24 @@ import (
 	_ "fmt"
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 )
 
 var defaultModelBranchNames = []string{"main", "development"}
+
+// BindModelApi registers the admin api endpoints and the corresponding handlers.
+func BindModelApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	rg.GET("/public/model", api.DefaultHandler(GetAllPublicModels))
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	modelGroup.GET("/all", api.DefaultHandler(GetAllModels))
+	modelGroup.GET("/:modelName", api.DefaultHandler(GetModel), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/create", api.DefaultHandler(CreateModel))
+}
 
 // GetAllPublicModels godoc
 //
@@ -19,8 +32,8 @@ var defaultModelBranchNames = []string{"main", "development"}
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/public/model [get]
-func GetAllPublicModels(request *models.Request) *models.Response {
-	allModels, err := datastore.GetAllPublicModels()
+func (api *Api) GetAllPublicModels(request *models.Request) *models.Response {
+	allModels, err := api.app.Dao().GetAllPublicModels()
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -38,15 +51,14 @@ func GetAllPublicModels(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/model/all [get]
 //	@Param			orgId	path	string	true	"Organization Id"
-func GetAllModels(request *models.Request) *models.Response {
+func (api *Api) GetAllModels(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	allModels, err := datastore.GetAllModels(orgId)
+	allModels, err := api.app.Dao().GetAllModels(orgId)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, allModels, "Models successfully retrieved")
 }
-
 
 // GetModel godoc
 //
@@ -60,10 +72,10 @@ func GetAllModels(request *models.Request) *models.Response {
 //	@Router			/org/{orgId}/model/{modelName} [get]
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
-func GetModel(request *models.Request) *models.Response {
+func (api *Api) GetModel(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	modelName := request.GetModelName()
-	model, err := datastore.GetModelByName(orgId, modelName)
+	model, err := api.app.Dao().GetModelByName(orgId, modelName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -72,7 +84,6 @@ func GetModel(request *models.Request) *models.Response {
 	}
 	return models.NewDataResponse(http.StatusOK, []models.ModelResponse{*model}, "Model successfully retrieved")
 }
-
 
 // CreateModel godoc
 //
@@ -87,7 +98,7 @@ func GetModel(request *models.Request) *models.Response {
 //	@Param			orgId		path	string						true	"Organization UUID"
 //	@Param			modelName	path	string						true	"Model name"
 //	@Param			data		body	models.CreateModelRequest	true	"Model details"
-func CreateModel(request *models.Request) *models.Response {
+func (api *Api) CreateModel(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := request.GetOrgId()
 	userUUID := request.GetUserUUID()
@@ -129,20 +140,25 @@ func CreateModel(request *models.Request) *models.Response {
 			Content:  modelReadme.(map[string]interface{})["content"].(string),
 		}
 	}
-	model, err := datastore.GetModelByName(orgId, modelName)
+	model, err := api.app.Dao().GetModelByName(orgId, modelName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	if model != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "Model already exists")
 	}
-	model, err = datastore.CreateModel(orgId, modelName, modelWikiData, modelIsPublicData, modelReadmeData, userUUID)
+	model, err = api.app.Dao().CreateModel(orgId, modelName, modelWikiData, modelIsPublicData, modelReadmeData, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	_, err = datastore.CreateModelBranches(model.UUID, modelBranchNamesData)
+	_, err = api.app.Dao().CreateModelBranches(model.UUID, modelBranchNamesData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, model, "Model and branches successfully created")
 }
+
+var GetAllPublicModels ServiceFunc = (*Api).GetAllPublicModels
+var GetAllModels ServiceFunc = (*Api).GetAllModels
+var GetModel ServiceFunc = (*Api).GetModel
+var CreateModel ServiceFunc = (*Api).CreateModel

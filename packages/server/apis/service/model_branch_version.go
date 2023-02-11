@@ -1,14 +1,31 @@
 package service
 
 import (
-	_ "fmt"
+	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/PureML-Inc/PureML/server/tools/filesystem"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindModelBranchVersionApi registers the admin api endpoints and the corresponding handlers.
+func BindModelBranchVersionApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	modelGroup.POST("/:modelName/branch/:branchName/update", api.DefaultHandler(UpdateModelBranch), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
+	modelGroup.POST("/:modelName/branch/:branchName/hash-status", api.DefaultHandler(VerifyModelBranchHashStatus), middlewares.ValidateModel(api.app))
+	modelGroup.POST("/:modelName/branch/:branchName/register", api.DefaultHandler(RegisterModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
+	modelGroup.DELETE("/:modelName/branch/:branchName/delete", api.DefaultHandler(DeleteModelBranch), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
+	modelGroup.GET("/:modelName/branch/:branchName/version", api.DefaultHandler(GetModelBranchAllVersions), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
+	modelGroup.GET("/:modelName/branch/:branchName/version/:version", api.DefaultHandler(GetModelBranchVersion), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
+}
+
 // GetModelBranchAllVersions godoc
 //
 //	@Security		ApiKeyAuth
@@ -23,11 +40,11 @@ import (
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			branchName	path	string	true	"Branch Name"
 //	@Param			withLogs	query	bool	false	"Include logs"
-func GetModelBranchAllVersions(request *models.Request) *models.Response {
+func (api *Api) GetModelBranchAllVersions(request *models.Request) *models.Response {
 	var response *models.Response
 	branchUUID := request.GetModelBranchUUID()
 	withLogs := strings.ToLower(request.GetQueryParam("withLogs")) == "true"
-	allVersions, err := datastore.GetModelBranchAllVersions(branchUUID, withLogs)
+	allVersions, err := api.app.Dao().GetModelBranchAllVersions(branchUUID, withLogs)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {
@@ -35,7 +52,6 @@ func GetModelBranchAllVersions(request *models.Request) *models.Response {
 	}
 	return response
 }
-
 
 // GetModelBranchVersion godoc
 //
@@ -51,10 +67,10 @@ func GetModelBranchAllVersions(request *models.Request) *models.Response {
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			branchName	path	string	true	"Branch Name"
 //	@Param			version		path	string	true	"Version"
-func GetModelBranchVersion(request *models.Request) *models.Response {
+func (api *Api) GetModelBranchVersion(request *models.Request) *models.Response {
 	branchUUID := request.GetModelBranchUUID()
 	versionName := request.PathParams["version"]
-	version, err := datastore.GetModelBranchVersion(branchUUID, versionName)
+	version, err := api.app.Dao().GetModelBranchVersion(branchUUID, versionName)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -78,12 +94,12 @@ func GetModelBranchVersion(request *models.Request) *models.Response {
 //	@Param			modelName	path	string				true	"Model Name"
 //	@Param			branchName	path	string				true	"Branch Name"
 //	@Param			hash		body	models.HashRequest	true	"Hash value"
-func VerifyModelBranchHashStatus(request *models.Request) *models.Response {
+func (api *Api) VerifyModelBranchHashStatus(request *models.Request) *models.Response {
 	modelName := request.GetModelName()
 	modelBranchName := request.GetPathParam("branchName")
 	orgId := uuid.Must(uuid.FromString(request.GetPathParam("orgId")))
 	message := "Hash validity (False - does not exist in db)"
-	model, err := datastore.GetModelBranchByName(orgId, modelName, modelBranchName)
+	model, err := api.app.Dao().GetModelBranchByName(orgId, modelName, modelBranchName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -93,7 +109,7 @@ func VerifyModelBranchHashStatus(request *models.Request) *models.Response {
 	modelBranchUUID := model.UUID
 	request.ParseJsonBody()
 	hashValue := request.GetParsedBodyAttribute("hash").(string)
-	versions, err := datastore.GetModelBranchAllVersions(modelBranchUUID, false)
+	versions, err := api.app.Dao().GetModelBranchAllVersions(modelBranchUUID, false)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -123,8 +139,9 @@ func VerifyModelBranchHashStatus(request *models.Request) *models.Response {
 //	@Param			modelName	path		string						true	"Model name"
 //	@Param			branchName	path		string						true	"Branch name"
 //	@Param			data		formData	models.RegisterModelRequest	true	"Model details"
-func RegisterModel(request *models.Request) *models.Response {
+func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
+	userUUID := request.GetUserUUID()
 	var modelHash string
 	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
 		modelHash = request.FormValues["hash"][0]
@@ -158,7 +175,7 @@ func RegisterModel(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
 	modelBranchUUID := request.GetModelBranchUUID()
-	versions, err := datastore.GetModelBranchAllVersions(modelBranchUUID, false)
+	versions, err := api.app.Dao().GetModelBranchAllVersions(modelBranchUUID, false)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -172,9 +189,60 @@ func RegisterModel(request *models.Request) *models.Response {
 	if response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Model with this hash already exists")
 	}
-	modelVersion, err := datastore.UploadAndRegisterModelFile(orgId, modelBranchUUID, fileHeader, modelIsEmpty, modelHash, modelSourceType)
+	if modelSourceType == "S3" && !api.app.Settings().S3.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "S3 source not enabled")
+	}
+	if modelSourceType == "R2" && !api.app.Settings().R2.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
+	}
+	sourceTypeUUID, err := api.app.Dao().GetSourceTypeByName(orgId, modelSourceType)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
+	}
+	if sourceTypeUUID == uuid.Nil {
+		if modelSourceType == "S3" && api.app.Settings().S3.Enabled {
+			publicUrl := fmt.Sprintf("https://%s.%s", api.app.Settings().S3.Bucket, api.app.Settings().S3.Endpoint)
+			sourceType, err := api.app.Dao().CreateS3Source(orgId, publicUrl)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else if modelSourceType == "R2" && api.app.Settings().R2.Enabled {
+			publicUrl := fmt.Sprintf("https://%s/%s", api.app.Settings().R2.Endpoint, api.app.Settings().R2.Bucket)
+			sourceType, err := api.app.Dao().CreateR2Source(orgId, publicUrl)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else if modelSourceType == "LOCAL" {
+			sourceType, err := api.app.Dao().CreateLocalSource(orgId)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else {
+			return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not enabled", modelSourceType))
+		}
+	}
+	var filePath string
+	if !modelIsEmpty {
+		file, err := filesystem.NewFileFromMultipart(fileHeader)
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+		filePath, err = api.app.UploadFile(file, "model-registry")
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+	}
+	modelVersion, err := api.app.Dao().RegisterModelFile(modelBranchUUID, sourceTypeUUID, filePath, modelIsEmpty, modelHash, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, modelVersion, "Model successfully registered")
 }
+
+var GetModelBranchAllVersions ServiceFunc = (*Api).GetModelBranchAllVersions
+var GetModelBranchVersion ServiceFunc = (*Api).GetModelBranchVersion
+var VerifyModelBranchHashStatus ServiceFunc = (*Api).VerifyModelBranchHashStatus
+var RegisterModel ServiceFunc = (*Api).RegisterModel

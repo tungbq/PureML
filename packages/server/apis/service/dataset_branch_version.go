@@ -1,14 +1,28 @@
 package service
 
 import (
-	_ "fmt"
+	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/PureML-Inc/PureML/server/tools/filesystem"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindDatasetBranchVersionApi registers the admin api endpoints and the corresponding handlers.
+func BindDatasetBranchVersionApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	datasetGroup.POST("/:datasetName/branch/:branchName/hash-status", api.DefaultHandler(VerifyDatasetBranchHashStatus), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/branch/:branchName/register", api.DefaultHandler(RegisterDataset), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app))
+	datasetGroup.GET("/:datasetName/branch/:branchName/version", api.DefaultHandler(GetDatasetBranchAllVersions), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app))
+	datasetGroup.GET("/:datasetName/branch/:branchName/version/:version", api.DefaultHandler(GetDatasetBranchVersion), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app), middlewares.ValidateDatasetBranchVersion(api.app))
+}
 
 // GetDatasetBranchAllVersions godoc
 //
@@ -23,10 +37,10 @@ import (
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			datasetName	path	string	true	"Dataset Name"
 //	@Param			branchName	path	string	true	"Branch Name"
-func GetDatasetBranchAllVersions(request *models.Request) *models.Response {
+func (api *Api) GetDatasetBranchAllVersions(request *models.Request) *models.Response {
 	var response *models.Response
 	branchUUID := request.GetDatasetBranchUUID()
-	allVersions, err := datastore.GetDatasetBranchAllVersions(branchUUID)
+	allVersions, err := api.app.Dao().GetDatasetBranchAllVersions(branchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {
@@ -49,10 +63,10 @@ func GetDatasetBranchAllVersions(request *models.Request) *models.Response {
 //	@Param			datasetName	path	string	true	"Dataset Name"
 //	@Param			branchName	path	string	true	"Branch Name"
 //	@Param			version		path	string	true	"Version"
-func GetDatasetBranchVersion(request *models.Request) *models.Response {
+func (api *Api) GetDatasetBranchVersion(request *models.Request) *models.Response {
 	branchUUID := request.GetDatasetBranchUUID()
 	versionName := request.PathParams["version"]
-	version, err := datastore.GetDatasetBranchVersion(branchUUID, versionName)
+	version, err := api.app.Dao().GetDatasetBranchVersion(branchUUID, versionName)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
@@ -76,12 +90,12 @@ func GetDatasetBranchVersion(request *models.Request) *models.Response {
 //	@Param			datasetName	path	string				true	"Dataset Name"
 //	@Param			branchName	path	string				true	"Branch Name"
 //	@Param			hash		body	models.HashRequest	true	"Hash value"
-func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
+func (api *Api) VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 	datasetName := request.GetDatasetName()
 	datasetBranchName := request.GetPathParam("branchName")
 	orgId := uuid.Must(uuid.FromString(request.GetPathParam("orgId")))
 	message := "Hash validity (False - does not exist in db)"
-	dataset, err := datastore.GetDatasetBranchByName(orgId, datasetName, datasetBranchName)
+	dataset, err := api.app.Dao().GetDatasetBranchByName(orgId, datasetName, datasetBranchName)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -91,7 +105,7 @@ func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 	datasetBranchUUID := dataset.UUID
 	request.ParseJsonBody()
 	hashValue := request.GetParsedBodyAttribute("hash").(string)
-	versions, err := datastore.GetDatasetBranchAllVersions(datasetBranchUUID)
+	versions, err := api.app.Dao().GetDatasetBranchAllVersions(datasetBranchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -121,8 +135,9 @@ func VerifyDatasetBranchHashStatus(request *models.Request) *models.Response {
 //	@Param			datasetName	path		string							true	"Dataset name"
 //	@Param			branchName	path		string							true	"Branch name"
 //	@Param			data		formData	models.RegisterDatasetRequest	true	"Dataset details"
-func RegisterDataset(request *models.Request) *models.Response {
+func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
+	userUUID := request.GetUserUUID()
 	var datasetHash string
 	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
 		datasetHash = request.FormValues["hash"][0]
@@ -160,7 +175,7 @@ func RegisterDataset(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
 	datasetBranchUUID := request.GetDatasetBranchUUID()
-	versions, err := datastore.GetDatasetBranchAllVersions(datasetBranchUUID)
+	versions, err := api.app.Dao().GetDatasetBranchAllVersions(datasetBranchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -174,9 +189,60 @@ func RegisterDataset(request *models.Request) *models.Response {
 	if response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Dataset with this hash already exists")
 	}
-	datasetVersion, err := datastore.UploadAndRegisterDatasetFile(orgId, datasetBranchUUID, fileHeader, datasetIsEmpty, datasetHash, datasetSourceType, datasetLineage)
+	if datasetSourceType == "S3" && !api.app.Settings().S3.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "S3 source not enabled")
+	}
+	if datasetSourceType == "R2" && !api.app.Settings().R2.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
+	}
+	sourceTypeUUID, err := api.app.Dao().GetSourceTypeByName(orgId, datasetSourceType)
+	if err != nil {
+		return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", datasetSourceType))
+	}
+	if sourceTypeUUID == uuid.Nil {
+		if api.app.Settings().S3.Enabled {
+			publicUrl := fmt.Sprintf("https://%s.%s", api.app.Settings().S3.Bucket, api.app.Settings().S3.Endpoint)
+			sourceType, err := api.app.Dao().CreateS3Source(orgId, publicUrl)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+			} else if datasetSourceType == "R2" && api.app.Settings().R2.Enabled {
+				publicUrl := fmt.Sprintf("https://%s/%s", api.app.Settings().R2.Endpoint, api.app.Settings().R2.Bucket)
+				sourceType, err := api.app.Dao().CreateR2Source(orgId, publicUrl)
+				if err != nil {
+					return models.NewServerErrorResponse(err)
+				}
+				sourceTypeUUID = sourceType.UUID
+			} else if datasetSourceType == "LOCAL" {
+			sourceType, err := api.app.Dao().CreateLocalSource(orgId)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else {
+			return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not enabled", datasetSourceType))
+		}
+	}
+	var filePath string
+	if !datasetIsEmpty {
+		file, err := filesystem.NewFileFromMultipart(fileHeader)
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+		filePath, err = api.app.UploadFile(file, "dataset-registry")
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+	}
+	datasetVersion, err := api.app.Dao().RegisterDatasetFile(datasetBranchUUID, sourceTypeUUID, filePath, datasetIsEmpty, datasetHash, datasetLineage, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, datasetVersion, "Dataset successfully registered")
 }
+
+var GetDatasetBranchAllVersions ServiceFunc = (*Api).GetDatasetBranchAllVersions
+var GetDatasetBranchVersion ServiceFunc = (*Api).GetDatasetBranchVersion
+var VerifyDatasetBranchHashStatus ServiceFunc = (*Api).VerifyDatasetBranchHashStatus
+var RegisterDataset ServiceFunc = (*Api).RegisterDataset

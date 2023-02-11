@@ -3,10 +3,23 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/server/datastore"
+	"github.com/PureML-Inc/PureML/server/core"
+	"github.com/PureML-Inc/PureML/server/middlewares"
 	"github.com/PureML-Inc/PureML/server/models"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
+
+// BindDatasetActivityApi registers the dataset activity api endpoints and the corresponding handlers.
+func BindDatasetActivityApi(app core.App, rg *echo.Group) {
+	api := Api{app: app}
+
+	datasetGroup := rg.Group("/org/:orgId/dataset", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
+	datasetGroup.GET("/:datasetName/activity/:category", api.DefaultHandler(GetDatasetActivity), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/activity/:category", api.DefaultHandler(CreateDatasetActivity), middlewares.ValidateDataset(api.app))
+	datasetGroup.POST("/:datasetName/activity/:category/:activityUUID", api.DefaultHandler(UpdateDatasetActivity), middlewares.ValidateDataset(api.app))
+	datasetGroup.DELETE("/:datasetName/activity/:category/:activityUUID/delete", api.DefaultHandler(DeleteDatasetActivity), middlewares.ValidateDataset(api.app))
+}
 
 // GetDatasetActivity godoc
 //
@@ -21,10 +34,10 @@ import (
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			datasetName	path	string	true	"Dataset Name"
 //	@Param			category	path	string	true	"Category"
-func GetDatasetActivity(request *models.Request) *models.Response {
+func (api *Api) GetDatasetActivity(request *models.Request) *models.Response {
 	datasetUUID := request.GetDatasetUUID()
 	category := request.GetPathParam("category")
-	activity, err := datastore.GetDatasetActivity(datasetUUID, category)
+	activity, err := api.app.Dao().GetDatasetActivity(datasetUUID, category)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -48,7 +61,7 @@ func GetDatasetActivity(request *models.Request) *models.Response {
 //	@Param			datasetName	path	string					true	"Dataset Name"
 //	@Param			category	path	string					true	"Category"
 //	@Param			data		body	models.ActivityRequest	true	"Activity"
-func CreateDatasetActivity(request *models.Request) *models.Response {
+func (api *Api) CreateDatasetActivity(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	datasetUUID := request.GetDatasetUUID()
 	userUUID := request.GetUserUUID()
@@ -60,7 +73,7 @@ func CreateDatasetActivity(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Activity cannot be empty")
 	}
 	activityData := activity.(string)
-	createdActivity, err := datastore.CreateDatasetActivity(datasetUUID, userUUID, category, activityData)
+	createdActivity, err := api.app.Dao().CreateDatasetActivity(datasetUUID, userUUID, category, activityData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -82,7 +95,7 @@ func CreateDatasetActivity(request *models.Request) *models.Response {
 //	@Param			category		path	string	true	"Category"
 //	@Param			activityUUID	path	string	true	"Activity UUID"
 //	@Param			activity		body	string	true	"Activity"
-func UpdateDatasetActivity(request *models.Request) *models.Response {
+func (api *Api) UpdateDatasetActivity(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	activityUUID := uuid.Must(uuid.FromString(request.GetPathParam("activityUUID")))
 	updatedActivity := request.GetParsedBodyAttribute("activity").(string)
@@ -90,7 +103,7 @@ func UpdateDatasetActivity(request *models.Request) *models.Response {
 	if updatedActivity != "" {
 		updatedAttributes["activity"] = updatedActivity
 	}
-	updatedDbActivity, err := datastore.UpdateDatasetActivity(activityUUID, updatedAttributes)
+	updatedDbActivity, err := api.app.Dao().UpdateDatasetActivity(activityUUID, updatedAttributes)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -111,11 +124,16 @@ func UpdateDatasetActivity(request *models.Request) *models.Response {
 //	@Param			datasetName		path	string	true	"Dataset Name"
 //	@Param			category		path	string	true	"Category"
 //	@Param			activityUUID	path	string	true	"Activity UUID"
-func DeleteDatasetActivity(request *models.Request) *models.Response {
+func (api *Api) DeleteDatasetActivity(request *models.Request) *models.Response {
 	activityUUID := uuid.Must(uuid.FromString(request.GetPathParam("activityUUID")))
-	err := datastore.DeleteDatasetActivity(activityUUID)
+	err := api.app.Dao().DeleteDatasetActivity(activityUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
 	return models.NewDataResponse(http.StatusOK, nil, "Dataset Activity deleted")
 }
+
+var GetDatasetActivity ServiceFunc = (*Api).GetDatasetActivity
+var CreateDatasetActivity ServiceFunc = (*Api).CreateDatasetActivity
+var UpdateDatasetActivity ServiceFunc = (*Api).UpdateDatasetActivity
+var DeleteDatasetActivity ServiceFunc = (*Api).DeleteDatasetActivity
