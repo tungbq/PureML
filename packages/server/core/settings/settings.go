@@ -7,6 +7,7 @@ import (
 // Settings defines common app configuration options.
 type Settings struct {
 	S3 S3Config `form:"s3" json:"s3"`
+	R2 R2Config `form:"r2" json:"r2"`
 
 	AdminAuthToken TokenConfig `form:"adminAuthToken" json:"adminAuthToken"`
 }
@@ -30,6 +31,16 @@ type S3Config struct {
 	Enabled        bool   `form:"enabled" json:"enabled"`
 	Bucket         string `form:"bucket" json:"bucket"`
 	Region         string `form:"region" json:"region"`
+	Endpoint       string `form:"endpoint" json:"endpoint"`
+	AccessKey      string `form:"accessKey" json:"accessKey"`
+	Secret         string `form:"secret" json:"secret"`
+	ForcePathStyle bool   `form:"forcePathStyle" json:"forcePathStyle"`
+}
+
+type R2Config struct {
+	Enabled        bool   `form:"enabled" json:"enabled"`
+	AccountId      string `form:"accountId" json:"accountId"`
+	Bucket         string `form:"bucket" json:"bucket"`
 	Endpoint       string `form:"endpoint" json:"endpoint"`
 	AccessKey      string `form:"accessKey" json:"accessKey"`
 	Secret         string `form:"secret" json:"secret"`

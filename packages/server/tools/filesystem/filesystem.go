@@ -3,6 +3,7 @@ package filesystem
 import (
 	"context"
 	"errors"
+	"fmt"
 	"image"
 	"io"
 	"mime/multipart"
@@ -18,6 +19,7 @@ import (
 	"github.com/PureML-Inc/PureML/server/tools/list"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/disintegration/imaging"
 	"github.com/gabriel-vasile/mimetype"
@@ -51,6 +53,45 @@ func NewS3(
 		Endpoint:         aws.String(endpoint),
 		Credentials:      cred,
 		S3ForcePathStyle: aws.Bool(s3ForcePathStyle),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	bucket, err := s3blob.OpenBucket(ctx, sess, bucketName, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &System{ctx: ctx, bucket: bucket}, nil
+}
+
+// NewR2 initializes an R2 filesystem instance.
+//
+// NB! Make sure to call `Close()` after you are done working with it.
+func NewR2(
+	accountId string,
+	bucketName string,
+	endpoint string,
+	accessKey string,
+	secretKey string,
+	r2ForcePathStyle bool,
+) (*System, error) {
+	ctx := context.Background() // default context
+
+	endpointResolver := func(service, region string, options ...func(*endpoints.Options)) (endpoints.ResolvedEndpoint, error) {
+		return endpoints.ResolvedEndpoint{
+			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountId),
+		}, nil
+	}
+
+	cred := credentials.NewStaticCredentials(accessKey, secretKey, "")
+
+	sess, err := session.NewSession(&aws.Config{
+		Region:           aws.String("auto"),
+		EndpointResolver: endpoints.ResolverFunc(endpointResolver),
+		Credentials:      cred,
+		S3ForcePathStyle: aws.Bool(r2ForcePathStyle),
 	})
 	if err != nil {
 		return nil, err

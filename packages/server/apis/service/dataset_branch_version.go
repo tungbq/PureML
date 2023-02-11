@@ -192,6 +192,9 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	if datasetSourceType == "S3" && !api.app.Settings().S3.Enabled {
 		return models.NewErrorResponse(http.StatusBadRequest, "S3 source not enabled")
 	}
+	if datasetSourceType == "R2" && !api.app.Settings().R2.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
+	}
 	sourceTypeUUID, err := api.app.Dao().GetSourceTypeByName(orgId, datasetSourceType)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", datasetSourceType))
@@ -204,7 +207,14 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 				return models.NewServerErrorResponse(err)
 			}
 			sourceTypeUUID = sourceType.UUID
-		} else if datasetSourceType == "LOCAL" {
+			} else if datasetSourceType == "R2" && api.app.Settings().R2.Enabled {
+				publicUrl := fmt.Sprintf("https://%s/%s", api.app.Settings().R2.Endpoint, api.app.Settings().R2.Bucket)
+				sourceType, err := api.app.Dao().CreateR2Source(orgId, publicUrl)
+				if err != nil {
+					return models.NewServerErrorResponse(err)
+				}
+				sourceTypeUUID = sourceType.UUID
+			} else if datasetSourceType == "LOCAL" {
 			sourceType, err := api.app.Dao().CreateLocalSource(orgId)
 			if err != nil {
 				return models.NewServerErrorResponse(err)

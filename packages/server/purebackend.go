@@ -39,6 +39,14 @@ func main() {
 				AccessKey: os.Getenv("PURE_S3_ACCESS_KEY"),
 				Secret:    os.Getenv("PURE_S3_SECRET"),
 			},
+			R2: settings.R2Config{
+				Enabled:   true,
+				AccountId: os.Getenv("PURE_R2_ACCOUNT_ID"),
+				Bucket:    os.Getenv("PURE_R2_BUCKET"),
+				Endpoint:  os.Getenv("PURE_R2_ENDPOINT"),
+				AccessKey: os.Getenv("PURE_R2_ACCESS_KEY"),
+				Secret:    os.Getenv("PURE_R2_SECRET"),
+			},
 		},
 	})
 	if err := app.Bootstrap(); err != nil {

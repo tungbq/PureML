@@ -192,6 +192,9 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	if modelSourceType == "S3" && !api.app.Settings().S3.Enabled {
 		return models.NewErrorResponse(http.StatusBadRequest, "S3 source not enabled")
 	}
+	if modelSourceType == "R2" && !api.app.Settings().R2.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
+	}
 	sourceTypeUUID, err := api.app.Dao().GetSourceTypeByName(orgId, modelSourceType)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
@@ -200,6 +203,13 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 		if modelSourceType == "S3" && api.app.Settings().S3.Enabled {
 			publicUrl := fmt.Sprintf("https://%s.%s", api.app.Settings().S3.Bucket, api.app.Settings().S3.Endpoint)
 			sourceType, err := api.app.Dao().CreateS3Source(orgId, publicUrl)
+			if err != nil {
+				return models.NewServerErrorResponse(err)
+			}
+			sourceTypeUUID = sourceType.UUID
+		} else if modelSourceType == "R2" && api.app.Settings().R2.Enabled {
+			publicUrl := fmt.Sprintf("https://%s/%s", api.app.Settings().R2.Endpoint, api.app.Settings().R2.Bucket)
+			sourceType, err := api.app.Dao().CreateR2Source(orgId, publicUrl)
 			if err != nil {
 				return models.NewServerErrorResponse(err)
 			}

@@ -312,17 +312,17 @@ func (dao *Dao) GetSourceSecret(orgId uuid.UUID, source string) (*models.SourceS
 	return dao.Datastore().GetSourceSecret(orgId, source)
 }
 
-func (dao *Dao) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*impl.R2Secrets, error) {
-	return dao.Datastore().CreateR2Secrets(orgId, accountId, accessKeyId, accessKeySecret, bucketName, publicURL)
-}
+// func (dao *Dao) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*impl.R2Secrets, error) {
+// 	return dao.Datastore().CreateR2Secrets(orgId, accountId, accessKeyId, accessKeySecret, bucketName, publicURL)
+// }
 
 func (dao *Dao) CreateR2Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
 	return dao.Datastore().CreateR2Source(orgId, publicURL)
 }
 
-func (dao *Dao) DeleteR2Secrets(orgId uuid.UUID) error {
-	return dao.Datastore().DeleteR2Secrets(orgId)
-}
+// func (dao *Dao) DeleteR2Secrets(orgId uuid.UUID) error {
+// 	return dao.Datastore().DeleteR2Secrets(orgId)
+// }
 
 // func (dao *Dao) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*impl.S3Secrets, error) {
 // 	return dao.Datastore().CreateS3Secrets(orgId, accessKeyId, accessKeySecret, bucketName, bucketLocation)

@@ -19,7 +19,7 @@ func BindSecretsApi(app core.App, rg *echo.Group) {
 	// secretGroup.GET("/all", api.DefaultHandler(GetAllSecrets))
 	// secretGroup.GET("/r2", api.DefaultHandler(GetR2Secret))
 	// secretGroup.POST("/r2/connect", api.DefaultHandler(ConnectR2Secret))
-	// secretGroup.GET("/r2/test", api.DefaultHandler(TestR2Secret))
+	secretGroup.GET("/r2/test", api.DefaultHandler(TestR2Secret))
 	// secretGroup.DELETE("/r2/delete", api.DefaultHandler(DeleteR2Secrets))
 	// secretGroup.GET("/s3", api.DefaultHandler(GetS3Secret))
 	// secretGroup.POST("/s3/connect", api.DefaultHandler(ConnectS3Secret))
@@ -204,6 +204,44 @@ func BindSecretsApi(app core.App, rg *echo.Group) {
 // 	return models.NewDataResponse(http.StatusOK, createdSource, "S3 connected successfully")
 // }
 
+// TestR2Secret godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Test secrets for source type r2
+//	@Description	Test secrets for source type r2
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret/r2/test [get]
+//	@Param			orgId	path	string	true	"Organization Id"
+func (api *Api) TestR2Secret(request *models.Request) *models.Response {
+	if !api.app.Settings().R2.Enabled {
+		return models.NewErrorResponse(http.StatusBadRequest, "R2 storage is not enabled.")
+	}
+
+	fs, err := api.app.NewFilesystem()
+	if err != nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "Failed to initialize the R2 storage. Raw error: \n"+err.Error())
+	}
+	defer fs.Close()
+
+	testPrefix := "pureml_settings_test_" + security.PseudorandomString(5)
+	testFileKey := testPrefix + "/test.txt"
+
+	// try to upload a test file
+	if err := fs.Upload([]byte("test"), testFileKey); err != nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "Failed to upload a test file. Raw error: \n"+err.Error())
+	}
+
+	// test prefix deletion (ensures that both bucket list and delete works)
+	if errs := fs.DeletePrefix(testPrefix); len(errs) > 0 {
+		return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Failed to delete a test file. Raw error: %v", errs))
+	}
+
+	return models.NewDataResponse(http.StatusOK, nil, "R2 connected successfully")
+}
+
 // TestS3Secret godoc
 //
 //	@Security		ApiKeyAuth
@@ -288,7 +326,7 @@ func (api *Api) TestS3Secret(request *models.Request) *models.Response {
 // var GetS3Secret ServiceFunc = (*Api).GetS3Secret
 // var ConnectR2Secret ServiceFunc = (*Api).ConnectR2Secret
 // var ConnectS3Secret ServiceFunc = (*Api).ConnectS3Secret
-// var TestR2Secret ServiceFunc = (*Api).TestR2Secret
+var TestR2Secret ServiceFunc = (*Api).TestR2Secret
 var TestS3Secret ServiceFunc = (*Api).TestS3Secret
 // var DeleteR2Secrets ServiceFunc = (*Api).DeleteR2Secrets
 // var DeleteS3Secrets ServiceFunc = (*Api).DeleteS3Secrets

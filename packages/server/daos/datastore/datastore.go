@@ -1073,7 +1073,7 @@ func (ds *Datastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName stri
 
 func (ds *Datastore) RegisterModelFile(modelBranchUUID uuid.UUID, sourceTypeUUID uuid.UUID, filePath string, isEmpty bool, hash string, userUUID uuid.UUID) (*models.ModelBranchVersionResponse, error) {
 	sourcePath := dbmodels.Path{
-		SourcePath: filePath,
+		SourcePath:     filePath,
 		SourceTypeUUID: sourceTypeUUID.String(),
 	}
 	err := ds.DB.Create(&sourcePath).Error
@@ -1685,7 +1685,7 @@ func (ds *Datastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchNam
 
 func (ds *Datastore) RegisterDatasetFile(datasetBranchUUID uuid.UUID, sourceTypeUUID uuid.UUID, filePath string, isEmpty bool, hash string, lineage string, userUUID uuid.UUID) (*models.DatasetBranchVersionResponse, error) {
 	sourcePath := dbmodels.Path{
-		SourcePath: filePath,
+		SourcePath:     filePath,
 		SourceTypeUUID: sourceTypeUUID.String(),
 	}
 	err := ds.DB.Create(&sourcePath).Error
@@ -2346,55 +2346,55 @@ func (ds *Datastore) GetSourceSecret(orgId uuid.UUID, source string) (*models.So
 	return &sourceSecret, nil
 }
 
-func (ds *Datastore) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*R2Secrets, error) {
-	secret := dbmodels.Secret{
-		Org: dbmodels.Organization{
-			BaseModel: dbmodels.BaseModel{
-				UUID: orgId,
-			},
-		},
-	}
-	err := ds.DB.Transaction(func(tx *gorm.DB) error {
-		secret.Name = "R2_ACCOUNT_ID"
-		secret.Value = accountId
-		err := tx.Create(&secret).Error
-		if err != nil {
-			return err
-		}
-		secret.UUID = uuid.Nil
-		secret.Name = "R2_ACCESS_KEY_ID"
-		secret.Value = accessKeyId
-		err = tx.Create(&secret).Error
-		if err != nil {
-			return err
-		}
-		secret.UUID = uuid.Nil
-		secret.Name = "R2_ACCESS_KEY_SECRET"
-		secret.Value = accessKeySecret
-		err = tx.Create(&secret).Error
-		if err != nil {
-			return err
-		}
-		secret.UUID = uuid.Nil
-		secret.Name = "R2_BUCKET_NAME"
-		secret.Value = bucketName
-		err = tx.Create(&secret).Error
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &R2Secrets{
-		AccountId:       accountId,
-		AccessKeyId:     accessKeyId,
-		AccessKeySecret: accessKeySecret,
-		BucketName:      bucketName,
-		PublicURL:       publicURL,
-	}, nil
-}
+// func (ds *Datastore) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*R2Secrets, error) {
+// 	secret := dbmodels.Secret{
+// 		Org: dbmodels.Organization{
+// 			BaseModel: dbmodels.BaseModel{
+// 				UUID: orgId,
+// 			},
+// 		},
+// 	}
+// 	err := ds.DB.Transaction(func(tx *gorm.DB) error {
+// 		secret.Name = "R2_ACCOUNT_ID"
+// 		secret.Value = accountId
+// 		err := tx.Create(&secret).Error
+// 		if err != nil {
+// 			return err
+// 		}
+// 		secret.UUID = uuid.Nil
+// 		secret.Name = "R2_ACCESS_KEY_ID"
+// 		secret.Value = accessKeyId
+// 		err = tx.Create(&secret).Error
+// 		if err != nil {
+// 			return err
+// 		}
+// 		secret.UUID = uuid.Nil
+// 		secret.Name = "R2_ACCESS_KEY_SECRET"
+// 		secret.Value = accessKeySecret
+// 		err = tx.Create(&secret).Error
+// 		if err != nil {
+// 			return err
+// 		}
+// 		secret.UUID = uuid.Nil
+// 		secret.Name = "R2_BUCKET_NAME"
+// 		secret.Value = bucketName
+// 		err = tx.Create(&secret).Error
+// 		if err != nil {
+// 			return err
+// 		}
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &R2Secrets{
+// 		AccountId:       accountId,
+// 		AccessKeyId:     accessKeyId,
+// 		AccessKeySecret: accessKeySecret,
+// 		BucketName:      bucketName,
+// 		PublicURL:       publicURL,
+// 	}, nil
+// }
 
 func (ds *Datastore) CreateR2Source(orgId uuid.UUID, publicURL string) (*models.SourceTypeResponse, error) {
 	sourceType := dbmodels.SourceType{
@@ -2411,19 +2411,20 @@ func (ds *Datastore) CreateR2Source(orgId uuid.UUID, publicURL string) (*models.
 		return nil, err
 	}
 	return &models.SourceTypeResponse{
+		UUID:      sourceType.BaseModel.UUID,
 		Name:      sourceType.Name,
 		PublicURL: sourceType.PublicURL,
 	}, nil
 }
 
-func (ds *Datastore) DeleteR2Secrets(orgId uuid.UUID) error {
-	var secrets []dbmodels.Secret
-	err := ds.DB.Where("org_uuid = ?", orgId).Where("name LIKE ?", "R2_%").Delete(&secrets).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
+// func (ds *Datastore) DeleteR2Secrets(orgId uuid.UUID) error {
+// 	var secrets []dbmodels.Secret
+// 	err := ds.DB.Where("org_uuid = ?", orgId).Where("name LIKE ?", "R2_%").Delete(&secrets).Error
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 // func (ds *Datastore) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*S3Secrets, error) {
 // 	secret := dbmodels.Secret{
@@ -2490,7 +2491,7 @@ func (ds *Datastore) CreateS3Source(orgId uuid.UUID, publicURL string) (*models.
 		return nil, err
 	}
 	return &models.SourceTypeResponse{
-		UUID:      sourceType.UUID,
+		UUID:      sourceType.BaseModel.UUID,
 		Name:      sourceType.Name,
 		PublicURL: sourceType.PublicURL,
 	}, nil
@@ -2520,8 +2521,8 @@ func (ds *Datastore) CreateLocalSource(orgId uuid.UUID) (*models.SourceTypeRespo
 		return nil, err
 	}
 	return &models.SourceTypeResponse{
-		UUID: sourceType.UUID,
-		Name: sourceType.Name,
+		UUID:      sourceType.UUID,
+		Name:      sourceType.Name,
 		PublicURL: sourceType.PublicURL,
 	}, nil
 }

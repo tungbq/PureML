@@ -69,6 +69,9 @@ func NewBaseApp(appConfig *BaseAppConfig) *BaseApp {
 		if appConfig.Settings.S3.Enabled {
 			app.settings.S3 = appConfig.Settings.S3
 		}
+		if appConfig.Settings.R2.Enabled {
+			app.settings.R2 = appConfig.Settings.R2
+		}
 		if appConfig.Settings.AdminAuthToken.Secret != "" {
 			app.settings.AdminAuthToken = appConfig.Settings.AdminAuthToken
 		}
@@ -170,6 +173,16 @@ func (app *BaseApp) NewFilesystem() (*filesystem.System, error) {
 			app.settings.S3.AccessKey,
 			app.settings.S3.Secret,
 			app.settings.S3.ForcePathStyle,
+		)
+	}
+	if app.settings.R2.Enabled {
+		return filesystem.NewR2(
+			app.settings.R2.AccountId,
+			app.settings.R2.Bucket,
+			app.settings.R2.Endpoint,
+			app.settings.R2.AccessKey,
+			app.settings.R2.Secret,
+			app.settings.R2.ForcePathStyle,
 		)
 	}
 
