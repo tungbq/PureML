@@ -1,6 +1,10 @@
 package models
 
-import uuid "github.com/satori/go.uuid"
+import (
+	"time"
+
+	uuid "github.com/satori/go.uuid"
+)
 
 // Request models
 
@@ -46,13 +50,14 @@ type ModelNameResponse struct {
 }
 
 type ModelResponse struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	Name      string             `json:"name"`
-	Wiki      string             `json:"wiki"`
-	CreatedBy UserHandleResponse `json:"created_by"`
-	UpdatedBy UserHandleResponse `json:"updated_by"`
-	Readme    ReadmeResponse     `json:"readme"`
-	IsPublic  bool               `json:"is_public"`
+	UUID      uuid.UUID                  `json:"uuid"`
+	Name      string                     `json:"name"`
+	Wiki      string                     `json:"wiki"`
+	Org       OrganizationHandleResponse `json:"org"`
+	CreatedBy UserHandleResponse         `json:"created_by"`
+	UpdatedBy UserHandleResponse         `json:"updated_by"`
+	Readme    ReadmeResponse             `json:"readme"`
+	IsPublic  bool                       `json:"is_public"`
 }
 
 type ModelUserResponse struct {
@@ -86,6 +91,7 @@ type ModelBranchVersionResponse struct {
 	Logs      []LogDataResponse       `json:"logs"`
 	IsEmpty   bool                    `json:"is_empty"`
 	CreatedBy UserHandleResponse      `json:"created_by"`
+	CreatedAt time.Time               `json:"created_at"`
 }
 
 type ModelReviewResponse struct {

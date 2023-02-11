@@ -122,7 +122,7 @@ func (api *Api) GetOrgAllPublicDatasets(request *models.Request) *models.Respons
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/create [post]
-//	@Param			org	body	models.CreateOrUpdateOrgRequest	true	"Organization details"
+//	@Param			org	body	models.CreateOrgRequest	true	"Organization details"
 func (api *Api) CreateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	// orgName := request.GetParsedBodyAttribute("name").(string)
@@ -163,8 +163,8 @@ func (api *Api) CreateOrg(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/update [post]
-//	@Param			orgId	path	string							true	"Organization ID"
-//	@Param			org		body	models.CreateOrUpdateOrgRequest	true	"Organization details"
+//	@Param			orgId	path	string					true	"Organization ID"
+//	@Param			org		body	models.UpdateOrgRequest	true	"Organization details"
 func (api *Api) UpdateOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	orgId := uuid.Must(uuid.FromString(request.PathParams["orgId"]))

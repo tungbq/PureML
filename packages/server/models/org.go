@@ -4,9 +4,15 @@ import uuid "github.com/satori/go.uuid"
 
 // Request models
 
-type CreateOrUpdateOrgRequest struct {
-	// Name        string `json:"name"`
+type CreateOrgRequest struct {
 	Handle      string `json:"handle"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar"`
+}
+
+type UpdateOrgRequest struct {
+	Name string `json:"name"`
+	// Handle      string `json:"handle"`
 	Description string `json:"description"`
 	Avatar      string `json:"avatar"`
 }
@@ -14,10 +20,11 @@ type CreateOrUpdateOrgRequest struct {
 // Response models
 
 type OrganizationHandleResponse struct {
-	UUID   uuid.UUID `json:"uuid"`
-	Handle string    `json:"handle"`
-	Name   string    `json:"name"`
-	Avatar string    `json:"avatar"`
+	UUID        uuid.UUID `json:"uuid"`
+	Handle      string    `json:"handle"`
+	Name        string    `json:"name"`
+	Avatar      string    `json:"avatar"`
+	Description string    `json:"description"`
 }
 
 type OrganizationResponse struct {

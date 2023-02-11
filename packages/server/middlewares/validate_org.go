@@ -36,10 +36,11 @@ func ValidateOrg(app core.App) echo.MiddlewareFunc {
 				return nil
 			}
 			context.Set(ContextOrgKey, &models.OrganizationHandleResponse{
-				Name:   org.Name,
-				UUID:   org.UUID,
-				Handle: org.Handle,
-				Avatar: org.Avatar,
+				Name:        org.Name,
+				UUID:        org.UUID,
+				Handle:      org.Handle,
+				Avatar:      org.Avatar,
+				Description: org.Description,
 			})
 			return next(context)
 		}

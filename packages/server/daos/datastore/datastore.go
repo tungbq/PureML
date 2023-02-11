@@ -288,23 +288,25 @@ func (ds *Datastore) GetOrgByHandle(handle string) (*models.OrganizationResponse
 func (ds *Datastore) GetUserOrganizationsByEmail(email string) ([]models.UserOrganizationsResponse, error) {
 	var orgs []models.UserOrganizationsResponse
 	var tableOrgs []struct {
-		UUID   uuid.UUID
-		Handle string
-		Name   string
-		Avatar string
-		Role   string
+		UUID        uuid.UUID
+		Handle      string
+		Name        string
+		Avatar      string
+		Description string
+		Role        string
 	}
-	result := ds.DB.Table("organizations").Select("organizations.uuid, organizations.handle, organizations.name, organizations.avatar, user_organizations.role").Joins("JOIN user_organizations ON user_organizations.organization_uuid = organizations.uuid").Joins("JOIN users ON users.uuid = user_organizations.user_uuid").Where("users.email = ?", email).Scan(&tableOrgs)
+	result := ds.DB.Table("organizations").Select("organizations.uuid, organizations.handle, organizations.name, organizations.avatar, organizations.description, user_organizations.role").Joins("JOIN user_organizations ON user_organizations.organization_uuid = organizations.uuid").Joins("JOIN users ON users.uuid = user_organizations.user_uuid").Where("users.email = ?", email).Scan(&tableOrgs)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	for _, org := range tableOrgs {
 		orgs = append(orgs, models.UserOrganizationsResponse{
 			Org: models.OrganizationHandleResponse{
-				UUID:   org.UUID,
-				Handle: org.Handle,
-				Name:   org.Name,
-				Avatar: org.Avatar,
+				UUID:        org.UUID,
+				Handle:      org.Handle,
+				Name:        org.Name,
+				Avatar:      org.Avatar,
+				Description: org.Description,
 			},
 			Role: org.Role,
 		})
@@ -354,10 +356,11 @@ func (ds *Datastore) CreateUserOrganizationFromEmailAndOrgId(email string, orgId
 	}
 	return &models.UserOrganizationsResponse{
 		Org: models.OrganizationHandleResponse{
-			UUID:   org.UUID,
-			Name:   org.Name,
-			Handle: org.Handle,
-			Avatar: org.Avatar,
+			UUID:        org.UUID,
+			Name:        org.Name,
+			Handle:      org.Handle,
+			Avatar:      org.Avatar,
+			Description: org.Description,
 		},
 		Role: userOrganization.Role,
 	}, nil
@@ -403,10 +406,11 @@ func (ds *Datastore) CreateUserOrganizationFromEmailAndJoinCode(email string, jo
 	}
 	return &models.UserOrganizationsResponse{
 		Org: models.OrganizationHandleResponse{
-			UUID:   org.UUID,
-			Name:   org.Name,
-			Handle: org.Handle,
-			Avatar: org.Avatar,
+			UUID:        org.UUID,
+			Name:        org.Name,
+			Handle:      org.Handle,
+			Avatar:      org.Avatar,
+			Description: org.Description,
 		},
 		Role: userOrganization.Role,
 	}, nil
@@ -990,6 +994,13 @@ func (ds *Datastore) GetAllPublicModels() ([]models.ModelResponse, error) {
 				Name:   model.UpdatedByUser.Name,
 				Email:  model.UpdatedByUser.Email,
 			},
+			Org: models.OrganizationHandleResponse{
+				UUID:        model.Org.UUID,
+				Name:        model.Org.Name,
+				Handle:      model.Org.Handle,
+				Avatar:      model.Org.Avatar,
+				Description: model.Org.Description,
+			},
 			IsPublic: model.IsPublic,
 		}
 	}
@@ -1141,13 +1152,14 @@ func (ds *Datastore) RegisterModelFile(modelBranchUUID uuid.UUID, sourceTypeUUID
 			Email:  modelVersion.CreatedByUser.Email,
 			Handle: modelVersion.CreatedByUser.Handle,
 		},
-		IsEmpty: modelVersion.IsEmpty,
+		CreatedAt: modelVersion.CreatedAt,
+		IsEmpty:   modelVersion.IsEmpty,
 	}, nil
 }
 
 func (ds *Datastore) MigrateModelVersionBranch(modelVersion uuid.UUID, toBranch uuid.UUID) (*models.ModelBranchVersionResponse, error) {
 	var modelVersionDB dbmodels.ModelVersion
-	err := ds.DB.Preload("Branch").Preload("Lineage").Preload("Path").Where("uuid = ?", modelVersion).First(&modelVersionDB).Error
+	err := ds.DB.Preload("Branch").Preload("CreatedByUser").Preload("Path").Where("uuid = ?", modelVersion).First(&modelVersionDB).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1175,13 +1187,21 @@ func (ds *Datastore) MigrateModelVersionBranch(modelVersion uuid.UUID, toBranch 
 				PublicURL: modelVersionDB.Path.SourceType.PublicURL,
 			},
 		},
-		IsEmpty: modelVersionDB.IsEmpty,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   modelVersionDB.CreatedByUser.UUID,
+			Handle: modelVersionDB.CreatedByUser.Handle,
+			Name:   modelVersionDB.CreatedByUser.Name,
+			Avatar: modelVersionDB.CreatedByUser.Avatar,
+			Email:  modelVersionDB.CreatedByUser.Email,
+		},
+		CreatedAt: modelVersionDB.CreatedAt,
+		IsEmpty:   modelVersionDB.IsEmpty,
 	}, nil
 }
 
 func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
-	err := ds.DB.Select("model_versions.*").Joins("JOIN model_branches ON model_branches.uuid = model_versions.branch_uuid").Where("model_branches.model_uuid = ?", modelUUID).Find(&modelVersions).Error
+	err := ds.DB.Select("model_versions.*").Joins("JOIN model_branches ON model_branches.uuid = model_versions.branch_uuid").Where("model_branches.model_uuid = ?", modelUUID).Preload("Branch").Preload("CreatedByUser").Preload("Path").Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1203,7 +1223,15 @@ func (ds *Datastore) GetModelAllVersions(modelUUID uuid.UUID) ([]models.ModelBra
 					PublicURL: modelVersion.Path.SourceType.PublicURL,
 				},
 			},
-			IsEmpty: modelVersion.IsEmpty,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   modelVersion.CreatedByUser.UUID,
+				Handle: modelVersion.CreatedByUser.Handle,
+				Name:   modelVersion.CreatedByUser.Name,
+				Avatar: modelVersion.CreatedByUser.Avatar,
+				Email:  modelVersion.CreatedByUser.Email,
+			},
+			CreatedAt: modelVersion.CreatedAt,
+			IsEmpty:   modelVersion.IsEmpty,
 		})
 	}
 	return modelVersionsResponse, nil
@@ -1255,7 +1283,7 @@ func (ds *Datastore) GetModelBranchByUUID(modelBranchUUID uuid.UUID) (*models.Mo
 
 func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID, withLogs bool) ([]models.ModelBranchVersionResponse, error) {
 	var modelVersions []dbmodels.ModelVersion
-	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Order("LENGTH(version) DESC").Order("version DESC").Find(&modelVersions).Error
+	err := ds.DB.Where("branch_uuid = ?", modelBranchUUID).Preload("Branch").Preload("Path.SourceType").Preload("CreatedByUser").Order("LENGTH(version) DESC").Order("version DESC").Find(&modelVersions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1278,6 +1306,14 @@ func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID, withLo
 				},
 			},
 			IsEmpty: modelVersion.IsEmpty,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   modelVersion.CreatedByUser.UUID,
+				Handle: modelVersion.CreatedByUser.Handle,
+				Name:   modelVersion.CreatedByUser.Name,
+				Avatar: modelVersion.CreatedByUser.Avatar,
+				Email:  modelVersion.CreatedByUser.Email,
+			},
+			CreatedAt: modelVersion.CreatedAt,
 		}
 		if withLogs {
 			modelBranchVersion.Logs, err = ds.GetLogForModelVersion(modelVersion.UUID)
@@ -1296,9 +1332,9 @@ func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version st
 	}
 	var res *gorm.DB
 	if strings.ToLower(version) == "latest" {
-		res = ds.DB.Order("created_at desc").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
+		res = ds.DB.Order("created_at desc").Preload("CreatedByUser").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
 	} else {
-		res = ds.DB.Where("version = ?", version).Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
+		res = ds.DB.Where("version = ?", version).Preload("CreatedByUser").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
 	}
 	if res.Error != nil {
 		return nil, res.Error
@@ -1322,7 +1358,15 @@ func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version st
 				PublicURL: modelVersion.Path.SourceType.PublicURL,
 			},
 		},
-		IsEmpty: modelVersion.IsEmpty,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   modelVersion.CreatedByUser.UUID,
+			Handle: modelVersion.CreatedByUser.Handle,
+			Name:   modelVersion.CreatedByUser.Name,
+			Avatar: modelVersion.CreatedByUser.Avatar,
+			Email:  modelVersion.CreatedByUser.Email,
+		},
+		CreatedAt: modelVersion.CreatedAt,
+		IsEmpty:   modelVersion.IsEmpty,
 	}, nil
 }
 
@@ -1602,6 +1646,13 @@ func (ds *Datastore) GetAllPublicDatasets() ([]models.DatasetResponse, error) {
 				Name:   dataset.UpdatedByUser.Name,
 				Email:  dataset.UpdatedByUser.Email,
 			},
+			Org: models.OrganizationHandleResponse{
+				UUID:        dataset.Org.UUID,
+				Name:        dataset.Org.Name,
+				Handle:      dataset.Org.Handle,
+				Avatar:      dataset.Org.Avatar,
+				Description: dataset.Org.Description,
+			},
 			IsPublic: dataset.IsPublic,
 		}
 	}
@@ -1760,13 +1811,14 @@ func (ds *Datastore) RegisterDatasetFile(datasetBranchUUID uuid.UUID, sourceType
 			Email:  datasetVersion.CreatedByUser.Email,
 			Handle: datasetVersion.CreatedByUser.Handle,
 		},
-		IsEmpty: datasetVersion.IsEmpty,
+		CreatedAt: datasetVersion.CreatedAt,
+		IsEmpty:   datasetVersion.IsEmpty,
 	}, nil
 }
 
 func (ds *Datastore) MigrateDatasetVersionBranch(datasetVersion uuid.UUID, toBranch uuid.UUID) (*models.DatasetBranchVersionResponse, error) {
 	var datasetVersionDB dbmodels.DatasetVersion
-	err := ds.DB.Preload("Branch").Preload("Lineage").Preload("Path").Where("uuid = ?", datasetVersion).First(&datasetVersionDB).Error
+	err := ds.DB.Preload("Branch").Preload("Lineage").Preload("Path").Preload("CreatedByUser").Where("uuid = ?", datasetVersion).First(&datasetVersionDB).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1800,13 +1852,21 @@ func (ds *Datastore) MigrateDatasetVersionBranch(datasetVersion uuid.UUID, toBra
 			UUID:    datasetVersionDB.Lineage.UUID,
 			Lineage: datasetVersionDB.Lineage.Lineage,
 		},
-		IsEmpty: datasetVersionDB.IsEmpty,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   datasetVersionDB.CreatedByUser.UUID,
+			Name:   datasetVersionDB.CreatedByUser.Name,
+			Avatar: datasetVersionDB.CreatedByUser.Avatar,
+			Email:  datasetVersionDB.CreatedByUser.Email,
+			Handle: datasetVersionDB.CreatedByUser.Handle,
+		},
+		CreatedAt: datasetVersionDB.CreatedAt,
+		IsEmpty:   datasetVersionDB.IsEmpty,
 	}, nil
 }
 
 func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
-	err := ds.DB.Select("dataset_versions.*").Joins("JOIN dataset_branches ON dataset_branches.uuid = dataset_versions.branch_uuid").Where("dataset_branches.dataset_uuid = ?", datasetUUID).Find(&datasetVersions).Error
+	err := ds.DB.Select("dataset_versions.*").Joins("JOIN dataset_branches ON dataset_branches.uuid = dataset_versions.branch_uuid").Where("dataset_branches.dataset_uuid = ?", datasetUUID).Preload("Branch").Preload("CreatedByUser").Preload("Lineage").Preload("Path").Find(&datasetVersions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1832,7 +1892,15 @@ func (ds *Datastore) GetDatasetAllVersions(datasetUUID uuid.UUID) ([]models.Data
 				UUID:    datasetVersion.Lineage.UUID,
 				Lineage: datasetVersion.Lineage.Lineage,
 			},
-			IsEmpty: datasetVersion.IsEmpty,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   datasetVersion.CreatedByUser.UUID,
+				Name:   datasetVersion.CreatedByUser.Name,
+				Avatar: datasetVersion.CreatedByUser.Avatar,
+				Email:  datasetVersion.CreatedByUser.Email,
+				Handle: datasetVersion.CreatedByUser.Handle,
+			},
+			CreatedAt: datasetVersion.CreatedAt,
+			IsEmpty:   datasetVersion.IsEmpty,
 		})
 	}
 	return datasetVersionsResponse, nil
@@ -1878,7 +1946,7 @@ func (ds *Datastore) GetDatasetBranchByUUID(datasetBranchUUID uuid.UUID) (*model
 
 func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([]models.DatasetBranchVersionResponse, error) {
 	var datasetVersions []dbmodels.DatasetVersion
-	err := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("Branch").Preload("Path.SourceType").Order("LENGTH(version) DESC").Order("version DESC").Find(&datasetVersions).Error
+	err := ds.DB.Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("Branch").Preload("CreatedByUser").Preload("Path.SourceType").Order("LENGTH(version) DESC").Order("version DESC").Find(&datasetVersions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1904,7 +1972,15 @@ func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([
 				UUID:    datasetVersion.Lineage.UUID,
 				Lineage: datasetVersion.Lineage.Lineage,
 			},
-			IsEmpty: datasetVersion.IsEmpty,
+			CreatedBy: models.UserHandleResponse{
+				UUID:   datasetVersion.CreatedByUser.UUID,
+				Name:   datasetVersion.CreatedByUser.Name,
+				Avatar: datasetVersion.CreatedByUser.Avatar,
+				Email:  datasetVersion.CreatedByUser.Email,
+				Handle: datasetVersion.CreatedByUser.Handle,
+			},
+			CreatedAt: datasetVersion.CreatedAt,
+			IsEmpty:   datasetVersion.IsEmpty,
 		})
 	}
 	return datasetVersionsResponse, nil
@@ -1916,9 +1992,9 @@ func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, versio
 	}
 	var res *gorm.DB
 	if strings.ToLower(version) == "latest" {
-		res = ds.DB.Preload("Branch").Preload("Lineage").Preload("Path.SourceType").Order("created_at desc").Limit(1).Find(&datasetVersion)
+		res = ds.DB.Preload("Branch").Preload("Lineage").Preload("CreatedByUser").Preload("Path.SourceType").Order("created_at desc").Limit(1).Find(&datasetVersion)
 	} else {
-		res = ds.DB.Where("version = ?", version).Preload("Branch").Preload("Lineage").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
+		res = ds.DB.Where("version = ?", version).Preload("Branch").Preload("Lineage").Preload("CreatedByUser").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
 	}
 	if res.Error != nil {
 		return nil, res.Error
@@ -1946,7 +2022,15 @@ func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, versio
 			UUID:    datasetVersion.Lineage.UUID,
 			Lineage: datasetVersion.Lineage.Lineage,
 		},
-		IsEmpty: datasetVersion.IsEmpty,
+		CreatedBy: models.UserHandleResponse{
+			UUID:   datasetVersion.CreatedByUser.UUID,
+			Name:   datasetVersion.CreatedByUser.Name,
+			Avatar: datasetVersion.CreatedByUser.Avatar,
+			Email:  datasetVersion.CreatedByUser.Email,
+			Handle: datasetVersion.CreatedByUser.Handle,
+		},
+		CreatedAt: datasetVersion.CreatedAt,
+		IsEmpty:   datasetVersion.IsEmpty,
 	}, nil
 }
 

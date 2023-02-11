@@ -131,7 +131,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateOrUpdateOrgRequest"
+                            "$ref": "#/definitions/models.CreateOrgRequest"
                         }
                     }
                 ],
@@ -3330,7 +3330,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateOrUpdateOrgRequest"
+                            "$ref": "#/definitions/models.UpdateOrgRequest"
                         }
                     }
                 ],
@@ -3727,7 +3727,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateOrUpdateOrgRequest": {
+        "models.CreateOrgRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -3737,7 +3737,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "handle": {
-                    "description": "Name        string ` + "`" + `json:\"name\"` + "`" + `",
                     "type": "string"
                 }
             }
@@ -3854,6 +3853,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "file_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateOrgRequest": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Handle      string ` + "`" + `json:\"handle\"` + "`" + `",
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
