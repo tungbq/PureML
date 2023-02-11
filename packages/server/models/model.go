@@ -1,6 +1,10 @@
 package models
 
-import uuid "github.com/satori/go.uuid"
+import (
+	"time"
+
+	uuid "github.com/satori/go.uuid"
+)
 
 // Request models
 
@@ -86,6 +90,7 @@ type ModelBranchVersionResponse struct {
 	Logs      []LogDataResponse       `json:"logs"`
 	IsEmpty   bool                    `json:"is_empty"`
 	CreatedBy UserHandleResponse      `json:"created_by"`
+	CreatedAt time.Time               `json:"created_at"`
 }
 
 type ModelReviewResponse struct {

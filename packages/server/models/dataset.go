@@ -1,6 +1,10 @@
 package models
 
-import uuid "github.com/satori/go.uuid"
+import (
+	"time"
+
+	uuid "github.com/satori/go.uuid"
+)
 
 // Request models
 
@@ -88,6 +92,7 @@ type DatasetBranchVersionResponse struct {
 	Path      PathResponse              `json:"path"`
 	IsEmpty   bool                      `json:"is_empty"`
 	CreatedBy UserHandleResponse        `json:"created_by"`
+	CreatedAt time.Time                 `json:"created_at"`
 }
 
 type LineageResponse struct {
