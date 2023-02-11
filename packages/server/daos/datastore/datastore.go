@@ -288,23 +288,25 @@ func (ds *Datastore) GetOrgByHandle(handle string) (*models.OrganizationResponse
 func (ds *Datastore) GetUserOrganizationsByEmail(email string) ([]models.UserOrganizationsResponse, error) {
 	var orgs []models.UserOrganizationsResponse
 	var tableOrgs []struct {
-		UUID   uuid.UUID
-		Handle string
-		Name   string
-		Avatar string
-		Role   string
+		UUID        uuid.UUID
+		Handle      string
+		Name        string
+		Avatar      string
+		Description string
+		Role        string
 	}
-	result := ds.DB.Table("organizations").Select("organizations.uuid, organizations.handle, organizations.name, organizations.avatar, user_organizations.role").Joins("JOIN user_organizations ON user_organizations.organization_uuid = organizations.uuid").Joins("JOIN users ON users.uuid = user_organizations.user_uuid").Where("users.email = ?", email).Scan(&tableOrgs)
+	result := ds.DB.Table("organizations").Select("organizations.uuid, organizations.handle, organizations.name, organizations.avatar, organizations.description, user_organizations.role").Joins("JOIN user_organizations ON user_organizations.organization_uuid = organizations.uuid").Joins("JOIN users ON users.uuid = user_organizations.user_uuid").Where("users.email = ?", email).Scan(&tableOrgs)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	for _, org := range tableOrgs {
 		orgs = append(orgs, models.UserOrganizationsResponse{
 			Org: models.OrganizationHandleResponse{
-				UUID:   org.UUID,
-				Handle: org.Handle,
-				Name:   org.Name,
-				Avatar: org.Avatar,
+				UUID:        org.UUID,
+				Handle:      org.Handle,
+				Name:        org.Name,
+				Avatar:      org.Avatar,
+				Description: org.Description,
 			},
 			Role: org.Role,
 		})
@@ -354,10 +356,11 @@ func (ds *Datastore) CreateUserOrganizationFromEmailAndOrgId(email string, orgId
 	}
 	return &models.UserOrganizationsResponse{
 		Org: models.OrganizationHandleResponse{
-			UUID:   org.UUID,
-			Name:   org.Name,
-			Handle: org.Handle,
-			Avatar: org.Avatar,
+			UUID:        org.UUID,
+			Name:        org.Name,
+			Handle:      org.Handle,
+			Avatar:      org.Avatar,
+			Description: org.Description,
 		},
 		Role: userOrganization.Role,
 	}, nil
@@ -403,10 +406,11 @@ func (ds *Datastore) CreateUserOrganizationFromEmailAndJoinCode(email string, jo
 	}
 	return &models.UserOrganizationsResponse{
 		Org: models.OrganizationHandleResponse{
-			UUID:   org.UUID,
-			Name:   org.Name,
-			Handle: org.Handle,
-			Avatar: org.Avatar,
+			UUID:        org.UUID,
+			Name:        org.Name,
+			Handle:      org.Handle,
+			Avatar:      org.Avatar,
+			Description: org.Description,
 		},
 		Role: userOrganization.Role,
 	}, nil
@@ -989,6 +993,13 @@ func (ds *Datastore) GetAllPublicModels() ([]models.ModelResponse, error) {
 				Avatar: model.UpdatedByUser.Avatar,
 				Name:   model.UpdatedByUser.Name,
 				Email:  model.UpdatedByUser.Email,
+			},
+			Org: models.OrganizationHandleResponse{
+				UUID:        model.Org.UUID,
+				Name:        model.Org.Name,
+				Handle:      model.Org.Handle,
+				Avatar:      model.Org.Avatar,
+				Description: model.Org.Description,
 			},
 			IsPublic: model.IsPublic,
 		}
@@ -1634,6 +1645,13 @@ func (ds *Datastore) GetAllPublicDatasets() ([]models.DatasetResponse, error) {
 				Avatar: dataset.UpdatedByUser.Avatar,
 				Name:   dataset.UpdatedByUser.Name,
 				Email:  dataset.UpdatedByUser.Email,
+			},
+			Org: models.OrganizationHandleResponse{
+				UUID:        dataset.Org.UUID,
+				Name:        dataset.Org.Name,
+				Handle:      dataset.Org.Handle,
+				Avatar:      dataset.Org.Avatar,
+				Description: dataset.Org.Description,
 			},
 			IsPublic: dataset.IsPublic,
 		}

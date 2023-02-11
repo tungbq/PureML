@@ -51,14 +51,14 @@ type DatasetNameResponse struct {
 }
 
 type DatasetResponse struct {
-	UUID      uuid.UUID            `json:"uuid"`
-	Name      string               `json:"name"`
-	Wiki      string               `json:"wiki"`
-	Org       OrganizationResponse `json:"org"`
-	CreatedBy UserHandleResponse   `json:"created_by"`
-	UpdatedBy UserHandleResponse   `json:"updated_by"`
-	Readme    ReadmeResponse       `json:"readme"`
-	IsPublic  bool                 `json:"is_public"`
+	UUID      uuid.UUID                  `json:"uuid"`
+	Name      string                     `json:"name"`
+	Wiki      string                     `json:"wiki"`
+	Org       OrganizationHandleResponse `json:"org"`
+	CreatedBy UserHandleResponse         `json:"created_by"`
+	UpdatedBy UserHandleResponse         `json:"updated_by"`
+	Readme    ReadmeResponse             `json:"readme"`
+	IsPublic  bool                       `json:"is_public"`
 }
 
 type DatasetUserResponse struct {
