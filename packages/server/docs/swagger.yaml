@@ -40,14 +40,13 @@ definitions:
       wiki:
         type: string
     type: object
-  models.CreateOrUpdateOrgRequest:
+  models.CreateOrgRequest:
     properties:
       avatar:
         type: string
       description:
         type: string
       handle:
-        description: Name        string `json:"name"`
         type: string
     type: object
   models.DatasetReviewRequest:
@@ -123,6 +122,16 @@ definitions:
       content:
         type: string
       file_type:
+        type: string
+    type: object
+  models.UpdateOrgRequest:
+    properties:
+      avatar:
+        type: string
+      description:
+        description: Handle      string `json:"handle"`
+        type: string
+      name:
         type: string
     type: object
   models.UserLoginRequest:
@@ -2214,7 +2223,7 @@ paths:
         name: org
         required: true
         schema:
-          $ref: '#/definitions/models.CreateOrUpdateOrgRequest'
+          $ref: '#/definitions/models.UpdateOrgRequest'
       produces:
       - application/json
       responses:
@@ -2257,7 +2266,7 @@ paths:
         name: org
         required: true
         schema:
-          $ref: '#/definitions/models.CreateOrUpdateOrgRequest'
+          $ref: '#/definitions/models.CreateOrgRequest'
       produces:
       - application/json
       responses:
