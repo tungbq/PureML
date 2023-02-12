@@ -1,5 +1,177 @@
-basePath: /
-host: localhost:8080
+definitions:
+  models.ActivityRequest:
+    properties:
+      activity:
+        type: string
+    type: object
+  models.CreateDatasetBranchRequest:
+    properties:
+      branch_name:
+        type: string
+    type: object
+  models.CreateDatasetRequest:
+    properties:
+      branch_names:
+        items:
+          type: string
+        type: array
+      is_public:
+        type: boolean
+      readme:
+        $ref: '#/definitions/models.ReadmeRequest'
+      wiki:
+        type: string
+    type: object
+  models.CreateModelBranchRequest:
+    properties:
+      branch_name:
+        type: string
+    type: object
+  models.CreateModelRequest:
+    properties:
+      branch_names:
+        items:
+          type: string
+        type: array
+      is_public:
+        type: boolean
+      readme:
+        $ref: '#/definitions/models.ReadmeRequest'
+      wiki:
+        type: string
+    type: object
+  models.CreateOrgRequest:
+    properties:
+      avatar:
+        type: string
+      description:
+        type: string
+      handle:
+        type: string
+    type: object
+  models.DatasetReviewRequest:
+    properties:
+      description:
+        type: string
+      from_branch:
+        type: string
+      from_branch_version:
+        type: string
+      is_accepted:
+        type: boolean
+      is_complete:
+        type: boolean
+      title:
+        type: string
+      to_branch:
+        type: string
+    type: object
+  models.DatasetReviewUpdateRequest:
+    properties:
+      description:
+        type: string
+      is_accepted:
+        type: boolean
+      is_complete:
+        type: boolean
+      title:
+        type: string
+    type: object
+  models.HashRequest:
+    properties:
+      hash:
+        type: string
+    type: object
+  models.LogRequest:
+    properties:
+      data:
+        type: string
+      key:
+        type: string
+    type: object
+  models.ModelReviewRequest:
+    properties:
+      description:
+        type: string
+      from_branch:
+        type: string
+      from_branch_version:
+        type: string
+      is_accepted:
+        type: boolean
+      is_complete:
+        type: boolean
+      title:
+        type: string
+      to_branch:
+        type: string
+    type: object
+  models.ModelReviewUpdateRequest:
+    properties:
+      description:
+        type: string
+      is_accepted:
+        type: boolean
+      is_complete:
+        type: boolean
+      title:
+        type: string
+    type: object
+  models.ReadmeRequest:
+    properties:
+      content:
+        type: string
+      file_type:
+        type: string
+    type: object
+  models.UpdateOrgRequest:
+    properties:
+      avatar:
+        type: string
+      description:
+        description: Handle      string `json:"handle"`
+        type: string
+      name:
+        type: string
+    type: object
+  models.UserLoginRequest:
+    properties:
+      email:
+        type: string
+      handle:
+        type: string
+      password:
+        type: string
+    type: object
+  models.UserResetPasswordRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  models.UserSignupRequest:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      email:
+        type: string
+      handle:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  models.UserUpdateRequest:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      name:
+        type: string
+    type: object
 info:
   contact:
     email: contact@pureml.com
@@ -8,8 +180,6 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: PureML API Documentation
-  version: "1.0"
 paths:
   /health:
     get:
@@ -26,7 +196,2047 @@ paths:
             type: object
       summary: Show the status of server.
       tags:
-      - root
+      - Root
+  /org/:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all user organizations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all user organizations.
+      tags:
+      - Organization
+  /org/{orgId}/add:
+    post:
+      consumes:
+      - '*/*'
+      description: Add a user to an organization. Only accessible by owners of the
+        organization.
+      parameters:
+      - description: User email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add a user to an organization.
+      tags:
+      - Organization
+  /org/{orgId}/dataset/{datasetName}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific dataset of an organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific dataset of an organization
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/activity/{category}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get activity of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get activity of a dataset for a category
+      tags:
+      - Dataset
+    post:
+      consumes:
+      - '*/*'
+      description: Add activity of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ActivityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add activity of a dataset for a category
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/activity/{category}/{activityUUID}:
+    post:
+      consumes:
+      - '*/*'
+      description: Update activity of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity UUID
+        in: path
+        name: activityUUID
+        required: true
+        type: string
+      - description: Activity
+        in: body
+        name: activity
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update activity of a dataset for a category
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/activity/{category}/{activityUUID}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete an activity of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity UUID
+        in: path
+        name: activityUUID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete an activity of a dataset for a category
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branches of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branches of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific branch of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific branch of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete a branch of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a branch of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/hash-status:
+    post:
+      consumes:
+      - '*/*'
+      description: Verify dataset hash status to determine if dataset is already uploaded
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Hash value
+        in: body
+        name: hash
+        required: true
+        schema:
+          $ref: '#/definitions/models.HashRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Verify dataset hash status
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/register:
+    post:
+      consumes:
+      - '*/*'
+      description: Register dataset file. Create dataset and default branches if not
+        exists
+      parameters:
+      - description: Dataset file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Organization UUID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - in: formData
+        name: hash
+        type: string
+      - in: formData
+        name: is_empty
+        type: boolean
+      - in: formData
+        name: lineage
+        type: string
+      - in: formData
+        name: storage
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Register dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update a branch of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a branch of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branch versions of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branch versions of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific branch version of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific branch version of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Log data for dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Log data for dataset
+      tags:
+      - Dataset
+    post:
+      consumes:
+      - '*/*'
+      description: Log data for dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Data to log
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Log data for dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log/{key}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Log data for dataset with specific key
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Log data for dataset with specific key
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Create a new branch of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: branchName
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDatasetBranchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new branch of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Register dataset file. Create dataset and default branches if not
+        exists
+      parameters:
+      - description: Organization UUID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Dataset details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDatasetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/readme:
+    post:
+      consumes:
+      - '*/*'
+      description: Update readme of a dataset for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReadmeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update readme of a dataset for a category
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/readme/version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get dataset readme
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get dataset readme
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/readme/version/{version}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get dataset readme
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get dataset readme
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/review:
+    get:
+      consumes:
+      - '*/*'
+      description: Get dataset reviews
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get dataset reviews
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/review/{reviewId}/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update review of a dataset
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Review UUID
+        in: path
+        name: reviewId
+        required: true
+        type: string
+      - description: Review
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/models.DatasetReviewUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update review of a dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/{datasetName}/review/create:
+    post:
+      consumes:
+      - '*/*'
+      description: |-
+        Create a new review request for dataset
+        From and To branch names are required (Not UUID)
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Review
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.DatasetReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new review request for dataset
+      tags:
+      - Dataset
+  /org/{orgId}/dataset/all:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all datasets of an organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all datasets of an organization
+      tags:
+      - Dataset
+  /org/{orgId}/leave:
+    post:
+      consumes:
+      - '*/*'
+      description: Leave organization.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: User email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Leave organization.
+      tags:
+      - Organization
+  /org/{orgId}/model/{modelName}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific model of an organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific model of an organization
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/activity/{category}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get activity of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get activity of a model for a category
+      tags:
+      - Model
+    post:
+      consumes:
+      - '*/*'
+      description: Add activity of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ActivityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add activity of a model for a category
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/activity/{category}/{activityUUID}:
+    post:
+      consumes:
+      - '*/*'
+      description: Update activity of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity UUID
+        in: path
+        name: activityUUID
+        required: true
+        type: string
+      - description: Activity
+        in: body
+        name: activity
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update activity of a model for a category
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/activity/{category}/{activityUUID}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete an activity of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: Activity UUID
+        in: path
+        name: activityUUID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete an activity of a model for a category
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branches of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branches of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific branch of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific branch of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete a branch of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a branch of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/hash-status:
+    post:
+      consumes:
+      - '*/*'
+      description: Verify model hash status to determine if model is already uploaded
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Hash value
+        in: body
+        name: hash
+        required: true
+        schema:
+          $ref: '#/definitions/models.HashRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Verify model hash status
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/register:
+    post:
+      consumes:
+      - '*/*'
+      description: Register model file. Create model and default branches if not exists
+      parameters:
+      - description: Model file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Organization UUID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - in: formData
+        name: hash
+        type: string
+      - in: formData
+        name: is_empty
+        type: boolean
+      - in: formData
+        name: storage
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Register model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update a branch of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a branch of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all branch versions of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Include logs
+        in: query
+        name: withLogs
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all branch versions of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get specific branch version of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get specific branch version of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Log data for model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Log data for model
+      tags:
+      - Model
+    post:
+      consumes:
+      - '*/*'
+      description: Log data for model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Data to log
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Log data for model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log/{key}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Log data for model with specific key
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Log data for model with specific key
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Create a new branch of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: branchName
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateModelBranchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new branch of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Register model file. Create model and default branches if not exists
+      parameters:
+      - description: Organization UUID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Model details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateModelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/readme:
+    post:
+      consumes:
+      - '*/*'
+      description: Update readme of a model for a category
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReadmeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update readme of a model for a category
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/readme/version:
+    get:
+      consumes:
+      - '*/*'
+      description: Get model readme
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get model readme
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/readme/version/{version}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get model readme
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get model readme
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/review:
+    get:
+      consumes:
+      - '*/*'
+      description: Get model reviews
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get model reviews
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/review/{reviewId}/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update review of a model
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Review UUID
+        in: path
+        name: reviewId
+        required: true
+        type: string
+      - description: Review
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/models.ModelReviewUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update review of a model
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/review/create:
+    post:
+      consumes:
+      - '*/*'
+      description: |-
+        Create a new review request for model
+        From and To branch names are required (Not UUID)
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Review
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ModelReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new review request for model
+      tags:
+      - Model
+  /org/{orgId}/model/all:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all models of an organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all models of an organization
+      tags:
+      - Model
+  /org/{orgId}/public/dataset:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all public datasets of an organization.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all public datasets of an organization.
+      tags:
+      - Organization
+  /org/{orgId}/public/model:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all public models of an organization.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all public models of an organization.
+      tags:
+      - Organization
+  /org/{orgId}/remove:
+    post:
+      consumes:
+      - '*/*'
+      description: Remove user from organization.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: User email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Remove user from organization.
+      tags:
+      - Organization
+  /org/{orgId}/secret/r2/test:
+    get:
+      consumes:
+      - '*/*'
+      description: Test secrets for source type r2
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Test secrets for source type r2
+      tags:
+      - Secret
+  /org/{orgId}/secret/s3/test:
+    get:
+      consumes:
+      - '*/*'
+      description: Test secrets for source type s3
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Test secrets for source type s3
+      tags:
+      - Secret
+  /org/{orgId}/update:
+    post:
+      consumes:
+      - '*/*'
+      description: Update organization details by ID.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Organization details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateOrgRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update organization details.
+      tags:
+      - Organization
   /org/all:
     get:
       consumes:
@@ -40,9 +2250,315 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all organizations and their details.
       tags:
-      - root
-schemes:
-- http
+      - Organization
+  /org/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Create an organization and add the user as the owner.
+      parameters:
+      - description: Organization details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrgRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create an organization.
+      tags:
+      - Organization
+  /org/handle/{orgHandle}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get organization details by handle.
+      parameters:
+      - description: Organization Handle
+        in: path
+        name: orgHandle
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get organization details by handle.
+      tags:
+      - Organization
+  /org/id/{orgId}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get organization details by ID.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get organization details by ID.
+      tags:
+      - Organization
+  /org/join:
+    post:
+      consumes:
+      - '*/*'
+      description: Join organization by join code.
+      parameters:
+      - description: Organization join code
+        in: body
+        name: join_code
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Join organization by join code.
+      tags:
+      - Organization
+  /public/dataset:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all public datasets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all public datasets
+      tags:
+      - Dataset
+  /public/model:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all public models
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all public models
+      tags:
+      - Model
+  /user/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete user profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user profile.
+      tags:
+      - User
+  /user/forgot-password:
+    post:
+      consumes:
+      - '*/*'
+      description: User can reset password by providing email id to send reset password
+        link.
+      parameters:
+      - description: User email
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: User forgot password.
+      tags:
+      - User
+  /user/login:
+    post:
+      consumes:
+      - '*/*'
+      description: User login with email and password.
+      parameters:
+      - description: User details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User login.
+      tags:
+      - User
+  /user/profile:
+    get:
+      consumes:
+      - '*/*'
+      description: Get logged in user profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get logged in user profile.
+      tags:
+      - User
+    post:
+      consumes:
+      - '*/*'
+      description: User can update profile by providing name, avatar, bio.
+      parameters:
+      - description: User details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: User update profile.
+      tags:
+      - User
+  /user/profile/{userHandle}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get user profile by handle. Accessible without login.
+      parameters:
+      - description: User handle
+        in: path
+        name: userHandle
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user profile by handle.
+      tags:
+      - User
+  /user/reset-password:
+    post:
+      consumes:
+      - '*/*'
+      description: User can reset password by providing old password and new password.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: User reset password.
+      tags:
+      - User
+  /user/signup:
+    post:
+      consumes:
+      - '*/*'
+      description: User sign up with email, name, handle and password.
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserSignupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User sign up.
+      tags:
+      - User
+securityDefinitions:
+  ApiKeyAuth:
+    description: 'Header for logged in user format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
