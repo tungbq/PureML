@@ -24,7 +24,7 @@ jobs:
       uses: actions/setup-go@v3.5.0
       with:
         # Path to the go.mod or go.work file.
-        go-version-file: /packages/server/go.mod
+        go-version-file: ./packages/server/go.mod
         # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
         cache: true
     
