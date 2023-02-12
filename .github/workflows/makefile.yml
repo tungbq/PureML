@@ -1,0 +1,38 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: configure
+      run: ./configure
+    
+    - name: Setup Go environment
+      uses: actions/setup-go@v3.5.0
+      with:
+        # Path to the go.mod or go.work file.
+        go-version-file: /packages/server/go.mod
+        # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
+        cache: true
+    
+    - name: Lint Backend
+      working-directory: ./packages/server
+      run: make lint
+      
+    - name: Build go backend
+      working-directory: ./packages/server
+      run: make build
+      
+    - name: Update docs
+      working-directory: ./packages/server
+      run: make docs
