@@ -27,6 +27,8 @@ jobs:
         go-version-file: ./packages/server/go.mod
         # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
         cache: true
+        # Used to specify the path to a dependency file - go.sum
+        cache-dependency-path: ./packages/server/go.sum
     
     - name: Lint Backend
       working-directory: ./packages/server
