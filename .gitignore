@@ -13,3 +13,5 @@ packages/server/pureml_data
 
 __pycache__/
 *.pyc
+
+.vscode/

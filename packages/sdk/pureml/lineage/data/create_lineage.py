@@ -77,7 +77,7 @@ def prune_dict_elements(components):
 
 
 
-def create_pipeline():
+def create_lineage():
     config = load_config()
 
     load_data = config['load_data']
@@ -86,35 +86,35 @@ def create_pipeline():
 
 
 
-    pipeline_components = []
+    lineage_components = []
 
     if len(load_data) > 0:
-        pipeline_components.append(load_data)
+        lineage_components.append(load_data)
     
     if len(transformer) > 0:
-        pipeline_components = pipeline_components + transformer
+        lineage_components = lineage_components + transformer
     
     if len(dataset) > 0:
-        pipeline_components.append(dataset)
+        lineage_components.append(dataset)
 
 
-    pipeline_components =  prune_dict_elements(pipeline_components)
+    lineage_components =  prune_dict_elements(lineage_components)
 
-    edges = create_edges(components=pipeline_components)
+    edges = create_edges(components=lineage_components)
     edges = prune_dict_elements(edges)
 
 
-    nodes = create_nodes(components=pipeline_components)
+    nodes = create_nodes(components=lineage_components)
     nodes = create_extra_nodes(nodes, edges)
     nodes = prune_dict_elements(nodes)
 
 
-    pipeline = {
+    lineage = {
         'edges': edges,
         'nodes': nodes
     }
 
-    return pipeline
+    return lineage
 
 
 

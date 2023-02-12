@@ -1,3 +1,59 @@
+## Release of V0.2.0
+### Changes
+- Removed projects. There will be no project related actions(creation, deletion etc.) in PureML
+- `project.init()` equivalent for datasets is `dataset.init()`. This will create an empty an empty Dataset that will contain all the information about a dataset like **ReadME.md**, **branches**, **versions**, **reviews** etc
+- - Each dataset registered using `@dataset` will be assigned a version 
+- `project.init()` equivalent for models is `model.init()`. This will create an empty an empty Models that will contain all the information about a dataset like **ReadME.md**, **branches**, **versions**, **reviews** etc
+- - Each model registered using `@model` will be assigned a version
+- Added branching for datasets, and models
+
+
+
+
+
+## Release of V0.1.6
+### Changes
+- Added support for more input types for fastAPI and Docker container
+- Input types:
+    - Numpy Ndarray
+    - Pandas DataFrame
+    - text
+    - Image
+- Output types:
+    - Numpy Ndarray
+    - Pandas DataFrame
+    - text
+    - Any json serializable output
+
+### Bug fixes
+- Building docker images without cache to utilize modified files
+- Remove duplicate edges between two nodes in the data lineage
+    
+
+## Release of V0.1.5
+
+
+## Release of V0.1.4
+### Changes
+- Added templates for bug report, feature request
+- Added source code extraction
+- Added support for creating FastAPI server for a model
+- Added support for creating Docker container for a model
+### Bug fixes
+- Bug fix related to unconnected node when parent is not given in leange
+
+
+## Release of V0.1.3
+### Changes
+- Added support for pytorch tabnet for model packaging
+- Added ReadMe file to enable collaboration guidelines for PureML repository
+
+
+### Bug fixes
+- Bug fix related to missing packages
+- Bug fix to generate nodes given in parents parameter of the decorators if they are not already available.
+
+
 ## Release of V0.1.2
 ### Changes
 
