@@ -15,24 +15,36 @@ func ValidateOrg(app core.App) echo.MiddlewareFunc {
 			orgId := context.Param("orgId")
 			if orgId == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Organization Id required"))
+				_, err := context.Response().Writer.Write([]byte("Organization Id required"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			orgUUID, err := uuid.FromString(orgId)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				_, err = context.Response().Writer.Write([]byte("Invalid UUID format"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			org, err := app.Dao().GetOrgById(orgUUID)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
-				context.Response().Writer.Write([]byte(err.Error()))
+				_, err = context.Response().Writer.Write([]byte(err.Error()))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if org == nil {
 				context.Response().WriteHeader(http.StatusNotFound)
-				context.Response().Writer.Write([]byte("Organization not found"))
+				_, err = context.Response().Writer.Write([]byte("Organization not found"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			context.Set(ContextOrgKey, &models.OrganizationHandleResponse{

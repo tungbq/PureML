@@ -172,7 +172,10 @@ func (s *System) UploadFile(file *File, fileKey string) error {
 	}
 
 	// rewind
-	f.Seek(0, io.SeekStart)
+	_, err = f.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
 
 	originalName := file.OriginalName
 	if len(originalName) > 255 {
@@ -214,7 +217,10 @@ func (s *System) UploadMultipart(fh *multipart.FileHeader, fileKey string) error
 	}
 
 	// rewind
-	f.Seek(0, io.SeekStart)
+	_, err = f.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
 
 	originalName := fh.Filename
 	if len(originalName) > 255 {
@@ -298,7 +304,10 @@ func (s *System) DeletePrefix(prefix string) []error {
 	// delete dirs
 	for _, d := range dirs {
 		if d != "" {
-			s.Delete(d)
+			err := s.Delete(d)
+			if err != nil {
+				failed = append(failed, err)
+			}
 		}
 	}
 	// ---

@@ -29,13 +29,25 @@ func All() []Seed {
 		{
 			Name: "CreateDemoModel",
 			Run: func(d *gorm.DB) error {
-				return CreateModel(d, "Demo Model", "Demo Model Wiki")
+				return CreateModel(d, defaultUUID, "Demo Model", "Demo Model Wiki", true)
+			},
+		},
+		{
+			Name: "CreateDemoPrivateModel",
+			Run: func(d *gorm.DB) error {
+				return CreateModel(d, defaultUUID2, "Demo Private Model", "Demo Private Model Wiki", false)
 			},
 		},
 		{
 			Name: "CreateDemoDataset",
 			Run: func(d *gorm.DB) error {
-				return CreateDataset(d, "Demo Dataset", "Demo Dataset Wiki")
+				return CreateDataset(d, defaultUUID, "Demo Dataset", "Demo Dataset Wiki", true)
+			},
+		},
+		{
+			Name: "CreateDemoPrivateDataset",
+			Run: func(d *gorm.DB) error {
+				return CreateDataset(d, defaultUUID2, "Demo Private Dataset", "Demo Private Dataset Wiki", false)
 			},
 		},
 	}
@@ -75,30 +87,11 @@ func CreateUser(db *gorm.DB, uuid uuid.UUID, name string, email string, handle s
 	return db.Table("user_organizations").Where("user_uuid = ?", uuid).Where("organization_uuid = ?", uuid).Update("role", "owner").Error
 }
 
-func CreateModel(db *gorm.DB, name string, wiki string) error {
-	return db.Create(&dbmodels.Model{
-		BaseModel: dbmodels.BaseModel{
-			UUID: defaultUUID,
-		},
-		Name: name,
-		Wiki: wiki,
-		Org: dbmodels.Organization{
-			BaseModel: dbmodels.BaseModel{
-				UUID: defaultUUID,
-			},
-		},
-		CreatedByUser: dbmodels.User{
-			BaseModel: dbmodels.BaseModel{
-				UUID: defaultUUID,
-			},
-		},
-		UpdatedByUser: dbmodels.User{
-			BaseModel: dbmodels.BaseModel{
-				UUID: defaultUUID,
-			},
-		},
-		IsPublic: true,
-		Branches: []dbmodels.ModelBranch{
+func CreateModel(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic bool) error {
+	var branches []dbmodels.ModelBranch
+	var readme dbmodels.Readme
+	if isPublic {
+		branches = []dbmodels.ModelBranch{
 			{
 				BaseModel: dbmodels.BaseModel{
 					UUID: defaultUUID,
@@ -128,8 +121,8 @@ func CreateModel(db *gorm.DB, name string, wiki string) error {
 					},
 				},
 			},
-		},
-		Readme: dbmodels.Readme{
+		}
+		readme = dbmodels.Readme{
 			BaseModel: dbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
@@ -143,14 +136,11 @@ func CreateModel(db *gorm.DB, name string, wiki string) error {
 					Version:  "v1",
 				},
 			},
-		},
-	}).Error
-}
-
-func CreateDataset(db *gorm.DB, name string, wiki string) error {
-	return db.Create(&dbmodels.Dataset{
+		}
+	}
+	return db.Create(&dbmodels.Model{
 		BaseModel: dbmodels.BaseModel{
-			UUID: defaultUUID,
+			UUID: uuid,
 		},
 		Name: name,
 		Wiki: wiki,
@@ -169,8 +159,17 @@ func CreateDataset(db *gorm.DB, name string, wiki string) error {
 				UUID: defaultUUID,
 			},
 		},
-		IsPublic: true,
-		Branches: []dbmodels.DatasetBranch{
+		IsPublic: isPublic,
+		Branches: branches,
+		Readme:   readme,
+	}).Error
+}
+
+func CreateDataset(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic bool) error {
+	var branches []dbmodels.DatasetBranch
+	var readme dbmodels.Readme
+	if isPublic {
+		branches = []dbmodels.DatasetBranch{
 			{
 				BaseModel: dbmodels.BaseModel{
 					UUID: defaultUUID,
@@ -206,8 +205,8 @@ func CreateDataset(db *gorm.DB, name string, wiki string) error {
 					},
 				},
 			},
-		},
-		Readme: dbmodels.Readme{
+		}
+		readme = dbmodels.Readme{
 			BaseModel: dbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
@@ -221,6 +220,31 @@ func CreateDataset(db *gorm.DB, name string, wiki string) error {
 					Version:  "v1",
 				},
 			},
+		}
+	}
+	return db.Create(&dbmodels.Dataset{
+		BaseModel: dbmodels.BaseModel{
+			UUID: uuid,
 		},
+		Name: name,
+		Wiki: wiki,
+		Org: dbmodels.Organization{
+			BaseModel: dbmodels.BaseModel{
+				UUID: defaultUUID,
+			},
+		},
+		CreatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: defaultUUID,
+			},
+		},
+		UpdatedByUser: dbmodels.User{
+			BaseModel: dbmodels.BaseModel{
+				UUID: defaultUUID,
+			},
+		},
+		IsPublic: isPublic,
+		Branches: branches,
+		Readme:   readme,
 	}).Error
 }

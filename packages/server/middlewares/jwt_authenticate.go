@@ -44,7 +44,10 @@ func AuthenticateJWT(app core.App) echo.MiddlewareFunc {
 			if err != nil {
 				// fmt.Println(err)
 				context.Response().WriteHeader(http.StatusForbidden)
-				context.Response().Writer.Write([]byte("Could not parse authentication token"))
+				_, err = context.Response().Writer.Write([]byte("Could not parse authentication token"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -63,9 +66,6 @@ func AuthenticateJWT(app core.App) echo.MiddlewareFunc {
 						Handle: "",
 					})
 				}
-			} else {
-				// context.Response().WriteHeader(http.StatusForbidden)
-				// context.Response().Writer.Write([]byte("Invalid authentication token"))
 			}
 			return next(context)
 		}

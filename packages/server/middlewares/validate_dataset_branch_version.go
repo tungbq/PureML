@@ -16,18 +16,27 @@ func ValidateDatasetBranchVersion(app core.App) echo.MiddlewareFunc {
 			datasetBranchUUID := context.Get("DatasetBranch").(*models.DatasetBranchNameResponse).UUID
 			if datasetBranchVersion == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Version required"))
+				_, err := context.Response().Writer.Write([]byte("Version required"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			version, err := app.Dao().GetDatasetBranchVersion(datasetBranchUUID, datasetBranchVersion)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
-				context.Response().Writer.Write([]byte(err.Error()))
+				_, err = context.Response().Writer.Write([]byte(err.Error()))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if version == nil {
 				context.Response().WriteHeader(http.StatusNotFound)
-				context.Response().Writer.Write([]byte("Dataset Branch Version not found"))
+				_, err = context.Response().Writer.Write([]byte("Dataset Branch Version not found"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			context.Set(ContextDatasetBranchVersionKey, &models.DatasetBranchVersionNameResponse{

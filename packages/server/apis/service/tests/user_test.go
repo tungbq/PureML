@@ -253,12 +253,10 @@ func TestUserLogin(t *testing.T) {
 
 // TODO
 func TestUserResetPassword(t *testing.T) {
-	return
 }
 
 // TODO
 func TestUserForgotPassword(t *testing.T) {
-	return
 }
 
 func TestGetProfile(t *testing.T) {
@@ -307,7 +305,7 @@ func TestGetProfile(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserUuid.String() + `"`,
 				`"email":"demo@aztlan.in"`,
 				`"handle":"demo"`,
 				`"name":"Demo User"`,
@@ -552,5 +550,4 @@ func TestUpdateProfile(t *testing.T) {
 
 // TODO
 func TestDeleteProfile(t *testing.T) {
-	return
 }
