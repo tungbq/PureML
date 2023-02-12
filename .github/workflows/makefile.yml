@@ -40,4 +40,6 @@ jobs:
       
     - name: Update docs
       working-directory: ./packages/server
-      run: make docs
+      run: |
+        go install github.com/swaggo/swag/cmd/swag@latest
+        make docs
