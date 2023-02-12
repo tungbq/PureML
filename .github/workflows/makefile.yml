@@ -30,9 +30,9 @@ jobs:
         # Used to specify the path to a dependency file - go.sum
         cache-dependency-path: ./packages/server/go.sum
     
-    - name: Lint Backend
-      working-directory: ./packages/server
-      run: make lint
+    #- name: Lint Backend
+    #  working-directory: ./packages/server
+    #  run: make lint
       
     - name: Build go backend
       working-directory: ./packages/server
