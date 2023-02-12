@@ -53,7 +53,16 @@ func (api *Api) GetAllPublicDatasets(request *models.Request) *models.Response {
 //	@Param			orgId	path	string	true	"Organization Id"
 func (api *Api) GetAllDatasets(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
-	allDatasets, err := api.app.Dao().GetAllDatasets(orgId)
+	userUUID := request.GetUserUUID()
+	showPublicOnly := false
+	UserOrganization, err := api.app.Dao().GetUserOrganizationByOrgIdAndUserUUID(orgId, userUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if UserOrganization == nil || UserOrganization.Role != "owner" {
+		showPublicOnly = true
+	}
+	allDatasets, err := api.app.Dao().GetAllDatasets(orgId, showPublicOnly)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

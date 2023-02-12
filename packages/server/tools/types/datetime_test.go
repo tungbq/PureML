@@ -133,7 +133,10 @@ func TestDateTimeUnmarshalJSON(t *testing.T) {
 
 	for i, s := range scenarios {
 		dt := types.DateTime{}
-		dt.UnmarshalJSON([]byte(s.date))
+		err := dt.UnmarshalJSON([]byte(s.date))
+		if err != nil {
+			panic(err)
+		}
 
 		if dt.String() != s.expected {
 			t.Errorf("(%d) Expected %q, got %q", i, s.expected, dt.String())

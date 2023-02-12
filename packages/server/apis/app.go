@@ -87,6 +87,7 @@ func Serve(app core.App, hideStartBanner bool) error {
 	if httpsAddr != "" {
 		// if httpAddr is set, start an HTTP server to redirect the traffic to the HTTPS version
 		if httpAddr != "" {
+			// nolint:errcheck
 			go http.ListenAndServe(httpAddr, certManager.HTTPHandler(nil))
 		}
 

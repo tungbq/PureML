@@ -11,7 +11,10 @@ import (
 
 func init() {
 	// fmt.Println("Loading environment variables from .env file")
-	godotenv.Load("../.env")
+	err := godotenv.Load("../.env")
+	if err != nil {
+		panic(err)
+	}
 }
 
 var adminAccess = map[string]bool{

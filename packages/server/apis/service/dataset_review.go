@@ -106,22 +106,23 @@ func (api *Api) CreateDatasetReview(request *models.Request) *models.Response {
 	}
 	titleData := title.(string)
 	description := request.GetParsedBodyAttribute("description")
+	var descriptionData string
 	if description == nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "Description not found in request body")
 	}
-	descriptionData := description.(string)
+	if description.(string) != "" {
+		descriptionData = description.(string)
+	}
 	isComplete := request.GetParsedBodyAttribute("is_complete")
 	var isCompleteData bool
-	if isComplete == nil {
-		isCompleteData = false
+	if isComplete != nil {
+		isCompleteData = isComplete.(bool)
 	}
-	isCompleteData = isComplete.(bool)
 	IsAccepted := request.GetParsedBodyAttribute("is_accepted")
 	var isAcceptedData bool
-	if IsAccepted == nil {
-		isAcceptedData = false
+	if IsAccepted != nil {
+		isAcceptedData = IsAccepted.(bool)
 	}
-	isAcceptedData = IsAccepted.(bool)
 	createdReview, err := api.app.Dao().CreateDatasetReview(datasetUUID, userUUID, fromBranchUUID, fromBranchVersionUUID, toBranchUUID, titleData, descriptionData, isCompleteData, isAcceptedData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)

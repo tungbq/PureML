@@ -1,5 +1,5 @@
 lint:
-	golangci-lint run -c ./golangci.yml ./...
+	golangci-lint run -c ./golangci.yml ./... --allow-parallel-runners --fix
 
 .PHONY: docs
 docs:

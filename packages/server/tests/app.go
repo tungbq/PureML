@@ -19,7 +19,10 @@ type TestApp struct {
 //
 // After this call, the app instance shouldn't be used anymore.
 func (t *TestApp) Cleanup() {
-	t.ResetBootstrapState()
+	err := t.ResetBootstrapState()
+	if err != nil {
+		panic(err)
+	}
 
 	if t.DataDir() != "" {
 		os.RemoveAll(t.DataDir())

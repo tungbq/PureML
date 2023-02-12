@@ -48,7 +48,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/": {
+        "/org": {
             "get": {
                 "security": [
                     {
@@ -1679,7 +1679,7 @@ const docTemplate = `{
             }
         },
         "/org/{orgId}/leave": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -1703,15 +1703,6 @@ const docTemplate = `{
                         "name": "orgId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "User email",
-                        "name": "email",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 ],
                 "responses": {
