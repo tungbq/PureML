@@ -173,10 +173,8 @@ func (api *Api) UpdateOrg(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	var response *models.Response
 	if UserOrganization == nil || UserOrganization.Role != "owner" {
-		response = models.NewErrorResponse(http.StatusForbidden, "You are not authorized to update this organization")
-		return response
+		return models.NewErrorResponse(http.StatusForbidden, "You are not authorized to update this organization")
 	}
 	orgName := request.GetParsedBodyAttribute("name")
 	orgDesc := request.GetParsedBodyAttribute("description")
@@ -198,9 +196,7 @@ func (api *Api) UpdateOrg(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	response = models.NewDataResponse(http.StatusOK, []models.OrganizationResponse{*updatedOrg}, "Organization updated")
-	return response
-
+	return models.NewDataResponse(http.StatusOK, []models.OrganizationResponse{*updatedOrg}, "Organization updated")
 }
 
 var GetOrgByHandle ServiceFunc = (*Api).GetOrgByHandle

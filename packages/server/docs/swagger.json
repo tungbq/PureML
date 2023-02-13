@@ -36,7 +36,7 @@
                 }
             }
         },
-        "/org/": {
+        "/org": {
             "get": {
                 "security": [
                     {
@@ -1667,7 +1667,7 @@
             }
         },
         "/org/{orgId}/leave": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -1691,15 +1691,6 @@
                         "name": "orgId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "User email",
-                        "name": "email",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 ],
                 "responses": {

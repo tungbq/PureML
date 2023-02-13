@@ -52,6 +52,8 @@ func main() {
 	if err := app.Bootstrap(); err != nil {
 		log.Fatal(err)
 	}
+	// Manually seed db if admin does not exist
+	app.Dao().Datastore().SeedAdminIfNotExists()
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}

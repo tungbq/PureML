@@ -143,7 +143,10 @@ func TestFileSystemUploadMultipart(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed creating form file: %v", err)
 	}
-	w.Write([]byte("demo"))
+	_, err = w.Write([]byte("demo"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	mp.Close()
 
 	req := httptest.NewRequest(http.MethodPost, "/", body)
@@ -488,7 +491,10 @@ func createTestDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	imgRect := image.Rect(0, 0, 1, 1) // tiny 1x1 png
-	png.Encode(file3, imgRect)
+	err = png.Encode(file3, imgRect)
+	if err != nil {
+		t.Fatal(err)
+	}
 	file3.Close()
 	err2 := os.WriteFile(filepath.Join(dir, "image.png.attrs"), []byte(`{"user.cache_control":"","user.content_disposition":"","user.content_encoding":"","user.content_language":"","user.content_type":"image/png","user.metadata":null}`), 0644)
 	if err2 != nil {
@@ -511,7 +517,10 @@ func createTestDir(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	png.Encode(file6, image.Rect(0, 0, 1, 1)) // tiny 1x1 png
+	err = png.Encode(file6, image.Rect(0, 0, 1, 1)) // tiny 1x1 png
+	if err != nil {
+		t.Fatal(err)
+	}
 	file6.Close()
 
 	return dir

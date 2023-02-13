@@ -31,7 +31,7 @@ func TestGetOrgByHandle(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org"`,
 				`"handle":"demo"`,
 				`"avatar":""`,
@@ -76,7 +76,7 @@ func TestGetOrgByHandle(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org"`,
 				`"handle":"demo"`,
 				`"avatar":""`,
@@ -96,7 +96,7 @@ func TestGetOrgByID(t *testing.T) {
 		{
 			Name:           "get org by id + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/id/11111111-1111-1111-1111-111111111111",
+			Url:            "/api/org/id/" + ValidAdminUserOrgUuid.String(),
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -105,7 +105,7 @@ func TestGetOrgByID(t *testing.T) {
 		{
 			Name:   "get org by id + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/id/11111111-1111-1111-1111-111111111111",
+			Url:    "/api/org/id/" + ValidAdminUserOrgUuid.String(),
 			RequestHeaders: map[string]string{
 				"Authorization": InvalidToken,
 			},
@@ -117,7 +117,7 @@ func TestGetOrgByID(t *testing.T) {
 		{
 			Name:   "get org by id + valid token + org not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/id/33333333-3333-3333-3333-333333333333",
+			Url:    "/api/org/id/" + ValidNoOrgUuid.String(),
 			RequestHeaders: map[string]string{
 				"Authorization": ValidUserToken,
 			},
@@ -129,7 +129,7 @@ func TestGetOrgByID(t *testing.T) {
 		{
 			Name:   "get org by id + valid token + org found",
 			Method: http.MethodGet,
-			Url:    "/api/org/id/11111111-1111-1111-1111-111111111111",
+			Url:    "/api/org/id/" + ValidAdminUserOrgUuid.String(),
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -137,7 +137,7 @@ func TestGetOrgByID(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org"`,
 				`"handle":"demo"`,
 				`"avatar":""`,
@@ -156,9 +156,18 @@ func TestGetOrgByID(t *testing.T) {
 func TestGetOrgAllPublicModels(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
+			Name:           "get org all public models + unauthorized + invalid org uuid",
+			Method:         http.MethodGet,
+			Url:            "/api/org/" + InvalidOrgUuidString + "/public/model",
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`Invalid UUID format`,
+			},
+		},
+		{
 			Name:           "get org all public models + unauthorized + org not found",
 			Method:         http.MethodGet,
-			Url:            "/api/org/33333333-3333-3333-3333-333333333333/public/model",
+			Url:            "/api/org/" + ValidNoOrgUuid.String() + "/public/model",
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
 				`Organization not found`,
@@ -167,12 +176,12 @@ func TestGetOrgAllPublicModels(t *testing.T) {
 		{
 			Name:           "get org all public models + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/11111111-1111-1111-1111-111111111111/public/model",
+			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/public/model",
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Model"`,
 				`"wiki":"Demo Model Wiki"`,
 				`"is_public":true`,
@@ -184,7 +193,7 @@ func TestGetOrgAllPublicModels(t *testing.T) {
 		{
 			Name:   "get org all public models + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/public/model",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/public/model",
 			RequestHeaders: map[string]string{
 				"Authorization": InvalidToken,
 			},
@@ -196,7 +205,7 @@ func TestGetOrgAllPublicModels(t *testing.T) {
 		{
 			Name:   "get org all public models + valid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/public/model",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/public/model",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -204,7 +213,7 @@ func TestGetOrgAllPublicModels(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Model"`,
 				`"wiki":"Demo Model Wiki"`,
 				`"is_public":true`,
@@ -223,9 +232,18 @@ func TestGetOrgAllPublicModels(t *testing.T) {
 func TestGetOrgAllPublicDatasets(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
+			Name:           "get org all public datasets + unauthorized + invalid org uuid",
+			Method:         http.MethodGet,
+			Url:            "/api/org/" + InvalidOrgUuidString + "/public/dataset",
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`Invalid UUID format`,
+			},
+		},
+		{
 			Name:           "get org all public datasets + unauthorized + org not found",
 			Method:         http.MethodGet,
-			Url:            "/api/org/33333333-3333-3333-3333-333333333333/public/dataset",
+			Url:            "/api/org/" + ValidNoOrgUuid.String() + "/public/dataset",
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
 				`Organization not found`,
@@ -234,12 +252,12 @@ func TestGetOrgAllPublicDatasets(t *testing.T) {
 		{
 			Name:           "get org all public datasets + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/11111111-1111-1111-1111-111111111111/public/dataset",
+			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/public/dataset",
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Dataset"`,
 				`"wiki":"Demo Dataset Wiki"`,
 				`"is_public":true`,
@@ -251,7 +269,7 @@ func TestGetOrgAllPublicDatasets(t *testing.T) {
 		{
 			Name:   "get org all public datasets + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/public/dataset",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/public/dataset",
 			RequestHeaders: map[string]string{
 				"Authorization": InvalidToken,
 			},
@@ -263,7 +281,7 @@ func TestGetOrgAllPublicDatasets(t *testing.T) {
 		{
 			Name:   "get org all public datasets + valid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/public/dataset",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/public/dataset",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -271,7 +289,7 @@ func TestGetOrgAllPublicDatasets(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Dataset"`,
 				`"wiki":"Demo Dataset Wiki"`,
 				`"is_public":true`,
@@ -395,7 +413,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:           "update org + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -404,7 +422,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": InvalidToken,
 			},
@@ -416,7 +434,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/33333333-3333-3333-3333-333333333333/update",
+			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -428,7 +446,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + valid token + org found + not member",
 			Method: http.MethodPost,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidUserToken,
 			},
@@ -447,7 +465,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + valid token + org found + not owner",
 			Method: http.MethodPost,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -473,7 +491,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + valid token + org found + empty name",
 			Method: http.MethodPost,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -492,7 +510,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + valid token + user found + update name",
 			Method: http.MethodPost,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -503,7 +521,7 @@ func TestUpdateOrg(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org New"`,
 				`"handle":"demo"`,
 				`"avatar":""`,
@@ -515,7 +533,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + valid token + user found + update avatar",
 			Method: http.MethodPost,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -526,7 +544,7 @@ func TestUpdateOrg(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org"`,
 				`"handle":"demo"`,
 				`"avatar":"test"`,
@@ -538,7 +556,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + valid token + user found + update bio",
 			Method: http.MethodPost,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -549,7 +567,7 @@ func TestUpdateOrg(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org"`,
 				`"handle":"demo"`,
 				`"avatar":""`,
@@ -561,7 +579,7 @@ func TestUpdateOrg(t *testing.T) {
 		{
 			Name:   "update org + valid token + user found + update all",
 			Method: http.MethodPost,
-			Url:    "/api/org/11111111-1111-1111-1111-111111111111/update",
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/update",
 			RequestHeaders: map[string]string{
 				"Authorization": ValidAdminToken,
 			},
@@ -574,7 +592,7 @@ func TestUpdateOrg(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"11111111-1111-1111-1111-111111111111"`,
+				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org New"`,
 				`"handle":"demo"`,
 				`"avatar":"test"`,
