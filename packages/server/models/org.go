@@ -35,3 +35,14 @@ type OrganizationResponse struct {
 	Description string    `json:"description"`
 	JoinCode    string    `json:"join_code"`
 }
+
+type OrganizationResponseWithMembers struct {
+	UUID        uuid.UUID `json:"uuid"`
+	Name        string    `json:"name"`
+	Handle      string    `json:"handle"`
+	Avatar      string    `json:"avatar"`
+	Description string    `json:"description"`
+	JoinCode    string    `json:"join_code"`
+
+	Members []UserHandleResponse `json:"members"`
+}

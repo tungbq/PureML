@@ -112,7 +112,7 @@ func (api *Api) AddUsersToOrg(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/join [post]
-//	@Param			join_code	body	string	true	"Organization join code"
+//	@Param			data	body	models.UserOrgJoin	true	"Organization join code"
 func (api *Api) JoinOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	joinCode := request.GetParsedBodyAttribute("join_code")
