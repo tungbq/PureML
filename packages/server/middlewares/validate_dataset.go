@@ -17,23 +17,35 @@ func ValidateDataset(app core.App) echo.MiddlewareFunc {
 			orgUUID, err := uuid.FromString(orgId)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				_, err = context.Response().Writer.Write([]byte("Invalid UUID format"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if datasetName == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Dataset name required"))
+				_, err = context.Response().Writer.Write([]byte("Dataset name required"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			dataset, err := app.Dao().GetDatasetByName(orgUUID, datasetName)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
-				context.Response().Writer.Write([]byte(err.Error()))
+				_, err = context.Response().Writer.Write([]byte(err.Error()))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if dataset == nil {
 				context.Response().WriteHeader(http.StatusNotFound)
-				context.Response().Writer.Write([]byte("Dataset not found"))
+				_, err = context.Response().Writer.Write([]byte("Dataset not found"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			context.Set(ContextDatasetKey, &models.DatasetNameResponse{

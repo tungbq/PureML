@@ -13,13 +13,19 @@ func RequireAuthContext(next echo.HandlerFunc) echo.HandlerFunc {
 		userContext := context.Get(ContextAuthKey)
 		if userContext == nil {
 			context.Response().WriteHeader(http.StatusUnauthorized)
-			context.Response().Writer.Write([]byte("Authentication token required"))
+			_, err := context.Response().Writer.Write([]byte("Authentication token required"))
+			if err != nil {
+				return err
+			}
 			return nil
 		} else {
 			userContext := userContext.(*models.UserClaims)
 			if userContext.UUID == uuid.Nil {
 				context.Response().WriteHeader(http.StatusNotFound)
-				context.Response().Writer.Write([]byte("User not found"))
+				_, err := context.Response().Writer.Write([]byte("User not found"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 		}

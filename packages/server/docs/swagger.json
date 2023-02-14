@@ -36,7 +36,7 @@
                 }
             }
         },
-        "/org/": {
+        "/org": {
             "get": {
                 "security": [
                     {
@@ -226,11 +226,11 @@
                 "parameters": [
                     {
                         "description": "Organization join code",
-                        "name": "join_code",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.UserOrgJoin"
                         }
                     }
                 ],
@@ -1667,7 +1667,7 @@
             }
         },
         "/org/{orgId}/leave": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -1691,15 +1691,6 @@
                         "name": "orgId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "User email",
-                        "name": "email",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 ],
                 "responses": {
@@ -3870,6 +3861,14 @@
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserOrgJoin": {
+            "type": "object",
+            "properties": {
+                "join_code": {
                     "type": "string"
                 }
             }

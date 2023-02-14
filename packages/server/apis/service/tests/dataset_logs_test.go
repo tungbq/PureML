@@ -6,15 +6,12 @@ import (
 
 // TODO
 func TestLogDataset(t *testing.T) {
-	return
 }
 
 // TODO
 func TestGetAllLogsDataset(t *testing.T) {
-	return
 }
 
 // TODO
 func TestGetKeyLogsDataset(t *testing.T) {
-	return
 }

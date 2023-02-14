@@ -48,7 +48,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/": {
+        "/org": {
             "get": {
                 "security": [
                     {
@@ -238,11 +238,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Organization join code",
-                        "name": "join_code",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.UserOrgJoin"
                         }
                     }
                 ],
@@ -1679,7 +1679,7 @@ const docTemplate = `{
             }
         },
         "/org/{orgId}/leave": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -1703,15 +1703,6 @@ const docTemplate = `{
                         "name": "orgId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "User email",
-                        "name": "email",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 ],
                 "responses": {
@@ -3882,6 +3873,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserOrgJoin": {
+            "type": "object",
+            "properties": {
+                "join_code": {
                     "type": "string"
                 }
             }

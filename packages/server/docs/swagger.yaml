@@ -143,6 +143,11 @@ definitions:
       password:
         type: string
     type: object
+  models.UserOrgJoin:
+    properties:
+      join_code:
+        type: string
+    type: object
   models.UserResetPasswordRequest:
     properties:
       email:
@@ -197,7 +202,7 @@ paths:
       summary: Show the status of server.
       tags:
       - Root
-  /org/:
+  /org:
     get:
       consumes:
       - '*/*'
@@ -1149,7 +1154,7 @@ paths:
       tags:
       - Dataset
   /org/{orgId}/leave:
-    post:
+    get:
       consumes:
       - '*/*'
       description: Leave organization.
@@ -1159,12 +1164,6 @@ paths:
         name: orgId
         required: true
         type: string
-      - description: User email
-        in: body
-        name: email
-        required: true
-        schema:
-          type: string
       produces:
       - application/json
       responses:
@@ -2334,10 +2333,10 @@ paths:
       parameters:
       - description: Organization join code
         in: body
-        name: join_code
+        name: data
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.UserOrgJoin'
       produces:
       - application/json
       responses:

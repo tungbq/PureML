@@ -19,23 +19,35 @@ func ValidateDatasetBranch(app core.App) echo.MiddlewareFunc {
 			orgUUID, err := uuid.FromString(orgId)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				_, err = context.Response().Writer.Write([]byte("Invalid UUID format"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if datasetBranchName == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Branch name required"))
+				_, err = context.Response().Writer.Write([]byte("Branch name required"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			branch, err := app.Dao().GetDatasetBranchByName(orgUUID, datasetName, datasetBranchName)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
-				context.Response().Writer.Write([]byte(err.Error()))
+				_, err = context.Response().Writer.Write([]byte(err.Error()))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if branch == nil {
 				context.Response().WriteHeader(http.StatusNotFound)
-				context.Response().Writer.Write([]byte("Branch not found"))
+				_, err = context.Response().Writer.Write([]byte("Branch not found"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			context.Set(ContextDatasetBranchKey, &models.DatasetBranchNameResponse{

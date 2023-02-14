@@ -79,7 +79,10 @@ func TestNewFileFromMultipart(t *testing.T) {
 
 	req := httptest.NewRequest("", "/", formData)
 	req.Header.Set(echo.HeaderContentType, mp.FormDataContentType())
-	req.ParseMultipartForm(32 << 20)
+	err = req.ParseMultipartForm(32 << 20)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	_, mh, err := req.FormFile("test")
 	if err != nil {

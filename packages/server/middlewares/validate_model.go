@@ -17,23 +17,35 @@ func ValidateModel(app core.App) echo.MiddlewareFunc {
 			orgUUID, err := uuid.FromString(orgId)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Invalid UUID format"))
+				_, err = context.Response().Writer.Write([]byte("Invalid UUID format"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if modelName == "" {
 				context.Response().WriteHeader(http.StatusBadRequest)
-				context.Response().Writer.Write([]byte("Model name required"))
+				_, err = context.Response().Writer.Write([]byte("Model name required"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			model, err := app.Dao().GetModelByName(orgUUID, modelName)
 			if err != nil {
 				context.Response().WriteHeader(http.StatusInternalServerError)
-				context.Response().Writer.Write([]byte(err.Error()))
+				_, err = context.Response().Writer.Write([]byte(err.Error()))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			if model == nil {
 				context.Response().WriteHeader(http.StatusNotFound)
-				context.Response().Writer.Write([]byte("Model not found"))
+				_, err = context.Response().Writer.Write([]byte("Model not found"))
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 			context.Set(ContextModelKey, &models.ModelNameResponse{

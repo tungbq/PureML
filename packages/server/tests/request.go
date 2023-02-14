@@ -10,6 +10,7 @@ import (
 // MockMultipartData creates a mocked multipart/form-data payload.
 //
 // Example
+//
 //	data, mp, err := tests.MockMultipartData(
 //		map[string]string{"title": "new"},
 //		"file1",
@@ -23,7 +24,10 @@ func MockMultipartData(data map[string]string, fileFields ...string) (*bytes.Buf
 
 	// write data fields
 	for k, v := range data {
-		mp.WriteField(k, v)
+		err := mp.WriteField(k, v)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	// write file fields
@@ -38,7 +42,10 @@ func MockMultipartData(data map[string]string, fileFields ...string) (*bytes.Buf
 			if _, err := tmpFile.Write([]byte("test")); err != nil {
 				return err
 			}
-			tmpFile.Seek(0, 0)
+			_, err = tmpFile.Seek(0, 0)
+			if err != nil {
+				return err
+			}
 			defer tmpFile.Close()
 			defer os.Remove(tmpFile.Name())
 

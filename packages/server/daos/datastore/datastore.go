@@ -64,7 +64,6 @@ func NewSQLiteDatastore(optDataDir ...string) *Datastore {
 	if err != nil {
 		return &Datastore{}
 	}
-	seedAdminIfNotExists(db)
 	return &Datastore{
 		DB: db,
 	}
@@ -103,16 +102,18 @@ func NewPostgresDatastore(databaseUrl string) *Datastore {
 	if err != nil {
 		return &Datastore{}
 	}
-	seedAdminIfNotExists(db)
 	return &Datastore{
 		DB: db,
 	}
 }
 
-func seedAdminIfNotExists(db *gorm.DB) {
+func (ds *Datastore) SeedAdminIfNotExists() {
 	var user dbmodels.User
 	adminDetails := config.GetAdminDetails()
-	err := db.Where("uuid = ?", adminDetails["uuid"]).First(&user).Error
+	if adminDetails == nil {
+		return
+	}
+	err := ds.DB.Where("uuid = ?", adminDetails["uuid"]).First(&user).Error
 	if err == gorm.ErrRecordNotFound {
 		// admin user does not exist, create it
 		adminUser := dbmodels.User{
@@ -134,11 +135,11 @@ func seedAdminIfNotExists(db *gorm.DB) {
 				},
 			},
 		}
-		db.Create(&adminUser)
+		ds.DB.Create(&adminUser)
 		var userOrganization dbmodels.UserOrganizations
-		db.Where("user_uuid = ? AND organization_uuid = ?", adminUser.UUID, adminUser.UUID).First(&userOrganization)
+		ds.DB.Where("user_uuid = ? AND organization_uuid = ?", adminUser.UUID, adminUser.UUID).First(&userOrganization)
 		userOrganization.Role = "owner"
-		db.Save(&userOrganization)
+		ds.DB.Save(&userOrganization)
 	} else if err != nil {
 		fmt.Println(err)
 	}
@@ -179,26 +180,37 @@ func (ds *Datastore) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	return responseOrganizations, nil
 }
 
-func (ds *Datastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error) {
+func (ds *Datastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponseWithMembers, error) {
 	org := dbmodels.Organization{
 		BaseModel: dbmodels.BaseModel{
 			UUID: orgId,
 		},
 	}
-	result := ds.DB.Limit(1).Find(&org)
+	result := ds.DB.Limit(1).Preload("Users").Find(&org)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &models.OrganizationResponse{
+	var members []models.UserHandleResponse
+	for _, user := range org.Users {
+		members = append(members, models.UserHandleResponse{
+			UUID:   user.UUID,
+			Handle: user.Handle,
+			Name:  user.Name,
+			Avatar: user.Avatar,
+			Email: user.Email,
+		})
+	}
+	return &models.OrganizationResponseWithMembers{
 		UUID:        org.UUID,
 		Name:        org.Name,
 		Handle:      org.Handle,
 		Avatar:      org.Avatar,
 		Description: org.Description,
-		JoinCode:    org.JoinCode,
+
+		Members: members,
 	}, nil
 }
 
@@ -521,6 +533,7 @@ func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) 
 		return nil, result.Error
 	}
 	return &models.UserResponse{
+		UUID:   user.UUID,
 		Name:   user.Name,
 		Email:  user.Email,
 		Handle: user.Handle,
@@ -1659,9 +1672,14 @@ func (ds *Datastore) GetAllPublicDatasets() ([]models.DatasetResponse, error) {
 	return modelResponses, nil
 }
 
-func (ds *Datastore) GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {
+func (ds *Datastore) GetAllDatasets(orgId uuid.UUID, showPublic bool) ([]models.DatasetResponse, error) {
 	var datasets []dbmodels.Dataset
-	result := ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("organization_uuid = ?", orgId).Find(&datasets)
+	var result *gorm.DB
+	if showPublic {
+		result = ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("organization_uuid = ?", orgId).Where("is_public LIKE ?", showPublic).Find(&datasets)
+	} else {
+		result = ds.DB.Preload("CreatedByUser").Preload("UpdatedByUser").Where("organization_uuid = ?", orgId).Find(&datasets)
+	}
 	if result.Error != nil {
 		return nil, result.Error
 	}

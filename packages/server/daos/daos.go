@@ -10,6 +10,8 @@ type Dao struct {
 	datastore *impl.Datastore
 }
 
+// TODO: add function documentation descriptions
+
 func InitDB(dataDir string, databaseType string, databaseUrl string) (*Dao, error) {
 	dao := &Dao{
 		datastore: nil,
@@ -44,7 +46,7 @@ func (dao *Dao) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	return dao.Datastore().GetAllAdminOrgs()
 }
 
-func (dao *Dao) GetOrgById(orgId uuid.UUID) (*models.OrganizationResponse, error) {
+func (dao *Dao) GetOrgById(orgId uuid.UUID) (*models.OrganizationResponseWithMembers, error) {
 	return dao.Datastore().GetOrgByID(orgId)
 }
 
@@ -214,8 +216,8 @@ func (dao *Dao) GetAllPublicDatasets() ([]models.DatasetResponse, error) {
 	return dao.Datastore().GetAllPublicDatasets()
 }
 
-func (dao *Dao) GetAllDatasets(orgId uuid.UUID) ([]models.DatasetResponse, error) {
-	return dao.Datastore().GetAllDatasets(orgId)
+func (dao *Dao) GetAllDatasets(orgId uuid.UUID, showPublic bool) ([]models.DatasetResponse, error) {
+	return dao.Datastore().GetAllDatasets(orgId, showPublic)
 }
 
 func (dao *Dao) GetDatasetByName(orgId uuid.UUID, datasetName string) (*models.DatasetResponse, error) {
