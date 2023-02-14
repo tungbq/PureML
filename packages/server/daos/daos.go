@@ -46,7 +46,7 @@ func (dao *Dao) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	return dao.Datastore().GetAllAdminOrgs()
 }
 
-func (dao *Dao) GetOrgById(orgId uuid.UUID) (*models.OrganizationResponse, error) {
+func (dao *Dao) GetOrgById(orgId uuid.UUID) (*models.OrganizationResponseWithMembers, error) {
 	return dao.Datastore().GetOrgByID(orgId)
 }
 

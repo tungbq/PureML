@@ -29,6 +29,10 @@ type UserUpdateRequest struct {
 	Bio    string `json:"bio"`
 }
 
+type UserOrgJoin struct {
+	JoinCode string `json:"join_code"`
+}
+
 // Response models
 
 type UserClaims struct {

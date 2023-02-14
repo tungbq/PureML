@@ -143,6 +143,11 @@ definitions:
       password:
         type: string
     type: object
+  models.UserOrgJoin:
+    properties:
+      join_code:
+        type: string
+    type: object
   models.UserResetPasswordRequest:
     properties:
       email:
@@ -2328,10 +2333,10 @@ paths:
       parameters:
       - description: Organization join code
         in: body
-        name: join_code
+        name: data
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.UserOrgJoin'
       produces:
       - application/json
       responses:

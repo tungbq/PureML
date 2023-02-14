@@ -238,11 +238,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Organization join code",
-                        "name": "join_code",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.UserOrgJoin"
                         }
                     }
                 ],
@@ -3873,6 +3873,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserOrgJoin": {
+            "type": "object",
+            "properties": {
+                "join_code": {
                     "type": "string"
                 }
             }

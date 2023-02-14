@@ -110,6 +110,9 @@ func NewPostgresDatastore(databaseUrl string) *Datastore {
 func (ds *Datastore) SeedAdminIfNotExists() {
 	var user dbmodels.User
 	adminDetails := config.GetAdminDetails()
+	if adminDetails == nil {
+		return
+	}
 	err := ds.DB.Where("uuid = ?", adminDetails["uuid"]).First(&user).Error
 	if err == gorm.ErrRecordNotFound {
 		// admin user does not exist, create it
@@ -177,26 +180,37 @@ func (ds *Datastore) GetAllAdminOrgs() ([]models.OrganizationResponse, error) {
 	return responseOrganizations, nil
 }
 
-func (ds *Datastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponse, error) {
+func (ds *Datastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponseWithMembers, error) {
 	org := dbmodels.Organization{
 		BaseModel: dbmodels.BaseModel{
 			UUID: orgId,
 		},
 	}
-	result := ds.DB.Limit(1).Find(&org)
+	result := ds.DB.Limit(1).Preload("Users").Find(&org)
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &models.OrganizationResponse{
+	var members []models.UserHandleResponse
+	for _, user := range org.Users {
+		members = append(members, models.UserHandleResponse{
+			UUID:   user.UUID,
+			Handle: user.Handle,
+			Name:  user.Name,
+			Avatar: user.Avatar,
+			Email: user.Email,
+		})
+	}
+	return &models.OrganizationResponseWithMembers{
 		UUID:        org.UUID,
 		Name:        org.Name,
 		Handle:      org.Handle,
 		Avatar:      org.Avatar,
 		Description: org.Description,
-		JoinCode:    org.JoinCode,
+
+		Members: members,
 	}, nil
 }
 
