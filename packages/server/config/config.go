@@ -11,10 +11,7 @@ import (
 
 func init() {
 	// fmt.Println("Loading environment variables from .env file")
-	err := godotenv.Load("../.env")
-	if err != nil {
-		panic(err)
-	}
+	_ = godotenv.Load("../.env")
 }
 
 var adminAccess = map[string]bool{
@@ -89,6 +86,9 @@ func GetHttpsAddr() string {
 
 func GetAdminDetails() map[string]interface{} {
 	adminUUID := os.Getenv("ADMIN_UUID")
+	if adminUUID == "" {
+		return nil
+	}
 	adminDetails := map[string]interface{}{
 		"uuid":       uuid.Must(uuid.FromString(adminUUID)),
 		"email":      os.Getenv("ADMIN_EMAIL"),
