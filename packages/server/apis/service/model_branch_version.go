@@ -151,6 +151,9 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	var modelSourceType string
 	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
 		modelSourceType = strings.ToUpper(request.FormValues["storage"][0])
+		if modelSourceType == "PUREML-STORAGE" {
+			modelSourceType = "R2"
+		}
 	}
 	var modelIsEmpty bool
 	if request.FormValues["isEmpty"] != nil && len(request.FormValues["isEmpty"]) > 0 {

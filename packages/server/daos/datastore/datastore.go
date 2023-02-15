@@ -193,14 +193,23 @@ func (ds *Datastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponseWi
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	var members []models.UserHandleResponse
+	var dbuserRoles []dbmodels.UserOrganizations
+	err := ds.DB.Where("organization_uuid = ?", orgId).Find(&dbuserRoles).Error
+	if err != nil {
+		return nil, err
+	}
+	userRoles := make(map[uuid.UUID]string)
+	for userRole := range dbuserRoles {
+		userRoles[dbuserRoles[userRole].UserUUID] = dbuserRoles[userRole].Role
+	}
+	var members []models.UserHandleRoleResponse
 	for _, user := range org.Users {
-		members = append(members, models.UserHandleResponse{
+		members = append(members, models.UserHandleRoleResponse{
 			UUID:   user.UUID,
 			Handle: user.Handle,
-			Name:  user.Name,
+			Name:   user.Name,
 			Avatar: user.Avatar,
-			Email: user.Email,
+			Role:   userRoles[user.UUID],
 		})
 	}
 	return &models.OrganizationResponseWithMembers{
@@ -1340,14 +1349,12 @@ func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID, withLo
 }
 
 func (ds *Datastore) GetModelBranchVersion(modelBranchUUID uuid.UUID, version string) (*models.ModelBranchVersionResponse, error) {
-	modelVersion := dbmodels.ModelVersion{
-		BranchUUID: modelBranchUUID,
-	}
+	var modelVersion dbmodels.ModelVersion
 	var res *gorm.DB
 	if strings.ToLower(version) == "latest" {
-		res = ds.DB.Order("created_at desc").Preload("CreatedByUser").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
+		res = ds.DB.Order("created_at desc").Where("branch_uuid = ?", modelBranchUUID).Preload("CreatedByUser").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
 	} else {
-		res = ds.DB.Where("version = ?", version).Preload("CreatedByUser").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
+		res = ds.DB.Where("version = ?", version).Where("branch_uuid = ?", modelBranchUUID).Preload("CreatedByUser").Preload("Branch").Preload("Path.SourceType").Limit(1).Find(&modelVersion)
 	}
 	if res.Error != nil {
 		return nil, res.Error
@@ -2005,14 +2012,12 @@ func (ds *Datastore) GetDatasetBranchAllVersions(datasetBranchUUID uuid.UUID) ([
 }
 
 func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, version string) (*models.DatasetBranchVersionResponse, error) {
-	datasetVersion := dbmodels.DatasetVersion{
-		BranchUUID: datasetBranchUUID,
-	}
+	var datasetVersion dbmodels.DatasetVersion
 	var res *gorm.DB
 	if strings.ToLower(version) == "latest" {
-		res = ds.DB.Preload("Branch").Preload("Lineage").Preload("CreatedByUser").Preload("Path.SourceType").Order("created_at desc").Limit(1).Find(&datasetVersion)
+		res = ds.DB.Preload("Branch").Where("branch_uuid = ?", datasetBranchUUID).Preload("Lineage").Preload("CreatedByUser").Preload("Path.SourceType").Order("created_at desc").Limit(1).Find(&datasetVersion)
 	} else {
-		res = ds.DB.Where("version = ?", version).Preload("Branch").Preload("Lineage").Preload("CreatedByUser").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
+		res = ds.DB.Where("version = ?", version).Where("branch_uuid = ?", datasetBranchUUID).Preload("Branch").Preload("Lineage").Preload("CreatedByUser").Preload("Path.SourceType").Limit(1).Find(&datasetVersion)
 	}
 	if res.Error != nil {
 		return nil, res.Error
@@ -2396,7 +2401,7 @@ func (ds *Datastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 
 func (ds *Datastore) GetSourceTypeByName(orgId uuid.UUID, name string) (uuid.UUID, error) {
 	var sourceType dbmodels.SourceType
-	res := ds.DB.Where("name = ?", name).Where("org_uuid = ?", orgId).Limit(1).Find(&sourceType)
+	res := ds.DB.Where("UPPER(name) = ?", name).Where("org_uuid = ?", orgId).Limit(1).Find(&sourceType)
 	if res.RowsAffected == 0 {
 		return uuid.Nil, nil
 	}
@@ -2610,7 +2615,7 @@ func (ds *Datastore) CreateS3Source(orgId uuid.UUID, publicURL string) (*models.
 
 func (ds *Datastore) CreateLocalSource(orgId uuid.UUID) (*models.SourceTypeResponse, error) {
 	sourceType := dbmodels.SourceType{
-		Name: "Local",
+		Name: "LOCAL",
 		Org: dbmodels.Organization{
 			BaseModel: dbmodels.BaseModel{
 				UUID: orgId,
