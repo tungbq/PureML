@@ -14,3 +14,5 @@ packages/purebackend/vendor
 
 __pycache__/
 *.pyc
+
+.vscode/

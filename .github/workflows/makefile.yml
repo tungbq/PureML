@@ -1,0 +1,47 @@
+name: Makefile CI
+
+on:
+  push:
+    paths:
+        - packages/server/**
+        - .github/**
+    branches: [ "main" ]
+  pull_request:
+    paths:
+        - packages/server/**
+        - .github/**
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Go environment
+      uses: actions/setup-go@v3.5.0
+      with:
+        # Path to the go.mod or go.work file.
+        go-version-file: ./packages/server/go.mod
+        # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
+        cache: true
+        # Used to specify the path to a dependency file - go.sum
+        cache-dependency-path: ./packages/server/go.sum
+    
+    - name: Lint Backend
+      working-directory: ./packages/server
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.51.1
+        make lint
+      
+    - name: Build go backend
+      working-directory: ./packages/server
+      run: make build
+      
+    - name: Update docs
+      working-directory: ./packages/server
+      run: |
+        go install github.com/swaggo/swag/cmd/swag@latest
+        make docs
