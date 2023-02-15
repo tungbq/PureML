@@ -17,7 +17,9 @@ class Precision():
 
 
 
-    def compute(self, predictions, references, labels=None, pos_label=1, average="binary", sample_weight=None, zero_division="warn"):
+    def compute(self, predictions, references, labels=None, pos_label=1, average="binary", sample_weight=None,
+                 zero_division="warn", **kwargs):
+        
         score = precision_score(y_true=references, y_pred=predictions, labels=labels, pos_label=pos_label,
                                  average=average, sample_weight=sample_weight, zero_division=zero_division)
         

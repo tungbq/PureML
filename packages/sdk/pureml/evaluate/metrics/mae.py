@@ -16,7 +16,8 @@ class MAE():
 
 
 
-    def compute(self, predictions, references, sample_weight=None, multioutput="uniform_average"):
+    def compute(self, predictions, references, sample_weight=None, multioutput="uniform_average", **kwargs):
+        
         score = mean_absolute_error(y_true=references, y_pred=predictions, sample_weight=sample_weight, multioutput=multioutput)
         
         score = {

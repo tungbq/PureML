@@ -18,3 +18,5 @@ from .components.auth import login
 from .components.log import log
 
 from .deploy import docker
+
+from .evaluate import evaluator

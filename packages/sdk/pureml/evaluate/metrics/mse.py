@@ -16,8 +16,10 @@ class MSE():
 
 
 
-    def compute(self, predictions, references, sample_weight=None, multioutput="uniform_average", squared=True):
-        score = mean_squared_error(y_true=references, y_pred=predictions, sample_weight=sample_weight, multioutput=multioutput, squared=squared)
+    def compute(self, predictions, references, sample_weight=None, multioutput="uniform_average", squared=True, **kwargs):
+
+        score = mean_squared_error(y_true=references, y_pred=predictions, sample_weight=sample_weight,
+                                    multioutput=multioutput, squared=squared)
         
         score = {
             self.name : float(score)

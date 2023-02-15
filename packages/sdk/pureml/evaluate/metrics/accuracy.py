@@ -17,8 +17,10 @@ class Accuracy():
 
 
 
-    def compute(self, references, predictions, normalize=True, sample_weight=None):
-        score = accuracy_score(y_true=references, y_pred=predictions, normalize=normalize, sample_weight=sample_weight)
+    def compute(self, references, predictions, normalize=True, sample_weight=None, **kwargs):
+
+        score = accuracy_score(y_true=references, y_pred=predictions, normalize=normalize,
+                                sample_weight=sample_weight)
         
         score = {
             self.name : float(score)
