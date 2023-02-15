@@ -1,5 +1,10 @@
 ## Release of V0.2.0
 ### Changes
+- Added node-type based colouring for data lineage
+
+
+## Release of V0.2.0
+### Changes
 - Removed projects. There will be no project related actions(creation, deletion etc.) in PureML
 - `project.init()` equivalent for datasets is `dataset.init()`. This will create an empty an empty Dataset that will contain all the information about a dataset like **ReadME.md**, **branches**, **versions**, **reviews** etc
 - - Each dataset registered using `@dataset` will be assigned a version 
