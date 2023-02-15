@@ -7,7 +7,7 @@ import json
 
 
 from . import get_token, get_org_id
-from pureml.utils.constants import BASE_URL, PATH_MODEL_DIR, PATH_MODEL_README
+from pureml.utils.constants import BASE_URL, PATH_MODEL_DIR, PATH_MODEL_README, STORAGE
 from pureml import save_model, load_model
 from urllib.parse import urljoin
 import joblib
@@ -243,7 +243,7 @@ def register(
     name: str,
     branch: str,
     is_empty: bool = False,
-    storage: str = "pureml-storage",
+    storage: str = STORAGE,
 ):
     user_token = get_token()
     org_id = get_org_id()

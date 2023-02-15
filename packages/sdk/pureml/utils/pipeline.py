@@ -22,6 +22,7 @@ def add_load_data_to_config(name, func=None, hash=''):
     config['load_data'] = {
                             'name' : name,
                             'hash' : hash,
+                            'type' : 'load_data',
                             'code' : code
                             }
 
@@ -62,6 +63,7 @@ def add_transformer_to_config(name, func=None, hash='', parent=None):
     config['transformer'][position] = {
                                         'name' : name,
                                         'hash' : hash,
+                                        'type' : 'transformer',
                                         'parent': parent,
                                         'code': code                                      
                                         }
@@ -96,6 +98,7 @@ def add_dataset_to_config(name, branch, func=None, hash='', version='', parent=N
                         'name' : name,
                         'branch': branch,
                         'hash' : hash,
+                        'type' : 'dataset',
                         'version': version,
                         'parent' : parent ,
                         'code': code                                            
