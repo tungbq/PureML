@@ -6,6 +6,8 @@ import os
 # BASE_URL = 'https://pureml-development.up.railway.app/'
 BASE_URL = 'https://pureml-development.up.railway.app/api/'
 
+STORAGE = 'PUREML-STORAGE'
+
 PATH_USER_TOKEN =  os.path.join(os.path.expanduser('~'), '.pureml/token')
 
 PATH_PUREML_RELATIVE = '.pureml'

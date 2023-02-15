@@ -5,7 +5,7 @@ import time
 import joblib
 import pandas as pd
 import requests
-from pureml.utils.constants import BASE_URL, PATH_DATASET_DIR, PATH_DATASET_README
+from pureml.utils.constants import BASE_URL, PATH_DATASET_DIR, PATH_DATASET_README, STORAGE
 from pureml.utils.hash import generate_hash_for_file
 from pureml.utils.readme import load_readme
 from rich import print
@@ -263,7 +263,7 @@ def register(
     lineage,
     branch: str,
     is_empty: bool = False,
-    storage: str = "PUREML-STORAGE",
+    storage: str = STORAGE,
 ) -> str:
     """The function takes in a dataset, a name and a version and saves the dataset locally, then uploads the
     dataset to the PureML server
