@@ -80,3 +80,11 @@ type UserOrganizationsRoleResponse struct {
 	OrgUUID  uuid.UUID `json:"org_uuid"`
 	Role     string    `json:"role"`
 }
+
+type UserHandleRoleResponse struct {
+	UUID   uuid.UUID `json:"uuid"`
+	Handle string    `json:"handle"`
+	Name   string    `json:"name"`
+	Avatar string    `json:"avatar"`
+	Role   string    `json:"role"`
+}

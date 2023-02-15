@@ -23,7 +23,7 @@ type Model struct {
 type ModelUser struct {
 	ModelUUID uuid.UUID `json:"model_uuid" gorm:"type:uuid;primaryKey"`
 	UserUUID  uuid.UUID `json:"user_uuid" gorm:"type:uuid;primaryKey"`
-	Role      string    `json:"role" gorm:"not null default:member"`
+	Role      string    `json:"role" gorm:"not null;default:member"`
 }
 
 type ModelBranch struct {
