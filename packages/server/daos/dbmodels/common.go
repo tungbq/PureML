@@ -30,6 +30,7 @@ type Log struct {
 	BaseModel          `gorm:"embedded"`
 	Key                string        `json:"key" gorm:""`
 	Data               string        `json:"data"`
+	Type               string        `json:"type"`
 	ModelVersionUUID   uuid.NullUUID `json:"model_version_uuid" gorm:"type:uuid;"`
 	DatasetVersionUUID uuid.NullUUID `json:"dataset_version_uuid" gorm:"type:uuid;"`
 

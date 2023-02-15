@@ -44,5 +44,5 @@ type OrganizationResponseWithMembers struct {
 	Description string    `json:"description"`
 	JoinCode    string    `json:"join_code"`
 
-	Members []UserHandleResponse `json:"members"`
+	Members []UserHandleRoleResponse `json:"members"`
 }

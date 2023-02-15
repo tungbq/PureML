@@ -147,6 +147,9 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	var datasetSourceType string
 	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
 		datasetSourceType = strings.ToUpper(request.FormValues["storage"][0])
+		if datasetSourceType == "PUREML-STORAGE" {
+			datasetSourceType = "R2"
+		}
 	}
 	var datasetIsEmpty bool
 	if request.FormValues["is_empty"] != nil && len(request.FormValues["is_empty"]) > 0 {
