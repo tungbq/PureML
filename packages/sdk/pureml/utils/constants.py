@@ -2,7 +2,11 @@ import os
 
 
 # BASE_URL = 'https://dev-api.pureml.com'
-BASE_URL = 'https://api.pureml.com'
+# BASE_URL = 'https://api.pureml.com'
+# BASE_URL = 'https://pureml-development.up.railway.app/'
+BASE_URL = 'https://pureml-development.up.railway.app/api/'
+
+STORAGE = 'PUREML-STORAGE'
 
 PATH_USER_TOKEN =  os.path.join(os.path.expanduser('~'), '.pureml/token')
 
@@ -24,7 +28,11 @@ PATH_VIDEO_DIR = os.path.join(PATH_USER_PROJECT_DIR,'video')
 PATH_IMAGE_DIR = os.path.join(PATH_USER_PROJECT_DIR,'image')
 
 PATH_DATASET_DIR = os.path.join(PATH_USER_PROJECT_DIR,'dataset')
+PATH_DATASET_README = os.path.join(PATH_DATASET_DIR,'ReadME.md')
+
+
 PATH_MODEL_DIR = os.path.join(PATH_USER_PROJECT_DIR,'model')
+PATH_MODEL_README = os.path.join(PATH_MODEL_DIR,'ReadME.md')
 
 
 PATH_PREDICT_DIR_RELATIVE = 'predict'
