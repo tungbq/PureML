@@ -1,8 +1,9 @@
 package config
 
 import (
-	"os"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/PureML-Inc/PureML/purebackend/tools/security"
 	"github.com/joho/godotenv"
@@ -48,8 +49,11 @@ func GetScheme() string {
 	scheme := os.Getenv("SCHEME")
 	host := GetHost()
 	if scheme == "" && (strings.HasPrefix(host, "localhost") || strings.HasPrefix(host, "127.0.0.1")){
-		
+		scheme = "http"
+	} else if scheme == "" {
+		scheme = "https"
 	}
+	return scheme
 }
 
 func GetPureMLR2Secrets() map[string]string {

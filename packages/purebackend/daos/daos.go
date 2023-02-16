@@ -1,6 +1,8 @@
 package daos
 
 import (
+	"errors"
+
 	impl "github.com/PureML-Inc/PureML/purebackend/daos/datastore"
 	"github.com/PureML-Inc/PureML/purebackend/models"
 	uuid "github.com/satori/go.uuid"
@@ -13,6 +15,10 @@ type Dao struct {
 // TODO: add function documentation descriptions
 
 func InitDB(dataDir string, databaseType string, databaseUrl string) (*Dao, error) {
+	if databaseType == "" {
+		//default SQLite3 db
+		databaseType = "sqlite3"
+	}
 	dao := &Dao{
 		datastore: nil,
 	}
@@ -21,6 +27,9 @@ func InitDB(dataDir string, databaseType string, databaseUrl string) (*Dao, erro
 		dao.datastore = impl.NewSQLiteDatastore(dataDir)
 	} else if databaseType == "postgres" {
 		//Postgres db
+		if databaseUrl == "" {
+			return nil, errors.New("databaseUrl is required for postgres")
+		}
 		dao.datastore = impl.NewPostgresDatastore(databaseUrl)
 	}
 	return dao, nil
