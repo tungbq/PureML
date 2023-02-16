@@ -468,6 +468,208 @@ func TestLeaveOrg(t *testing.T) {
 	}
 }
 
-// TODO
 func TestRemoveOrg(t *testing.T) {
+	scenarios := []tests.ApiScenario{
+		{
+			Name:           "remove org member + unauthorized",
+			Method:         http.MethodPost,
+			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			ExpectedStatus: 401,
+			ExpectedContent: []string{
+				`Authentication token required`,
+			},
+		},
+		{
+			Name:   "remove org member + invalid token",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": InvalidToken,
+			},
+			ExpectedStatus: 403,
+			ExpectedContent: []string{
+				`Could not parse authentication token`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + user not found",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidTokenNoUser,
+			},
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`User not found`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + invalid org uuid",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + InvalidOrgUuidString + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`Invalid UUID format`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + org not found",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`Organization not found`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + no email in body",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":""
+			}`),
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`"status":400`,
+				`"data":null`,
+				`"message":"Email is required"`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + invalid email",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"invalidemail"
+			}`),
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`"status":400`,
+				`"data":null`,
+				`"message":"Email is invalid"`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + user with email not found",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"nouser@noone.none"
+			}`),
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`"status":404`,
+				`"data":null`,
+				`"message":"User to remove not found"`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + not authorized to remove user",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidUserToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"notadmin@aztlan.in"
+			}`),
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+				// Make notadmin a "member" of the admin user org
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", ValidAdminUserOrgUuid)
+				if err != nil {
+					t.Fatal(err)
+				}
+			},
+			ExpectedStatus: 403,
+			ExpectedContent: []string{
+				`"status":403`,
+				`"data":null`,
+				`"message":"You are not authorized to remove users from this organization"`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + user with email not member",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"test@test.com"
+			}`),
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+				// Create 3rd user
+				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.")
+				if err != nil {
+					t.Fatal(err)
+				}
+			},
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`"status":404`,
+				`"data":null`,
+				`"message":"User not member of organization"`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + owner cannot be removed",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"demo@aztlan.in"
+			}`),
+			ExpectedStatus: 403,
+			ExpectedContent: []string{
+				`"status":403`,
+				`"data":null`,
+				`"message":"Owner can't be removed from organization"`,
+			},
+		},
+		{
+			Name:   "remove org member + valid token + user removed successfully",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/remove",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"notadmin@aztlan.in"
+			}`),
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+				// Make notadmin a "member" of the admin user org
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", ValidAdminUserOrgUuid)
+				if err != nil {
+					t.Fatal(err)
+				}
+			},
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":null`,
+				`"message":"User removed from organization"`,
+			},
+		},
+	}
+
+	for _, scenario := range scenarios {
+		scenario.Test(t)
+	}
 }

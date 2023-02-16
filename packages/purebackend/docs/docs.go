@@ -278,10 +278,19 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User email",
-                        "name": "email",
+                        "description": "Organization ID",
+                        "name": "orgId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "User email to add",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserOrgAdd"
+                        }
                     }
                 ],
                 "responses": {
@@ -3873,6 +3882,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserOrgAdd": {
+            "type": "object",
+            "properties": {
+                "email": {
                     "type": "string"
                 }
             }

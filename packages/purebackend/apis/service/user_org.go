@@ -51,7 +51,8 @@ func (api *Api) GetOrgsForUser(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/add [post]
-//	@Param			email	path	string	true	"User email"
+//	@Param			orgId	path	string				true	"Organization ID"
+//	@Param			data	body	models.UserOrgAddOrRemove	true	"User email to add"
 func (api *Api) AddUsersToOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email")
@@ -181,7 +182,7 @@ func (api *Api) LeaveOrg(request *models.Request) *models.Response {
 	return response
 }
 
-// TODO:RemoveOrg godoc
+// RemoveOrg godoc
 //
 //	@Security		ApiKeyAuth
 //	@Summary		Remove user from organization.
@@ -192,9 +193,58 @@ func (api *Api) LeaveOrg(request *models.Request) *models.Response {
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/remove [post]
 //	@Param			orgId	path	string	true	"Organization ID"
-//	@Param			email	body	string	true	"User email"
+//	@Param	data	body	models.UserOrgAddOrRemove	true	"User to remove"
 func (api *Api) RemoveOrg(request *models.Request) *models.Response {
-	return nil
+	request.ParseJsonBody()
+	email := request.GetParsedBodyAttribute("email")
+	var emailData string
+	if email == nil {
+		emailData = ""
+	} else {
+		emailData = email.(string)
+	}
+	if emailData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Email is required")
+	}
+	if addr, ok := ValidateMailAddress(emailData); ok {
+		emailData = addr
+	} else {
+		return models.NewErrorResponse(http.StatusBadRequest, "Email is invalid")
+	}
+	orgId := request.GetOrgId()
+	user, err := api.app.Dao().GetUserByEmail(emailData)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	var response *models.Response
+	if user == nil {
+		response = models.NewErrorResponse(http.StatusNotFound, "User to remove not found")
+		return response
+	}
+	userUUID := request.GetUserUUID()
+	userOrganization, err := api.app.Dao().GetUserOrganizationByOrgIdAndUserUUID(orgId, userUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if userOrganization == nil || userOrganization.Role != "owner" {
+		return models.NewErrorResponse(http.StatusForbidden, "You are not authorized to remove users from this organization")
+	}
+	userOrganization, err = api.app.Dao().GetUserOrganizationByOrgIdAndUserUUID(orgId, user.UUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if userOrganization == nil {
+		return models.NewErrorResponse(http.StatusNotFound, "User not member of organization")
+	}
+	if userOrganization.Role == "owner" {
+		return models.NewErrorResponse(http.StatusForbidden, "Owner can't be removed from organization")
+	}
+	err = api.app.Dao().DeleteUserOrganizationFromEmailAndOrgId(emailData, orgId)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response = models.NewDataResponse(http.StatusOK, nil, "User removed from organization")
+	return response
 }
 
 var GetOrgsForUser ServiceFunc = (*Api).GetOrgsForUser

@@ -143,6 +143,11 @@ definitions:
       password:
         type: string
     type: object
+  models.UserOrgAdd:
+    properties:
+      email:
+        type: string
+    type: object
   models.UserOrgJoin:
     properties:
       join_code:
@@ -227,11 +232,17 @@ paths:
       description: Add a user to an organization. Only accessible by owners of the
         organization.
       parameters:
-      - description: User email
+      - description: Organization ID
         in: path
-        name: email
+        name: orgId
         required: true
         type: string
+      - description: User email to add
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserOrgAdd'
       produces:
       - application/json
       responses:
