@@ -88,7 +88,7 @@ def signup():
 
 def list_org(access_token):
 
-    url_path = 'org/'
+    url_path = 'org'
     url = urljoin(BASE_URL, url_path)
 
     headers = {

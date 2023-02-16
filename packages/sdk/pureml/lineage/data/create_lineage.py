@@ -7,7 +7,7 @@ import json
 def create_nodes(components):
     # print(components)
 
-    nodes = [{'id': component['name'], 'text': component['name']} for component in components]
+    nodes = [{'id': component['name'], 'text': component['name'], 'nodeType':component['type']} for component in components]
 
 
     return nodes
@@ -21,7 +21,7 @@ def create_extra_nodes(nodes, edges):
 
     extra_nodes = list(set([n for n in edge_nodes if n not in node_nodes]))
 
-    nodes = nodes + [{'id': n, 'text':n} for n in extra_nodes]
+    nodes = nodes + [{'id': n, 'text':n, 'nodeType':'unknown'} for n in extra_nodes]
 
 
     return nodes

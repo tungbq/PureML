@@ -69,7 +69,7 @@ func (api *Api) GetOrgByID(request *models.Request) *models.Response {
 	if organization == nil {
 		response = models.NewErrorResponse(http.StatusNotFound, "Organization not found")
 	} else {
-		response = models.NewDataResponse(http.StatusOK, []models.OrganizationResponse{*organization}, "Organization details")
+		response = models.NewDataResponse(http.StatusOK, []models.OrganizationResponseWithMembers{*organization}, "Organization details")
 	}
 	return response
 }
