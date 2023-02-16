@@ -8,9 +8,9 @@ catboost_info/
 experiments/
 .env
 
-packages/server/db/*.db
-packages/server/pureml_data
-packages/purebackend
+packages/purebackend/db/*.db
+packages/purebackend/pureml_data
+packages/purebackend/vendor
 
 __pycache__/
 *.pyc
