@@ -33,6 +33,10 @@ type UserOrgJoin struct {
 	JoinCode string `json:"join_code"`
 }
 
+type UserOrgAddOrRemove struct {
+	Email string `json:"email"`
+}
+
 // Response models
 
 type UserClaims struct {
