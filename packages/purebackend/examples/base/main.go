@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/PureML-Inc/PureML/purebackend"
-	"github.com/PureML-Inc/PureML/purebackend/core/settings"
+	"github.com/PureML-Inc/PureML/packages/purebackend"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
 )
 
 func main() {

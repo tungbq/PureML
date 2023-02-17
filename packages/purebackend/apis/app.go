@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	config "github.com/PureML-Inc/PureML/purebackend/config"
-	"github.com/PureML-Inc/PureML/purebackend/core"
+	config "github.com/PureML-Inc/PureML/packages/purebackend/config"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core"
 	"github.com/fatih/color"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/crypto/acme"

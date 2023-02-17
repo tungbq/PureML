@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/purebackend/tests"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tests"
 	"github.com/labstack/echo/v4"
 )
 

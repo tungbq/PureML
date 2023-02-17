@@ -3,7 +3,7 @@ package seeds
 import (
 	"fmt"
 
-	"github.com/PureML-Inc/PureML/purebackend/daos/dbmodels"
+	"github.com/PureML-Inc/PureML/packages/purebackend/daos/dbmodels"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"

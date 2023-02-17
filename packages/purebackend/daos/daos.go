@@ -3,8 +3,8 @@ package daos
 import (
 	"errors"
 
-	impl "github.com/PureML-Inc/PureML/purebackend/daos/datastore"
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	impl "github.com/PureML-Inc/PureML/packages/purebackend/daos/datastore"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	uuid "github.com/satori/go.uuid"
 )
 

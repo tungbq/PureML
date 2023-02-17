@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/purebackend/config"
-	"github.com/PureML-Inc/PureML/purebackend/daos/dbmodels"
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	"github.com/PureML-Inc/PureML/packages/purebackend/config"
+	"github.com/PureML-Inc/PureML/packages/purebackend/daos/dbmodels"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	puregosqlite "github.com/glebarez/sqlite"
 	uuid "github.com/satori/go.uuid"
 	"github.com/teris-io/shortid"

@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )

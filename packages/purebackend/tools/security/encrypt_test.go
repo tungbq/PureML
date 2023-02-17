@@ -3,7 +3,7 @@ package security_test
 import (
 	"testing"
 
-	"github.com/PureML-Inc/PureML/purebackend/tools/security"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tools/security"
 )
 
 func TestS256Challenge(t *testing.T) {

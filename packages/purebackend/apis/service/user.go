@@ -3,10 +3,10 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/purebackend/config"
-	"github.com/PureML-Inc/PureML/purebackend/core"
-	"github.com/PureML-Inc/PureML/purebackend/middlewares"
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	"github.com/PureML-Inc/PureML/packages/purebackend/config"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core"
+	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
