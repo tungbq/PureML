@@ -35,7 +35,7 @@ def login(org_id:str, access_token:str) -> str:
         response_org_details = json.loads(response_text)['data']
         
         # if response_org_details is not None:
-        response_org_id = response_org_details[0]['id']
+        response_org_id = response_org_details[0]['uuid']
 
         if response_org_id == org_id:
             print('[green] Valid Org Id and Access token')
