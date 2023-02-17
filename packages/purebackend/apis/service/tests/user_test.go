@@ -319,7 +319,6 @@ func TestGetProfile(t *testing.T) {
 	}
 }
 
-// TODO
 func TestGetProfileByHandle(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{

@@ -115,6 +115,18 @@ func TestGetOrgByID(t *testing.T) {
 			},
 		},
 		{
+			Name:   "get org by id + valid token + invalid org uuid",
+			Method: http.MethodGet,
+			Url:    "/api/org/id/" + InvalidOrgUuidString,
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`Invalid UUID format`,
+			},
+		},
+		{
 			Name:   "get org by id + valid token + org not found",
 			Method: http.MethodGet,
 			Url:    "/api/org/id/" + ValidNoOrgUuid.String(),
@@ -429,6 +441,18 @@ func TestUpdateOrg(t *testing.T) {
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
 				`Could not parse authentication token`,
+			},
+		},
+		{
+			Name:   "update org + valid token + invalid org uuid",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + InvalidOrgUuidString + "/update",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`Invalid UUID format`,
 			},
 		},
 		{

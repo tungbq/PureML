@@ -277,7 +277,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserOrgAdd"
+                            "$ref": "#/definitions/models.UserOrgAddOrRemove"
                         }
                     }
                 ],
@@ -3190,12 +3190,12 @@
                         "required": true
                     },
                     {
-                        "description": "User email",
-                        "name": "email",
+                        "description": "User to remove",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.UserOrgAddOrRemove"
                         }
                     }
                 ],
@@ -3874,7 +3874,7 @@
                 }
             }
         },
-        "models.UserOrgAdd": {
+        "models.UserOrgAddOrRemove": {
             "type": "object",
             "properties": {
                 "email": {

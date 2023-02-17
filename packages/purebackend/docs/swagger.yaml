@@ -143,7 +143,7 @@ definitions:
       password:
         type: string
     type: object
-  models.UserOrgAdd:
+  models.UserOrgAddOrRemove:
     properties:
       email:
         type: string
@@ -242,7 +242,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.UserOrgAdd'
+          $ref: '#/definitions/models.UserOrgAddOrRemove'
       produces:
       - application/json
       responses:
@@ -2150,12 +2150,12 @@ paths:
         name: orgId
         required: true
         type: string
-      - description: User email
+      - description: User to remove
         in: body
-        name: email
+        name: data
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.UserOrgAddOrRemove'
       produces:
       - application/json
       responses:

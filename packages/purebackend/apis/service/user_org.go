@@ -51,7 +51,7 @@ func (api *Api) GetOrgsForUser(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/add [post]
-//	@Param			orgId	path	string				true	"Organization ID"
+//	@Param			orgId	path	string						true	"Organization ID"
 //	@Param			data	body	models.UserOrgAddOrRemove	true	"User email to add"
 func (api *Api) AddUsersToOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
@@ -192,8 +192,8 @@ func (api *Api) LeaveOrg(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/remove [post]
-//	@Param			orgId	path	string	true	"Organization ID"
-//	@Param	data	body	models.UserOrgAddOrRemove	true	"User to remove"
+//	@Param			orgId	path	string						true	"Organization ID"
+//	@Param			data	body	models.UserOrgAddOrRemove	true	"User to remove"
 func (api *Api) RemoveOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email")

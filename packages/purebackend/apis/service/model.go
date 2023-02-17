@@ -3,6 +3,7 @@ package service
 import (
 	_ "fmt"
 	"net/http"
+	"strings"
 
 	"github.com/PureML-Inc/PureML/packages/purebackend/core"
 	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
@@ -123,8 +124,16 @@ func (api *Api) CreateModel(request *models.Request) *models.Response {
 		modelBranchNamesData = defaultModelBranchNames
 	} else {
 		modelBranchNames := modelBranchNames.([]interface{})
+		hasMain := false
 		for _, branchName := range modelBranchNames {
-			modelBranchNamesData = append(modelBranchNamesData, branchName.(string))
+			branchName := strings.ToLower(branchName.(string))
+			if branchName == "main" {
+				hasMain = true
+			}
+			modelBranchNamesData = append(modelBranchNamesData, branchName)
+		}
+		if !hasMain {
+			return models.NewErrorResponse(http.StatusBadRequest, "Branch names must contain 'main'")
 		}
 	}
 	modelReadme := request.GetParsedBodyAttribute("readme")

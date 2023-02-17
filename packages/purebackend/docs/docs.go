@@ -289,7 +289,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserOrgAdd"
+                            "$ref": "#/definitions/models.UserOrgAddOrRemove"
                         }
                     }
                 ],
@@ -3202,12 +3202,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "User email",
-                        "name": "email",
+                        "description": "User to remove",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.UserOrgAddOrRemove"
                         }
                     }
                 ],
@@ -3886,7 +3886,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserOrgAdd": {
+        "models.UserOrgAddOrRemove": {
             "type": "object",
             "properties": {
                 "email": {
