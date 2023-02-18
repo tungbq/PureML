@@ -289,7 +289,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserOrgAddOrRemove"
+                            "$ref": "#/definitions/models.UserEmailRequest"
                         }
                     }
                 ],
@@ -3207,7 +3207,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserOrgAddOrRemove"
+                            "$ref": "#/definitions/models.UserEmailRequest"
                         }
                     }
                 ],
@@ -3424,11 +3424,6 @@ const docTemplate = `{
         },
         "/user/forgot-password": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "User can reset password by providing email id to send reset password link.",
                 "consumes": [
                     "*/*"
@@ -3447,7 +3442,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserForgotPasswordRequest"
+                            "$ref": "#/definitions/models.UserEmailRequest"
                         }
                     }
                 ],
@@ -3599,11 +3594,6 @@ const docTemplate = `{
         },
         "/user/resend-verification": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "User can resend verification email by providing email id.",
                 "consumes": [
                     "*/*"
@@ -3615,6 +3605,17 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "User resend verification.",
+                "parameters": [
+                    {
+                        "description": "Email id",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserEmailRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -3628,11 +3629,6 @@ const docTemplate = `{
         },
         "/user/reset-password": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "User can reset password by providing old password and new password.",
                 "consumes": [
                     "*/*"
@@ -3716,12 +3712,47 @@ const docTemplate = `{
                 "summary": "User verify email.",
                 "parameters": [
                     {
-                        "description": "User details",
+                        "description": "Verification token",
                         "name": "org",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserVerifyEmailRequest"
+                            "$ref": "#/definitions/models.UserVerifyTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/verify-reset-password": {
+            "post": {
+                "description": "User can verify token to view reset password form.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User reset password verify token.",
+                "parameters": [
+                    {
+                        "description": "Verification token",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserVerifyTokenRequest"
                         }
                     }
                 ],
@@ -3947,7 +3978,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserForgotPasswordRequest": {
+        "models.UserEmailRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3965,14 +3996,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.UserOrgAddOrRemove": {
-            "type": "object",
-            "properties": {
-                "email": {
                     "type": "string"
                 }
             }
@@ -4036,7 +4059,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserVerifyEmailRequest": {
+        "models.UserVerifyTokenRequest": {
             "type": "object",
             "properties": {
                 "token": {

@@ -25,8 +25,10 @@ func BindUserApi(app core.App, rg *echo.Group) {
 	userGroup.POST("/signup", api.DefaultHandler(UserSignUp))
 	userGroup.POST("/login", api.DefaultHandler(UserLogin))
 	userGroup.POST("/verify-email", api.DefaultHandler(UserVerifyEmail))
+	userGroup.POST("/resend-verification", api.DefaultHandler(UserResendVerification))
 	userGroup.POST("/forgot-password", api.DefaultHandler(UserForgotPassword))
-	userGroup.POST("/reset-password", api.DefaultHandler(UserResetPassword)) //TODO To complete the logic here and update middlewares
+	userGroup.POST("/verify-reset-password", api.DefaultHandler(UserVerifyResetPassword))
+	userGroup.POST("/reset-password", api.DefaultHandler(UserResetPassword))
 }
 
 // UserSignUp godoc
@@ -89,6 +91,13 @@ func (api *Api) UserSignUp(request *models.Request) *models.Response {
 	}
 	if passwordData == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Password is required")
+	}
+	dbuser, err := api.app.Dao().GetUserByEmail(emailData)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if dbuser != nil {
+		return models.NewErrorResponse(http.StatusConflict, "User with email already exists")
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(passwordData), bcrypt.DefaultCost)
 	if err != nil {
@@ -219,7 +228,7 @@ func (api *Api) UserLogin(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/user/verify-email [post]
-//	@Param			org	body	models.UserVerifyEmailRequest	true	"User details"
+//	@Param			org	body	models.UserVerifyTokenRequest	true	"Verification token"
 func (api *Api) UserVerifyEmail(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	token := request.GetParsedBodyAttribute("token")
@@ -270,7 +279,6 @@ func (api *Api) UserVerifyEmail(request *models.Request) *models.Response {
 
 // UserResendVerification godoc
 //
-//	@Security		ApiKeyAuth
 //	@Summary		User resend verification.
 //	@Description	User can resend verification email by providing email id.
 //	@Tags			User
@@ -278,6 +286,7 @@ func (api *Api) UserVerifyEmail(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/user/resend-verification [post]
+//	@Param			data	body	models.UserEmailRequest	true	"Email id"
 func (api *Api) UserResendVerification(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email")
@@ -334,7 +343,6 @@ func (api *Api) UserResendVerification(request *models.Request) *models.Response
 
 // UserForgotPassword godoc
 //
-//	@Security		ApiKeyAuth
 //	@Summary		User forgot password.
 //	@Description	User can reset password by providing email id to send reset password link.
 //	@Tags			User
@@ -342,7 +350,7 @@ func (api *Api) UserResendVerification(request *models.Request) *models.Response
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/user/forgot-password [post]
-//	@Param			org	body	models.UserForgotPasswordRequest	true	"User email"
+//	@Param			org	body	models.UserEmailRequest	true	"User email"
 func (api *Api) UserForgotPassword(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email").(string)
@@ -377,9 +385,58 @@ func (api *Api) UserForgotPassword(request *models.Request) *models.Response {
 	return models.NewDataResponse(http.StatusOK, nil, "Reset password link sent to your mail")
 }
 
+// UserVerifyResetPassword godoc
+//
+//	@Summary		User reset password verify token.
+//	@Description	User can verify token to view reset password form.
+//	@Tags			User
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/user/verify-reset-password [post]
+//	@Param			org	body	models.UserVerifyTokenRequest	true	"Verification token"
+func (api *Api) UserVerifyResetPassword(request *models.Request) *models.Response {
+	request.ParseJsonBody()
+	token := request.GetParsedBodyAttribute("token")
+	var tokenData string
+	if token == nil {
+		tokenData = ""
+	} else {
+		tokenData = token.(string)
+	}
+	if tokenData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Token is required")
+	}
+	parsedToken, err := jwt.Parse(tokenData, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("invalid token signing algorithm %v", t.Method.Alg())
+		}
+		return []byte(api.app.Settings().PasswordResetAuthToken.Secret), nil
+	})
+	if err != nil {
+		return models.NewDataResponse(http.StatusBadRequest, nil, "Could not parse verification token")
+	}
+	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+		userUUID := uuid.Must(uuid.FromString(claims["uuid"].(string)))
+		expireTime := int64(claims["exp"].(float64))
+		if expireTime < time.Now().Unix() {
+			return models.NewDataResponse(http.StatusBadRequest, nil, "Password Reset token expired")
+		}
+		user, err := api.app.Dao().GetSecureUserByUUID(userUUID)
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+		if user == nil {
+			return models.NewDataResponse(http.StatusNotFound, nil, "User not found")
+		}
+	} else {
+		return models.NewDataResponse(http.StatusBadRequest, nil, "Invalid verification token")
+	}
+	return models.NewDataResponse(http.StatusOK, nil, "Password reset token valid")
+}
+
 // UserResetPassword godoc
 //
-//	@Security		ApiKeyAuth
 //	@Summary		User reset password.
 //	@Description	User can reset password by providing old password and new password.
 //	@Tags			User
@@ -553,6 +610,8 @@ func (api *Api) DeleteProfile(request *models.Request) *models.Response {
 var UserSignUp ServiceFunc = (*Api).UserSignUp
 var UserLogin ServiceFunc = (*Api).UserLogin
 var UserVerifyEmail ServiceFunc = (*Api).UserVerifyEmail
+var UserResendVerification ServiceFunc = (*Api).UserResendVerification
+var UserVerifyResetPassword ServiceFunc = (*Api).UserVerifyResetPassword
 var UserResetPassword ServiceFunc = (*Api).UserResetPassword
 var UserForgotPassword ServiceFunc = (*Api).UserForgotPassword
 var GetProfile ServiceFunc = (*Api).GetProfile

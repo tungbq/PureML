@@ -19,7 +19,7 @@ type UserLoginRequest struct {
 	Password string `json:"password"`
 }
 
-type UserForgotPasswordRequest struct {
+type UserEmailRequest struct {
 	Email string `json:"email"`
 }
 
@@ -33,11 +33,7 @@ type UserOrgJoin struct {
 	JoinCode string `json:"join_code"`
 }
 
-type UserOrgAddOrRemove struct {
-	Email string `json:"email"`
-}
-
-type UserVerifyEmailRequest struct {
+type UserVerifyTokenRequest struct {
 	Token string `json:"token"`
 }
 

@@ -85,6 +85,9 @@ func NewBaseApp(appConfig *BaseAppConfig) *BaseApp {
 		if appConfig.Settings.MailService.Enabled {
 			app.settings.MailService = appConfig.Settings.MailService
 		}
+		if appConfig.Settings.Site.BaseURL != "" {
+			app.settings.Site = appConfig.Settings.Site
+		}
 	}
 
 	return app

@@ -134,7 +134,7 @@ definitions:
       name:
         type: string
     type: object
-  models.UserForgotPasswordRequest:
+  models.UserEmailRequest:
     properties:
       email:
         type: string
@@ -146,11 +146,6 @@ definitions:
       handle:
         type: string
       password:
-        type: string
-    type: object
-  models.UserOrgAddOrRemove:
-    properties:
-      email:
         type: string
     type: object
   models.UserOrgJoin:
@@ -191,7 +186,7 @@ definitions:
       name:
         type: string
     type: object
-  models.UserVerifyEmailRequest:
+  models.UserVerifyTokenRequest:
     properties:
       token:
         type: string
@@ -256,7 +251,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.UserOrgAddOrRemove'
+          $ref: '#/definitions/models.UserEmailRequest'
       produces:
       - application/json
       responses:
@@ -2169,7 +2164,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.UserOrgAddOrRemove'
+          $ref: '#/definitions/models.UserEmailRequest'
       produces:
       - application/json
       responses:
@@ -2437,7 +2432,7 @@ paths:
         name: org
         required: true
         schema:
-          $ref: '#/definitions/models.UserForgotPasswordRequest'
+          $ref: '#/definitions/models.UserEmailRequest'
       produces:
       - application/json
       responses:
@@ -2446,8 +2441,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - ApiKeyAuth: []
       summary: User forgot password.
       tags:
       - User
@@ -2543,6 +2536,13 @@ paths:
       consumes:
       - '*/*'
       description: User can resend verification email by providing email id.
+      parameters:
+      - description: Email id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserEmailRequest'
       produces:
       - application/json
       responses:
@@ -2551,8 +2551,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - ApiKeyAuth: []
       summary: User resend verification.
       tags:
       - User
@@ -2576,8 +2574,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - ApiKeyAuth: []
       summary: User reset password.
       tags:
       - User
@@ -2613,12 +2609,12 @@ paths:
       - '*/*'
       description: User can verify email by providing verification token.
       parameters:
-      - description: User details
+      - description: Verification token
         in: body
         name: org
         required: true
         schema:
-          $ref: '#/definitions/models.UserVerifyEmailRequest'
+          $ref: '#/definitions/models.UserVerifyTokenRequest'
       produces:
       - application/json
       responses:
@@ -2628,6 +2624,29 @@ paths:
             additionalProperties: true
             type: object
       summary: User verify email.
+      tags:
+      - User
+  /user/verify-reset-password:
+    post:
+      consumes:
+      - '*/*'
+      description: User can verify token to view reset password form.
+      parameters:
+      - description: Verification token
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserVerifyTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User reset password verify token.
       tags:
       - User
 securityDefinitions:

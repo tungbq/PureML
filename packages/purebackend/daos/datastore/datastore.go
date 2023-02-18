@@ -546,12 +546,13 @@ func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) 
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:   user.UUID,
-		Name:   user.Name,
-		Email:  user.Email,
-		Handle: user.Handle,
-		Bio:    user.Bio,
-		Avatar: user.Avatar,
+		UUID:       user.UUID,
+		Name:       user.Name,
+		Email:      user.Email,
+		Handle:     user.Handle,
+		Bio:        user.Bio,
+		Avatar:     user.Avatar,
+		IsVerified: user.IsVerified,
 	}, nil
 }
 
@@ -689,12 +690,12 @@ func (ds *Datastore) GetUserProfileByUUID(userUUID uuid.UUID) (*models.UserProfi
 
 func (ds *Datastore) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string, isVerified bool) (*models.UserResponse, error) {
 	user := dbmodels.User{
-		Name:     name,
-		Email:    email,
-		Password: hashedPassword,
-		Handle:   handle,
-		Bio:      bio,
-		Avatar:   avatar,
+		Name:       name,
+		Email:      email,
+		Password:   hashedPassword,
+		Handle:     handle,
+		Bio:        bio,
+		Avatar:     avatar,
 		IsVerified: isVerified,
 
 		Orgs: []dbmodels.Organization{

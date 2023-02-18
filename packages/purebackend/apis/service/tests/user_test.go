@@ -77,7 +77,6 @@ func TestUserSignUp(t *testing.T) {
 				`"message":"Password is required"`,
 			},
 		},
-		// TODO: Handle this case without relying on unique constraint
 		{
 			Name:   "signup + user exists with same email or handle",
 			Method: http.MethodPost,
@@ -95,9 +94,11 @@ func TestUserSignUp(t *testing.T) {
 					t.Fatal(err)
 				}
 			},
-			ExpectedStatus: 500,
+			ExpectedStatus: 409,
 			ExpectedContent: []string{
-				`"error":"Internal server error`,
+				`"status":409`,
+				`"data":null`,
+				`"message":"User with email already exists"`,
 			},
 		},
 		{
