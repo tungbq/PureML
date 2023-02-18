@@ -8,13 +8,16 @@ docs:
 	swag fmt
 	swag init -g purebackend.go
 
+.PHONY: pre-commit
+pre-commit: docs lint
+
 .PHONY: run
 run:
-	go run purebackend.go
+	go run examples/prod/main.go
 
 .PHONY: build
 build:
-	go build -o purebackend.exe purebackend.go
+	go build -o purebackend.exe examples/prod/main.go
 
 .PHONY: seed
 seed:
@@ -45,8 +48,8 @@ deploy-server: serve ui-server
 
 .PHONY: docker-build
 docker-build:
-	docker build --pull --rm -f "Dockerfile" -t purebackend:v0.0.2 "."
+	docker build --pull --rm -f "Dockerfile" -t purebackend:v0.0.4 "."
 
 .PHONY: docker-run
 docker-run:
-	docker run -it --rm --env-file=.env -p 8080:8080/tcp purebackend:v0.0.2
+	docker run -it --rm --env-file=.env -p 8080:8080/tcp purebackend:v0.0.4

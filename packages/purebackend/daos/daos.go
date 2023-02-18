@@ -3,8 +3,8 @@ package daos
 import (
 	"errors"
 
-	impl "github.com/PureML-Inc/PureML/purebackend/daos/datastore"
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	impl "github.com/PureML-Inc/PureML/packages/purebackend/daos/datastore"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -119,6 +119,10 @@ func (dao *Dao) GetSecureUserByHandle(handle string) (*models.UserResponse, erro
 	return dao.Datastore().GetSecureUserByHandle(handle)
 }
 
+func (dao *Dao) GetSecureUserByUUID(userUUID uuid.UUID) (*models.UserResponse, error) {
+	return dao.Datastore().GetSecureUserByUUID(userUUID)
+}
+
 func (dao *Dao) GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, error) {
 	return dao.Datastore().GetUserByUUID(userUUID)
 }
@@ -127,12 +131,20 @@ func (dao *Dao) GetUserProfileByUUID(userUUID uuid.UUID) (*models.UserProfileRes
 	return dao.Datastore().GetUserProfileByUUID(userUUID)
 }
 
-func (dao *Dao) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
-	return dao.Datastore().CreateUser(name, email, handle, bio, avatar, hashedPassword)
+func (dao *Dao) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string, isVerified bool) (*models.UserResponse, error) {
+	return dao.Datastore().CreateUser(name, email, handle, bio, avatar, hashedPassword, isVerified)
+}
+
+func (dao *Dao) VerifyUserEmail(userUUID uuid.UUID) error {
+	return dao.Datastore().VerifyUserEmail(userUUID)
 }
 
 func (dao *Dao) UpdateUser(email string, updatedAttributes map[string]interface{}) (*models.UserResponse, error) {
 	return dao.Datastore().UpdateUser(email, updatedAttributes)
+}
+
+func (dao *Dao) UpdateUserPassword(userUUID uuid.UUID, hashedPassword string) error {
+	return dao.Datastore().UpdateUserPassword(userUUID, hashedPassword)
 }
 
 func (dao *Dao) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogDataResponse, error) {

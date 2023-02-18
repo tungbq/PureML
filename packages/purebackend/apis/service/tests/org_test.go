@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/purebackend/tests"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tests"
 	"github.com/labstack/echo/v4"
 )
 
@@ -112,6 +112,18 @@ func TestGetOrgByID(t *testing.T) {
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
 				`Could not parse authentication token`,
+			},
+		},
+		{
+			Name:   "get org by id + valid token + invalid org uuid",
+			Method: http.MethodGet,
+			Url:    "/api/org/id/" + InvalidOrgUuidString,
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`Invalid UUID format`,
 			},
 		},
 		{
@@ -429,6 +441,18 @@ func TestUpdateOrg(t *testing.T) {
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
 				`Could not parse authentication token`,
+			},
+		},
+		{
+			Name:   "update org + valid token + invalid org uuid",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + InvalidOrgUuidString + "/update",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`Invalid UUID format`,
 			},
 		},
 		{

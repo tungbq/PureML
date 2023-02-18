@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/purebackend/core"
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"

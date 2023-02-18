@@ -3,9 +3,9 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/purebackend/core"
-	"github.com/PureML-Inc/PureML/purebackend/middlewares"
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core"
+	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -51,8 +51,8 @@ func (api *Api) GetOrgsForUser(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/add [post]
-//	@Param			orgId	path	string				true	"Organization ID"
-//	@Param			data	body	models.UserOrgAddOrRemove	true	"User email to add"
+//	@Param			orgId	path	string					true	"Organization ID"
+//	@Param			data	body	models.UserEmailRequest	true	"User email to add"
 func (api *Api) AddUsersToOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email")
@@ -192,8 +192,8 @@ func (api *Api) LeaveOrg(request *models.Request) *models.Response {
 //	@Produce		json
 //	@Success		200	{object}	map[string]interface{}
 //	@Router			/org/{orgId}/remove [post]
-//	@Param			orgId	path	string	true	"Organization ID"
-//	@Param	data	body	models.UserOrgAddOrRemove	true	"User to remove"
+//	@Param			orgId	path	string					true	"Organization ID"
+//	@Param			data	body	models.UserEmailRequest	true	"User to remove"
 func (api *Api) RemoveOrg(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email")

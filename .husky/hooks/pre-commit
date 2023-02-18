@@ -1,0 +1,6 @@
+#!/bin/sh
+declare IS_APP_FOLDER_CHANGE=$(git show --name-only -r --stat --oneline HEAD^^..HEAD | grep 'packages/purebackend')
+
+echo "IS_APP_FOLDER_CHANGE  --> + $IS_APP_FOLDER_CHANGE"
+
+if [[ $IS_APP_FOLDER_CHANGE ]]; then cd packages/purebackend && make pre-commit && cd .. && cd ..; fi

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/purebackend/tools/security"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tools/security"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	uuid "github.com/satori/go.uuid"
@@ -48,7 +48,7 @@ func GetPort() string {
 func GetScheme() string {
 	scheme := os.Getenv("SCHEME")
 	host := GetHost()
-	if scheme == "" && (strings.HasPrefix(host, "localhost") || strings.HasPrefix(host, "127.0.0.1")){
+	if scheme == "" && (strings.HasPrefix(host, "localhost") || strings.HasPrefix(host, "127.0.0.1")) {
 		scheme = "http"
 	} else if scheme == "" {
 		scheme = "https"

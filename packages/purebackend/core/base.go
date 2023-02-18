@@ -5,10 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/PureML-Inc/PureML/purebackend/config"
-	"github.com/PureML-Inc/PureML/purebackend/core/settings"
-	"github.com/PureML-Inc/PureML/purebackend/daos"
-	"github.com/PureML-Inc/PureML/purebackend/tools/filesystem"
+	"github.com/PureML-Inc/PureML/packages/purebackend/config"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
+	"github.com/PureML-Inc/PureML/packages/purebackend/daos"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tools/filesystem"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tools/mailer"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -74,6 +75,18 @@ func NewBaseApp(appConfig *BaseAppConfig) *BaseApp {
 		}
 		if appConfig.Settings.AdminAuthToken.Secret != "" {
 			app.settings.AdminAuthToken = appConfig.Settings.AdminAuthToken
+		}
+		if appConfig.Settings.MailVerifificationAuthToken.Secret != "" {
+			app.settings.MailVerifificationAuthToken = appConfig.Settings.MailVerifificationAuthToken
+		}
+		if appConfig.Settings.PasswordResetAuthToken.Secret != "" {
+			app.settings.PasswordResetAuthToken = appConfig.Settings.PasswordResetAuthToken
+		}
+		if appConfig.Settings.MailService.Enabled {
+			app.settings.MailService = appConfig.Settings.MailService
+		}
+		if appConfig.Settings.Site.BaseURL != "" {
+			app.settings.Site = appConfig.Settings.Site
 		}
 	}
 
@@ -219,6 +232,7 @@ func (app *BaseApp) RefreshSettings() error {
 	return nil
 }
 
+// initDB initializes the app database connection.
 func (app *BaseApp) initDataDB() error {
 	dao, err := daos.InitDB(app.DataDir(), app.DatabaseType(), app.DatabaseUrl())
 	if err != nil {
@@ -226,4 +240,8 @@ func (app *BaseApp) initDataDB() error {
 	}
 	app.dao = dao
 	return nil
+}
+
+func (app *BaseApp) SendMail(to string, subject string, body string) error {
+	return mailer.SendMail(app.Settings(), to, subject, body, app.IsDebug())
 }

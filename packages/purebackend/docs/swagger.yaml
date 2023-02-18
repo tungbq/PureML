@@ -134,6 +134,11 @@ definitions:
       name:
         type: string
     type: object
+  models.UserEmailRequest:
+    properties:
+      email:
+        type: string
+    type: object
   models.UserLoginRequest:
     properties:
       email:
@@ -143,11 +148,6 @@ definitions:
       password:
         type: string
     type: object
-  models.UserOrgAdd:
-    properties:
-      email:
-        type: string
-    type: object
   models.UserOrgJoin:
     properties:
       join_code:
@@ -155,7 +155,11 @@ definitions:
     type: object
   models.UserResetPasswordRequest:
     properties:
-      email:
+      new_password:
+        type: string
+      old_password:
+        type: string
+      token:
         type: string
     type: object
   models.UserSignupRequest:
@@ -180,6 +184,11 @@ definitions:
       bio:
         type: string
       name:
+        type: string
+    type: object
+  models.UserVerifyTokenRequest:
+    properties:
+      token:
         type: string
     type: object
 info:
@@ -242,7 +251,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.UserOrgAdd'
+          $ref: '#/definitions/models.UserEmailRequest'
       produces:
       - application/json
       responses:
@@ -2150,12 +2159,12 @@ paths:
         name: orgId
         required: true
         type: string
-      - description: User email
+      - description: User to remove
         in: body
-        name: email
+        name: data
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.UserEmailRequest'
       produces:
       - application/json
       responses:
@@ -2423,7 +2432,7 @@ paths:
         name: org
         required: true
         schema:
-          $ref: '#/definitions/models.UserResetPasswordRequest'
+          $ref: '#/definitions/models.UserEmailRequest'
       produces:
       - application/json
       responses:
@@ -2432,8 +2441,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - ApiKeyAuth: []
       summary: User forgot password.
       tags:
       - User
@@ -2524,11 +2531,18 @@ paths:
       summary: Get user profile by handle.
       tags:
       - User
-  /user/reset-password:
+  /user/resend-verification:
     post:
       consumes:
       - '*/*'
-      description: User can reset password by providing old password and new password.
+      description: User can resend verification email by providing email id.
+      parameters:
+      - description: Email id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserEmailRequest'
       produces:
       - application/json
       responses:
@@ -2537,8 +2551,29 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - ApiKeyAuth: []
+      summary: User resend verification.
+      tags:
+      - User
+  /user/reset-password:
+    post:
+      consumes:
+      - '*/*'
+      description: User can reset password by providing old password and new password.
+      parameters:
+      - description: User email
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
       summary: User reset password.
       tags:
       - User
@@ -2546,7 +2581,10 @@ paths:
     post:
       consumes:
       - '*/*'
-      description: User sign up with email, name, handle and password.
+      description: |-
+        User sign up with email, name, handle and password. The user will receive an email with a verification link if enabled from backend.
+        Response status code 202 means that the user has been created but the email verification is pending.
+        Response status code 200 means that the user has been created and no verification of email is needed.
       parameters:
       - description: User details
         in: body
@@ -2563,6 +2601,52 @@ paths:
             additionalProperties: true
             type: object
       summary: User sign up.
+      tags:
+      - User
+  /user/verify-email:
+    post:
+      consumes:
+      - '*/*'
+      description: User can verify email by providing verification token.
+      parameters:
+      - description: Verification token
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserVerifyTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User verify email.
+      tags:
+      - User
+  /user/verify-reset-password:
+    post:
+      consumes:
+      - '*/*'
+      description: User can verify token to view reset password form.
+      parameters:
+      - description: Verification token
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserVerifyTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User reset password verify token.
       tags:
       - User
 securityDefinitions:
