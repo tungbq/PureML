@@ -3447,7 +3447,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserResetPasswordRequest"
+                            "$ref": "#/definitions/models.UserForgotPasswordRequest"
                         }
                     }
                 ],
@@ -3597,6 +3597,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/resend-verification": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "User can resend verification email by providing email id.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User resend verification.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/user/reset-password": {
             "post": {
                 "security": [
@@ -3615,6 +3644,17 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "User reset password.",
+                "parameters": [
+                    {
+                        "description": "User email",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserResetPasswordRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -3628,7 +3668,7 @@ const docTemplate = `{
         },
         "/user/signup": {
             "post": {
-                "description": "User sign up with email, name, handle and password.",
+                "description": "User sign up with email, name, handle and password. The user will receive an email with a verification link if enabled from backend.\nResponse status code 202 means that the user has been created but the email verification is pending.\nResponse status code 200 means that the user has been created and no verification of email is needed.",
                 "consumes": [
                     "*/*"
                 ],
@@ -3647,6 +3687,41 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/models.UserSignupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/verify-email": {
+            "post": {
+                "description": "User can verify email by providing verification token.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User verify email.",
+                "parameters": [
+                    {
+                        "description": "User details",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserVerifyEmailRequest"
                         }
                     }
                 ],
@@ -3872,6 +3947,14 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UserForgotPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UserLoginRequest": {
             "type": "object",
             "properties": {
@@ -3905,7 +3988,13 @@ const docTemplate = `{
         "models.UserResetPasswordRequest": {
             "type": "object",
             "properties": {
-                "email": {
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }
@@ -3943,6 +4032,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserVerifyEmailRequest": {
+            "type": "object",
+            "properties": {
+                "token": {
                     "type": "string"
                 }
             }

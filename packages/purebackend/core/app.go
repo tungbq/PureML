@@ -47,4 +47,7 @@ type App interface {
 	// ResetBootstrapState takes care for releasing initialized app resources
 	// (eg. closing db connections).
 	ResetBootstrapState() error
+
+	// SendMail sends an email using the app mail service.
+	SendMail(to, subject, body string) error
 }

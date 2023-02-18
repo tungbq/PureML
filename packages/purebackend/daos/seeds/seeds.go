@@ -62,12 +62,13 @@ func CreateUser(db *gorm.DB, uuid uuid.UUID, name string, email string, handle s
 		BaseModel: dbmodels.BaseModel{
 			UUID: uuid,
 		},
-		Name:     name,
-		Email:    email,
-		Handle:   handle,
-		Password: string(hashedPassword),
-		Bio:      bio,
-		Avatar:   avatar,
+		Name:       name,
+		Email:      email,
+		Handle:     handle,
+		Password:   string(hashedPassword),
+		Bio:        bio,
+		Avatar:     avatar,
+		IsVerified: true,
 		Orgs: []dbmodels.Organization{
 			{
 				BaseModel: dbmodels.BaseModel{
@@ -138,7 +139,7 @@ func CreateModel(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic
 			},
 		}
 	}
-	return db.Create(&dbmodels.Model{
+	err := db.Create(&dbmodels.Model{
 		BaseModel: dbmodels.BaseModel{
 			UUID: uuid,
 		},
@@ -162,7 +163,22 @@ func CreateModel(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic
 		IsPublic: isPublic,
 		Branches: branches,
 		Readme:   readme,
+		Users: []dbmodels.User{
+			{
+				BaseModel: dbmodels.BaseModel{
+					UUID: defaultUUID,
+				},
+			},
+		},
 	}).Error
+	if err != nil {
+		return err
+	}
+	err = db.Table("model_users").Where("user_uuid = ?", defaultUUID).Where("model_uuid =  ?", uuid).Update("role", "owner").Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func CreateDataset(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic bool) error {
@@ -222,7 +238,7 @@ func CreateDataset(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPubl
 			},
 		}
 	}
-	return db.Create(&dbmodels.Dataset{
+	err := db.Create(&dbmodels.Dataset{
 		BaseModel: dbmodels.BaseModel{
 			UUID: uuid,
 		},
@@ -246,5 +262,20 @@ func CreateDataset(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPubl
 		IsPublic: isPublic,
 		Branches: branches,
 		Readme:   readme,
+		Users: []dbmodels.User{
+			{
+				BaseModel: dbmodels.BaseModel{
+					UUID: defaultUUID,
+				},
+			},
+		},
 	}).Error
+	if err != nil {
+		return err
+	}
+	err = db.Table("dataset_users").Where("user_uuid = ?", defaultUUID).Where("dataset_uuid =  ?", uuid).Update("role", "owner").Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

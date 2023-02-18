@@ -9,7 +9,12 @@ type Settings struct {
 	S3 S3Config `form:"s3" json:"s3"`
 	R2 R2Config `form:"r2" json:"r2"`
 
-	AdminAuthToken TokenConfig `form:"adminAuthToken" json:"adminAuthToken"`
+	AdminAuthToken              TokenConfig       `form:"adminAuthToken" json:"adminAuthToken"`
+	MailVerifificationAuthToken TokenConfig       `form:"mailVerifificationAuthToken" json:"mailVerifificationAuthToken"`
+	PasswordResetAuthToken      TokenConfig       `form:"passwordResetAuthToken" json:"passwordResetAuthToken"`
+	MailService                 MailServiceConfig `form:"mailService" json:"mailService"`
+
+	Site SiteConfig `form:"site" json:"site"`
 }
 
 // New creates and returns a new default Settings instance.
@@ -18,6 +23,14 @@ func New() *Settings {
 		AdminAuthToken: TokenConfig{
 			Secret:   security.RandomString(50),
 			Duration: 1209600, // 14 days,
+		},
+		MailVerifificationAuthToken: TokenConfig{
+			Secret:   security.RandomString(50),
+			Duration: 86400, // 1 day
+		},
+		PasswordResetAuthToken: TokenConfig{
+			Secret:   security.RandomString(50),
+			Duration: 86400, // 1 day
 		},
 	}
 }
@@ -45,6 +58,18 @@ type R2Config struct {
 	AccessKey      string `form:"accessKey" json:"accessKey"`
 	Secret         string `form:"secret" json:"secret"`
 	ForcePathStyle bool   `form:"forcePathStyle" json:"forcePathStyle"`
+}
+
+type MailServiceConfig struct {
+	Enabled  bool   `form:"enabled" json:"enabled"`
+	Host     string `form:"host" json:"host"`
+	Port     int    `form:"port" json:"port"`
+	Username string `form:"username" json:"username"`
+	Password string `form:"password" json:"password"`
+}
+
+type SiteConfig struct {
+	BaseURL string `form:"baseUrl" json:"baseUrl"`
 }
 
 // func (s *Settings) LoadFromDB(dao *daos.Dao, source string) error {

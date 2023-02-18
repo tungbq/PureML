@@ -90,7 +90,7 @@ func TestUserSignUp(t *testing.T) {
 			}`),
 			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
 				// Create user
-				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.")
+				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.", true)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -208,6 +208,28 @@ func TestUserLogin(t *testing.T) {
 				`"status":401`,
 				`"data":null`,
 				`"message":"Invalid credentials"`,
+			},
+		},
+		{
+			Name:   "login + email not verified",
+			Method: http.MethodPost,
+			Url:    "/api/user/login",
+			Body: strings.NewReader(`{
+				"handle":"test",
+				"password":"test"
+			}`),
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+				// Create user
+				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.", true)
+				if err != nil {
+					t.Fatal(err)
+				}
+			},
+			ExpectedStatus: 401,
+			ExpectedContent: []string{
+				`"status":401`,
+				`"data":null`,
+				`"message":"User email is not verified"`,
 			},
 		},
 		{

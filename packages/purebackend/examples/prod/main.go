@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/PureML-Inc/PureML/packages/purebackend"
 	"github.com/PureML-Inc/PureML/packages/purebackend/config"
@@ -10,6 +11,10 @@ import (
 )
 
 func main() {
+	port, err := strconv.ParseInt(os.Getenv("PURE_MAIL_PORT"), 10, 64)
+	if err != nil {
+		log.Fatal("PURE_MAIL_PORT is not a number")
+	}
 	app := purebackend.NewWithConfig(&purebackend.Config{
 		DatabaseType: config.GetDatabaseType(),
 		DatabaseUrl:  config.GetDatabaseURL(),
@@ -24,6 +29,16 @@ func main() {
 			},
 			AdminAuthToken: settings.TokenConfig{
 				Secret: os.Getenv("PURE_ADMIN_AUTH_TOKEN_SECRET"),
+			},
+			MailService: settings.MailServiceConfig{
+				Enabled:  true,
+				Host:     os.Getenv("PURE_MAIL_HOST"),
+				Port:     int(port),
+				Username: os.Getenv("PURE_MAIL_USER"),
+				Password: os.Getenv("PURE_MAIL_PASS"),
+			},
+			Site: settings.SiteConfig{
+				BaseURL: os.Getenv("PURE_SITE_BASE_URL"),
 			},
 		},
 	})
