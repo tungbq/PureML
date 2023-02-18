@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/purebackend/apis"
-	"github.com/PureML-Inc/PureML/purebackend/core"
-	"github.com/PureML-Inc/PureML/purebackend/core/settings"
+	"github.com/PureML-Inc/PureML/packages/purebackend/apis"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
 )
 
 //	@contact.name	API Support

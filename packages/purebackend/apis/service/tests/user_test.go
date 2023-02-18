@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/purebackend/tests"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tests"
 	"github.com/labstack/echo/v4"
 )
 
@@ -77,7 +77,6 @@ func TestUserSignUp(t *testing.T) {
 				`"message":"Password is required"`,
 			},
 		},
-		// TODO: Handle this case without relying on unique constraint
 		{
 			Name:   "signup + user exists with same email or handle",
 			Method: http.MethodPost,
@@ -90,14 +89,16 @@ func TestUserSignUp(t *testing.T) {
 			}`),
 			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
 				// Create user
-				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.")
+				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.", true)
 				if err != nil {
 					t.Fatal(err)
 				}
 			},
-			ExpectedStatus: 500,
+			ExpectedStatus: 409,
 			ExpectedContent: []string{
-				`"error":"Internal server error`,
+				`"status":409`,
+				`"data":null`,
+				`"message":"User with email already exists"`,
 			},
 		},
 		{
@@ -211,6 +212,28 @@ func TestUserLogin(t *testing.T) {
 			},
 		},
 		{
+			Name:   "login + email not verified",
+			Method: http.MethodPost,
+			Url:    "/api/user/login",
+			Body: strings.NewReader(`{
+				"handle":"test",
+				"password":"test"
+			}`),
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+				// Create user
+				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.", true)
+				if err != nil {
+					t.Fatal(err)
+				}
+			},
+			ExpectedStatus: 401,
+			ExpectedContent: []string{
+				`"status":401`,
+				`"data":null`,
+				`"message":"User email is not verified"`,
+			},
+		},
+		{
 			Name:   "login successful with email",
 			Method: http.MethodPost,
 			Url:    "/api/user/login",
@@ -319,7 +342,6 @@ func TestGetProfile(t *testing.T) {
 	}
 }
 
-// TODO
 func TestGetProfileByHandle(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{

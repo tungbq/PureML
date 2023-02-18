@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/purebackend/tests"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tests"
 )
 
 func TestGetAllAdminOrgs(t *testing.T) {

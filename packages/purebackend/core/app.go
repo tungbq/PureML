@@ -1,9 +1,9 @@
 package core
 
 import (
-	"github.com/PureML-Inc/PureML/purebackend/core/settings"
-	"github.com/PureML-Inc/PureML/purebackend/daos"
-	"github.com/PureML-Inc/PureML/purebackend/tools/filesystem"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
+	"github.com/PureML-Inc/PureML/packages/purebackend/daos"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tools/filesystem"
 )
 
 // App defines the main PureBackend app interface.
@@ -47,4 +47,7 @@ type App interface {
 	// ResetBootstrapState takes care for releasing initialized app resources
 	// (eg. closing db connections).
 	ResetBootstrapState() error
+
+	// SendMail sends an email using the app mail service.
+	SendMail(to, subject, body string) error
 }

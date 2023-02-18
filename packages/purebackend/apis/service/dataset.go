@@ -3,10 +3,11 @@ package service
 import (
 	_ "fmt"
 	"net/http"
+	"strings"
 
-	"github.com/PureML-Inc/PureML/purebackend/core"
-	"github.com/PureML-Inc/PureML/purebackend/middlewares"
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	"github.com/PureML-Inc/PureML/packages/purebackend/core"
+	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -132,8 +133,16 @@ func (api *Api) CreateDataset(request *models.Request) *models.Response {
 		datasetBranchNamesData = defaultDatasetBranchNames
 	} else {
 		datasetBranchNames := datasetBranchNames.([]interface{})
+		hasMain := false
 		for _, branchName := range datasetBranchNames {
-			datasetBranchNamesData = append(datasetBranchNamesData, branchName.(string))
+			branchName := strings.ToLower(branchName.(string))
+			if branchName == "main" {
+				hasMain = true
+			}
+			datasetBranchNamesData = append(datasetBranchNamesData, branchName)
+		}
+		if !hasMain {
+			return models.NewErrorResponse(http.StatusBadRequest, "Branch names must contain 'main'")
 		}
 	}
 	datasetReadme := request.GetParsedBodyAttribute("readme")

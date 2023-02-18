@@ -4,12 +4,12 @@ import uuid "github.com/satori/go.uuid"
 
 type Dataset struct {
 	BaseModel        `gorm:"embedded"`
-	Name             string    `json:"name" gorm:"unique"`
-	Wiki             string    `json:"wiki"`
-	OrganizationUUID uuid.UUID `json:"org_uuid" gorm:"type:uuid;not null"`
-	CreatedBy        uuid.UUID `json:"created_by" gorm:"type:uuid;not null"`
-	UpdatedBy        uuid.UUID `json:"updated_by" gorm:"type:uuid;not null"`
-	IsPublic         bool      `json:"is_public" gorm:"not null;default:false"`
+	Name             string        `json:"name" gorm:"not null;index:idx_org_dataset_name,unique"`
+	Wiki             string        `json:"wiki"`
+	OrganizationUUID uuid.UUID     `json:"org_uuid" gorm:"type:uuid;not null;index:idx_org_dataset_name,unique"`
+	CreatedBy        uuid.UUID     `json:"created_by" gorm:"type:uuid;not null"`
+	UpdatedBy        uuid.NullUUID `json:"updated_by" gorm:"type:uuid;"`
+	IsPublic         bool          `json:"is_public" default:"false"`
 
 	Org           Organization `gorm:"foreignKey:OrganizationUUID"`
 	CreatedByUser User         `gorm:"foreignKey:CreatedBy"`
@@ -23,7 +23,7 @@ type Dataset struct {
 type DatasetUser struct {
 	DatasetUUID uuid.UUID `json:"dataset_uuid" gorm:"type:uuid;primaryKey"`
 	UserUUID    uuid.UUID `json:"user_uuid" gorm:"type:uuid;primaryKey"`
-	Role        string    `json:"role" gorm:"not null default:member"`
+	Role        string    `json:"role" gorm:"not null;default:member"`
 }
 
 type DatasetBranch struct {

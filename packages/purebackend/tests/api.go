@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/PureML-Inc/PureML/purebackend/apis"
+	"github.com/PureML-Inc/PureML/packages/purebackend/apis"
 	"github.com/labstack/echo/v4"
 )
 

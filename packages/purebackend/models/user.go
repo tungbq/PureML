@@ -19,7 +19,7 @@ type UserLoginRequest struct {
 	Password string `json:"password"`
 }
 
-type UserResetPasswordRequest struct {
+type UserEmailRequest struct {
 	Email string `json:"email"`
 }
 
@@ -33,8 +33,14 @@ type UserOrgJoin struct {
 	JoinCode string `json:"join_code"`
 }
 
-type UserOrgAddOrRemove struct {
-	Email string `json:"email"`
+type UserVerifyTokenRequest struct {
+	Token string `json:"token"`
+}
+
+type UserResetPasswordRequest struct {
+	Token       string `json:"token"`
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
 }
 
 // Response models
@@ -54,13 +60,14 @@ type UserHandleResponse struct {
 }
 
 type UserResponse struct {
-	UUID     uuid.UUID `json:"uuid"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Handle   string    `json:"handle"`
-	Bio      string    `json:"bio"`
-	Avatar   string    `json:"avatar"`
-	Password string    `json:"-"`
+	UUID       uuid.UUID `json:"uuid"`
+	Name       string    `json:"name"`
+	Email      string    `json:"email"`
+	Handle     string    `json:"handle"`
+	Bio        string    `json:"bio"`
+	Avatar     string    `json:"avatar"`
+	Password   string    `json:"-"`
+	IsVerified bool      `json:"is_verified"`
 }
 
 type UserProfileResponse struct {

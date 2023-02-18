@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/purebackend/config"
-	"github.com/PureML-Inc/PureML/purebackend/daos/dbmodels"
-	"github.com/PureML-Inc/PureML/purebackend/models"
+	"github.com/PureML-Inc/PureML/packages/purebackend/config"
+	"github.com/PureML-Inc/PureML/packages/purebackend/daos/dbmodels"
+	"github.com/PureML-Inc/PureML/packages/purebackend/models"
 	puregosqlite "github.com/glebarez/sqlite"
 	uuid "github.com/satori/go.uuid"
 	"github.com/teris-io/shortid"
@@ -40,26 +40,28 @@ func NewSQLiteDatastore(optDataDir ...string) *Datastore {
 		panic("Error connecting to database")
 	}
 	err = db.AutoMigrate(
-		&dbmodels.Activity{},
-		&dbmodels.Dataset{},
-		&dbmodels.DatasetBranch{},
-		&dbmodels.DatasetReview{},
-		&dbmodels.DatasetUser{},
-		&dbmodels.DatasetVersion{},
-		&dbmodels.Lineage{},
-		&dbmodels.Log{},
-		&dbmodels.Dataset{},
-		&dbmodels.ModelBranch{},
-		&dbmodels.ModelReview{},
-		&dbmodels.ModelUser{},
-		&dbmodels.ModelVersion{},
-		&dbmodels.Organization{},
-		&dbmodels.Path{},
-		&dbmodels.User{},
-		&dbmodels.UserOrganizations{},
-		&dbmodels.Secret{},
-		&dbmodels.Readme{},
-		&dbmodels.ReadmeVersion{},
+		dbmodels.Activity{},
+		dbmodels.Model{},
+		dbmodels.Dataset{},
+		dbmodels.DatasetBranch{},
+		dbmodels.DatasetReview{},
+		dbmodels.DatasetUser{},
+		dbmodels.DatasetVersion{},
+		dbmodels.Lineage{},
+		dbmodels.Log{},
+		// dbmodels.Tag{},
+		dbmodels.Dataset{},
+		dbmodels.ModelBranch{},
+		dbmodels.ModelReview{},
+		dbmodels.ModelUser{},
+		dbmodels.ModelVersion{},
+		dbmodels.Organization{},
+		dbmodels.Path{},
+		dbmodels.User{},
+		dbmodels.UserOrganizations{},
+		dbmodels.Secret{},
+		dbmodels.Readme{},
+		dbmodels.ReadmeVersion{},
 	)
 	if err != nil {
 		return &Datastore{}
@@ -78,26 +80,28 @@ func NewPostgresDatastore(databaseUrl string) *Datastore {
 		panic("Error connecting to database")
 	}
 	err = db.AutoMigrate(
-		&dbmodels.Activity{},
-		&dbmodels.Dataset{},
-		&dbmodels.DatasetBranch{},
-		&dbmodels.DatasetReview{},
-		&dbmodels.DatasetUser{},
-		&dbmodels.DatasetVersion{},
-		&dbmodels.Lineage{},
-		&dbmodels.Log{},
-		&dbmodels.Dataset{},
-		&dbmodels.ModelBranch{},
-		&dbmodels.ModelReview{},
-		&dbmodels.ModelUser{},
-		&dbmodels.ModelVersion{},
-		&dbmodels.Organization{},
-		&dbmodels.Path{},
-		&dbmodels.User{},
-		&dbmodels.UserOrganizations{},
-		&dbmodels.Secret{},
-		&dbmodels.Readme{},
-		&dbmodels.ReadmeVersion{},
+		dbmodels.Activity{},
+		dbmodels.Model{},
+		dbmodels.Dataset{},
+		dbmodels.DatasetBranch{},
+		dbmodels.DatasetReview{},
+		dbmodels.DatasetUser{},
+		dbmodels.DatasetVersion{},
+		dbmodels.Lineage{},
+		dbmodels.Log{},
+		// dbmodels.Tag{},
+		dbmodels.Dataset{},
+		dbmodels.ModelBranch{},
+		dbmodels.ModelReview{},
+		dbmodels.ModelUser{},
+		dbmodels.ModelVersion{},
+		dbmodels.Organization{},
+		dbmodels.Path{},
+		dbmodels.User{},
+		dbmodels.UserOrganizations{},
+		dbmodels.Secret{},
+		dbmodels.Readme{},
+		dbmodels.ReadmeVersion{},
 	)
 	if err != nil {
 		return &Datastore{}
@@ -542,12 +546,13 @@ func (ds *Datastore) GetUserByEmail(email string) (*models.UserResponse, error) 
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:   user.UUID,
-		Name:   user.Name,
-		Email:  user.Email,
-		Handle: user.Handle,
-		Bio:    user.Bio,
-		Avatar: user.Avatar,
+		UUID:       user.UUID,
+		Name:       user.Name,
+		Email:      user.Email,
+		Handle:     user.Handle,
+		Bio:        user.Bio,
+		Avatar:     user.Avatar,
+		IsVerified: user.IsVerified,
 	}, nil
 }
 
@@ -585,13 +590,14 @@ func (ds *Datastore) GetSecureUserByEmail(email string) (*models.UserResponse, e
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:     user.UUID,
-		Name:     user.Name,
-		Email:    user.Email,
-		Handle:   user.Handle,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
-		Password: user.Password,
+		UUID:       user.UUID,
+		Name:       user.Name,
+		Email:      user.Email,
+		Handle:     user.Handle,
+		Bio:        user.Bio,
+		Avatar:     user.Avatar,
+		Password:   user.Password,
+		IsVerified: user.IsVerified,
 	}, nil
 }
 
@@ -605,13 +611,35 @@ func (ds *Datastore) GetSecureUserByHandle(handle string) (*models.UserResponse,
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:     user.UUID,
-		Name:     user.Name,
-		Email:    user.Email,
-		Handle:   user.Handle,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
-		Password: user.Password,
+		UUID:       user.UUID,
+		Name:       user.Name,
+		Email:      user.Email,
+		Handle:     user.Handle,
+		Bio:        user.Bio,
+		Avatar:     user.Avatar,
+		Password:   user.Password,
+		IsVerified: user.IsVerified,
+	}, nil
+}
+
+func (ds *Datastore) GetSecureUserByUUID(userUUID uuid.UUID) (*models.UserResponse, error) {
+	var user dbmodels.User
+	result := ds.DB.Where("uuid = ?", userUUID).Limit(1).Find(&user)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &models.UserResponse{
+		UUID:       user.UUID,
+		Name:       user.Name,
+		Email:      user.Email,
+		Handle:     user.Handle,
+		Bio:        user.Bio,
+		Avatar:     user.Avatar,
+		Password:   user.Password,
+		IsVerified: user.IsVerified,
 	}, nil
 }
 
@@ -625,12 +653,13 @@ func (ds *Datastore) GetUserByUUID(userUUID uuid.UUID) (*models.UserResponse, er
 		return nil, result.Error
 	}
 	return &models.UserResponse{
-		UUID:   user.UUID,
-		Name:   user.Name,
-		Email:  user.Email,
-		Handle: user.Handle,
-		Bio:    user.Bio,
-		Avatar: user.Avatar,
+		UUID:       user.UUID,
+		Name:       user.Name,
+		Email:      user.Email,
+		Handle:     user.Handle,
+		Bio:        user.Bio,
+		Avatar:     user.Avatar,
+		IsVerified: user.IsVerified,
 	}, nil
 }
 
@@ -659,14 +688,15 @@ func (ds *Datastore) GetUserProfileByUUID(userUUID uuid.UUID) (*models.UserProfi
 	}, nil
 }
 
-func (ds *Datastore) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string) (*models.UserResponse, error) {
+func (ds *Datastore) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string, isVerified bool) (*models.UserResponse, error) {
 	user := dbmodels.User{
-		Name:     name,
-		Email:    email,
-		Password: hashedPassword,
-		Handle:   handle,
-		Bio:      bio,
-		Avatar:   avatar,
+		Name:       name,
+		Email:      email,
+		Password:   hashedPassword,
+		Handle:     handle,
+		Bio:        bio,
+		Avatar:     avatar,
+		IsVerified: isVerified,
 
 		Orgs: []dbmodels.Organization{
 			{
@@ -702,6 +732,14 @@ func (ds *Datastore) CreateUser(name string, email string, handle string, bio st
 	}, nil
 }
 
+func (ds *Datastore) VerifyUserEmail(userUUID uuid.UUID) error {
+	result := ds.DB.Model(&dbmodels.User{}).Where("uuid = ?", userUUID).Update("is_verified", true)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func (ds *Datastore) UpdateUser(email string, updatedAttributes map[string]interface{}) (*models.UserResponse, error) {
 	var user dbmodels.User
 	result := ds.DB.Where("email = ?", email).First(&user)
@@ -729,6 +767,14 @@ func (ds *Datastore) UpdateUser(email string, updatedAttributes map[string]inter
 		Bio:    user.Bio,
 		Avatar: user.Avatar,
 	}, nil
+}
+
+func (ds *Datastore) UpdateUserPassword(userUUID uuid.UUID, hashedPassword string) error {
+	result := ds.DB.Model(&dbmodels.User{}).Where("uuid = ?", userUUID).Update("password", hashedPassword)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 // Helper

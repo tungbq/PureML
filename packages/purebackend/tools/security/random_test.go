@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/purebackend/tools/security"
+	"github.com/PureML-Inc/PureML/packages/purebackend/tools/security"
 )
 
 func TestRandomString(t *testing.T) {
