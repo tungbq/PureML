@@ -43,6 +43,11 @@ type UserResetPasswordRequest struct {
 	NewPassword string `json:"new_password"`
 }
 
+type UserRoleRequest struct {
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
 // Response models
 
 type UserClaims struct {

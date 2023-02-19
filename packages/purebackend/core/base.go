@@ -243,5 +243,5 @@ func (app *BaseApp) initDataDB() error {
 }
 
 func (app *BaseApp) SendMail(to string, subject string, body string) error {
-	return mailer.SendMail(app.Settings(), to, subject, body, app.IsDebug())
+	return mailer.SendMail(app.Settings(), to, subject, body)
 }

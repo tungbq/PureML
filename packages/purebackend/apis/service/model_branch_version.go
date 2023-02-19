@@ -142,6 +142,8 @@ func (api *Api) VerifyModelBranchHashStatus(request *models.Request) *models.Res
 func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	userUUID := request.GetUserUUID()
+	modelUUID := request.GetModelUUID()
+	modelBranchUUID := request.GetModelBranchUUID()
 	var modelHash string
 	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
 		modelHash = request.FormValues["hash"][0]
@@ -177,7 +179,6 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	if !sourceValid {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
-	modelBranchUUID := request.GetModelBranchUUID()
 	versions, err := api.app.Dao().GetModelBranchAllVersions(modelBranchUUID, false)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
@@ -233,7 +234,7 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		filePath, err = api.app.UploadFile(file, "model-registry")
+		filePath, err = api.app.UploadFile(file, fmt.Sprintf("model-registry/%s/models/%s/%s", orgId, modelUUID, modelBranchUUID))
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
