@@ -162,6 +162,13 @@ definitions:
       token:
         type: string
     type: object
+  models.UserRoleRequest:
+    properties:
+      email:
+        type: string
+      role:
+        type: string
+    type: object
   models.UserSignupRequest:
     properties:
       avatar:
@@ -2176,6 +2183,37 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Remove user from organization.
+      tags:
+      - Organization
+  /org/{orgId}/role:
+    post:
+      consumes:
+      - '*/*'
+      description: Update a user's role in an organization. Only accessible by owners
+        of the organization.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: User email and role to update
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user's role in an organization.
       tags:
       - Organization
   /org/{orgId}/secret/r2/test:

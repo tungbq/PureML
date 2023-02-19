@@ -107,15 +107,15 @@ func (api *Api) AddUsersToOrg(request *models.Request) *models.Response {
 // UpdateUserRole godoc
 //
 //	@Security		ApiKeyAuth
-//	@Summary			Update a user's role in an organization.
-//	@Description		Update a user's role in an organization. Only accessible by owners of the organization.
-//	@Tags				Organization
-//	@Accept				*/*
-//	@Produce			json
-//	@Success			200	{object}	map[string]interface{}
-//	@Router				/org/{orgId}/role [post]
-//	@Param				orgId		path	string					true	"Organization ID"
-//	@Param				data		body	models.UserRoleRequest	true	"User email and role to update"
+//	@Summary		Update a user's role in an organization.
+//	@Description	Update a user's role in an organization. Only accessible by owners of the organization.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/role [post]
+//	@Param			orgId	path	string					true	"Organization ID"
+//	@Param			data	body	models.UserRoleRequest	true	"User email and role to update"
 func (api *Api) UpdateUserRole(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	email := request.GetParsedBodyAttribute("email")
