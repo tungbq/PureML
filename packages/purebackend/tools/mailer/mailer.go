@@ -8,7 +8,7 @@ import (
 	gomail "gopkg.in/mail.v2"
 )
 
-func SendMail(settings *settings.Settings, to string, subject string, body string, isDebug bool) (err error) {
+func SendMail(settings *settings.Settings, to string, subject string, body string) (err error) {
 	m := gomail.NewMessage()
 
 	// Set E-Mail sender
@@ -28,7 +28,7 @@ func SendMail(settings *settings.Settings, to string, subject string, body strin
 
 	// This is only needed when SSL/TLS certificate is not valid on server.
 	// In production this should be set to false.
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: isDebug}
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	// Now send E-Mail
 	if err := d.DialAndSend(m); err != nil {

@@ -91,6 +91,10 @@ func (dao *Dao) CreateUserOrganizationFromEmailAndJoinCode(email string, joinCod
 	return dao.Datastore().CreateUserOrganizationFromEmailAndJoinCode(email, joinCode)
 }
 
+func (dao *Dao) UpdateUserRoleByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.UUID, role string) (error) {
+	return dao.Datastore().UpdateUserRoleByOrgIdAndUserUUID(orgId, userUUID, role)
+}
+
 func (dao *Dao) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]interface{}) (*models.OrganizationResponse, error) {
 	return dao.Datastore().UpdateOrg(orgId, updatedAttributes)
 }

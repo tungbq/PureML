@@ -138,6 +138,8 @@ func (api *Api) VerifyDatasetBranchHashStatus(request *models.Request) *models.R
 func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	userUUID := request.GetUserUUID()
+	datasetUUID := request.GetDatasetUUID()
+	datasetBranchUUID := request.GetDatasetBranchUUID()
 	var datasetHash string
 	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
 		datasetHash = request.FormValues["hash"][0]
@@ -177,7 +179,6 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	if !sourceValid {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
 	}
-	datasetBranchUUID := request.GetDatasetBranchUUID()
 	versions, err := api.app.Dao().GetDatasetBranchAllVersions(datasetBranchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
@@ -233,7 +234,7 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		filePath, err = api.app.UploadFile(file, "dataset-registry")
+		filePath, err = api.app.UploadFile(file, fmt.Sprintf("dataset-registry/%s/datasets/%s/%s", orgId, datasetUUID, datasetBranchUUID))
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}

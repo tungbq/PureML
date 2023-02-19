@@ -441,6 +441,26 @@ func (ds *Datastore) CreateUserOrganizationFromEmailAndJoinCode(email string, jo
 	}, nil
 }
 
+func (ds *Datastore) UpdateUserRoleByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.UUID, role string) error {
+	userOrganizations := dbmodels.UserOrganizations{
+		UserUUID:         userUUID,
+		OrganizationUUID: orgId,
+	}
+	result := ds.DB.Limit(1).Find(&userOrganizations)
+	if result.RowsAffected == 0 {
+		return nil
+	}
+	if result.Error != nil {
+		return result.Error
+	}
+	userOrganizations.Role = role
+	result = ds.DB.Save(&userOrganizations)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func (ds *Datastore) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]interface{}) (*models.OrganizationResponse, error) {
 	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
