@@ -31,6 +31,9 @@ func main() {
 				AccessKey: os.Getenv("PURE_R2_ACCESS_KEY"),
 				Secret:    os.Getenv("PURE_R2_SECRET"),
 			},
+			Search: settings.SearchConfig{
+				Enabled: false,
+			},
 			Site: settings.SiteConfig{
 				BaseURL: os.Getenv("PURE_SITE_BASE_URL"),
 			},

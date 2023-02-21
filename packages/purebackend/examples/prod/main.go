@@ -27,6 +27,11 @@ func main() {
 				AccessKey: os.Getenv("PURE_R2_ACCESS_KEY"),
 				Secret:    os.Getenv("PURE_R2_SECRET"),
 			},
+			Search: settings.SearchConfig{
+				Enabled:     true,
+				Host:        os.Getenv("PURE_SEARCH_HOST"),
+				AdminAPIKey: os.Getenv("PURE_SEARCH_ADMIN_API_KEY"),
+			},
 			AdminAuthToken: settings.TokenConfig{
 				Secret: os.Getenv("PURE_ADMIN_AUTH_TOKEN_SECRET"),
 			},
