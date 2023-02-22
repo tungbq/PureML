@@ -1326,6 +1326,7 @@ func (ds *Datastore) GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBra
 				UUID: branch.Model.UUID,
 				Name: branch.Model.Name,
 			},
+			IsDefault: branch.IsDefault,
 		}
 	}
 	return branches, nil
@@ -1351,6 +1352,7 @@ func (ds *Datastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName stri
 			UUID: modelBranch.Model.UUID,
 			Name: modelBranch.Model.Name,
 		},
+		IsDefault: modelBranch.IsDefault,
 	}, nil
 }
 
@@ -1993,6 +1995,7 @@ func (ds *Datastore) GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.Data
 				UUID: branch.Dataset.UUID,
 				Name: branch.Dataset.Name,
 			},
+			IsDefault: branch.IsDefault,
 		}
 	}
 	return branches, nil
@@ -2018,6 +2021,7 @@ func (ds *Datastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchNam
 			UUID: datasetBranch.Dataset.UUID,
 			Name: datasetBranch.Dataset.Name,
 		},
+		IsDefault: datasetBranch.IsDefault,
 	}, nil
 }
 
