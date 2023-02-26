@@ -6,7 +6,6 @@ import os
 
 class PathSchema(Singleton_BaseModel):
 
-    BASE_URL = "https://pureml-development.up.railway.app/api/"
     PATH_PUREML_RELATIVE = ".pureml"
     PATH_PREDICT_DIR_RELATIVE = "predict"
 

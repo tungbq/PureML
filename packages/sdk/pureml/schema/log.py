@@ -4,7 +4,7 @@ from .backend import BackendSchema
 import os
 
 
-class ModelSchema(BaseModel):
+class LogSchema(BaseModel):
     paths: PathSchema = PathSchema().get_instance()
     backend: BackendSchema = BackendSchema().get_instance()
 

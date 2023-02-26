@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from .backend import BackendSchema
 
 import typing
 import os
@@ -7,6 +8,7 @@ from .paths import PathSchema
 
 class DockerSchema(BaseModel):
     paths: PathSchema = PathSchema().get_instance()
+    backend: BackendSchema = BackendSchema().get_instance()
     # PORT_DOCKER = 8005      #Same port as fastapi server
     PORT_HOST = 8000
     BASE_IMAGE_DOCKER = "python:3.8-slim"

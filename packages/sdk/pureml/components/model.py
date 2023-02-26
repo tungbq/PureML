@@ -7,7 +7,7 @@ import json
 
 
 from . import get_token, get_org_id
-from pureml.utils.constants import BASE_URL, PATH_MODEL_DIR, PATH_MODEL_README, STORAGE
+from pureml.schema import ModelSchema, StorageSchema
 from pureml import save_model, load_model
 from urllib.parse import urljoin
 import joblib
@@ -18,9 +18,10 @@ from pureml.utils.readme import load_readme
 def init_branch(branch: str, model_name: str):
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/create".format(org_id, model_name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/json",
@@ -48,9 +49,10 @@ def check_model_hash(hash: str, name: str, branch: str):
 
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/{}/hash-status".format(org_id, branch, name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {"Authorization": "Bearer {}".format(user_token)}
 
@@ -71,9 +73,10 @@ def check_model_hash(hash: str, name: str, branch: str):
 def branch_details(branch: str, model_name: str):
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/{}".format(org_id, model_name, branch)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -111,9 +114,10 @@ def branch_delete(branch: str, model_name: str) -> str:
 
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/{}/delete".format(org_id, model_name, branch)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -135,16 +139,16 @@ def branch_list(model_name: str) -> str:
 
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch".format(org_id, model_name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
     }
 
-    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -170,9 +174,10 @@ def list():
 
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/all".format(org_id)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -198,9 +203,10 @@ def list():
 def init(name: str, readme: str = None, branch: str = None):
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     if readme is None:
-        readme = PATH_MODEL_README
+        readme = ModelSchema().PATH_MODEL_README
 
     file_content, file_type = load_readme(path=readme)
 
@@ -208,7 +214,7 @@ def init(name: str, readme: str = None, branch: str = None):
     branch_main = "main"
 
     url = "org/{}/model/{}/create".format(org_id, name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/json",
@@ -223,7 +229,7 @@ def init(name: str, readme: str = None, branch: str = None):
 
     data = json.dumps(data)
 
-    files = {'file': (readme, open(readme, "rb"), file_type)}
+    files = {"file": (readme, open(readme, "rb"), file_type)}
 
     response = requests.post(url, data=data, headers=headers)
     # response = requests.post(url, data=data, headers=headers, files=files)
@@ -243,15 +249,16 @@ def register(
     name: str,
     branch: str,
     is_empty: bool = False,
-    storage: str = STORAGE,
+    storage: str = StorageSchema().STORAGE,
 ):
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     model_file_name = ".".join([name, "pkl"])
-    model_path = os.path.join(PATH_MODEL_DIR, model_file_name)
+    model_path = os.path.join(model_schema.paths.PATH_MODEL_DIR, model_file_name)
 
-    os.makedirs(PATH_MODEL_DIR, exist_ok=True)
+    os.makedirs(model_schema.paths.PATH_MODEL_DIR, exist_ok=True)
 
     save_model(model, name, model_path=model_path)
 
@@ -263,17 +270,17 @@ def register(
 
     if not model_exists:
         model_created = init(name=name, branch=branch)
-        print('model_created', model_created)
+        print("model_created", model_created)
         if not model_created:
             print("[bold red] Unable to register the model")
             return False, model_hash, "latest"
 
     branch_exists = branch_status(branch=branch, model_name=name)
-    print('branch_exists', branch_exists)
+    print("branch_exists", branch_exists)
 
     if not branch_exists:
         branch_created = init_branch(branch=branch, model_name=name)
-        print('branch_created', branch_created)
+        print("branch_created", branch_created)
 
         if not branch_created:
             print("[bold red] Unable to register the model")
@@ -286,7 +293,7 @@ def register(
         return True, model_hash, "latest"
     else:
         url = "org/{}/model/{}/branch/{}/register".format(org_id, name, branch)
-        url = urljoin(BASE_URL, url)
+        url = urljoin(model_schema.paths.BASE_URL, url)
 
         headers = {"Authorization": "Bearer {}".format(user_token)}
 
@@ -301,12 +308,6 @@ def register(
         }
 
         response = requests.post(url, files=files, data=data, headers=headers)
-
-
-        # print(response.json())
-        # print(response.request.url)
-        # print(response.request.body)
-        # print(response.request.headers)
 
         if response.ok:
             print(f"[bold green]Model has been registered!")
@@ -349,9 +350,10 @@ def details(name: str):
 
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/{}".format(org_id, name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -392,12 +394,13 @@ def version_details(name: str, branch: str, version: str = "latest"):
 
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/{}/version/{}".format(org_id, name, branch, version)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
-        'accept': 'application/json',
+        "accept": "application/json",
         "Authorization": "Bearer {}".format(user_token),
     }
 
@@ -451,7 +454,7 @@ def fetch(name: str, branch: str, version: str = "latest"):
     storage_source_type = model_details["path"]["source_type"]["public_url"]
 
     model_url = urljoin(storage_source_type, storage_path)
-    
+
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
@@ -489,9 +492,10 @@ def delete(name: str) -> str:
 
     user_token = get_token()
     org_id = get_org_id()
+    model_schema = ModelSchema()
 
     url = "org/{}/model/{}/delete".format(org_id, name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(model_schema.paths.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",

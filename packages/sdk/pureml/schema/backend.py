@@ -1,14 +1,12 @@
 from pydantic import BaseModel, root_validator
 from .singleton import Singleton_BaseModel
-from .backend import BackendSchema
 import typing
 import os
 
 
-class StorageSchema(Singleton_BaseModel):
+class BackendSchema(Singleton_BaseModel):
 
-    STORAGE: str = "PUREML-STORAGE"
-    backend: BackendSchema = BackendSchema().get_instance()
+    BASE_URL: str = "https://pureml-development.up.railway.app/api/"
 
     class Config:
         arbitrary_types_allowed = True

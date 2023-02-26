@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from .backend import BackendSchema
 
 from .paths import PathSchema
 import os
@@ -6,6 +7,7 @@ import os
 
 class PredictionSchema(BaseModel):
     paths: PathSchema = PathSchema().get_instance()
+    backend: BackendSchema = BackendSchema().get_instance()
 
     PATH_PREDICT_REQUIREMENTS: str = os.path.join(
         paths.PATH_PREDICT_DIR, "requirements.txt"
