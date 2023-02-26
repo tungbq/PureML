@@ -21,7 +21,7 @@ def init_branch(branch: str, model_name: str):
     model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/create".format(org_id, model_name)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/json",
@@ -52,7 +52,7 @@ def check_model_hash(hash: str, name: str, branch: str):
     model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/{}/hash-status".format(org_id, branch, name)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {"Authorization": "Bearer {}".format(user_token)}
 
@@ -76,7 +76,7 @@ def branch_details(branch: str, model_name: str):
     model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/{}".format(org_id, model_name, branch)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -117,7 +117,7 @@ def branch_delete(branch: str, model_name: str) -> str:
     model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/{}/delete".format(org_id, model_name, branch)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -142,7 +142,7 @@ def branch_list(model_name: str) -> str:
     model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch".format(org_id, model_name)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -177,7 +177,7 @@ def list():
     model_schema = ModelSchema()
 
     url = "org/{}/model/all".format(org_id)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -214,7 +214,7 @@ def init(name: str, readme: str = None, branch: str = None):
     branch_main = "main"
 
     url = "org/{}/model/{}/create".format(org_id, name)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/json",
@@ -293,7 +293,7 @@ def register(
         return True, model_hash, "latest"
     else:
         url = "org/{}/model/{}/branch/{}/register".format(org_id, name, branch)
-        url = urljoin(model_schema.paths.BASE_URL, url)
+        url = urljoin(model_schema.backend.BASE_URL, url)
 
         headers = {"Authorization": "Bearer {}".format(user_token)}
 
@@ -353,7 +353,7 @@ def details(name: str):
     model_schema = ModelSchema()
 
     url = "org/{}/model/{}".format(org_id, name)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -397,7 +397,7 @@ def version_details(name: str, branch: str, version: str = "latest"):
     model_schema = ModelSchema()
 
     url = "org/{}/model/{}/branch/{}/version/{}".format(org_id, name, branch, version)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "accept": "application/json",
@@ -495,7 +495,7 @@ def delete(name: str) -> str:
     model_schema = ModelSchema()
 
     url = "org/{}/model/{}/delete".format(org_id, name)
-    url = urljoin(model_schema.paths.BASE_URL, url)
+    url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
