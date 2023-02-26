@@ -1,7 +1,7 @@
-
 import os
 
 from .utils.constants import PATH_USER_PROJECT_DIR
+
 os.makedirs(PATH_USER_PROJECT_DIR, exist_ok=True)
 
 
@@ -17,6 +17,6 @@ from .components import auth as auth
 from .components.auth import login
 from .components.log import log
 
-from .deploy import docker
+from .package import docker
 
 __version__ = "0.2.2"
