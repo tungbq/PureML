@@ -2,49 +2,43 @@ import os
 import shutil
 import uvicorn
 from fastapi import FastAPI
-
-
-from pureml.utils.constants import (
-    API_IP_DOCKER,
-    PATH_FASTAPI_FILE,
-    PATH_PREDICT,
-    PATH_PREDICT_DIR,
-    PATH_PREDICT_REQUIREMENTS,
-    PATH_PREDICT_REQUIREMENTS_USER,
-    PATH_PREDICT_USER,
-    PORT_FASTAPI,
-)
+from pureml.schema import FastAPISchema, DockerSchema, PredictionSchema
 from pureml.utils.deploy import process_input, process_output
+
+
+prediction_schema = PredictionSchema()
+fastapi_schema = FastAPISchema()
+docker_schema = DockerSchema()
 
 
 def get_predict_file(predict_path):
 
-    os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
+    # os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
 
     if predict_path is None:
-        predict_path = PATH_PREDICT_USER
+        predict_path = prediction_schema.PATH_PREDICT_USER
         print("Taking the default predict.py file path: ", predict_path)
     else:
         print("Taking the predict.py file path: ", predict_path)
 
     if os.path.exists(predict_path):
-        shutil.copy(predict_path, PATH_PREDICT)
+        shutil.copy(predict_path, prediction_schema.PATH_PREDICT)
     else:
         raise Exception(predict_path, "doesnot exists!!!")
 
 
 def get_requirements_file(requirements_path):
 
-    os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
+    # os.makedirs(prediction_schema.paths.PATH_PREDICT_DIR, exist_ok=True)
 
     if requirements_path is None:
-        requirements_path = PATH_PREDICT_REQUIREMENTS_USER
+        requirements_path = prediction_schema.PATH_PREDICT_REQUIREMENTS_USER
         print("Taking the default requirements.txt file path: ", requirements_path)
     else:
         print("Taking the requirements.txt file path: ", requirements_path)
 
     if os.path.exists(requirements_path):
-        shutil.copy(requirements_path, PATH_PREDICT_REQUIREMENTS)
+        shutil.copy(requirements_path, prediction_schema.PATH_PREDICT_REQUIREMENTS)
     else:
         raise Exception(requirements_path, "doesnot exists!!!")
 
@@ -63,7 +57,7 @@ def generate_file_upload_api(
 from fastapi import FastAPI, Depends, Request, UploadFile
 import uvicorn
 import pureml
-from predict import model_predict
+from predict import Predictor
 import os
 from dotenv import load_dotenv
 import json
@@ -132,8 +126,8 @@ async def predict(file: Union[UploadFile, None] = None):
 
 if __name__ == '__main__':
     uvicorn.run(app, host='{HOST}', port={PORT})""".format(
-        HOST=API_IP_DOCKER,
-        PORT=PORT_FASTAPI,
+        HOST=fastapi_schema.API_IP_HOST,
+        PORT=fastapi_schema.PORT_FASTAPI,
         MODEL_NAME=model_name,
         MODEL_BRANCH=model_branch,
         MODEL_VERSION=model_version,
@@ -218,8 +212,8 @@ async def predict(request: Request):
 
 if __name__ == '__main__':
     uvicorn.run(app, host='{HOST}', port={PORT})""".format(
-        HOST=API_IP_DOCKER,
-        PORT=PORT_FASTAPI,
+        HOST=fastapi_schema.API_IP_HOST,
+        PORT=fastapi_schema.PORT_FASTAPI,
         MODEL_NAME=model_name,
         MODEL_BRANCH=model_branch,
         MODEL_VERSION=model_version,
@@ -270,6 +264,7 @@ def create_fastapi_file(
     input,
     output,
 ):
+    fastapi_schema = FastAPISchema()
 
     # get_project_file()
 
@@ -285,7 +280,7 @@ def create_fastapi_file(
         model_version=model_version,
     )
 
-    with open(PATH_FASTAPI_FILE, "w") as api_writer:
+    with open(fastapi_schema.PATH_FASTAPI_FILE, "w") as api_writer:
         api_writer.write(api)
 
     api_writer.close()
@@ -321,4 +316,4 @@ def run_fastapi_server(
 
     app = FastAPI()
 
-    uvicorn.run(app, host=API_IP_DOCKER, port=PORT_FASTAPI)
+    uvicorn.run(app, host=fastapi_schema.API_IP_HOST, port=fastapi_schema.PORT_FASTAPI)
