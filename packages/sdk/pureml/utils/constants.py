@@ -4,28 +4,28 @@ import os
 # BASE_URL = 'https://dev-api.pureml.com'
 # BASE_URL = 'https://api.pureml.com'
 # BASE_URL = 'https://pureml-development.up.railway.app/'
-BASE_URL = "https://pureml-development.up.railway.app/api/"
+# BASE_URL = "https://pureml-development.up.railway.app/api/"
 
 # STORAGE = "PUREML-STORAGE"
 
-PATH_USER_TOKEN = os.path.join(os.path.expanduser("~"), ".pureml/token")
+# PATH_USER_TOKEN = os.path.join(os.path.expanduser("~"), ".pureml/token")
 
 PATH_PUREML_RELATIVE = ".pureml"
 
 PATH_USER_PROJECT_DIR = os.path.join(os.getcwd(), PATH_PUREML_RELATIVE)
 
-PATH_USER_PROJECT = os.path.join(PATH_USER_PROJECT_DIR, "pure.project")
+# PATH_USER_PROJECT = os.path.join(PATH_USER_PROJECT_DIR, "pure.project")
 
 
 PATH_CONFIG = os.path.join(PATH_USER_PROJECT_DIR, "config.pkl")  # 'temp.yaml'
 
-PATH_ARTIFACT_DIR = os.path.join(PATH_USER_PROJECT_DIR, "artifacts")
-PATH_ARRAY_DIR = os.path.join(PATH_USER_PROJECT_DIR, "array")
-PATH_AUDIO_DIR = os.path.join(PATH_USER_PROJECT_DIR, "audio")
-PATH_FIGURE_DIR = os.path.join(PATH_USER_PROJECT_DIR, "figure")
-PATH_TABULAR_DIR = os.path.join(PATH_USER_PROJECT_DIR, "tabular")
-PATH_VIDEO_DIR = os.path.join(PATH_USER_PROJECT_DIR, "video")
-PATH_IMAGE_DIR = os.path.join(PATH_USER_PROJECT_DIR, "image")
+# PATH_ARTIFACT_DIR = os.path.join(PATH_USER_PROJECT_DIR, "artifacts")
+# PATH_ARRAY_DIR = os.path.join(PATH_USER_PROJECT_DIR, "array")
+# PATH_AUDIO_DIR = os.path.join(PATH_USER_PROJECT_DIR, "audio")
+# PATH_FIGURE_DIR = os.path.join(PATH_USER_PROJECT_DIR, "figure")
+# PATH_TABULAR_DIR = os.path.join(PATH_USER_PROJECT_DIR, "tabular")
+# PATH_VIDEO_DIR = os.path.join(PATH_USER_PROJECT_DIR, "video")
+# PATH_IMAGE_DIR = os.path.join(PATH_USER_PROJECT_DIR, "image")
 
 # PATH_DATASET_DIR = os.path.join(PATH_USER_PROJECT_DIR, "dataset")
 # PATH_DATASET_README = os.path.join(PATH_DATASET_DIR, "ReadME.md")
