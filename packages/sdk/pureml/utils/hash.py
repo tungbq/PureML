@@ -1,9 +1,7 @@
-
 from collections import defaultdict
 import hashlib
 import string
 import random
-from .constants import PATH_CONFIG
 from .config import load_config, save_config
 import json
 import inspect
@@ -27,12 +25,15 @@ def generate_hash_unique(name, branch, hash=hashlib.md5):
     access_token = get_token()
 
     time_current = str(datetime.now())
-   
-    string_random = ''.join(random.choices(string.ascii_lowercase +string.digits, k=16))
- 
 
-    hash_content = 'puremlHash'.join([org_id, access_token, name, branch, time_current, string_random])
-    
+    string_random = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=16)
+    )
+
+    hash_content = "puremlHash".join(
+        [org_id, access_token, name, branch, time_current, string_random]
+    )
+
     # print('hash content', hash_content)
 
     value_str = hash_content.encode()
@@ -46,39 +47,34 @@ def generate_hash_unique(name, branch, hash=hashlib.md5):
     return hash_value
 
 
-    
-
-def generate_hash_for_file(file_path, name:str, branch:str, hash=hashlib.md5, is_empty=False):
+def generate_hash_for_file(
+    file_path, name: str, branch: str, hash=hashlib.md5, is_empty=False
+):
 
     if is_empty:
         hash_value = generate_hash_unique(name=name, branch=branch)
     else:
         hash_obj = hash()
-        file_object = open(file_path, 'rb')
+        file_object = open(file_path, "rb")
 
-        
         for chunk in file_reader_chunk(file_object):
             hash_obj.update(chunk)
-        
+
         hash_value = hash_obj.hexdigest()
 
         file_object.close()
-    
+
     return hash_value
-
-
-
 
 
 def generate_hash_for_dict(values, hash=hashlib.md5):
     value_str = json.dumps(values).encode()
-    
+
     file_object = hash(value_str)
 
     hash_value = file_object.hexdigest()
-    
-    return hash_value
 
+    return hash_value
 
 
 def generate_hash_for_function(func, hash=hashlib.md5):
@@ -86,18 +82,16 @@ def generate_hash_for_function(func, hash=hashlib.md5):
     string_stripped = re.sub(r"[\n\t\s]*", "", inspect.getsource(func))
 
     string_stripped = string_stripped.encode()
-    
+
     string_object = hash(string_stripped)
 
     hash_value = string_object.hexdigest()
-    
+
     return hash_value
 
 
-
-
 # def check_hash_status_model(hash_value, name, item_key='model'):
-    
+
 #     hash_status = False
 
 #     config = load_config()
@@ -111,7 +105,7 @@ def generate_hash_for_function(func, hash=hashlib.md5):
 #                 hash_status = True
 #                 return hash_status, hash_value
 
-            
+
 #     return hash_status
 
 
@@ -128,6 +122,5 @@ def generate_hash_for_function(func, hash=hashlib.md5):
 #             hash_status = True
 #             return hash_status, hash_value
 
-            
-#     return hash_status, hash_value
 
+#     return hash_status, hash_value
