@@ -31,7 +31,7 @@ import os
 # PATH_DATASET_README = os.path.join(PATH_DATASET_DIR, "ReadME.md")
 
 
-PATH_MODEL_DIR = os.path.join(PATH_USER_PROJECT_DIR, "model")
+# PATH_MODEL_DIR = os.path.join(PATH_USER_PROJECT_DIR, "model")
 # PATH_MODEL_README = os.path.join(PATH_MODEL_DIR, "ReadME.md")
 
 
