@@ -2,13 +2,12 @@ import os
 import shutil
 import uvicorn
 from fastapi import FastAPI
-from pureml.schema import FastAPISchema, DockerSchema, PredictionSchema
+from pureml.schema import FastAPISchema, PredictionSchema
 from pureml.utils.deploy import process_input, process_output
 
 
 prediction_schema = PredictionSchema()
 fastapi_schema = FastAPISchema()
-docker_schema = DockerSchema()
 
 
 def get_predict_file(predict_path):

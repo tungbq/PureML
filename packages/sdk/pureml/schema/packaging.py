@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from .backend import BackendSchema
+from .prediction import PredictionSchema
 
 import typing
 import os
@@ -19,7 +20,9 @@ class FastAPISchema(BaseModel):
 class DockerSchema(BaseModel):
     paths: PathSchema = PathSchema().get_instance()
     backend: BackendSchema = BackendSchema().get_instance()
-    # PORT_DOCKER = 8005      #Same port as fastapi server
+    PATH_DOCKER_IMAGE = os.path.join(paths.PATH_PREDICT_DIR, "Dockerfile")
+    PATH_DOCKER_CONFIG = os.path.join(paths.PATH_PREDICT_DIR, "DockerConfig.yaml")
+    PORT_DOCKER = FastAPISchema().PORT_FASTAPI  # Same port as fastapi server
     PORT_HOST = 8000
     BASE_IMAGE_DOCKER = "python:3.8-slim"
     API_IP_DOCKER = FastAPISchema().API_IP_HOST
