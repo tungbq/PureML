@@ -4,17 +4,17 @@
 
 You can contribute to PureML in a number of ways, depending on your expertise, experience, and interest.
 
-If you want to **dive into the code**, the next sections of this document describes the project structure, commit instructions, etc. We have compiled a list of ["Good first issues"](https://github.com/PureML-Inc/PureML/issues), which are small and well-defined tasks for getting started. We also have a ["Help wanted"](https://github.com/PureML-Inc/PureML/issues) tag that has more general issues.
+If you want to **dive into the code**, the next sections of this document describes the project structure, commit instructions, etc. We have compiled a list of ["Good first issues"](https://github.com/PuremlHQ/PureML/issues), which are small and well-defined tasks for getting started. We also have a ["Help wanted"](https://github.com/PuremlHQ/PureML/issues) tag that has more general issues.
 
 When you pick up an issue, please post a comment on the Github issue so others know that it's being worked on.
 
-If you have **thoughts about version control for ML**, we would really appreciate a review of [the roadmap](https://github.com/orgs/PureML-Inc/projects/5). You can use the thumbs up/down feature to let us know if you think a roadmap item is useful or not. It's also great if you comment on roadmap issues that you have specific thoughts about. If something is missing on the roadmap, please open a new issue and we'll discuss it there on Github.
+If you have **thoughts about version control for ML**, we would really appreciate a review of [the roadmap](https://github.com/orgs/PuremlHQ/projects/5). You can use the thumbs up/down feature to let us know if you think a roadmap item is useful or not. It's also great if you comment on roadmap issues that you have specific thoughts about. If something is missing on the roadmap, please open a new issue and we'll discuss it there on Github.
 
 The roadmap is a work in progress, not a waterfall-y specification, and we want it to evolve based on the input from the community!
 
 We also host regular "community meetings" where we discuss specific roadmap items, and ML versioning and replicability in general. We send out invites to the meeting in advance, in the [`#community-meeting` Discord channel](https://discord.gg/DQ65HnKY). Anyone is welcome to join, and they tend to be interesting discussions with a mix of industry practitioners and academics.
 
-But perhaps the most useful thing you can do is **use the tool**. Join the [Discord chat](https://discord.gg/DBvedzGu) and let us know if PureML is useful to you, and how it can be improved. Open issues on [Github](https://github.com/PureML-Inc/PureML) if you find bugs or have ideas for enhancements.
+But perhaps the most useful thing you can do is **use the tool**. Join the [Discord chat](https://discord.gg/DBvedzGu) and let us know if PureML is useful to you, and how it can be improved. Open issues on [Github](https://github.com/PuremlHQ/PureML) if you find bugs or have ideas for enhancements.
 
 ## Project structure
 

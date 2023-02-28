@@ -3,7 +3,7 @@
     <img
       align="center"
       alt="PureML"
-      src="https://github.com/PureML-Inc/PureML/blob/main/assets/coverImg.jpeg"
+      src="https://github.com/PuremlHQ/PureML/blob/main/assets/coverImg.jpeg"
       style="width:100%;"
     />
   </a>
@@ -95,13 +95,13 @@
   <a
     href="https://pypi.org/project/pureml/"
   >
-    <img alt="Coverage" src="https://img.shields.io/codecov/c/github/PureML-Inc/pureml">
+    <img alt="Coverage" src="https://img.shields.io/codecov/c/github/PuremlHQ/pureml">
   </a>
   &nbsp;
   <a
     href="https://pypi.org/project/pureml/"
   >
-    <img alt="Coverage" src="https://img.shields.io/github/stars/pureml-inc/pureml?style=social">
+    <img alt="Coverage" src="https://img.shields.io/github/stars/PuremlHQ/pureml?style=social">
   </a>
 
 
@@ -204,7 +204,7 @@ This is how generated data lineage will look like in the UI
 <h1 align="center">
     <img
       align="center"
-      src="https://github.com/PureML-Inc/PureML/blob/main/assets/pipeline.png?raw=true"
+      src="https://github.com/PuremlHQ/PureML/blob/main/assets/pipeline.png?raw=true"
       style="width:60%;"
     />
   </a>
@@ -232,27 +232,27 @@ PureML quick start demo
 
 
 # 📍 [Main Features](https://docs.pureml.com/)
-|   |   |
-| --- | --- |
-| Data Lineage | Automatic generation of data lineage|
-| Dataset Versioning | Object-based Automatic Semantic Versioning of datasets |
-| Model Versioning | Object-based Automatic Semantic Versioning of models |
-| Comparision | Comparing different versions of models or datasets
+|                          |                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| Data Lineage             | Automatic generation of data lineage                                          |
+| Dataset Versioning       | Object-based Automatic Semantic Versioning of datasets                        |
+| Model Versioning         | Object-based Automatic Semantic Versioning of models                          |
+| Comparision              | Comparing different versions of models or datasets                            |
 | Branches (*Coming Soon*) | Separation between experimentation and production ready models using branches |
-| Review (*Coming Soon*) | Review and approve models, and datasets to production ready branch|
+| Review (*Coming Soon*)   | Review and approve models, and datasets to production ready branch            |
 
 <br />
 
 
 # 🔮 Core design principles
 
-|   |   |
-| --- | --- |
-| Easy developer experience | An intuitive open source package aimed to bridge the gaps in data science teams |
-| Engineering best practices built-in | Integrating PureML functionalities in your code doesnot disrupt your workflow |
-| Object Versioning | A reliable object versioning mechanism to track changes to your datasets, and models |
-| Data is a first-class citizen | Your data is secure. It will never leave your system. |
-| Reduce Friction | Have access to operations performed on data using data lineage without having to spend time on lengthy meetings |
+|                                     |                                                                                                                 |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Easy developer experience           | An intuitive open source package aimed to bridge the gaps in data science teams                                 |
+| Engineering best practices built-in | Integrating PureML functionalities in your code doesnot disrupt your workflow                                   |
+| Object Versioning                   | A reliable object versioning mechanism to track changes to your datasets, and models                            |
+| Data is a first-class citizen       | Your data is secure. It will never leave your system.                                                           |
+| Reduce Friction                     | Have access to operations performed on data using data lineage without having to spend time on lengthy meetings |
 
 
 
@@ -262,13 +262,13 @@ PureML quick start demo
 
 These are the fundamental concepts that PureML uses to operate.
 
-|   |   |
-| --- | --- |
-| [Project](https://docs.pureml.com/docs/projects/about_projects) | A data science project. This is where you store datasets, models, and their related objects. It is similar to a github repository with object storage.|
-| [Lineage](https://docs.pureml.com/docs/data/register_data_pipeline) | Contains a series of transformations performed on data to generate a dataset.|
-| Data Versioning | Versioning of the data should be comprehensible to the user and should encapsulate the changes in the data, its creation mechanism, among others.|
-| Model Versioning| Versioning of the model should be comprehensible to the user and should encapuslate the changes in training data, model architecture, hyper parameters.|
-| Fetch | This functionality is used to fetch registered Models, and Datasets.|
+|                                                                     |                                                                                                                                                         |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Project](https://docs.pureml.com/docs/projects/about_projects)     | A data science project. This is where you store datasets, models, and their related objects. It is similar to a github repository with object storage.  |
+| [Lineage](https://docs.pureml.com/docs/data/register_data_pipeline) | Contains a series of transformations performed on data to generate a dataset.                                                                           |
+| Data Versioning                                                     | Versioning of the data should be comprehensible to the user and should encapsulate the changes in the data, its creation mechanism, among others.       |
+| Model Versioning                                                    | Versioning of the model should be comprehensible to the user and should encapuslate the changes in training data, model architecture, hyper parameters. |
+| Fetch                                                               | This functionality is used to fetch registered Models, and Datasets.                                                                                    |
 
 
 <br />
@@ -302,7 +302,7 @@ Lets build this together. If you have faced this issue or have worked out a simi
 # 🐞 Reporting Bugs
 To report any bugs you have faced while using PureML package, please
 1. Report it in [Discord](https://discord.gg/xNUHt9yguJ) channel
-1. Open an [issue](https://github.com/PureML-Inc/PureML/issues)
+1. Open an [issue](https://github.com/PuremlHQ/PureML/issues)
 
 <br />
 
@@ -317,12 +317,12 @@ Work with mutual respect. Please take a look at our public roadmap here.
 
 # 👨‍👩‍👧‍👦 Community
 To get quick updates, feature release for PureML follow us on
-|   |
-| --- |
-| [<img alt="Twitter" height="20" src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />](https://twitter.com/getPureML) |
-[<img alt="LinkedIn" height="20" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/company/pureml-inc/) |
-| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/PureML-Inc/PureML) |
-| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" />](https://discord.gg/DBvedzGu) |
+|                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [<img alt="Twitter" height="20" src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />](https://twitter.com/getPureML)                 |
+| [<img alt="LinkedIn" height="20" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/company/PuremlHQ/) |
+| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/PuremlHQ/PureML)               |
+| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" />](https://discord.gg/DBvedzGu)                    |
 
 
 # 📄 License

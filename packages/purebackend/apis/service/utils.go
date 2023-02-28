@@ -7,8 +7,8 @@ import (
 	"mime/multipart"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
-	"github.com/PureML-Inc/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/middlewares"
+	"github.com/PuremlHQ/PureML/packages/purebackend/models"
 	"github.com/labstack/echo/v4"
 )
 

@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
 	gomail "gopkg.in/mail.v2"
 )
 

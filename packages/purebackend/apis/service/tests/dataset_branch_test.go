@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/tests"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tests"
 )
 
 func TestGetDatasetAllBranches(t *testing.T) {
