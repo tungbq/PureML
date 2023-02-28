@@ -101,7 +101,7 @@ func (api *Api) CreateDatasetBranch(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 	for _, branch := range datasetBranches {
-		if branch.Name == datasetBranchName {
+		if branch.Name == datasetBranchNameData {
 			return models.NewErrorResponse(http.StatusBadRequest, "Branch already exists")
 		}
 	}
