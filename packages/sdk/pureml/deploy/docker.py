@@ -12,12 +12,12 @@ def create_docker_file(org_id, access_token):
     # os.makedirs(PATH_DOCKER_DIR, exist_ok=True)
     os.makedirs(prediction_schema.paths.PATH_PREDICT_DIR, exist_ok=True)
 
-    req_pos = prediction_schema.PATH_PREDICT_REQUIREMENTS.find(
+    req_pos = prediction_schema.PATH_PREDICT_REQUIREMENTS.rfind(
         prediction_schema.paths.PATH_PREDICT_DIR_RELATIVE
     )
     req_path = prediction_schema.PATH_PREDICT_REQUIREMENTS[req_pos:]
 
-    api_pos = fastapi_schema.PATH_FASTAPI_FILE.find(
+    api_pos = fastapi_schema.PATH_FASTAPI_FILE.rfind(
         prediction_schema.paths.PATH_PREDICT_DIR_RELATIVE
     )
     api_path = fastapi_schema.PATH_FASTAPI_FILE[api_pos:]
@@ -40,7 +40,9 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir -r {REQUIREMENTS_PATH}
 
-RUN pip install pureml fastapi uvicorn python-multipart
+RUN pip install fastapi uvicorn python-multipart
+
+RUN pip install pureml
 
 EXPOSE {PORT}
 CMD ["python", "{API_PATH}"]    
