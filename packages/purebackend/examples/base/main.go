@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend"
-	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
+	"github.com/PuremlHQ/PureML/packages/purebackend"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
 )
 
 func main() {
@@ -30,6 +30,9 @@ func main() {
 				Endpoint:  os.Getenv("PURE_R2_ENDPOINT"),
 				AccessKey: os.Getenv("PURE_R2_ACCESS_KEY"),
 				Secret:    os.Getenv("PURE_R2_SECRET"),
+			},
+			Search: settings.SearchConfig{
+				Enabled: false,
 			},
 			Site: settings.SiteConfig{
 				BaseURL: os.Getenv("PURE_SITE_BASE_URL"),

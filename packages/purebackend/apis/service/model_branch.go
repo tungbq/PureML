@@ -3,9 +3,9 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/core"
-	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
-	"github.com/PureML-Inc/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core"
+	"github.com/PuremlHQ/PureML/packages/purebackend/middlewares"
+	"github.com/PuremlHQ/PureML/packages/purebackend/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -84,8 +84,14 @@ func (api *Api) GetModelBranch(request *models.Request) *models.Response {
 func (api *Api) CreateModelBranch(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	modelUUID := request.GetModelUUID()
-	modelBranchName := request.GetParsedBodyAttribute("branch_name").(string)
-	if modelBranchName == "" {
+	modelBranchName := request.GetParsedBodyAttribute("branch_name")
+	var modelBranchNameData string
+	if modelBranchName == nil {
+		modelBranchNameData = ""
+	} else {
+		modelBranchNameData = modelBranchName.(string)
+	}
+	if modelBranchNameData == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Branch name cannot be empty")
 	}
 	modelBranches, err := api.app.Dao().GetModelAllBranches(modelUUID)
@@ -93,11 +99,11 @@ func (api *Api) CreateModelBranch(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 	for _, branch := range modelBranches {
-		if branch.Name == modelBranchName {
+		if branch.Name == modelBranchNameData {
 			return models.NewErrorResponse(http.StatusBadRequest, "Branch already exists")
 		}
 	}
-	modelBranch, err := api.app.Dao().CreateModelBranch(modelUUID, modelBranchName)
+	modelBranch, err := api.app.Dao().CreateModelBranch(modelUUID, modelBranchNameData)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}

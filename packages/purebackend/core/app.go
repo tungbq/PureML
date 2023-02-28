@@ -1,9 +1,10 @@
 package core
 
 import (
-	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
-	"github.com/PureML-Inc/PureML/packages/purebackend/daos"
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/filesystem"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
+	"github.com/PuremlHQ/PureML/packages/purebackend/daos"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/filesystem"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/search"
 )
 
 // App defines the main PureBackend app interface.
@@ -33,6 +34,9 @@ type App interface {
 
 	// UploadFile uploads a file to the app storage.
 	UploadFile(file *filesystem.File, basePath string) (string, error)
+
+	// NewSearchClient creates and returns a configured search.SearchClient instance.
+	NewSearchClient() *search.SearchClient
 
 	// IsBootstrapped checks if the application was initialized
 	// (aka. whether Bootstrap() was called).

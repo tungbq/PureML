@@ -1,13 +1,14 @@
 package settings
 
 import (
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/security"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/security"
 )
 
 // Settings defines common app configuration options.
 type Settings struct {
-	S3 S3Config `form:"s3" json:"s3"`
-	R2 R2Config `form:"r2" json:"r2"`
+	S3     S3Config     `form:"s3" json:"s3"`
+	R2     R2Config     `form:"r2" json:"r2"`
+	Search SearchConfig `form:"search" json:"search"`
 
 	AdminAuthToken              TokenConfig       `form:"adminAuthToken" json:"adminAuthToken"`
 	MailVerifificationAuthToken TokenConfig       `form:"mailVerifificationAuthToken" json:"mailVerifificationAuthToken"`
@@ -58,6 +59,12 @@ type R2Config struct {
 	AccessKey      string `form:"accessKey" json:"accessKey"`
 	Secret         string `form:"secret" json:"secret"`
 	ForcePathStyle bool   `form:"forcePathStyle" json:"forcePathStyle"`
+}
+
+type SearchConfig struct {
+	Enabled     bool   `form:"enabled" json:"enabled"`
+	Host        string `form:"host" json:"host"`
+	AdminAPIKey string `form:"admin_api_key" json:"admin_api_key"`
 }
 
 type MailServiceConfig struct {

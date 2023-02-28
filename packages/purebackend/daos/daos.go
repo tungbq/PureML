@@ -3,8 +3,9 @@ package daos
 import (
 	"errors"
 
-	impl "github.com/PureML-Inc/PureML/packages/purebackend/daos/datastore"
-	"github.com/PureML-Inc/PureML/packages/purebackend/models"
+	impl "github.com/PuremlHQ/PureML/packages/purebackend/daos/datastore"
+	"github.com/PuremlHQ/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/search"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -13,8 +14,7 @@ type Dao struct {
 }
 
 // TODO: add function documentation descriptions
-
-func InitDB(dataDir string, databaseType string, databaseUrl string) (*Dao, error) {
+func InitDB(dataDir string, databaseType string, databaseUrl string, searchEnabled bool, searchClient *search.SearchClient) (*Dao, error) {
 	if databaseType == "" {
 		//default SQLite3 db
 		databaseType = "sqlite3"
@@ -31,6 +31,12 @@ func InitDB(dataDir string, databaseType string, databaseUrl string) (*Dao, erro
 			return nil, errors.New("databaseUrl is required for postgres")
 		}
 		dao.datastore = impl.NewPostgresDatastore(databaseUrl)
+	}
+	if searchEnabled {
+		if searchClient == nil {
+			return nil, errors.New("searchClient is required for searchEnabled")
+		}
+		dao.datastore.SearchClient = searchClient
 	}
 	return dao, nil
 }
@@ -89,6 +95,10 @@ func (dao *Dao) DeleteUserOrganizationFromEmailAndOrgId(email string, orgId uuid
 
 func (dao *Dao) CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*models.UserOrganizationsResponse, error) {
 	return dao.Datastore().CreateUserOrganizationFromEmailAndJoinCode(email, joinCode)
+}
+
+func (dao *Dao) UpdateUserRoleByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.UUID, role string) error {
+	return dao.Datastore().UpdateUserRoleByOrgIdAndUserUUID(orgId, userUUID, role)
 }
 
 func (dao *Dao) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]interface{}) (*models.OrganizationResponse, error) {

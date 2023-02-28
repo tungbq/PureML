@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	impl "github.com/PureML-Inc/PureML/packages/purebackend/daos/datastore"
-	"github.com/PureML-Inc/PureML/packages/purebackend/daos/seeds"
+	impl "github.com/PuremlHQ/PureML/packages/purebackend/daos/datastore"
+	"github.com/PuremlHQ/PureML/packages/purebackend/daos/seeds"
 )
 
 func main() {

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/list"
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/types"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/list"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/types"
 )
 
 func TestSubtractSliceString(t *testing.T) {

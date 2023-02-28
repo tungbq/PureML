@@ -3,9 +3,9 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/core"
-	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
-	"github.com/PureML-Inc/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core"
+	"github.com/PuremlHQ/PureML/packages/purebackend/middlewares"
+	"github.com/PuremlHQ/PureML/packages/purebackend/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -86,8 +86,14 @@ func (api *Api) GetDatasetBranch(request *models.Request) *models.Response {
 func (api *Api) CreateDatasetBranch(request *models.Request) *models.Response {
 	request.ParseJsonBody()
 	datasetUUID := request.GetDatasetUUID()
-	datasetBranchName := request.GetParsedBodyAttribute("branch_name").(string)
-	if datasetBranchName == "" {
+	datasetBranchName := request.GetParsedBodyAttribute("branch_name")
+	var datasetBranchNameData string
+	if datasetBranchName == nil {
+		datasetBranchNameData = ""
+	} else {
+		datasetBranchNameData = datasetBranchName.(string)
+	}
+	if datasetBranchNameData == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Branch name cannot be empty")
 	}
 	datasetBranches, err := api.app.Dao().GetDatasetAllBranches(datasetUUID)
@@ -95,11 +101,11 @@ func (api *Api) CreateDatasetBranch(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 	for _, branch := range datasetBranches {
-		if branch.Name == datasetBranchName {
+		if branch.Name == datasetBranchNameData {
 			return models.NewErrorResponse(http.StatusBadRequest, "Branch already exists")
 		}
 	}
-	modelBranch, err := api.app.Dao().CreateDatasetBranch(datasetUUID, datasetBranchName)
+	modelBranch, err := api.app.Dao().CreateDatasetBranch(datasetUUID, datasetBranchNameData)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusInternalServerError, err.Error())
 	}

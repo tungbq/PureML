@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/config"
-	"github.com/PureML-Inc/PureML/packages/purebackend/daos/dbmodels"
-	"github.com/PureML-Inc/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/config"
+	"github.com/PuremlHQ/PureML/packages/purebackend/daos/dbmodels"
+	"github.com/PuremlHQ/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/search"
 	puregosqlite "github.com/glebarez/sqlite"
 	uuid "github.com/satori/go.uuid"
 	"github.com/teris-io/shortid"
@@ -111,6 +112,131 @@ func NewPostgresDatastore(databaseUrl string) *Datastore {
 	}
 }
 
+func (ds *Datastore) SeedSearchClient() {
+	// Query database
+	db, err := ds.DB.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	// Users
+	users, err := db.Query("SELECT uuid, name, email, handle FROM users")
+	if err != nil {
+		fmt.Println(err)
+	}
+	var userDocs []interface{}
+	for users.Next() {
+		var myuuid uuid.UUID
+		var name string
+		var email string
+		var handle string
+
+		err = users.Scan(&myuuid, &name, &email, &handle)
+		if err != nil {
+			fmt.Println(err)
+		}
+		userDocs = append(userDocs, map[string]interface{}{
+			"uuid":   myuuid,
+			"name":   name,
+			"email":  email,
+			"handle": handle,
+		})
+	}
+
+	// Organizations
+	orgs, err := db.Query("SELECT uuid, name, handle, description FROM organizations")
+	if err != nil {
+		fmt.Println(err)
+	}
+	var orgDocs []interface{}
+	for orgs.Next() {
+		var myuuid uuid.UUID
+		var name string
+		var handle string
+		var description string
+
+		err = orgs.Scan(&myuuid, &name, &handle, &description)
+		if err != nil {
+			fmt.Println(err)
+		}
+		orgDocs = append(orgDocs, map[string]interface{}{
+			"uuid":        myuuid,
+			"name":        name,
+			"handle":      handle,
+			"description": description,
+		})
+	}
+
+	// Models
+	models, err := db.Query("SELECT uuid, name, wiki, organization_uuid, is_public FROM models")
+	if err != nil {
+		fmt.Println(err)
+	}
+	var modelDocs []interface{}
+	for models.Next() {
+		var myuuid uuid.UUID
+		var name string
+		var wiki string
+		var organizationUuid uuid.UUID
+		var is_public bool
+
+		err = models.Scan(&myuuid, &name, &wiki, &organizationUuid, &is_public)
+		if err != nil {
+			fmt.Println(err)
+		}
+		modelDocs = append(modelDocs, map[string]interface{}{
+			"uuid":              myuuid,
+			"name":              name,
+			"wiki":              wiki,
+			"organization_uuid": organizationUuid,
+			"is_public":         is_public,
+		})
+	}
+
+	// Datasets
+	datasets, err := db.Query("SELECT uuid, name, wiki, organization_uuid, is_public FROM datasets")
+	if err != nil {
+		fmt.Println(err)
+	}
+	var datasetDocs []interface{}
+	for datasets.Next() {
+		var myuuid uuid.UUID
+		var name string
+		var wiki string
+		var organizationUuid uuid.UUID
+		var is_public bool
+
+		err = datasets.Scan(&myuuid, &name, &wiki, &organizationUuid, &is_public)
+		if err != nil {
+			fmt.Println(err)
+		}
+		datasetDocs = append(datasetDocs, map[string]interface{}{
+			"uuid":              myuuid,
+			"name":              name,
+			"wiki":              wiki,
+			"organization_uuid": organizationUuid,
+			"is_public":         is_public,
+		})
+	}
+
+	// Add documents to index
+	_, err = ds.SearchClient.Client.Index("users").AddDocuments(userDocs, "uuid")
+	if err != nil {
+		panic(err)
+	}
+	_, err = ds.SearchClient.Client.Index("organizations").AddDocuments(orgDocs, "uuid")
+	if err != nil {
+		panic(err)
+	}
+	_, err = ds.SearchClient.Client.Index("models").AddDocuments(modelDocs, "uuid")
+	if err != nil {
+		panic(err)
+	}
+	_, err = ds.SearchClient.Client.Index("datasets").AddDocuments(datasetDocs, "uuid")
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (ds *Datastore) SeedAdminIfNotExists() {
 	var user dbmodels.User
 	adminDetails := config.GetAdminDetails()
@@ -150,7 +276,8 @@ func (ds *Datastore) SeedAdminIfNotExists() {
 }
 
 type Datastore struct {
-	DB *gorm.DB
+	DB           *gorm.DB
+	SearchClient *search.SearchClient
 }
 
 func (ds *Datastore) ExecuteSQL(sql string) error {
@@ -213,6 +340,7 @@ func (ds *Datastore) GetOrgByID(orgId uuid.UUID) (*models.OrganizationResponseWi
 			Handle: user.Handle,
 			Name:   user.Name,
 			Avatar: user.Avatar,
+			Email:  user.Email,
 			Role:   userRoles[user.UUID],
 		})
 	}
@@ -280,6 +408,17 @@ func (ds *Datastore) CreateOrgFromEmail(email string, orgName string, orgDesc st
 	})
 	if err != nil {
 		return nil, err
+	}
+	if ds.SearchClient != nil {
+		err := ds.SearchClient.AddDocument("organizations", map[string]interface{}{
+			"uuid":        org.UUID,
+			"name":        org.Name,
+			"handle":      org.Handle,
+			"description": org.Description,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &models.OrganizationResponse{
 		UUID:        org.UUID,
@@ -441,6 +580,26 @@ func (ds *Datastore) CreateUserOrganizationFromEmailAndJoinCode(email string, jo
 	}, nil
 }
 
+func (ds *Datastore) UpdateUserRoleByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.UUID, role string) error {
+	userOrganizations := dbmodels.UserOrganizations{
+		UserUUID:         userUUID,
+		OrganizationUUID: orgId,
+	}
+	result := ds.DB.Limit(1).Find(&userOrganizations)
+	if result.RowsAffected == 0 {
+		return nil
+	}
+	if result.Error != nil {
+		return result.Error
+	}
+	userOrganizations.Role = role
+	result = ds.DB.Save(&userOrganizations)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func (ds *Datastore) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]interface{}) (*models.OrganizationResponse, error) {
 	var org dbmodels.Organization
 	result := ds.DB.First(&org, orgId)
@@ -459,6 +618,17 @@ func (ds *Datastore) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]int
 	result = ds.DB.Save(&org)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+	if ds.SearchClient != nil {
+		err := ds.SearchClient.UpdateDocument("organizations", orgId.String(), map[string]interface{}{
+			"uuid":        org.UUID,
+			"name":        org.Name,
+			"handle":      org.Handle,
+			"description": org.Description,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &models.OrganizationResponse{
 		UUID:        org.UUID,
@@ -722,6 +892,17 @@ func (ds *Datastore) CreateUser(name string, email string, handle string, bio st
 	if err != nil {
 		return nil, err
 	}
+	if ds.SearchClient != nil {
+		err := ds.SearchClient.AddDocument("users", map[string]interface{}{
+			"uuid":   user.UUID,
+			"name":   user.Name,
+			"email":  user.Email,
+			"handle": user.Handle,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &models.UserResponse{
 		UUID:   user.UUID,
 		Name:   user.Name,
@@ -758,6 +939,17 @@ func (ds *Datastore) UpdateUser(email string, updatedAttributes map[string]inter
 	result = ds.DB.Save(&user)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+	if ds.SearchClient != nil {
+		err := ds.SearchClient.UpdateDocument("users", user.UUID.String(), map[string]interface{}{
+			"uuid":   user.UUID,
+			"name":   user.Name,
+			"email":  user.Email,
+			"handle": user.Handle,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &models.UserResponse{
 		UUID:   user.UUID,
@@ -1005,6 +1197,18 @@ func (ds *Datastore) CreateModel(orgId uuid.UUID, name string, wiki string, isPu
 	if err != nil {
 		return nil, err
 	}
+	if ds.SearchClient != nil {
+		err := ds.SearchClient.AddDocument("models", map[string]interface{}{
+			"uuid":              model.UUID,
+			"name":              model.Name,
+			"wiki":              model.Wiki,
+			"organization_uuid": model.Org.UUID,
+			"is_public":         model.IsPublic,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &models.ModelResponse{
 		UUID: model.UUID,
 		Name: model.Name,
@@ -1122,6 +1326,7 @@ func (ds *Datastore) GetModelAllBranches(modelUUID uuid.UUID) ([]models.ModelBra
 				UUID: branch.Model.UUID,
 				Name: branch.Model.Name,
 			},
+			IsDefault: branch.IsDefault,
 		}
 	}
 	return branches, nil
@@ -1147,6 +1352,7 @@ func (ds *Datastore) CreateModelBranch(modelUUID uuid.UUID, modelBranchName stri
 			UUID: modelBranch.Model.UUID,
 			Name: modelBranch.Model.Name,
 		},
+		IsDefault: modelBranch.IsDefault,
 	}, nil
 }
 
@@ -1655,6 +1861,18 @@ func (ds *Datastore) CreateDataset(orgId uuid.UUID, name string, wiki string, is
 	if err != nil {
 		return nil, err
 	}
+	if ds.SearchClient != nil {
+		err := ds.SearchClient.AddDocument("datasets", map[string]interface{}{
+			"uuid":              dataset.UUID,
+			"name":              dataset.Name,
+			"wiki":              dataset.Wiki,
+			"organization_uuid": dataset.Org.UUID,
+			"is_public":         dataset.IsPublic,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &models.DatasetResponse{
 		UUID: dataset.UUID,
 		Name: dataset.Name,
@@ -1777,6 +1995,7 @@ func (ds *Datastore) GetDatasetAllBranches(datasetUUID uuid.UUID) ([]models.Data
 				UUID: branch.Dataset.UUID,
 				Name: branch.Dataset.Name,
 			},
+			IsDefault: branch.IsDefault,
 		}
 	}
 	return branches, nil
@@ -1802,6 +2021,7 @@ func (ds *Datastore) CreateDatasetBranch(datasetUUID uuid.UUID, datasetBranchNam
 			UUID: datasetBranch.Dataset.UUID,
 			Name: datasetBranch.Dataset.Name,
 		},
+		IsDefault: datasetBranch.IsDefault,
 	}, nil
 }
 

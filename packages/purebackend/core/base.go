@@ -5,11 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/config"
-	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
-	"github.com/PureML-Inc/PureML/packages/purebackend/daos"
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/filesystem"
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/mailer"
+	"github.com/PuremlHQ/PureML/packages/purebackend/config"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
+	"github.com/PuremlHQ/PureML/packages/purebackend/daos"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/filesystem"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/mailer"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/search"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -73,6 +74,9 @@ func NewBaseApp(appConfig *BaseAppConfig) *BaseApp {
 		if appConfig.Settings.R2.Enabled {
 			app.settings.R2 = appConfig.Settings.R2
 		}
+		if appConfig.Settings.Search.Enabled {
+			app.settings.Search = appConfig.Settings.Search
+		}
 		if appConfig.Settings.AdminAuthToken.Secret != "" {
 			app.settings.AdminAuthToken = appConfig.Settings.AdminAuthToken
 		}
@@ -116,6 +120,10 @@ func (app *BaseApp) Bootstrap() error {
 
 	if err := app.initDataDB(); err != nil {
 		return err
+	}
+
+	if app.settings.Search.Enabled {
+		app.Dao().Datastore().SeedSearchClient()
 	}
 
 	// app.RefreshSettings()
@@ -218,6 +226,11 @@ func (app *BaseApp) UploadFile(file *filesystem.File, basePath string) (string, 
 	return path, nil
 }
 
+// NewSearchClient creates a new search client instance
+func (app *BaseApp) NewSearchClient() *search.SearchClient {
+	return search.NewSearchClient(app.settings.Search.Host, app.settings.Search.AdminAPIKey)
+}
+
 // RefreshSettings reinitializes and reloads the stored application settings.
 func (app *BaseApp) RefreshSettings() error {
 	if app.settings == nil {
@@ -234,7 +247,11 @@ func (app *BaseApp) RefreshSettings() error {
 
 // initDB initializes the app database connection.
 func (app *BaseApp) initDataDB() error {
-	dao, err := daos.InitDB(app.DataDir(), app.DatabaseType(), app.DatabaseUrl())
+	var searchClient *search.SearchClient
+	if app.settings.Search.Enabled {
+		searchClient = app.NewSearchClient()
+	}
+	dao, err := daos.InitDB(app.DataDir(), app.DatabaseType(), app.DatabaseUrl(), app.settings.Search.Enabled, searchClient)
 	if err != nil {
 		return err
 	}
@@ -243,5 +260,5 @@ func (app *BaseApp) initDataDB() error {
 }
 
 func (app *BaseApp) SendMail(to string, subject string, body string) error {
-	return mailer.SendMail(app.Settings(), to, subject, body, app.IsDebug())
+	return mailer.SendMail(app.Settings(), to, subject, body)
 }

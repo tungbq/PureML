@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/tests"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tests"
 	"github.com/labstack/echo/v4"
 )
 
@@ -248,6 +248,229 @@ func TestAddUsersToOrg(t *testing.T) {
 				`"status":200`,
 				`"data":null`,
 				`"message":"User added to organization"`,
+			},
+		},
+	}
+
+	for _, scenario := range scenarios {
+		scenario.Test(t)
+	}
+}
+func TestUpdateUserRole(t *testing.T) {
+	scenarios := []tests.ApiScenario{
+		{
+			Name:           "update user role + unauthorized",
+			Method:         http.MethodPost,
+			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			ExpectedStatus: 401,
+			ExpectedContent: []string{
+				`Authentication token required`,
+			},
+		},
+		{
+			Name:   "update user role + invalid token",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": InvalidToken,
+			},
+			ExpectedStatus: 403,
+			ExpectedContent: []string{
+				`Could not parse authentication token`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + login user not found",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidTokenNoUser,
+			},
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`User not found`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + invalid org uuid",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + InvalidOrgUuidString + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`Invalid UUID format`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + org not found",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`Organization not found`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + no email in body",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"",
+				"role":"owner"
+			}`),
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`"status":400`,
+				`"data":null`,
+				`"message":"Email is required"`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + no role in body",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"test@test.com",
+				"role":""
+			}`),
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`"status":400`,
+				`"data":null`,
+				`"message":"Role is required"`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + invalid email",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"invalidemail",
+				"role":"owner"
+			}`),
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`"status":400`,
+				`"data":null`,
+				`"message":"Email is invalid"`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + invalid role",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"test@test.com",
+				"role":"norole"
+			}`),
+			ExpectedStatus: 400,
+			ExpectedContent: []string{
+				`"status":400`,
+				`"data":null`,
+				`"message":"Role must be one of 'owner' or 'member'"`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + user to add not found",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"noone@nomail.com",
+				"role":"owner"
+			}`),
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`"status":404`,
+				`"data":null`,
+				`"message":"User to update not found"`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + not authorized to update user roles",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidUserToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"demo@aztlan.in",
+				"role":"member"
+			}`),
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+				// Make notadmin a "member" of the admin user org
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", ValidAdminUserOrgUuid)
+				if err != nil {
+					t.Fatal(err)
+				}
+			},
+			ExpectedStatus: 403,
+			ExpectedContent: []string{
+				`"status":403`,
+				`"data":null`,
+				`"message":"You are not authorized to update users in this organization"`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + user not member",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"notadmin@aztlan.in",
+				"role":"member"
+			}`),
+			ExpectedStatus: 404,
+			ExpectedContent: []string{
+				`"status":404`,
+				`"data":null`,
+				`"message":"User not member of organization"`,
+			},
+		},
+		{
+			Name:   "update user role + valid token + user added successfully",
+			Method: http.MethodPost,
+			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/role",
+			RequestHeaders: map[string]string{
+				"Authorization": ValidAdminToken,
+			},
+			Body: strings.NewReader(`{
+				"email":"notadmin@aztlan.in",
+				"role":"owner"
+			}`),
+			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+				// Make notadmin a "member" of the admin user org
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", ValidAdminUserOrgUuid)
+				if err != nil {
+					t.Fatal(err)
+				}
+			},
+			ExpectedStatus: 200,
+			ExpectedContent: []string{
+				`"status":200`,
+				`"data":null`,
+				`"message":"User role updated"`,
 			},
 		},
 	}

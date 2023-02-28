@@ -3,9 +3,9 @@ package service
 import (
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/core"
-	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
-	"github.com/PureML-Inc/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core"
+	"github.com/PuremlHQ/PureML/packages/purebackend/middlewares"
+	"github.com/PuremlHQ/PureML/packages/purebackend/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,6 +16,7 @@ func BindUserOrgApi(app core.App, rg *echo.Group) {
 	orgGroup := rg.Group("/org", middlewares.RequireAuthContext)
 	orgGroup.GET("", api.DefaultHandler(GetOrgsForUser))
 	orgGroup.POST("/:orgId/add", api.DefaultHandler(AddUsersToOrg), middlewares.ValidateOrg(api.app))
+	orgGroup.POST("/:orgId/role", api.DefaultHandler(UpdateUserRole), middlewares.ValidateOrg(api.app))
 	orgGroup.POST("/join", api.DefaultHandler(JoinOrg))
 	orgGroup.POST("/:orgId/remove", api.DefaultHandler(RemoveOrg), middlewares.ValidateOrg(api.app))
 	orgGroup.GET("/:orgId/leave", api.DefaultHandler(LeaveOrg), middlewares.ValidateOrg(api.app))
@@ -101,6 +102,78 @@ func (api *Api) AddUsersToOrg(request *models.Request) *models.Response {
 	}
 	response = models.NewDataResponse(http.StatusOK, nil, "User added to organization")
 	return response
+}
+
+// UpdateUserRole godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Update a user's role in an organization.
+//	@Description	Update a user's role in an organization. Only accessible by owners of the organization.
+//	@Tags			Organization
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/role [post]
+//	@Param			orgId	path	string					true	"Organization ID"
+//	@Param			data	body	models.UserRoleRequest	true	"User email and role to update"
+func (api *Api) UpdateUserRole(request *models.Request) *models.Response {
+	request.ParseJsonBody()
+	email := request.GetParsedBodyAttribute("email")
+	var emailData string
+	if email == nil {
+		emailData = ""
+	} else {
+		emailData = email.(string)
+	}
+	if emailData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Email is required")
+	}
+	if addr, ok := ValidateMailAddress(emailData); ok {
+		emailData = addr
+	} else {
+		return models.NewErrorResponse(http.StatusBadRequest, "Email is invalid")
+	}
+	role := request.GetParsedBodyAttribute("role")
+	var roleData string
+	if role == nil {
+		roleData = ""
+	} else {
+		roleData = role.(string)
+	}
+	if roleData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Role is required")
+	}
+	if roleData != "owner" && roleData != "member" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Role must be one of 'owner' or 'member'")
+	}
+	orgId := request.GetOrgId()
+	user, err := api.app.Dao().GetUserByEmail(emailData)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if user == nil {
+		return models.NewErrorResponse(http.StatusNotFound, "User to update not found")
+	}
+	userUUID := request.GetUserUUID()
+	userOrganization, err := api.app.Dao().GetUserOrganizationByOrgIdAndUserUUID(orgId, userUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if userOrganization == nil || userOrganization.Role != "owner" {
+		return models.NewErrorResponse(http.StatusForbidden, "You are not authorized to update users in this organization")
+	}
+	userOrganization, err = api.app.Dao().GetUserOrganizationByOrgIdAndUserUUID(orgId, user.UUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if userOrganization == nil {
+		return models.NewErrorResponse(http.StatusNotFound, "User not member of organization")
+	}
+	err = api.app.Dao().UpdateUserRoleByOrgIdAndUserUUID(orgId, user.UUID, roleData)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, nil, "User role updated")
 }
 
 // JoinOrg godoc
@@ -249,6 +322,7 @@ func (api *Api) RemoveOrg(request *models.Request) *models.Response {
 
 var GetOrgsForUser ServiceFunc = (*Api).GetOrgsForUser
 var AddUsersToOrg ServiceFunc = (*Api).AddUsersToOrg
+var UpdateUserRole ServiceFunc = (*Api).UpdateUserRole
 var JoinOrg ServiceFunc = (*Api).JoinOrg
 var LeaveOrg ServiceFunc = (*Api).LeaveOrg
 var RemoveOrg ServiceFunc = (*Api).RemoveOrg
