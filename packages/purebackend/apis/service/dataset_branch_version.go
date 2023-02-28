@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/core"
-	"github.com/PureML-Inc/PureML/packages/purebackend/middlewares"
-	"github.com/PureML-Inc/PureML/packages/purebackend/models"
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/filesystem"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core"
+	"github.com/PuremlHQ/PureML/packages/purebackend/middlewares"
+	"github.com/PuremlHQ/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/filesystem"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )

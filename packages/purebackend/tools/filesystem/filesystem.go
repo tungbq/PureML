@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/list"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/list"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/endpoints"

@@ -5,12 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/config"
-	"github.com/PureML-Inc/PureML/packages/purebackend/core/settings"
-	"github.com/PureML-Inc/PureML/packages/purebackend/daos"
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/filesystem"
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/mailer"
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/search"
+	"github.com/PuremlHQ/PureML/packages/purebackend/config"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
+	"github.com/PuremlHQ/PureML/packages/purebackend/daos"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/filesystem"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/mailer"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/search"
 	_ "github.com/joho/godotenv/autoload"
 )
 

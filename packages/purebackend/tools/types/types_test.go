@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/types"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/types"
 )
 
 func TestPointer(t *testing.T) {

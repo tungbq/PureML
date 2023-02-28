@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/models"
+	"github.com/PuremlHQ/PureML/packages/purebackend/models"
 	"github.com/labstack/echo/v4"
 )
 

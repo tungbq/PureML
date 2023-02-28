@@ -4,7 +4,7 @@ import (
 	"database/sql/driver"
 	"testing"
 
-	"github.com/PureML-Inc/PureML/packages/purebackend/tools/types"
+	"github.com/PuremlHQ/PureML/packages/purebackend/tools/types"
 )
 
 func TestJsonArrayMarshalJSON(t *testing.T) {
