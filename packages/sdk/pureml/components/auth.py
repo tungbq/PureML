@@ -36,22 +36,22 @@ def login(org_id: str, access_token: str) -> str:
         response_org_id = response_org_details[0]["uuid"]
 
         if response_org_id == org_id:
-            print("[green] Valid Org Id and Access token")
+            print("[green]Valid Org Id and Access token")
             save_auth(org_id=org_id, access_token=access_token)
 
         else:
             print(
-                "[orange] Valid Org Id and Access token. Obtained different organization"
+                "[orange]Valid Org Id and Access token. Obtained different organization"
             )
 
         # else:
         #     print('[green] Invalid Org Id and Access token')
     elif response.status_code == 403:
-        print("[red] Invalid Access token")
+        print("[red]Invalid Access token")
     elif response.status_code == 404:
-        print("[red] Invalid Org Id")
+        print("[red]Invalid Org Id")
     else:
-        print("[red] Unable to obtain the organization details")
+        print("[red]Unable to obtain the organization details")
 
 
 def details():

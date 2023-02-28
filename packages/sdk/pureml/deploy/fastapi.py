@@ -313,6 +313,10 @@ def run_fastapi_server(
         output=output,
     )
 
-    app = FastAPI()
+    run_command = "python {api_path}".format(api_path=fastapi_schema.PATH_FASTAPI_FILE)
 
-    uvicorn.run(app, host=fastapi_schema.API_IP_HOST, port=fastapi_schema.PORT_FASTAPI)
+    os.system(run_command)
+
+    # app = FastAPI()
+
+    # uvicorn.run(app, host=fastapi_schema.API_IP_HOST, port=fastapi_schema.PORT_FASTAPI)

@@ -3,7 +3,6 @@ import docker
 from .fastapi import create_fastapi_file
 from pureml.schema import FastAPISchema, PredictionSchema, DockerSchema
 
-
 prediction_schema = PredictionSchema()
 fastapi_schema = FastAPISchema()
 docker_schema = DockerSchema()
