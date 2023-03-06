@@ -5,7 +5,14 @@ import time
 import joblib
 import pandas as pd
 import requests
-from pureml.utils.constants import BASE_URL, PATH_DATASET_DIR, PATH_DATASET_README, STORAGE
+
+# from pureml.utils.constants import (
+#     BASE_URL,
+#     PATH_DATASET_DIR,
+#     PATH_DATASET_README,
+#     STORAGE,
+# )
+from pureml.schema import DatasetSchema, StorageSchema
 from pureml.utils.hash import generate_hash_for_file
 from pureml.utils.readme import load_readme
 from rich import print
@@ -16,9 +23,10 @@ from . import get_org_id, get_token
 def init_branch(branch: str, dataset_name: str):
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     url = "org/{}/dataset/{}/branch/create".format(org_id, dataset_name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/json",
@@ -28,8 +36,7 @@ def init_branch(branch: str, dataset_name: str):
     data = {"dataset_name": dataset_name, "branchName": branch}
 
     data = json.dumps(data)
-    
-    
+
     response = requests.post(url, data=data, headers=headers)
 
     if response.ok:
@@ -47,17 +54,17 @@ def check_dataset_hash(hash: str, name: str, branch: str):
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     url = "org/{}/dataset/{}/branch/{}/hash-status".format(org_id, branch, name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {"Authorization": "Bearer {}".format(user_token)}
 
     data = {"hash": hash, "branch": branch}
 
     data = json.dumps(data)
-    
-    
+
     response = requests.post(url, data=data, headers=headers)
 
     hash_exists = False
@@ -71,16 +78,16 @@ def check_dataset_hash(hash: str, name: str, branch: str):
 def branch_details(branch: str, dataset_name: str):
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     url = "org/{}/dataset/{}/branch/{}".format(org_id, dataset_name, branch)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
     }
 
-    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -112,16 +119,16 @@ def branch_delete(branch: str, dataset_name: str) -> str:
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     url = "org/{}/dataset/{}/branch/{}/delete".format(org_id, dataset_name, branch)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
     }
 
-    
     response = requests.delete(url, headers=headers)
 
     if response.ok:
@@ -137,16 +144,16 @@ def branch_list(dataset_name: str) -> str:
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     url = "org/{}/dataset/{}/branch".format(org_id, dataset_name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
     }
 
-    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -172,16 +179,16 @@ def list():
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     url = "org/{}/dataset/all".format(org_id)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
     }
 
-    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -201,9 +208,10 @@ def list():
 def init(name: str, readme: str = None, branch: str = None):
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     if readme is None:
-        readme = PATH_DATASET_README
+        readme = dataset_schema.PATH_DATASET_README
 
     file_content, file_type = load_readme(path=readme)
 
@@ -211,13 +219,13 @@ def init(name: str, readme: str = None, branch: str = None):
     branch_main = "main"
 
     url = "org/{}/dataset/{}/create".format(org_id, name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         # "Content-Type": "application/json",
         "Authorization": "Bearer {}".format(user_token),
         # 'accept': 'application/json',
-        'Content-Type': '*/*',
+        "Content-Type": "*/*",
     }
 
     data = {
@@ -225,13 +233,12 @@ def init(name: str, readme: str = None, branch: str = None):
         "branch_names": [branch_main, branch_user],
         "readme": {"file_type": file_type, "content": file_content},
     }
-    
-    data = json.dumps(data)
-    files = {'file': (readme, open(readme, "rb"), file_type)}
-    # response = requests.post(url, data=data, headers=headers, files=files)
-    #     
-    response = requests.post(url, data=data, headers=headers)
 
+    data = json.dumps(data)
+    files = {"file": (readme, open(readme, "rb"), file_type)}
+    # response = requests.post(url, data=data, headers=headers, files=files)
+    #
+    response = requests.post(url, data=data, headers=headers)
 
     if response.ok:
         print(f"[bold green]Dataset has been created!")
@@ -245,11 +252,12 @@ def init(name: str, readme: str = None, branch: str = None):
 
 
 def save_dataset(dataset, name: str):
+    dataset_schema = DatasetSchema()
     # file_name = '.'.join([name, 'parquet'])
     file_name = ".".join([name, "pkl"])
-    save_path = os.path.join(PATH_DATASET_DIR, file_name)
+    save_path = os.path.join(dataset_schema.paths.PATH_DATASET_DIR, file_name)
 
-    os.makedirs(PATH_DATASET_DIR, exist_ok=True)
+    os.makedirs(dataset_schema.paths.PATH_DATASET_DIR, exist_ok=True)
 
     # dataset.to_parquet(save_path)
     joblib.dump(dataset, save_path)
@@ -263,7 +271,7 @@ def register(
     lineage,
     branch: str,
     is_empty: bool = False,
-    storage: str = STORAGE,
+    storage: str = StorageSchema().STORAGE,
 ) -> str:
     """The function takes in a dataset, a name and a version and saves the dataset locally, then uploads the
     dataset to the PureML server
@@ -281,6 +289,7 @@ def register(
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     dataset_path = save_dataset(dataset, name)
     name_with_ext = dataset_path.split("/")[-1]
@@ -292,7 +301,6 @@ def register(
     if is_empty:
         dataset_path = save_dataset(dataset=None, name=name)
         name_with_ext = dataset_path.split("/")[-1]
-
 
     dataset_exists = dataset_status(name)
     # print('Dataset status', dataset_exists)
@@ -330,10 +338,12 @@ def register(
     else:
 
         url = "org/{}/dataset/{}/branch/{}/register".format(org_id, name, branch)
-        url = urljoin(BASE_URL, url)
+        url = urljoin(dataset_schema.backend.BASE_URL, url)
 
-        headers = {"Authorization": "Bearer {}".format(user_token),
-                    'accept': 'application/json'}
+        headers = {
+            "Authorization": "Bearer {}".format(user_token),
+            "accept": "application/json",
+        }
 
         files = {"file": (name_with_ext, open(dataset_path, "rb"))}
 
@@ -349,27 +359,27 @@ def register(
         }
 
         # data = json.dumps(data)
-        
-        response = requests.post(url, files=files, data=data, headers=headers)
 
+        response = requests.post(url, files=files, data=data, headers=headers)
 
         if response.ok:
 
             # print(response.json())
             try:
                 dataset_version = response.json()["data"][0]["version"]
-               
+                print("Version: ", dataset_version)
+
                 if is_empty:
                     print(f"[bold green]Lineage has been registered!")
                 else:
                     print(f"[bold green]Dataset and lineage have been registered!")
-                    
+
             except Exception as e:
-                print('[bold red] Incorrect json response. Dataset has not been registered')
+                print(
+                    "[bold red] Incorrect json response. Dataset has not been registered"
+                )
                 print(e)
                 dataset_version = None
-
-
 
             return True, dataset_hash, dataset_version
         else:
@@ -408,16 +418,16 @@ def details(
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     url = "org/{}/dataset/{}".format(org_id, name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
     }
 
-    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -449,18 +459,16 @@ def version_details(name: str, branch: str, version: str = "latest"):
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
-    url = "org/{}/dataset/{}/branch/{}/version/{}".format(
-        org_id, name, branch, version
-    )
-    url = urljoin(BASE_URL, url)
+    url = "org/{}/dataset/{}/branch/{}/version/{}".format(org_id, name, branch, version)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": "Bearer {}".format(user_token),
     }
 
-    
     response = requests.get(url, headers=headers)
 
     if response.ok:
@@ -494,6 +502,7 @@ def fetch(name: str, branch: str, version: str = "latest"):
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     dataset_details = version_details(name=name, branch=branch, version=version)
 
@@ -519,8 +528,6 @@ def fetch(name: str, branch: str, version: str = "latest"):
 
     # print('url', dataset_url)
 
-
-    
     response = requests.get(dataset_url)
 
     if response.ok:
@@ -555,9 +562,10 @@ def delete(name: str, version: str = "latest") -> str:
 
     user_token = get_token()
     org_id = get_org_id()
+    dataset_schema = DatasetSchema()
 
     url = "org/{}/dataset/{}/delete".format(org_id, name)
-    url = urljoin(BASE_URL, url)
+    url = urljoin(dataset_schema.backend.BASE_URL, url)
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -568,7 +576,6 @@ def delete(name: str, version: str = "latest") -> str:
 
     data = json.dumps(data)
 
-    
     response = requests.delete(url, headers=headers, data=data)
 
     if response.ok:
