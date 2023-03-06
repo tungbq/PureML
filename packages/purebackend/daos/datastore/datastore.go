@@ -1398,7 +1398,12 @@ func (ds *Datastore) RegisterModelFile(modelBranchUUID uuid.UUID, sourceTypeUUID
 		Path:    sourcePath,
 		IsEmpty: isEmpty,
 	}
-	err = ds.DB.Create(&modelVersion).Preload("Branch").Preload("CreatedByUser").Preload("Path.SourceType").Error
+	
+	err = ds.DB.Create(&modelVersion).Error
+	if err != nil {
+		return nil, err
+	}
+	err = ds.DB.Preload("Branch").Preload("CreatedByUser").Preload("Path.SourceType").Find(&modelVersion).Error
 	if err != nil {
 		return nil, err
 	}
@@ -2070,7 +2075,11 @@ func (ds *Datastore) RegisterDatasetFile(datasetBranchUUID uuid.UUID, sourceType
 		Path:    sourcePath,
 		IsEmpty: isEmpty,
 	}
-	err = ds.DB.Create(&datasetVersion).Preload("Lineage").Preload("Branch").Preload("CreatedByUser").Preload("Path.SourceType").Error
+	err = ds.DB.Create(&datasetVersion).Error
+	if err != nil {
+		return nil, err
+	}
+	err = ds.DB.Preload("Lineage").Preload("Branch").Preload("CreatedByUser").Preload("Path.SourceType").Find(&datasetVersion).Error
 	if err != nil {
 		return nil, err
 	}

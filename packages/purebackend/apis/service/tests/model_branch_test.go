@@ -190,7 +190,7 @@ func TestGetModelBranch(t *testing.T) {
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Branch not found`,
+				`Model Branch not found`,
 			},
 		},
 		{

@@ -190,7 +190,7 @@ func TestGetDatasetBranch(t *testing.T) {
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Branch not found`,
+				`Dataset Branch not found`,
 			},
 		},
 		{

@@ -44,7 +44,7 @@ func ValidateDatasetBranch(app core.App) echo.MiddlewareFunc {
 			}
 			if branch == nil {
 				context.Response().WriteHeader(http.StatusNotFound)
-				_, err = context.Response().Writer.Write([]byte("Branch not found"))
+				_, err = context.Response().Writer.Write([]byte("Dataset Branch not found"))
 				if err != nil {
 					return err
 				}

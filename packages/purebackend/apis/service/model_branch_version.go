@@ -18,10 +18,8 @@ func BindModelBranchVersionApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
 	modelGroup := rg.Group("/org/:orgId/model", middlewares.RequireAuthContext, middlewares.ValidateOrg(api.app))
-	modelGroup.POST("/:modelName/branch/:branchName/update", api.DefaultHandler(UpdateModelBranch), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
 	modelGroup.POST("/:modelName/branch/:branchName/hash-status", api.DefaultHandler(VerifyModelBranchHashStatus), middlewares.ValidateModel(api.app))
 	modelGroup.POST("/:modelName/branch/:branchName/register", api.DefaultHandler(RegisterModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
-	modelGroup.DELETE("/:modelName/branch/:branchName/delete", api.DefaultHandler(DeleteModelBranch), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
 	modelGroup.GET("/:modelName/branch/:branchName/version", api.DefaultHandler(GetModelBranchAllVersions), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app))
 	modelGroup.GET("/:modelName/branch/:branchName/version/:version", api.DefaultHandler(GetModelBranchVersion), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
 }
@@ -39,7 +37,6 @@ func BindModelBranchVersionApi(app core.App, rg *echo.Group) {
 //	@Param			orgId		path	string	true	"Organization Id"
 //	@Param			modelName	path	string	true	"Model Name"
 //	@Param			branchName	path	string	true	"Branch Name"
-//	@Param			withLogs	query	bool	false	"Include logs"
 func (api *Api) GetModelBranchAllVersions(request *models.Request) *models.Response {
 	var response *models.Response
 	branchUUID := request.GetModelBranchUUID()
@@ -48,7 +45,7 @@ func (api *Api) GetModelBranchAllVersions(request *models.Request) *models.Respo
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	} else {
-		response = models.NewDataResponse(http.StatusOK, allVersions, "Model branch all version details")
+		response = models.NewDataResponse(http.StatusOK, allVersions, "All model branch versions")
 	}
 	return response
 }
@@ -77,7 +74,7 @@ func (api *Api) GetModelBranchVersion(request *models.Request) *models.Response 
 	if version == nil {
 		return models.NewErrorResponse(http.StatusNotFound, "Version not found")
 	}
-	return models.NewDataResponse(http.StatusOK, version, "Model branch details")
+	return models.NewDataResponse(http.StatusOK, version, "Model branch version details")
 }
 
 // VerifyModelBranchHashStatus godoc
@@ -108,7 +105,16 @@ func (api *Api) VerifyModelBranchHashStatus(request *models.Request) *models.Res
 	}
 	modelBranchUUID := model.UUID
 	request.ParseJsonBody()
-	hashValue := request.GetParsedBodyAttribute("hash").(string)
+	hashValue := request.GetParsedBodyAttribute("hash")
+	var hashValueData string
+	if hashValue == nil {
+		hashValueData = ""
+	} else {
+		hashValueData = hashValue.(string)
+	}
+	if hashValueData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Hash value is empty")
+	}
 	versions, err := api.app.Dao().GetModelBranchAllVersions(modelBranchUUID, false)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
@@ -145,7 +151,7 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	modelUUID := request.GetModelUUID()
 	modelBranchUUID := request.GetModelBranchUUID()
 	var modelHash string
-	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
+	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 && request.FormValues["hash"][0] != "" {
 		modelHash = request.FormValues["hash"][0]
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Hash is required")
@@ -155,8 +161,8 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 		modelSourceType = strings.ToUpper(request.FormValues["storage"][0])
 	}
 	var modelIsEmpty bool
-	if request.FormValues["isEmpty"] != nil && len(request.FormValues["isEmpty"]) > 0 {
-		modelIsEmpty = request.FormValues["isEmpty"][0] == "true"
+	if request.FormValues["is_empty"] != nil && len(request.FormValues["is_empty"]) > 0 {
+		modelIsEmpty = request.FormValues["is_empty"][0] == "true"
 	}
 	fileHeader := request.GetFormFile("file")
 	if fileHeader == nil {
@@ -174,7 +180,7 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 		}
 	}
 	if !sourceValid {
-		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
+		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model storage")
 	}
 	versions, err := api.app.Dao().GetModelBranchAllVersions(modelBranchUUID, false)
 	if err != nil {
@@ -199,12 +205,12 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	var sourceTypeUUID uuid.UUID
 	if modelSourceType == "PUREML-STORAGE" {
 		sourceTypeUUID, err = api.app.Dao().GetSourceTypeByName(uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111")), modelSourceType)
-		if err != nil {
+		if sourceTypeUUID == uuid.Nil || err != nil {
 			return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
 		}
 	} else {
 		sourceTypeUUID, err = api.app.Dao().GetSourceTypeByName(orgId, modelSourceType)
-		if sourceTypeUUID == uuid.Nil || err != nil {
+		if err != nil {
 			return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
 		}
 		if sourceTypeUUID == uuid.Nil {

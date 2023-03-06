@@ -104,7 +104,16 @@ func (api *Api) VerifyDatasetBranchHashStatus(request *models.Request) *models.R
 	}
 	datasetBranchUUID := dataset.UUID
 	request.ParseJsonBody()
-	hashValue := request.GetParsedBodyAttribute("hash").(string)
+	hashValue := request.GetParsedBodyAttribute("hash")
+	var hashValueData string
+	if hashValue == nil {
+		hashValueData = ""
+	} else {
+		hashValueData = hashValue.(string)
+	}
+	if hashValueData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Hash value is empty")
+	}
 	versions, err := api.app.Dao().GetDatasetBranchAllVersions(datasetBranchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
@@ -141,7 +150,7 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	datasetUUID := request.GetDatasetUUID()
 	datasetBranchUUID := request.GetDatasetBranchUUID()
 	var datasetHash string
-	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 {
+	if request.FormValues["hash"] != nil && len(request.FormValues["hash"]) > 0 && request.FormValues["hash"][0] != "" {
 		datasetHash = request.FormValues["hash"][0]
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Hash is required")
@@ -164,7 +173,7 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	}
 	datasetBranchName := request.GetPathParam("branchName")
 	if datasetBranchName == "main" {
-		return models.NewErrorResponse(http.StatusBadRequest, "Cannot register model directly to main branch")
+		return models.NewErrorResponse(http.StatusBadRequest, "Cannot register dataset directly to main branch")
 	}
 	sourceValid := false
 	for source := range models.SupportedSources {
@@ -174,7 +183,7 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 		}
 	}
 	if !sourceValid {
-		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model source type")
+		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported dataset storage")
 	}
 	versions, err := api.app.Dao().GetDatasetBranchAllVersions(datasetBranchUUID)
 	if err != nil {
