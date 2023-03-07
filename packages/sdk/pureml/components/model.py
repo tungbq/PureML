@@ -1,10 +1,8 @@
 import requests
 from rich import print
 
-
 import os
 import json
-
 
 from . import get_token, get_org_id
 from pureml.schema import ModelSchema, StorageSchema
@@ -266,7 +264,7 @@ def register(
     storage: str = StorageSchema().STORAGE,
 ):
 
-    name, branch = parse_version_label(label)
+    name, branch, _ = parse_version_label(label)
 
     user_token = get_token()
     org_id = get_org_id()
