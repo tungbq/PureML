@@ -1,7 +1,7 @@
 package settings
 
 import (
-	"github.com/PuremlHQ/PureML/packages/purebackend/tools/security"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/security"
 )
 
 // Settings defines common app configuration options.

@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/apis"
 	"github.com/PuremlHQ/PureML/packages/purebackend/core"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core/apis"
 	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
 )
 

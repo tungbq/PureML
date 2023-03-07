@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/PuremlHQ/PureML/packages/purebackend"
-	"github.com/PuremlHQ/PureML/packages/purebackend/config"
+	"github.com/PuremlHQ/PureML/packages/purebackend/core/config"
 	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
 )
 
