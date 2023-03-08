@@ -3,7 +3,7 @@ package security_test
 import (
 	"testing"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/security"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/security"
 	"github.com/golang-jwt/jwt/v4"
 )
 

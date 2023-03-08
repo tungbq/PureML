@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
-	orgmodels "github.com/PuremlHQ/PureML/packages/purebackend/org/models"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	userorgmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
@@ -51,7 +51,7 @@ func ValidateOrg(app core.App) echo.MiddlewareFunc {
 				}
 				return nil
 			}
-			context.Set(ContextOrgKey, &orgmodels.OrganizationHandleResponse{
+			context.Set(ContextOrgKey, &userorgmodels.OrganizationHandleResponse{
 				Name:        org.Name,
 				UUID:        org.UUID,
 				Handle:      org.Handle,

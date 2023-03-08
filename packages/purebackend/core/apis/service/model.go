@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	authmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/auth/middlewares"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
-	commonmodels "github.com/PuremlHQ/PureML/packages/purebackend/core/common/models"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/models"
-	"github.com/PuremlHQ/PureML/packages/purebackend/model/middlewares"
-	orgmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/org/middlewares"
+	authmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/auth/middlewares"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	commonmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/models"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
+	"github.com/PureMLHQ/PureML/packages/purebackend/model/middlewares"
+	orgmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/user_org/middlewares"
 	"github.com/labstack/echo/v4"
 )
 

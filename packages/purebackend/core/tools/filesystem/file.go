@@ -11,8 +11,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/inflector"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/security"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/inflector"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/security"
 	"github.com/gabriel-vasile/mimetype"
 )
 

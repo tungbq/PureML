@@ -3,7 +3,10 @@ package seeds
 import (
 	"fmt"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/daos/dbmodels"
+	commondbmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/dbmodels"
+	datasetdbmodels "github.com/PureMLHQ/PureML/packages/purebackend/dataset/dbmodels"
+	modeldbmodels "github.com/PureMLHQ/PureML/packages/purebackend/model/dbmodels"
+	userorgdbmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/dbmodels"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -58,8 +61,8 @@ func CreateUser(db *gorm.DB, uuid uuid.UUID, name string, email string, handle s
 	if err != nil {
 		return err
 	}
-	err = db.Create(&dbmodels.User{
-		BaseModel: dbmodels.BaseModel{
+	err = db.Create(&userorgdbmodels.User{
+		BaseModel: commondbmodels.BaseModel{
 			UUID: uuid,
 		},
 		Name:       name,
@@ -69,9 +72,9 @@ func CreateUser(db *gorm.DB, uuid uuid.UUID, name string, email string, handle s
 		Bio:        bio,
 		Avatar:     avatar,
 		IsVerified: true,
-		Orgs: []dbmodels.Organization{
+		Orgs: []userorgdbmodels.Organization{
 			{
-				BaseModel: dbmodels.BaseModel{
+				BaseModel: commondbmodels.BaseModel{
 					UUID: uuid,
 				},
 				Name:        "Demo Org",
@@ -89,33 +92,33 @@ func CreateUser(db *gorm.DB, uuid uuid.UUID, name string, email string, handle s
 }
 
 func CreateModel(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic bool) error {
-	var branches []dbmodels.ModelBranch
-	var readme dbmodels.Readme
+	var branches []modeldbmodels.ModelBranch
+	var readme commondbmodels.Readme
 	if isPublic {
-		branches = []dbmodels.ModelBranch{
+		branches = []modeldbmodels.ModelBranch{
 			{
-				BaseModel: dbmodels.BaseModel{
+				BaseModel: commondbmodels.BaseModel{
 					UUID: defaultUUID,
 				},
 				Name:      "main",
 				IsDefault: true,
 			},
 			{
-				BaseModel: dbmodels.BaseModel{
+				BaseModel: commondbmodels.BaseModel{
 					UUID: defaultUUID2,
 				},
 				Name:      "dev",
 				IsDefault: false,
-				Versions: []dbmodels.ModelVersion{
+				Versions: []modeldbmodels.ModelVersion{
 					{
-						BaseModel: dbmodels.BaseModel{
+						BaseModel: commondbmodels.BaseModel{
 							UUID: defaultUUID,
 						},
 						Version: "v1",
 						Hash:    "1234567890",
 						IsEmpty: true,
-						CreatedByUser: dbmodels.User{
-							BaseModel: dbmodels.BaseModel{
+						CreatedByUser: userorgdbmodels.User{
+							BaseModel: commondbmodels.BaseModel{
 								UUID: defaultUUID,
 							},
 						},
@@ -123,13 +126,13 @@ func CreateModel(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic
 				},
 			},
 		}
-		readme = dbmodels.Readme{
-			BaseModel: dbmodels.BaseModel{
+		readme = commondbmodels.Readme{
+			BaseModel: commondbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
-			ReadmeVersions: []dbmodels.ReadmeVersion{
+			ReadmeVersions: []commondbmodels.ReadmeVersion{
 				{
-					BaseModel: dbmodels.BaseModel{
+					BaseModel: commondbmodels.BaseModel{
 						UUID: defaultUUID,
 					},
 					Content:  "Demo Readme",
@@ -139,33 +142,33 @@ func CreateModel(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic
 			},
 		}
 	}
-	err := db.Create(&dbmodels.Model{
-		BaseModel: dbmodels.BaseModel{
+	err := db.Create(&modeldbmodels.Model{
+		BaseModel: commondbmodels.BaseModel{
 			UUID: uuid,
 		},
 		Name: name,
 		Wiki: wiki,
-		Org: dbmodels.Organization{
-			BaseModel: dbmodels.BaseModel{
+		Org: userorgdbmodels.Organization{
+			BaseModel: commondbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
 		},
-		CreatedByUser: dbmodels.User{
-			BaseModel: dbmodels.BaseModel{
+		CreatedByUser: userorgdbmodels.User{
+			BaseModel: commondbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
 		},
-		UpdatedByUser: dbmodels.User{
-			BaseModel: dbmodels.BaseModel{
+		UpdatedByUser: userorgdbmodels.User{
+			BaseModel: commondbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
 		},
 		IsPublic: isPublic,
 		Branches: branches,
 		Readme:   readme,
-		Users: []dbmodels.User{
+		Users: []userorgdbmodels.User{
 			{
-				BaseModel: dbmodels.BaseModel{
+				BaseModel: commondbmodels.BaseModel{
 					UUID: defaultUUID,
 				},
 			},
@@ -182,39 +185,39 @@ func CreateModel(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic
 }
 
 func CreateDataset(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPublic bool) error {
-	var branches []dbmodels.DatasetBranch
-	var readme dbmodels.Readme
+	var branches []datasetdbmodels.DatasetBranch
+	var readme commondbmodels.Readme
 	if isPublic {
-		branches = []dbmodels.DatasetBranch{
+		branches = []datasetdbmodels.DatasetBranch{
 			{
-				BaseModel: dbmodels.BaseModel{
+				BaseModel: commondbmodels.BaseModel{
 					UUID: defaultUUID,
 				},
 				Name:      "main",
 				IsDefault: true,
 			},
 			{
-				BaseModel: dbmodels.BaseModel{
+				BaseModel: commondbmodels.BaseModel{
 					UUID: defaultUUID2,
 				},
 				Name:      "dev",
 				IsDefault: false,
-				Versions: []dbmodels.DatasetVersion{
+				Versions: []datasetdbmodels.DatasetVersion{
 					{
-						BaseModel: dbmodels.BaseModel{
+						BaseModel: commondbmodels.BaseModel{
 							UUID: defaultUUID,
 						},
 						Version: "v1",
 						Hash:    "1234567890",
 						IsEmpty: true,
-						Lineage: dbmodels.Lineage{
-							BaseModel: dbmodels.BaseModel{
+						Lineage: datasetdbmodels.Lineage{
+							BaseModel: commondbmodels.BaseModel{
 								UUID: defaultUUID,
 							},
 							Lineage: "{}",
 						},
-						CreatedByUser: dbmodels.User{
-							BaseModel: dbmodels.BaseModel{
+						CreatedByUser: userorgdbmodels.User{
+							BaseModel: commondbmodels.BaseModel{
 								UUID: defaultUUID,
 							},
 						},
@@ -222,13 +225,13 @@ func CreateDataset(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPubl
 				},
 			},
 		}
-		readme = dbmodels.Readme{
-			BaseModel: dbmodels.BaseModel{
+		readme = commondbmodels.Readme{
+			BaseModel: commondbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
-			ReadmeVersions: []dbmodels.ReadmeVersion{
+			ReadmeVersions: []commondbmodels.ReadmeVersion{
 				{
-					BaseModel: dbmodels.BaseModel{
+					BaseModel: commondbmodels.BaseModel{
 						UUID: defaultUUID,
 					},
 					Content:  "Demo Readme",
@@ -238,33 +241,33 @@ func CreateDataset(db *gorm.DB, uuid uuid.UUID, name string, wiki string, isPubl
 			},
 		}
 	}
-	err := db.Create(&dbmodels.Dataset{
-		BaseModel: dbmodels.BaseModel{
+	err := db.Create(&datasetdbmodels.Dataset{
+		BaseModel: commondbmodels.BaseModel{
 			UUID: uuid,
 		},
 		Name: name,
 		Wiki: wiki,
-		Org: dbmodels.Organization{
-			BaseModel: dbmodels.BaseModel{
+		Org: userorgdbmodels.Organization{
+			BaseModel: commondbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
 		},
-		CreatedByUser: dbmodels.User{
-			BaseModel: dbmodels.BaseModel{
+		CreatedByUser: userorgdbmodels.User{
+			BaseModel: commondbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
 		},
-		UpdatedByUser: dbmodels.User{
-			BaseModel: dbmodels.BaseModel{
+		UpdatedByUser: userorgdbmodels.User{
+			BaseModel: commondbmodels.BaseModel{
 				UUID: defaultUUID,
 			},
 		},
 		IsPublic: isPublic,
 		Branches: branches,
 		Readme:   readme,
-		Users: []dbmodels.User{
+		Users: []userorgdbmodels.User{
 			{
-				BaseModel: dbmodels.BaseModel{
+				BaseModel: commondbmodels.BaseModel{
 					UUID: defaultUUID,
 				},
 			},

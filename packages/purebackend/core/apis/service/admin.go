@@ -4,10 +4,10 @@ import (
 	// "fmt"
 	"net/http"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/config"
-	authmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/auth/middlewares"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/models"
+	authmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/auth/middlewares"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/config"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
 	"github.com/labstack/echo/v4"
 )
 

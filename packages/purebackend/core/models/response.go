@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"reflect"
 
-	datasetmodels "github.com/PuremlHQ/PureML/packages/purebackend/dataset/models"
-	modelmodels "github.com/PuremlHQ/PureML/packages/purebackend/model/models"
-	orgmodels "github.com/PuremlHQ/PureML/packages/purebackend/org/models"
-	usermodels "github.com/PuremlHQ/PureML/packages/purebackend/user/models"
+	datasetmodels "github.com/PureMLHQ/PureML/packages/purebackend/dataset/models"
+	modelmodels "github.com/PureMLHQ/PureML/packages/purebackend/model/models"
+	userorgmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
+
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -80,21 +80,20 @@ func NewDataResponse(statusCode int, data interface{}, message string) *Response
 	}
 }
 
-
 type ActivityResponse struct {
 	UUID     uuid.UUID                         `json:"uuid"`
 	Category string                            `json:"category"`
 	Activity string                            `json:"activity"`
-	User     usermodels.UserHandleResponse     `json:"user"`
+	User     userorgmodels.UserHandleResponse  `json:"user"`
 	Model    modelmodels.ModelNameResponse     `json:"model"`
 	Dataset  datasetmodels.DatasetNameResponse `json:"dataset"`
 }
 
 type TagResponse struct {
-	Tag     string                               `json:"tag"`
-	Model   modelmodels.ModelNameResponse        `json:"model"`
-	Dataset datasetmodels.DatasetNameResponse    `json:"dataset"`
-	Org     orgmodels.OrganizationHandleResponse `json:"org"`
+	Tag     string                                   `json:"tag"`
+	Model   modelmodels.ModelNameResponse            `json:"model"`
+	Dataset datasetmodels.DatasetNameResponse        `json:"dataset"`
+	Org     userorgmodels.OrganizationHandleResponse `json:"org"`
 }
 
 type LogResponse struct {

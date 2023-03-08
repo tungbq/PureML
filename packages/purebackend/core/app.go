@@ -1,10 +1,10 @@
 package core
 
 import (
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/daos"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/filesystem"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/search"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/daos"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/settings"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/filesystem"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/search"
 )
 
 // App defines the main PureBackend app interface.

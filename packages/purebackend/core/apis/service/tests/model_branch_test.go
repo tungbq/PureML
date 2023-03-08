@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/tests"
+	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
 )
 
 func TestGetModelAllBranches(t *testing.T) {

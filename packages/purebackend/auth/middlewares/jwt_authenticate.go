@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
-	"github.com/PuremlHQ/PureML/packages/purebackend/user/models"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/middlewares"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/middlewares"
+	"github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 )
 
 const (
-	AuthHeaderName                 = "Authorization"
-	ContextAuthKey                 = "User"
+	AuthHeaderName = "Authorization"
+	ContextAuthKey = "User"
 )
 
 func AuthenticateJWT(app core.App) echo.MiddlewareFunc {

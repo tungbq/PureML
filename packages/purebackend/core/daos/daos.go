@@ -3,14 +3,13 @@ package daos
 import (
 	"errors"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/models"
-	commonmodels "github.com/PuremlHQ/PureML/packages/purebackend/core/common/models"
-	orgmodels "github.com/PuremlHQ/PureML/packages/purebackend/org/models"
-	datasetmodels "github.com/PuremlHQ/PureML/packages/purebackend/dataset/models"
-	modelmodels "github.com/PuremlHQ/PureML/packages/purebackend/model/models"
-	usermodels "github.com/PuremlHQ/PureML/packages/purebackend/user/models"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/search"
-	impl "github.com/PuremlHQ/PureML/packages/purebackend/core/daos/datastore"
+	commonmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/models"
+	impl "github.com/PureMLHQ/PureML/packages/purebackend/core/daos/datastore"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/search"
+	datasetmodels "github.com/PureMLHQ/PureML/packages/purebackend/dataset/models"
+	modelmodels "github.com/PureMLHQ/PureML/packages/purebackend/model/models"
+	userorgmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -62,35 +61,35 @@ func (dao *Dao) Close() error {
 	return dao.Datastore().Close()
 }
 
-func (dao *Dao) GetAllAdminOrgs() ([]orgmodels.OrganizationResponse, error) {
+func (dao *Dao) GetAllAdminOrgs() ([]userorgmodels.OrganizationResponse, error) {
 	return dao.Datastore().GetAllAdminOrgs()
 }
 
-func (dao *Dao) GetOrgById(orgId uuid.UUID) (*orgmodels.OrganizationResponseWithMembers, error) {
+func (dao *Dao) GetOrgById(orgId uuid.UUID) (*userorgmodels.OrganizationResponseWithMembers, error) {
 	return dao.Datastore().GetOrgByID(orgId)
 }
 
-func (dao *Dao) GetOrgByHandle(orgHandle string) (*orgmodels.OrganizationResponse, error) {
+func (dao *Dao) GetOrgByHandle(orgHandle string) (*userorgmodels.OrganizationResponse, error) {
 	return dao.Datastore().GetOrgByHandle(orgHandle)
 }
 
-func (dao *Dao) GetOrgByJoinCode(joinCode string) (*orgmodels.OrganizationResponse, error) {
+func (dao *Dao) GetOrgByJoinCode(joinCode string) (*userorgmodels.OrganizationResponse, error) {
 	return dao.Datastore().GetOrgByJoinCode(joinCode)
 }
 
-func (dao *Dao) CreateOrgFromEmail(email string, orgName string, orgDesc string, orgHandle string) (*orgmodels.OrganizationResponse, error) {
+func (dao *Dao) CreateOrgFromEmail(email string, orgName string, orgDesc string, orgHandle string) (*userorgmodels.OrganizationResponse, error) {
 	return dao.Datastore().CreateOrgFromEmail(email, orgName, orgDesc, orgHandle)
 }
 
-func (dao *Dao) GetUserOrganizationsByEmail(email string) ([]usermodels.UserOrganizationsResponse, error) {
+func (dao *Dao) GetUserOrganizationsByEmail(email string) ([]userorgmodels.UserOrganizationsResponse, error) {
 	return dao.Datastore().GetUserOrganizationsByEmail(email)
 }
 
-func (dao *Dao) GetUserOrganizationByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.UUID) (*usermodels.UserOrganizationsRoleResponse, error) {
+func (dao *Dao) GetUserOrganizationByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.UUID) (*userorgmodels.UserOrganizationsRoleResponse, error) {
 	return dao.Datastore().GetUserOrganizationByOrgIdAndUserUUID(orgId, userUUID)
 }
 
-func (dao *Dao) CreateUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) (*usermodels.UserOrganizationsResponse, error) {
+func (dao *Dao) CreateUserOrganizationFromEmailAndOrgId(email string, orgId uuid.UUID) (*userorgmodels.UserOrganizationsResponse, error) {
 	return dao.Datastore().CreateUserOrganizationFromEmailAndOrgId(email, orgId)
 }
 
@@ -98,7 +97,7 @@ func (dao *Dao) DeleteUserOrganizationFromEmailAndOrgId(email string, orgId uuid
 	return dao.Datastore().DeleteUserOrganizationFromEmailAndOrgId(email, orgId)
 }
 
-func (dao *Dao) CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*usermodels.UserOrganizationsResponse, error) {
+func (dao *Dao) CreateUserOrganizationFromEmailAndJoinCode(email string, joinCode string) (*userorgmodels.UserOrganizationsResponse, error) {
 	return dao.Datastore().CreateUserOrganizationFromEmailAndJoinCode(email, joinCode)
 }
 
@@ -106,7 +105,7 @@ func (dao *Dao) UpdateUserRoleByOrgIdAndUserUUID(orgId uuid.UUID, userUUID uuid.
 	return dao.Datastore().UpdateUserRoleByOrgIdAndUserUUID(orgId, userUUID, role)
 }
 
-func (dao *Dao) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]interface{}) (*orgmodels.OrganizationResponse, error) {
+func (dao *Dao) UpdateOrg(orgId uuid.UUID, updatedAttributes map[string]interface{}) (*userorgmodels.OrganizationResponse, error) {
 	return dao.Datastore().UpdateOrg(orgId, updatedAttributes)
 }
 
@@ -118,35 +117,35 @@ func (dao *Dao) GetOrgAllPublicDatasets(orgId uuid.UUID) ([]datasetmodels.Datase
 	return dao.Datastore().GetOrgAllPublicDatasets(orgId)
 }
 
-func (dao *Dao) GetUserByEmail(email string) (*usermodels.UserResponse, error) {
+func (dao *Dao) GetUserByEmail(email string) (*userorgmodels.UserResponse, error) {
 	return dao.Datastore().GetUserByEmail(email)
 }
 
-func (dao *Dao) GetUserByHandle(handle string) (*usermodels.UserProfileResponse, error) {
+func (dao *Dao) GetUserByHandle(handle string) (*userorgmodels.UserProfileResponse, error) {
 	return dao.Datastore().GetUserByHandle(handle)
 }
 
-func (dao *Dao) GetSecureUserByEmail(email string) (*usermodels.UserResponse, error) {
+func (dao *Dao) GetSecureUserByEmail(email string) (*userorgmodels.UserResponse, error) {
 	return dao.Datastore().GetSecureUserByEmail(email)
 }
 
-func (dao *Dao) GetSecureUserByHandle(handle string) (*usermodels.UserResponse, error) {
+func (dao *Dao) GetSecureUserByHandle(handle string) (*userorgmodels.UserResponse, error) {
 	return dao.Datastore().GetSecureUserByHandle(handle)
 }
 
-func (dao *Dao) GetSecureUserByUUID(userUUID uuid.UUID) (*usermodels.UserResponse, error) {
+func (dao *Dao) GetSecureUserByUUID(userUUID uuid.UUID) (*userorgmodels.UserResponse, error) {
 	return dao.Datastore().GetSecureUserByUUID(userUUID)
 }
 
-func (dao *Dao) GetUserByUUID(userUUID uuid.UUID) (*usermodels.UserResponse, error) {
+func (dao *Dao) GetUserByUUID(userUUID uuid.UUID) (*userorgmodels.UserResponse, error) {
 	return dao.Datastore().GetUserByUUID(userUUID)
 }
 
-func (dao *Dao) GetUserProfileByUUID(userUUID uuid.UUID) (*usermodels.UserProfileResponse, error) {
+func (dao *Dao) GetUserProfileByUUID(userUUID uuid.UUID) (*userorgmodels.UserProfileResponse, error) {
 	return dao.Datastore().GetUserProfileByUUID(userUUID)
 }
 
-func (dao *Dao) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string, isVerified bool) (*usermodels.UserResponse, error) {
+func (dao *Dao) CreateUser(name string, email string, handle string, bio string, avatar string, hashedPassword string, isVerified bool) (*userorgmodels.UserResponse, error) {
 	return dao.Datastore().CreateUser(name, email, handle, bio, avatar, hashedPassword, isVerified)
 }
 
@@ -154,7 +153,7 @@ func (dao *Dao) VerifyUserEmail(userUUID uuid.UUID) error {
 	return dao.Datastore().VerifyUserEmail(userUUID)
 }
 
-func (dao *Dao) UpdateUser(email string, updatedAttributes map[string]interface{}) (*usermodels.UserResponse, error) {
+func (dao *Dao) UpdateUser(email string, updatedAttributes map[string]interface{}) (*userorgmodels.UserResponse, error) {
 	return dao.Datastore().UpdateUser(email, updatedAttributes)
 }
 

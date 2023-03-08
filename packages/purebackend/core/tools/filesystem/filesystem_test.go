@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/filesystem"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/filesystem"
 )
 
 func TestFileSystemExists(t *testing.T) {

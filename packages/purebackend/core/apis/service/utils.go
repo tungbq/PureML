@@ -7,29 +7,29 @@ import (
 	"mime/multipart"
 	"strings"
 
-	authmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/auth/middlewares"
-	orgmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/org/middlewares"
-	modelmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/model/middlewares"
-	datasetmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/dataset/middlewares"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/models"
-	orgmodels "github.com/PuremlHQ/PureML/packages/purebackend/org/models"
-	datasetmodels "github.com/PuremlHQ/PureML/packages/purebackend/dataset/models"
-	modelmodels "github.com/PuremlHQ/PureML/packages/purebackend/model/models"
-	usermodels "github.com/PuremlHQ/PureML/packages/purebackend/user/models"
+	authmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/auth/middlewares"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
+	datasetmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/dataset/middlewares"
+	datasetmodels "github.com/PureMLHQ/PureML/packages/purebackend/dataset/models"
+	modelmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/model/middlewares"
+	modelmodels "github.com/PureMLHQ/PureML/packages/purebackend/model/models"
+	userorgmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
+
+	orgmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/user_org/middlewares"
 	"github.com/labstack/echo/v4"
 )
 
 func extractRequest(context echo.Context) *models.Request {
 	request := &models.Request{}
 	if context.Get(authmiddlewares.ContextAuthKey) != nil {
-		request.User = context.Get(authmiddlewares.ContextAuthKey).(*usermodels.UserClaims)
+		request.User = context.Get(authmiddlewares.ContextAuthKey).(*userorgmodels.UserClaims)
 	} else {
-		request.User = &usermodels.UserClaims{}
+		request.User = &userorgmodels.UserClaims{}
 	}
 	if context.Get(orgmiddlewares.ContextOrgKey) != nil {
-		request.Org = context.Get(orgmiddlewares.ContextOrgKey).(*orgmodels.OrganizationHandleResponse)
+		request.Org = context.Get(orgmiddlewares.ContextOrgKey).(*userorgmodels.OrganizationHandleResponse)
 	} else {
-		request.Org = &orgmodels.OrganizationHandleResponse{}
+		request.Org = &userorgmodels.OrganizationHandleResponse{}
 	}
 	if context.Get(modelmiddlewares.ContextModelKey) != nil {
 		request.Model = context.Get(modelmiddlewares.ContextModelKey).(*modelmodels.ModelNameResponse)

@@ -1,4 +1,4 @@
-module github.com/PuremlHQ/PureML/packages/purebackend
+module github.com/PureMLHQ/PureML/packages/purebackend
 
 go 1.19
 

@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/config"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/settings"
+	"github.com/PureMLHQ/PureML/packages/purebackend"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/config"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/settings"
 )
 
 func main() {

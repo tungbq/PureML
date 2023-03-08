@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"mime/multipart"
 
+	datasetmodels "github.com/PureMLHQ/PureML/packages/purebackend/dataset/models"
+	modelmodels "github.com/PureMLHQ/PureML/packages/purebackend/model/models"
+	userorgmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
+
 	uuid "github.com/satori/go.uuid"
-	datasetmodels "github.com/PuremlHQ/PureML/packages/purebackend/dataset/models"
-	modelmodels "github.com/PuremlHQ/PureML/packages/purebackend/model/models"
-	orgmodels "github.com/PuremlHQ/PureML/packages/purebackend/org/models"
-	usermodels "github.com/PuremlHQ/PureML/packages/purebackend/user/models"
 )
 
 type Request struct {
-	User                 *usermodels.UserClaims
-	Org                  *orgmodels.OrganizationHandleResponse
+	User                 *userorgmodels.UserClaims
+	Org                  *userorgmodels.OrganizationHandleResponse
 	Model                *modelmodels.ModelNameResponse
 	ModelBranch          *modelmodels.ModelBranchNameResponse
 	ModelBranchVersion   *modelmodels.ModelBranchVersionNameResponse

@@ -4,8 +4,8 @@ import (
 	_ "fmt"
 	"net/http"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
-	"github.com/PuremlHQ/PureML/packages/purebackend/dataset/models"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	"github.com/PureMLHQ/PureML/packages/purebackend/dataset/models"
 	"github.com/labstack/echo/v4"
 )
 

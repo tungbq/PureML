@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/security"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/security"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	uuid "github.com/satori/go.uuid"

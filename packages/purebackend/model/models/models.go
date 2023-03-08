@@ -3,9 +3,8 @@ package models
 import (
 	"time"
 
-	commonmodels "github.com/PuremlHQ/PureML/packages/purebackend/core/common/models"
-	orgmodels "github.com/PuremlHQ/PureML/packages/purebackend/org/models"
-	usermodels "github.com/PuremlHQ/PureML/packages/purebackend/user/models"
+	commonmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/models"
+	userorgmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -53,19 +52,19 @@ type ModelNameResponse struct {
 }
 
 type ModelResponse struct {
-	UUID      uuid.UUID                            `json:"uuid"`
-	Name      string                               `json:"name"`
-	Wiki      string                               `json:"wiki"`
-	Org       orgmodels.OrganizationHandleResponse `json:"org"`
-	CreatedBy usermodels.UserHandleResponse        `json:"created_by"`
-	UpdatedBy usermodels.UserHandleResponse        `json:"updated_by"`
-	Readme    commonmodels.ReadmeResponse          `json:"readme"`
-	IsPublic  bool                                 `json:"is_public"`
+	UUID      uuid.UUID                                `json:"uuid"`
+	Name      string                                   `json:"name"`
+	Wiki      string                                   `json:"wiki"`
+	Org       userorgmodels.OrganizationHandleResponse `json:"org"`
+	CreatedBy userorgmodels.UserHandleResponse         `json:"created_by"`
+	UpdatedBy userorgmodels.UserHandleResponse         `json:"updated_by"`
+	Readme    commonmodels.ReadmeResponse              `json:"readme"`
+	IsPublic  bool                                     `json:"is_public"`
 }
 
 type ModelUserResponse struct {
-	User usermodels.UserHandleResponse `json:"user"`
-	Role string                        `json:"role"`
+	User userorgmodels.UserHandleResponse `json:"user"`
+	Role string                           `json:"role"`
 }
 
 type ModelBranchNameResponse struct {
@@ -86,27 +85,27 @@ type ModelBranchVersionNameResponse struct {
 }
 
 type ModelBranchVersionResponse struct {
-	UUID      uuid.UUID                      `json:"uuid"`
-	Version   string                         `json:"version"`
-	Branch    ModelBranchNameResponse        `json:"branch"`
-	Hash      string                         `json:"hash"`
-	Path      commonmodels.PathResponse      `json:"path"`
-	Logs      []commonmodels.LogDataResponse `json:"logs"`
-	IsEmpty   bool                           `json:"is_empty"`
-	CreatedBy usermodels.UserHandleResponse  `json:"created_by"`
-	CreatedAt time.Time                      `json:"created_at"`
+	UUID      uuid.UUID                        `json:"uuid"`
+	Version   string                           `json:"version"`
+	Branch    ModelBranchNameResponse          `json:"branch"`
+	Hash      string                           `json:"hash"`
+	Path      commonmodels.PathResponse        `json:"path"`
+	Logs      []commonmodels.LogDataResponse   `json:"logs"`
+	IsEmpty   bool                             `json:"is_empty"`
+	CreatedBy userorgmodels.UserHandleResponse `json:"created_by"`
+	CreatedAt time.Time                        `json:"created_at"`
 }
 
 type ModelReviewResponse struct {
-	UUID              uuid.UUID                      `json:"uuid"`
-	Model             ModelNameResponse              `json:"model"`
-	FromBranch        ModelBranchNameResponse        `json:"from_branch"`
-	FromBranchVersion ModelBranchVersionNameResponse `json:"from_branch_version"`
-	ToBranch          ModelBranchNameResponse        `json:"to_branch"`
-	Title             string                         `json:"title"`
-	Description       string                         `json:"description"`
-	CreatedBy         usermodels.UserHandleResponse  `json:"created_by"`
-	AssignedTo        usermodels.UserHandleResponse  `json:"assigned_to"`
-	IsComplete        bool                           `json:"is_complete"`
-	IsAccepted        bool                           `json:"is_accepted"`
+	UUID              uuid.UUID                        `json:"uuid"`
+	Model             ModelNameResponse                `json:"model"`
+	FromBranch        ModelBranchNameResponse          `json:"from_branch"`
+	FromBranchVersion ModelBranchVersionNameResponse   `json:"from_branch_version"`
+	ToBranch          ModelBranchNameResponse          `json:"to_branch"`
+	Title             string                           `json:"title"`
+	Description       string                           `json:"description"`
+	CreatedBy         userorgmodels.UserHandleResponse `json:"created_by"`
+	AssignedTo        userorgmodels.UserHandleResponse `json:"assigned_to"`
+	IsComplete        bool                             `json:"is_complete"`
+	IsAccepted        bool                             `json:"is_accepted"`
 }

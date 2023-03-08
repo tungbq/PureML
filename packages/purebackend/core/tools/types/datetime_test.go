@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/types"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/types"
 )
 
 func TestNowDateTime(t *testing.T) {

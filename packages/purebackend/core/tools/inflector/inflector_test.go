@@ -3,7 +3,7 @@ package inflector_test
 import (
 	"testing"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/inflector"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/inflector"
 )
 
 func TestUcFirst(t *testing.T) {

@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	authmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/auth/middlewares"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/models"
-	usermodels "github.com/PuremlHQ/PureML/packages/purebackend/user/models"
+	authmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/auth/middlewares"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
+	userorgmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
@@ -182,7 +183,7 @@ func (api *Api) UserLogin(request *models.Request) *models.Response {
 	if passwordData == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Password is required")
 	}
-	var user *usermodels.UserResponse
+	var user *userorgmodels.UserResponse
 	var err error
 	if email != nil {
 		user, err = api.app.Dao().GetSecureUserByEmail(emailData)

@@ -1,7 +1,6 @@
 package models
 
 import (
-	orgmodels "github.com/PuremlHQ/PureML/packages/purebackend/org/models"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -90,8 +89,8 @@ type UserProfileResponse struct {
 }
 
 type UserOrganizationsResponse struct {
-	Org  orgmodels.OrganizationHandleResponse `json:"org"`
-	Role string                               `json:"role"`
+	Org  OrganizationHandleResponse `json:"org"`
+	Role string                                   `json:"role"`
 }
 
 type UserOrganizationsRoleResponse struct {

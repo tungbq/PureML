@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/tools/filesystem"
-	"github.com/PuremlHQ/PureML/packages/purebackend/tests"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/filesystem"
+	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
 	"github.com/labstack/echo/v4"
 )
 

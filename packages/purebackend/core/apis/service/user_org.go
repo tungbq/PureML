@@ -3,10 +3,10 @@ package service
 import (
 	"net/http"
 
-	authmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/auth/middlewares"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
-	orgmiddlewares "github.com/PuremlHQ/PureML/packages/purebackend/org/middlewares"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/models"
+	authmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/auth/middlewares"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
+	orgmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/user_org/middlewares"
 	"github.com/labstack/echo/v4"
 )
 

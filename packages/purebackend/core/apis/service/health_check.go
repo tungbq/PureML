@@ -3,8 +3,8 @@ package service
 import (
 	"net/http"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
-	"github.com/PuremlHQ/PureML/packages/purebackend/core/models"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
 	"github.com/labstack/echo/v4"
 )
 
