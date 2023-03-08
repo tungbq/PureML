@@ -258,8 +258,6 @@ def init(label: str, readme: str = None):
 def register(
     model,
     label,
-    # name: str,
-    # branch: str,
     is_empty: bool = False,
     storage: str = StorageSchema().STORAGE,
 ):
@@ -501,41 +499,41 @@ def fetch(label: str):
         return
 
 
-def delete(label: str) -> str:
-    """This function deletes a model from the project
+# def delete(label: str) -> str:
+#     """This function deletes a model from the project
 
-    Parameters
-    ----------
-    name : str
-        The name of the model you want to delete
-    version : str
-        The version of the model to delete.
+#     Parameters
+#     ----------
+#     name : str
+#         The name of the model you want to delete
+#     version : str
+#         The version of the model to delete.
 
-    """
+#     """
 
-    name, _, _ = parse_version_label(label)
+#     name, _, _ = parse_version_label(label)
 
-    user_token = get_token()
-    org_id = get_org_id()
-    model_schema = ModelSchema()
+#     user_token = get_token()
+#     org_id = get_org_id()
+#     model_schema = ModelSchema()
 
-    url = "org/{}/model/{}/delete".format(org_id, name)
-    url = urljoin(model_schema.backend.BASE_URL, url)
+#     url = "org/{}/model/{}/delete".format(org_id, name)
+#     url = urljoin(model_schema.backend.BASE_URL, url)
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": "Bearer {}".format(user_token),
-    }
+#     headers = {
+#         "Content-Type": "application/x-www-form-urlencoded",
+#         "Authorization": "Bearer {}".format(user_token),
+#     }
 
-    response = requests.delete(url, headers=headers)
+#     response = requests.delete(url, headers=headers)
 
-    if response.ok:
-        print(f"[bold green]Model has been deleted")
+#     if response.ok:
+#         print(f"[bold green]Model has been deleted")
 
-    else:
-        print(f"[bold red]Unable to delete Model")
+#     else:
+#         print(f"[bold red]Unable to delete Model")
 
-    return response.text
+#     return response.text
 
 
 def serve_model():
