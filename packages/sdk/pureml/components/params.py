@@ -8,6 +8,7 @@ from pureml.utils.pipeline import add_params_to_config
 from rich import print
 
 from . import convert_values_to_string, get_org_id, get_token
+from pureml.utils.version_utils import parse_version_label
 
 
 def post_params(params, model_name: str, model_branch: str, model_version: str):
@@ -44,9 +45,7 @@ def post_params(params, model_name: str, model_branch: str, model_version: str):
 
 def add(
     params,
-    model_name: str = None,
-    model_branch: str = None,
-    model_version: str = "latest",
+    label: str,
     step=1,
 ) -> str:
     """`add()` takes a dictionary of parameters and a model name as input and returns a string
@@ -65,6 +64,8 @@ def add(
         The response.text is being returned.
 
     """
+
+    model_name, model_branch, model_version = parse_version_label(label)
 
     params = convert_values_to_string(logged_dict=params)
     # params = merge_step_with_value(values_dict=params, step=step)
@@ -94,9 +95,7 @@ def add(
 
 
 # @app.command()
-def fetch(
-    model_name: str, model_branch: str, model_version: str = "latest", param: str = ""
-) -> str:
+def fetch(label: str, param: str = "") -> str:
     """
 
     This function fetches the parameters of a model
@@ -115,6 +114,8 @@ def fetch(
         The params that are fetched
 
     """
+    model_name, model_branch, model_version = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
     log_schema = LogSchema()
@@ -170,9 +171,7 @@ def fetch(
 
 
 # @app.command()
-def delete(
-    param: str, model_name: str, model_branch: str, model_version: str = "latest"
-) -> str:
+def delete(param: str, label: str) -> str:
     """This function deletes a parameter from a model
 
     Parameters
@@ -185,6 +184,8 @@ def delete(
         The version of the model
 
     """
+    model_name, model_branch, model_version = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
     log_schema = LogSchema()
