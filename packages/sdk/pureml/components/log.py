@@ -46,12 +46,8 @@ def log(label: str, metrics=None, params=None, step=1, **kwargs):
         figure = kwargs["fig"]
         func_params = {}
 
-        if model_name is not None:
-            func_params["model_name"] = model_name
-        if model_branch is not None:
-            func_params["model_branch"] = model_branch
-        if model_version is not None:
-            func_params["model_version"] = model_version
+        if label is not None:
+            func_params["label"] = label
 
         func_params["figure"] = figure.copy()
         # func_params['step']  = step
