@@ -1,10 +1,11 @@
-package service_test
+package tests
 
 import (
 	"net/http"
 	"strings"
 	"testing"
 
+	coretests "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service/tests"
 	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
 )
 
@@ -13,7 +14,7 @@ func TestGetModelAllBranches(t *testing.T) {
 		{
 			Name:           "get all branches of model + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch",
+			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -22,9 +23,9 @@ func TestGetModelAllBranches(t *testing.T) {
 		{
 			Name:   "get all branches of model + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -34,9 +35,9 @@ func TestGetModelAllBranches(t *testing.T) {
 		{
 			Name:   "get all branches of model + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidTokenNoUser,
+				"Authorization": coretests.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -46,9 +47,9 @@ func TestGetModelAllBranches(t *testing.T) {
 		{
 			Name:   "get all branches of model + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + InvalidOrgUuidString + "/model/Demo%20Model/branch",
+			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -58,9 +59,9 @@ func TestGetModelAllBranches(t *testing.T) {
 		{
 			Name:   "get all branches of model + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/model/Demo%20Model/branch",
+			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -70,9 +71,9 @@ func TestGetModelAllBranches(t *testing.T) {
 		{
 			Name:   "get all branches of model + valid token + model not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/NoModel/branch",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -82,20 +83,20 @@ func TestGetModelAllBranches(t *testing.T) {
 		{
 			Name:   "get all branches of model + valid token + model found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
 				`"name":"main"`,
 				`"model":{`,
 				`"name":"Demo Model"`,
 				`"is_default":true`,
-				`"uuid":"` + ValidUserUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidUserUuid.String() + `"`,
 				`"name":"dev"`,
 				`"model":{`,
 				`"name":"Demo Model"`,
@@ -115,7 +116,7 @@ func TestGetModelBranch(t *testing.T) {
 		{
 			Name:           "get branch of model + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main",
+			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -124,9 +125,9 @@ func TestGetModelBranch(t *testing.T) {
 		{
 			Name:   "get branch of model + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -136,9 +137,9 @@ func TestGetModelBranch(t *testing.T) {
 		{
 			Name:   "get branch of model + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidTokenNoUser,
+				"Authorization": coretests.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -148,9 +149,9 @@ func TestGetModelBranch(t *testing.T) {
 		{
 			Name:   "get branch of model + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + InvalidOrgUuidString + "/model/Demo%20Model/branch/main",
+			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/main",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -160,9 +161,9 @@ func TestGetModelBranch(t *testing.T) {
 		{
 			Name:   "get branch of model + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/main",
+			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/main",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -172,9 +173,9 @@ func TestGetModelBranch(t *testing.T) {
 		{
 			Name:   "get branch of model + valid token + model not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/main",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/main",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -184,9 +185,9 @@ func TestGetModelBranch(t *testing.T) {
 		{
 			Name:   "get branch of model + valid token + model branch not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -196,15 +197,15 @@ func TestGetModelBranch(t *testing.T) {
 		{
 			Name:   "get branch of model + valid token + model branch found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
 				`"name":"main"`,
 				`"model":{`,
 				`"name":"Demo Model"`,
@@ -224,7 +225,7 @@ func TestCreateModelBranch(t *testing.T) {
 		{
 			Name:           "create model branch + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
+			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -233,9 +234,9 @@ func TestCreateModelBranch(t *testing.T) {
 		{
 			Name:   "create model branch + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -245,9 +246,9 @@ func TestCreateModelBranch(t *testing.T) {
 		{
 			Name:   "create model branch + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + InvalidOrgUuidString + "/model/Demo%20Model/branch/create",
+			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/create",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -257,9 +258,9 @@ func TestCreateModelBranch(t *testing.T) {
 		{
 			Name:   "create model branch + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/create",
+			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/create",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidUserToken,
+				"Authorization": coretests.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -269,9 +270,9 @@ func TestCreateModelBranch(t *testing.T) {
 		{
 			Name:   "create model branch + valid token + model not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/create",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/create",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -281,9 +282,9 @@ func TestCreateModelBranch(t *testing.T) {
 		{
 			Name:   "create model branch + valid token + branch name empty",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"branch_name":""
@@ -298,9 +299,9 @@ func TestCreateModelBranch(t *testing.T) {
 		{
 			Name:   "create model branch + valid token + branch already exists",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"branch_name":"main"
@@ -315,9 +316,9 @@ func TestCreateModelBranch(t *testing.T) {
 		{
 			Name:   "create model branch + valid token + branch created successfully",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/create",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"branch_name":"test"
@@ -326,7 +327,7 @@ func TestCreateModelBranch(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
 				`"name":"test"`,
 				`"is_default":false`,
 				`"message":"Model branch created"`,

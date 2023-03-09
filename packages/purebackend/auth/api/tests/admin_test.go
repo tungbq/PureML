@@ -1,9 +1,10 @@
-package service_test
+package tests
 
 import (
 	"net/http"
 	"testing"
 
+	coretests "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service/tests"
 	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
 )
 
@@ -23,7 +24,7 @@ func TestGetAllAdminOrgs(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/org/all",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -35,7 +36,7 @@ func TestGetAllAdminOrgs(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/org/all",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidUserToken,
+				"Authorization": coretests.ValidUserToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -49,19 +50,19 @@ func TestGetAllAdminOrgs(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/org/all",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org"`,
 				`"handle":"demo"`,
 				`"avatar":""`,
 				`"description":"Demo Org Description"`,
 				`"join_code":"iwanttojoindemo"`,
-				`"uuid":"` + ValidUserOrgUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidUserOrgUuid.String() + `"`,
 				`"name":"Demo Org"`,
 				`"handle":"notadmin"`,
 				`"avatar":""`,

@@ -1,30 +1,31 @@
-package service_test
+package tests
 
 import (
 	"net/http"
 	"strings"
 	"testing"
 
+	coretests "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service/tests"
 	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
 )
 
-func TestGetDatasetBranchAllVersions(t *testing.T) {
+func TestGetModelBranchAllVersions(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
-			Name:           "get specific version of dataset branch + unauthorized",
+			Name:           "get specific version of model branch + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version",
+			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
 			},
 		},
 		{
-			Name:   "get all versions of dataset branch + invalid token",
+			Name:   "get all versions of model branch + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -32,11 +33,11 @@ func TestGetDatasetBranchAllVersions(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get all versions of dataset branch + valid token + user not found",
+			Name:   "get all versions of model branch + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidTokenNoUser,
+				"Authorization": coretests.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -44,11 +45,11 @@ func TestGetDatasetBranchAllVersions(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get all versions of dataset branch + valid token + invalid org uuid",
+			Name:   "get all versions of model branch + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + InvalidOrgUuidString + "/dataset/Demo%20Dataset/branch/dev/version",
+			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -56,11 +57,11 @@ func TestGetDatasetBranchAllVersions(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get all versions of dataset branch + valid token + org not found",
+			Name:   "get all versions of model branch + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version",
+			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -68,41 +69,41 @@ func TestGetDatasetBranchAllVersions(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get all versions of dataset branch + valid token + dataset not found",
+			Name:   "get all versions of model branch + valid token + model not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/NoDataset/branch/dev/version",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Dataset not found`,
+				`Model not found`,
 			},
 		},
 		{
-			Name:   "get all versions of dataset branch + valid token + branch not found",
+			Name:   "get all versions of model branch + valid token + branch not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/nobranch/version",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/version",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Dataset Branch not found`,
+				`Model Branch not found`,
 			},
 		},
 		{
-			Name:   "get all versions of dataset branch + valid token + dataset branch found",
+			Name:   "get all versions of model branch + valid token + model branch found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
 				`"hash":"1234567890"`,
 				`"version":"v1"`,
 				`"branch":{`,
@@ -110,8 +111,6 @@ func TestGetDatasetBranchAllVersions(t *testing.T) {
 				`"path":{`,
 				`"source_path":`,
 				`"source_type":{`,
-				`"lineage":{`,
-				`"lineage":"{}"`,
 				`"created_by":{`,
 				`"name":"Demo User"`,
 				`"avatar":`,
@@ -119,7 +118,7 @@ func TestGetDatasetBranchAllVersions(t *testing.T) {
 				`"handle":"demo"`,
 				`"created_at":`,
 				`"is_empty":true`,
-				`"message":"All dataset branch versions"`,
+				`"message":"All model branch versions"`,
 			},
 		},
 	}
@@ -129,23 +128,23 @@ func TestGetDatasetBranchAllVersions(t *testing.T) {
 	}
 }
 
-func TestGetDatasetBranchVersion(t *testing.T) {
+func TestGetModelBranchVersion(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
-			Name:           "get specific version of dataset branch + unauthorized",
+			Name:           "get specific version of model branch + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version/v1",
+			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
 			},
 		},
 		{
-			Name:   "get specific version of dataset branch + invalid token",
+			Name:   "get specific version of model branch + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version/v1",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -153,11 +152,11 @@ func TestGetDatasetBranchVersion(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get specific version of dataset branch + valid token + user not found",
+			Name:   "get specific version of model branch + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version/v1",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidTokenNoUser,
+				"Authorization": coretests.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -165,11 +164,11 @@ func TestGetDatasetBranchVersion(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get specific version of dataset branch + valid token + invalid org uuid",
+			Name:   "get specific version of model branch + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + InvalidOrgUuidString + "/dataset/Demo%20Dataset/branch/dev/version/v1",
+			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -177,11 +176,11 @@ func TestGetDatasetBranchVersion(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get specific version of dataset branch + valid token + org not found",
+			Name:   "get specific version of model branch + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version/v1",
+			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -189,53 +188,53 @@ func TestGetDatasetBranchVersion(t *testing.T) {
 			},
 		},
 		{
-			Name:   "get specific version of dataset branch + valid token + dataset not found",
+			Name:   "get specific version of model branch + valid token + model not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/NoDataset/branch/dev/version/v1",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Dataset not found`,
+				`Model not found`,
 			},
 		},
 		{
-			Name:   "get specific version of dataset branch + valid token + branch not found",
+			Name:   "get specific version of model branch + valid token + branch not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/nobranch/version",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/version",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Dataset Branch not found`,
+				`Model Branch not found`,
 			},
 		},
 		{
-			Name:   "get specific version of dataset branch + valid token + version not found",
+			Name:   "get specific version of model branch + valid token + version not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version/v2",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v2",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Dataset Branch Version not found`,
+				`Model Branch Version not found`,
 			},
 		},
 		{
-			Name:   "get specific version of dataset branch + valid token + dataset branch version found",
+			Name:   "get specific version of model branch + valid token + model branch version found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/version/v1",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
 				`"hash":"1234567890"`,
 				`"version":"v1"`,
 				`"branch":{`,
@@ -243,8 +242,6 @@ func TestGetDatasetBranchVersion(t *testing.T) {
 				`"path":{`,
 				`"source_path":`,
 				`"source_type":{`,
-				`"lineage":{`,
-				`"lineage":"{}"`,
 				`"created_by":{`,
 				`"name":"Demo User"`,
 				`"avatar":`,
@@ -252,7 +249,7 @@ func TestGetDatasetBranchVersion(t *testing.T) {
 				`"handle":"demo"`,
 				`"created_at":`,
 				`"is_empty":true`,
-				`"message":"Dataset branch version details"`,
+				`"message":"Model branch version details"`,
 			},
 		},
 	}
@@ -262,23 +259,23 @@ func TestGetDatasetBranchVersion(t *testing.T) {
 	}
 }
 
-func TestVerifyDatasetBranchHashStatus(t *testing.T) {
+func TestVerifyModelBranchHashStatus(t *testing.T) {
 	scenarios := []tests.ApiScenario{
 		{
-			Name:           "verify dataset hash status + unauthorized",
+			Name:           "verify model hash status + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/hash-status",
+			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
 			},
 		},
 		{
-			Name:   "verify dataset hash status + invalid token",
+			Name:   "verify model hash status + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/hash-status",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -286,11 +283,11 @@ func TestVerifyDatasetBranchHashStatus(t *testing.T) {
 			},
 		},
 		{
-			Name:   "verify dataset hash status + valid token + invalid org uuid",
+			Name:   "verify model hash status + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + InvalidOrgUuidString + "/dataset/Demo%20Dataset/branch/dev/hash-status",
+			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -298,11 +295,11 @@ func TestVerifyDatasetBranchHashStatus(t *testing.T) {
 			},
 		},
 		{
-			Name:   "verify dataset hash status + valid token + org not found",
+			Name:   "verify model hash status + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/hash-status",
+			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidUserToken,
+				"Authorization": coretests.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -310,23 +307,23 @@ func TestVerifyDatasetBranchHashStatus(t *testing.T) {
 			},
 		},
 		{
-			Name:   "verify dataset hash status + valid token + dataset not found",
+			Name:   "verify model hash status + valid token + model not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/noDataset/branch/dev/hash-status",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/noModel/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidUserToken,
+				"Authorization": coretests.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Dataset not found`,
+				`Model not found`,
 			},
 		},
 		{
-			Name:   "verify dataset hash status + valid token + hash empty",
+			Name:   "verify model hash status + valid token + hash empty",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/hash-status",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"hash":""
@@ -339,11 +336,11 @@ func TestVerifyDatasetBranchHashStatus(t *testing.T) {
 			},
 		},
 		{
-			Name:   "verify dataset hash status + valid token + branch not found",
+			Name:   "verify model hash status + valid token + branch not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/nobranch/hash-status",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"hash":"test"
@@ -356,11 +353,11 @@ func TestVerifyDatasetBranchHashStatus(t *testing.T) {
 			},
 		},
 		{
-			Name:   "verify dataset hash status + valid token + hash does not exist",
+			Name:   "verify model hash status + valid token + hash does not exist",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/hash-status",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"hash":"test"
@@ -373,11 +370,11 @@ func TestVerifyDatasetBranchHashStatus(t *testing.T) {
 			},
 		},
 		{
-			Name:   "verify dataset hash status + valid token + hash exists",
+			Name:   "verify model hash status + valid token + hash exists",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/hash-status",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"hash":"1234567890"
@@ -396,12 +393,11 @@ func TestVerifyDatasetBranchHashStatus(t *testing.T) {
 	}
 }
 
-func TestRegisterDataset(t *testing.T) {
+func TestRegisterModel(t *testing.T) {
 	emptyHashMultipartBody, emptyHashMultipartContentType, err := tests.MockMultipartData(map[string]string{
 		"hash":     "",
 		"storage":  "local",
 		"is_empty": "true",
-		"lineage":  "{}",
 	}, "file")
 	if err != nil {
 		t.Fatal(err)
@@ -410,7 +406,6 @@ func TestRegisterDataset(t *testing.T) {
 		"hash":     "uniquehash",
 		"storage":  "local",
 		"is_empty": "true",
-		"lineage":  "{}",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -419,7 +414,6 @@ func TestRegisterDataset(t *testing.T) {
 		"hash":     "uniquehash",
 		"storage":  "nope",
 		"is_empty": "true",
-		"lineage":  "{}",
 	}, "file")
 	if err != nil {
 		t.Fatal(err)
@@ -428,7 +422,6 @@ func TestRegisterDataset(t *testing.T) {
 		"hash":     "1234567890",
 		"storage":  "local",
 		"is_empty": "true",
-		"lineage":  "{}",
 	}, "file")
 	if err != nil {
 		t.Fatal(err)
@@ -437,7 +430,6 @@ func TestRegisterDataset(t *testing.T) {
 		"hash":     "uniquehash",
 		"storage":  "local",
 		"is_empty": "true",
-		"lineage":  "{}",
 	}, "file")
 	if err != nil {
 		t.Fatal(err)
@@ -446,7 +438,6 @@ func TestRegisterDataset(t *testing.T) {
 		"hash":     "uniquehash",
 		"storage":  "local",
 		"is_empty": "true",
-		"lineage":  "{}",
 	}, "file")
 	if err != nil {
 		t.Fatal(err)
@@ -455,7 +446,6 @@ func TestRegisterDataset(t *testing.T) {
 		"hash":     "uniquehash",
 		"storage":  "s3",
 		"is_empty": "true",
-		"lineage":  "{}",
 	}, "file")
 	if err != nil {
 		t.Fatal(err)
@@ -464,7 +454,6 @@ func TestRegisterDataset(t *testing.T) {
 		"hash":     "uniquehash",
 		"storage":  "r2",
 		"is_empty": "true",
-		"lineage":  "{}",
 	}, "file")
 	if err != nil {
 		t.Fatal(err)
@@ -472,20 +461,20 @@ func TestRegisterDataset(t *testing.T) {
 
 	scenarios := []tests.ApiScenario{
 		{
-			Name:           "register dataset + unauthorized",
+			Name:           "register model + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
 			},
 		},
 		{
-			Name:   "register dataset + invalid token",
+			Name:   "register model + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -493,11 +482,11 @@ func TestRegisterDataset(t *testing.T) {
 			},
 		},
 		{
-			Name:   "register dataset + valid token + invalid org uuid",
+			Name:   "register model + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + InvalidOrgUuidString + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -505,11 +494,11 @@ func TestRegisterDataset(t *testing.T) {
 			},
 		},
 		{
-			Name:   "register dataset + valid token + org not found",
+			Name:   "register model + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidNoOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidUserToken,
+				"Authorization": coretests.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -517,35 +506,35 @@ func TestRegisterDataset(t *testing.T) {
 			},
 		},
 		{
-			Name:   "register dataset + valid token + dataset not found",
+			Name:   "register model + valid token + model not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/noDataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/noModel/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidUserToken,
+				"Authorization": coretests.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Dataset not found`,
+				`Model not found`,
 			},
 		},
 		{
-			Name:   "register dataset + valid token + branch not found",
+			Name:   "register model + valid token + branch not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/nobranch/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidUserToken,
+				"Authorization": coretests.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
-				`Dataset Branch not found`,
+				`Model Branch not found`,
 			},
 		},
 		{
-			Name:   "register dataset + valid token + hash empty",
+			Name:   "register model + valid token + hash empty",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 				"Content-Type":  emptyHashMultipartContentType.FormDataContentType(),
 			},
 			Body:           emptyHashMultipartBody,
@@ -557,11 +546,11 @@ func TestRegisterDataset(t *testing.T) {
 			},
 		},
 		{
-			Name:   "register dataset + valid token + file empty",
+			Name:   "register model + valid token + file empty",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 				"Content-Type":  emptyFileMultipartContentType.FormDataContentType(),
 			},
 			Body:           emptyFileMultipartBody,
@@ -573,11 +562,11 @@ func TestRegisterDataset(t *testing.T) {
 			},
 		},
 		{
-			Name:   "register dataset + valid token + protected main branch",
+			Name:   "register model + valid token + protected main branch",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/main/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 				"Content-Type":  validProtectedMultipartContentType.FormDataContentType(),
 			},
 			Body:           validProtectedMultipartBody,
@@ -585,15 +574,15 @@ func TestRegisterDataset(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":400`,
 				`"data":null`,
-				`"message":"Cannot register dataset directly to main branch"`,
+				`"message":"Cannot register model directly to main branch"`,
 			},
 		},
 		{
-			Name:   "register dataset + valid token + unsupported storage",
+			Name:   "register model + valid token + unsupported storage",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 				"Content-Type":  invalidStorageMultipartContentType.FormDataContentType(),
 			},
 			Body:           invalidStorageMultipartBody,
@@ -601,15 +590,15 @@ func TestRegisterDataset(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":400`,
 				`"data":null`,
-				`"message":"Unsupported dataset storage"`,
+				`"message":"Unsupported model storage"`,
 			},
 		},
 		{
-			Name:   "register dataset + valid token + hash already exists",
+			Name:   "register model + valid token + hash already exists",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 				"Content-Type":  invalidHashMultipartContentType.FormDataContentType(),
 			},
 			Body:           invalidHashMultipartBody,
@@ -617,15 +606,15 @@ func TestRegisterDataset(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":400`,
 				`"data":null`,
-				`"message":"Dataset with this hash already exists"`,
+				`"message":"Model with this hash already exists"`,
 			},
 		},
 		{
-			Name:   "register dataset + valid token + s3 not enabled",
+			Name:   "register model + valid token + s3 not enabled",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 				"Content-Type":  validS3MultipartContentType.FormDataContentType(),
 			},
 			Body:           validS3MultipartBody,
@@ -637,11 +626,11 @@ func TestRegisterDataset(t *testing.T) {
 			},
 		},
 		{
-			Name:   "register dataset + valid token + r2 not enabled",
+			Name:   "register model + valid token + r2 not enabled",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 				"Content-Type":  validR2MultipartContentType.FormDataContentType(),
 			},
 			Body:           validR2MultipartBody,
@@ -653,11 +642,11 @@ func TestRegisterDataset(t *testing.T) {
 			},
 		},
 		{
-			Name:   "register dataset + valid token + registered successfully",
+			Name:   "register model + valid token + registered successfully",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/branch/dev/register",
+			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 				"Content-Type":  validMultipartContentType.FormDataContentType(),
 			},
 			Body:           validMultipartBody,
@@ -673,8 +662,6 @@ func TestRegisterDataset(t *testing.T) {
 				`"path":{`,
 				`"source_path":`,
 				`"source_type":{`,
-				`"lineage":{`,
-				`"lineage":"{}"`,
 				`"created_by":{`,
 				`"name":"Demo User"`,
 				`"avatar":`,
@@ -682,7 +669,7 @@ func TestRegisterDataset(t *testing.T) {
 				`"handle":"demo"`,
 				`"created_at":`,
 				`"is_empty":true`,
-				`"message":"Dataset successfully registered"`,
+				`"message":"Model successfully registered"`,
 			},
 		},
 	}

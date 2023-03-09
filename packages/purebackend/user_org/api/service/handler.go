@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
+	coreservice "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,7 +13,7 @@ type ServiceFunc func(*Api, *models.Request) *models.Response
 
 func (api *Api) DefaultHandler(f ServiceFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
-		request := ExtractRequest(context)
+		request := coreservice.ExtractRequest(context)
 		response := f(api, request)
 		responseWriter := context.Response().Writer
 		if response.Error != nil {
@@ -26,7 +27,7 @@ func (api *Api) DefaultHandler(f ServiceFunc) echo.HandlerFunc {
 
 func populateSuccessResponse(context echo.Context, response *models.Response, responseWriter http.ResponseWriter) {
 	context.Response().WriteHeader(response.StatusCode)
-	_, err := responseWriter.Write(ConvertToBytes(response.Body))
+	_, err := responseWriter.Write(coreservice.ConvertToBytes(response.Body))
 	if err != nil {
 		panic(fmt.Sprintf("Error writing response: %v \n", err.Error()))
 	}
@@ -34,7 +35,7 @@ func populateSuccessResponse(context echo.Context, response *models.Response, re
 
 func populateErrorResponse(context echo.Context, response *models.Response, responseWriter http.ResponseWriter) {
 	context.Response().WriteHeader(http.StatusInternalServerError)
-	_, err := responseWriter.Write(ConvertToBytes(map[string]interface{}{
+	_, err := responseWriter.Write(coreservice.ConvertToBytes(map[string]interface{}{
 		"error": "Internal server error - " + response.Error.Error(),
 	}))
 	if err != nil {

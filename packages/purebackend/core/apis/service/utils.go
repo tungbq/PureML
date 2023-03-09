@@ -19,7 +19,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func extractRequest(context echo.Context) *models.Request {
+func ExtractRequest(context echo.Context) *models.Request {
 	request := &models.Request{}
 	if context.Get(authmiddlewares.ContextAuthKey) != nil {
 		request.User = context.Get(authmiddlewares.ContextAuthKey).(*userorgmodels.UserClaims)
@@ -130,7 +130,7 @@ func extractFormData(context echo.Context) (map[string][]string, map[string][]*m
 	return formData.Value, formData.File
 }
 
-func convertToBytes(object interface{}) []byte {
+func ConvertToBytes(object interface{}) []byte {
 	switch objectType := object.(type) {
 	case string:
 		return []byte(objectType)

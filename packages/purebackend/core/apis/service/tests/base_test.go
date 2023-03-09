@@ -1,4 +1,4 @@
-package service_test
+package tests
 
 import (
 	uuid "github.com/satori/go.uuid"

@@ -6,6 +6,7 @@ import (
 	authmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/auth/middlewares"
 	"github.com/PureMLHQ/PureML/packages/purebackend/core"
 	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
+	coreservice "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service"
 	orgmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/user_org/middlewares"
 	"github.com/labstack/echo/v4"
 )
@@ -67,7 +68,7 @@ func (api *Api) AddUsersToOrg(request *models.Request) *models.Response {
 	if emailData == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is required")
 	}
-	if addr, ok := ValidateMailAddress(emailData); ok {
+	if addr, ok := coreservice.ValidateMailAddress(emailData); ok {
 		emailData = addr
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is invalid")
@@ -129,7 +130,7 @@ func (api *Api) UpdateUserRole(request *models.Request) *models.Response {
 	if emailData == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is required")
 	}
-	if addr, ok := ValidateMailAddress(emailData); ok {
+	if addr, ok := coreservice.ValidateMailAddress(emailData); ok {
 		emailData = addr
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is invalid")
@@ -280,7 +281,7 @@ func (api *Api) RemoveOrg(request *models.Request) *models.Response {
 	if emailData == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is required")
 	}
-	if addr, ok := ValidateMailAddress(emailData); ok {
+	if addr, ok := coreservice.ValidateMailAddress(emailData); ok {
 		emailData = addr
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is invalid")

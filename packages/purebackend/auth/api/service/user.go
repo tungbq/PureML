@@ -7,6 +7,7 @@ import (
 
 	authmiddlewares "github.com/PureMLHQ/PureML/packages/purebackend/auth/middlewares"
 	"github.com/PureMLHQ/PureML/packages/purebackend/core"
+	coreservice "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service"
 	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
 	userorgmodels "github.com/PureMLHQ/PureML/packages/purebackend/user_org/models"
 
@@ -57,7 +58,7 @@ func (api *Api) UserSignUp(request *models.Request) *models.Response {
 	if emailData == "" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is required")
 	}
-	if addr, ok := ValidateMailAddress(emailData); ok {
+	if addr, ok := coreservice.ValidateMailAddress(emailData); ok {
 		emailData = addr
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is invalid")
@@ -121,7 +122,7 @@ func (api *Api) UserSignUp(request *models.Request) *models.Response {
 			panic(err)
 		}
 		verifyLink := api.app.Settings().Site.BaseURL + "/verify-email?token=" + signedString
-		emailTemplate := BaseEmailTemplate("Verify your email address",
+		emailTemplate := coreservice.BaseEmailTemplate("Verify your email address",
 			`Hi `+user.Handle+`,<br><br>Thanks for signing up for PureML. Please click the link below to verify your email address.<br><br><a href="`+verifyLink+`">Verify Email</a><br><br>Thanks,<br>Team PureML`,
 		)
 		if err != nil {
@@ -167,7 +168,7 @@ func (api *Api) UserLogin(request *models.Request) *models.Response {
 		return models.NewDataResponse(http.StatusBadRequest, nil, "Email or handle is required")
 	}
 	if emailData != "" {
-		if addr, ok := ValidateMailAddress(emailData); ok {
+		if addr, ok := coreservice.ValidateMailAddress(emailData); ok {
 			emailData = addr
 		} else {
 			return models.NewErrorResponse(http.StatusBadRequest, "Email is invalid")
@@ -302,7 +303,7 @@ func (api *Api) UserResendVerification(request *models.Request) *models.Response
 		return models.NewErrorResponse(http.StatusBadRequest, "Email is required")
 	}
 	if emailData != "" {
-		if addr, ok := ValidateMailAddress(emailData); ok {
+		if addr, ok := coreservice.ValidateMailAddress(emailData); ok {
 			emailData = addr
 		} else {
 			return models.NewErrorResponse(http.StatusBadRequest, "Email is invalid")
@@ -328,7 +329,7 @@ func (api *Api) UserResendVerification(request *models.Request) *models.Response
 		panic(err)
 	}
 	verifyLink := api.app.Settings().Site.BaseURL + "/verify-email?token=" + signedString
-	emailTemplate := BaseEmailTemplate("Verify your email address",
+	emailTemplate := coreservice.BaseEmailTemplate("Verify your email address",
 		`Hi `+user.Handle+`,<br><br>Thanks for signing up for PureML. Please click the link below to verify your email address.<br><br><a href="`+verifyLink+`">Verify Email</a><br><br>Thanks,<br>Team PureML`,
 	)
 	if err != nil {
@@ -373,7 +374,7 @@ func (api *Api) UserForgotPassword(request *models.Request) *models.Response {
 		panic(err)
 	}
 	verifyLink := api.app.Settings().Site.BaseURL + "/reset-password?token=" + signedString
-	emailTemplate := BaseEmailTemplate("Reset your password",
+	emailTemplate := coreservice.BaseEmailTemplate("Reset your password",
 		`Hi `+user.Handle+`,<br><br>Someone requested a password reset for your PureML account. If it was you, click the link below to reset your password.<br><br><a href="`+verifyLink+`">Reset Password</a><br><br>Thanks,<br>Team PureML`,
 	)
 	if err != nil {

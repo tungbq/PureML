@@ -1,4 +1,4 @@
-package service_test
+package tests
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	coretests "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service/tests"
 	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
 	"github.com/labstack/echo/v4"
 )
@@ -298,7 +299,7 @@ func TestGetProfile(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -310,7 +311,7 @@ func TestGetProfile(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidTokenNoUser,
+				"Authorization": coretests.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -322,13 +323,13 @@ func TestGetProfile(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
 				`"email":"demo@aztlan.in"`,
 				`"handle":"demo"`,
 				`"name":"Demo User"`,
@@ -374,7 +375,7 @@ func TestGetProfileByHandle(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/user/profile/demo",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -386,7 +387,7 @@ func TestGetProfileByHandle(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/user/profile/noone",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidTokenNoUser,
+				"Authorization": coretests.ValidTokenNoUser,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
@@ -400,7 +401,7 @@ func TestGetProfileByHandle(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/user/profile/demo",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
@@ -435,7 +436,7 @@ func TestUpdateProfile(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": InvalidToken,
+				"Authorization": coretests.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -447,7 +448,7 @@ func TestUpdateProfile(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidTokenNoUser,
+				"Authorization": coretests.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -459,7 +460,7 @@ func TestUpdateProfile(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"name":"",
@@ -478,7 +479,7 @@ func TestUpdateProfile(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"name":"Demo User New"
@@ -500,7 +501,7 @@ func TestUpdateProfile(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"avatar":"test"
@@ -522,7 +523,7 @@ func TestUpdateProfile(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"bio":"Demo User Bio New"
@@ -544,7 +545,7 @@ func TestUpdateProfile(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/user/profile",
 			RequestHeaders: map[string]string{
-				"Authorization": ValidAdminToken,
+				"Authorization": coretests.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"name":"Demo User New",
