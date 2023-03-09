@@ -3,7 +3,7 @@
     <img
       align="center"
       alt="PureML"
-      src="https://github.com/PuremlHQ/PureML/blob/main/assets/coverImg.jpeg"
+      src="https://github.com/PureMLHQ/PureML/blob/main/assets/coverImg.jpeg"
       style="width:100%;"
     />
   </a>
@@ -95,13 +95,13 @@
   <a
     href="https://pypi.org/project/pureml/"
   >
-    <img alt="Coverage" src="https://img.shields.io/codecov/c/github/PuremlHQ/pureml">
+    <img alt="Coverage" src="https://img.shields.io/codecov/c/github/PureMLHQ/PureML">
   </a>
   &nbsp;
   <a
     href="https://pypi.org/project/pureml/"
   >
-    <img alt="Coverage" src="https://img.shields.io/github/stars/PuremlHQ/pureml?style=social">
+    <img alt="Coverage" src="https://img.shields.io/github/stars/PureMLHQ/PureML?style=social">
   </a>
 
 
@@ -204,7 +204,7 @@ This is how generated data lineage will look like in the UI
 <h1 align="center">
     <img
       align="center"
-      src="https://github.com/PuremlHQ/PureML/blob/main/assets/pipeline.png?raw=true"
+      src="https://github.com/PureMLHQ/PureML/blob/main/assets/pipeline.png?raw=true"
       style="width:60%;"
     />
   </a>
@@ -302,7 +302,7 @@ Lets build this together. If you have faced this issue or have worked out a simi
 # 🐞 Reporting Bugs
 To report any bugs you have faced while using PureML package, please
 1. Report it in [Discord](https://discord.gg/xNUHt9yguJ) channel
-1. Open an [issue](https://github.com/PuremlHQ/PureML/issues)
+1. Open an [issue](https://github.com/PureMLHQ/PureML/issues)
 
 <br />
 
@@ -321,7 +321,7 @@ To get quick updates, feature release for PureML follow us on
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [<img alt="Twitter" height="20" src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />](https://twitter.com/getPureML)                 |
 | [<img alt="LinkedIn" height="20" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/company/PuremlHQ/) |
-| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/PuremlHQ/PureML)               |
+| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/PureMLHQ/PureML)               |
 | [<img alt="GitHub" height="20" src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" />](https://discord.gg/DBvedzGu)                    |
 
 

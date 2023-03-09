@@ -6,35 +6,34 @@ import requests
 import typer
 from rich import print
 from rich.syntax import Syntax
-from pureml.utils.constants import BASE_URL, PATH_USER_TOKEN
+
 from pureml.components import get_org_id, get_token
 from rich.console import Console
 from rich.table import Table
 from urllib.parse import urljoin
 import json
+from pureml.schema import BackendSchema, PathSchema
 
+
+path_schema = PathSchema().get_instance()
+backend_schema = BackendSchema().get_instance()
 app = typer.Typer()
 
 
-def save_auth(org_id:str=None, access_token:str=None, email=None):
-    token_path = PATH_USER_TOKEN
+def save_auth(org_id: str = None, access_token: str = None, email=None):
+    token_path = path_schema.PATH_USER_TOKEN
 
     token_dir = os.path.dirname(token_path)
     os.makedirs(token_dir, exist_ok=True)
 
-    token = {
-                'org_id': org_id,
-                'accessToken': access_token,
-                'email': email
-            }
-        
+    token = {"org_id": org_id, "accessToken": access_token, "email": email}
+
     token = json.dumps(token)
-    
+
     with open(token_path, "w") as token_file:
         token_file.write(token)
 
-    print('[green]User token is stored')
-
+    print("[green]User token is stored")
 
 
 @app.command()
@@ -42,11 +41,8 @@ def details():
     token = get_token()
     org_id = get_org_id()
 
-    print('Org Id: ', org_id)
-    print('Access Token: ', token)
-
-
-
+    print("Org Id: ", org_id)
+    print("Access Token: ", token)
 
 
 @app.callback()
@@ -62,88 +58,83 @@ def callback():
     logout - Logs out user
     """
 
+
 @app.command()
 def signup():
     print("\n[bold]Create a new account[/bold]\n")
     email: str = typer.prompt("Enter new email")
     handle: str = typer.prompt("Enter new user handle")
     name: str = typer.prompt("Enter new user name")
-    password: str = typer.prompt("Enter new password", confirmation_prompt=True, hide_input=True)
+    password: str = typer.prompt(
+        "Enter new password", confirmation_prompt=True, hide_input=True
+    )
     # organization_id: str = typer.prompt("Enter Organization id")
     # data = {"email": email, "password": password, "org": organization_id}
-    data = {"email": email, "password": password, "handle": handle, "name":name}
+    data = {"email": email, "password": password, "handle": handle, "name": name}
 
+    url_path_1 = "user/signup"
+    url = urljoin(backend_schema.BASE_URL, url_path_1)
 
-    url_path_1 = 'user/signup'
-    url = urljoin(BASE_URL, url_path_1)
-
-    response = requests.post(url,json=data)
-
+    response = requests.post(url, json=data)
 
     if not response.ok:
         print(f"[bold red]Could not create account! Please try again later")
         return
-    print(f"[bold green]Successfully created your account! You can now login using ```pure auth login```")
+    print(
+        f"[bold green]Successfully created your account! You can now login using ```pure auth login```"
+    )
 
 
 def list_org(access_token):
 
-    url_path = 'org'
-    url = urljoin(BASE_URL, url_path)
+    url_path = "org"
+    url = urljoin(backend_schema.BASE_URL, url_path)
 
     headers = {
-        'accept': 'application/json',
-        'Authorization': 'Bearer {}'.format(access_token)
+        "accept": "application/json",
+        "Authorization": "Bearer {}".format(access_token),
     }
 
-
-    response = requests.get(url,headers=headers)
+    response = requests.get(url, headers=headers)
 
     if response.ok:
         print()
-        print('[bold green]Select the Organization from the list below!')
-        org_all = response.json()['data']
+        print("[bold green]Select the Organization from the list below!")
+        org_all = response.json()["data"]
 
         console = Console()
 
-        table = Table( "User Handle", "Organization Id")
+        table = Table("User Handle", "Organization Id")
         for org in org_all:
-            table.add_row(org['org']['handle'], org['org']['uuid'])
-    
+            table.add_row(org["org"]["handle"], org["org"]["uuid"])
+
         console.print(table)
         print()
 
-
     else:
-        print('[bold red]Unable to fetch existing Organizations!')
-
-
+        print("[bold red]Unable to fetch existing Organizations!")
 
 
 def check_org_status(access_token):
 
     org_id: str = typer.prompt("Enter your Org Id")
 
-    url_path = 'org/id/{}'.format(org_id)
-    url = urljoin(BASE_URL, url_path)
+    url_path = "org/id/{}".format(org_id)
+    url = urljoin(backend_schema.BASE_URL, url_path)
 
     headers = {
-        'accept': 'application/json',
-        'Authorization': 'Bearer {}'.format(access_token)
+        "accept": "application/json",
+        "Authorization": "Bearer {}".format(access_token),
     }
 
-
-    response = requests.get(url,headers=headers)
+    response = requests.get(url, headers=headers)
 
     if response.ok:
-        print('[bold green]Organization Exists!')
+        print("[bold green]Organization Exists!")
         return org_id
     else:
-        print('[bold red]Organization doesnot Exists!')
+        print("[bold red]Organization doesnot Exists!")
         return None
-        
-
-
 
 
 @app.command()
@@ -154,18 +145,17 @@ def login():
     password: str = typer.prompt("Enter your password", hide_input=True)
     data = {"email": email, "password": password}
 
+    url_path = "user/login"
+    url = urljoin(backend_schema.BASE_URL, url_path)
 
-    url_path = 'user/login'
-    url = urljoin(BASE_URL, url_path)
+    response = requests.post(url, json=data)
 
-    response = requests.post(url,json=data)
-    
     if response.ok:
         token = response.text
-        token = json.loads(token)['data'][0]
+        token = json.loads(token)["data"][0]
 
-        access_token = token['accessToken']
-        email = token['email']
+        access_token = token["accessToken"]
+        email = token["email"]
 
         list_org(access_token=access_token)
 
@@ -176,14 +166,13 @@ def login():
             save_auth(org_id=org_id, access_token=access_token, email=email)
             print(f"[bold green]Successfully logged in to your account!")
 
-            print('org_id:', org_id)
-            print('accessToken:', access_token)
+            print("org_id:", org_id)
+            print("accessToken:", access_token)
         else:
             print(f"[bold red]Unable to login to your account!")
 
     else:
         print(f"[bold red]Unable to login to your account!")
-
 
 
 # @app.command()
@@ -200,13 +189,15 @@ def login():
 #     else:
 #         print("[bold red]You are not logged in!")
 
+
 def statusHelper():
-    path = PATH_USER_TOKEN
+    path = path_schema.PATH_USER_TOKEN
 
     if os.path.exists(path):
         return open(path, "r").read()
     else:
         return None
+
 
 def auth_validate():
     token = statusHelper()
@@ -214,6 +205,7 @@ def auth_validate():
         print("[bold red]You are not logged in!")
         raise typer.Exit()
     return token
+
 
 # @app.command()
 # def logout():

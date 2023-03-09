@@ -4,7 +4,7 @@
 
 You can contribute to PureML in a number of ways, depending on your expertise, experience, and interest.
 
-If you want to **dive into the code**, the next sections of this document describes the project structure, commit instructions, etc. We have compiled a list of ["Good first issues"](https://github.com/PuremlHQ/PureML/issues), which are small and well-defined tasks for getting started. We also have a ["Help wanted"](https://github.com/PuremlHQ/PureML/issues) tag that has more general issues.
+If you want to **dive into the code**, the next sections of this document describes the project structure, commit instructions, etc. We have compiled a list of ["Good first issues"](https://github.com/PureMLHQ/PureML/issues), which are small and well-defined tasks for getting started. We also have a ["Help wanted"](https://github.com/PureMLHQ/PureML/issues) tag that has more general issues.
 
 When you pick up an issue, please post a comment on the Github issue so others know that it's being worked on.
 
@@ -14,7 +14,7 @@ The roadmap is a work in progress, not a waterfall-y specification, and we want 
 
 We also host regular "community meetings" where we discuss specific roadmap items, and ML versioning and replicability in general. We send out invites to the meeting in advance, in the [`#community-meeting` Discord channel](https://discord.gg/DQ65HnKY). Anyone is welcome to join, and they tend to be interesting discussions with a mix of industry practitioners and academics.
 
-But perhaps the most useful thing you can do is **use the tool**. Join the [Discord chat](https://discord.gg/DBvedzGu) and let us know if PureML is useful to you, and how it can be improved. Open issues on [Github](https://github.com/PuremlHQ/PureML) if you find bugs or have ideas for enhancements.
+But perhaps the most useful thing you can do is **use the tool**. Join the [Discord chat](https://discord.gg/DBvedzGu) and let us know if PureML is useful to you, and how it can be improved. Open issues on [Github](https://github.com/PureMLHQ/PureML) if you find bugs or have ideas for enhancements.
 
 ## Project structure
 

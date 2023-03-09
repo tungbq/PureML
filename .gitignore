@@ -10,6 +10,7 @@ experiments/
 
 packages/purebackend/db/*.db
 packages/purebackend/pureml_data
+packages/purebackend/purebackend.exe
 packages/purebackend/vendor
 
 __pycache__/

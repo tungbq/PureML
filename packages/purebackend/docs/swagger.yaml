@@ -1630,10 +1630,6 @@ paths:
         name: branchName
         required: true
         type: string
-      - description: Include logs
-        in: query
-        name: withLogs
-        type: boolean
       produces:
       - application/json
       responses:
