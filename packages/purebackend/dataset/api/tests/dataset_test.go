@@ -5,13 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	coretests "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service/tests"
-	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
+	"github.com/PureMLHQ/PureML/packages/purebackend/test"
 	"github.com/labstack/echo/v4"
 )
 
 func TestGetAllPublicDatasets(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "get all public datasets + unauthorized",
 			Method:         http.MethodGet,
@@ -20,7 +19,7 @@ func TestGetAllPublicDatasets(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserUuid.String() + `"`,
 				`"name":"Demo Dataset"`,
 				`"wiki":"Demo Dataset Wiki"`,
 				`"is_public":true`,
@@ -34,7 +33,7 @@ func TestGetAllPublicDatasets(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/public/dataset",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -46,13 +45,13 @@ func TestGetAllPublicDatasets(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/public/dataset",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Dataset"`,
 				`"wiki":"Demo Dataset Wiki"`,
 				`"is_public":true`,
@@ -66,13 +65,13 @@ func TestGetAllPublicDatasets(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/public/dataset",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Dataset"`,
 				`"wiki":"Demo Dataset Wiki"`,
 				`"is_public":true`,
@@ -89,11 +88,11 @@ func TestGetAllPublicDatasets(t *testing.T) {
 }
 
 func TestGetAllDatasets(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "get all org datasets + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/all",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/all",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -102,9 +101,9 @@ func TestGetAllDatasets(t *testing.T) {
 		{
 			Name:   "get all org datasets + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/all",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -114,9 +113,9 @@ func TestGetAllDatasets(t *testing.T) {
 		{
 			Name:   "get all org datasets + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/all",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -126,9 +125,9 @@ func TestGetAllDatasets(t *testing.T) {
 		{
 			Name:   "get all org datasets + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/dataset/all",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/dataset/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -138,9 +137,9 @@ func TestGetAllDatasets(t *testing.T) {
 		{
 			Name:   "get all org datasets + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/dataset/all",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/dataset/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -150,13 +149,13 @@ func TestGetAllDatasets(t *testing.T) {
 		{
 			Name:   "get all org datasets + valid token + user not owner",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/all",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Make notadmin a "member" of the admin user org
-				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -165,7 +164,7 @@ func TestGetAllDatasets(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Dataset"`,
 				`"wiki":"Demo Dataset Wiki"`,
 				`"is_public":true`,
@@ -177,21 +176,21 @@ func TestGetAllDatasets(t *testing.T) {
 		{
 			Name:   "get all org datasets + valid token + user is owner",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/all",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserUuid.String() + `"`,
 				`"name":"Demo Dataset"`,
 				`"wiki":"Demo Dataset Wiki"`,
 				`"is_public":true`,
 				`"created_by":{`,
 				`"updated_by":{`,
-				`"uuid":"` + coretests.ValidUserUuid.String() + `"`,
+				`"uuid":"` + test.ValidUserUuid.String() + `"`,
 				`"name":"Demo Private Dataset"`,
 				`"wiki":"Demo Private Dataset Wiki"`,
 				`"is_public":false`,
@@ -208,11 +207,11 @@ func TestGetAllDatasets(t *testing.T) {
 }
 
 func TestGetDataset(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "create dataset + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -221,9 +220,9 @@ func TestGetDataset(t *testing.T) {
 		{
 			Name:   "create dataset + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -233,9 +232,9 @@ func TestGetDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + invalid org uuid",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/dataset/Demo%20Dataset",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/dataset/Demo%20Dataset",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -245,9 +244,9 @@ func TestGetDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + org not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/dataset/Demo%20Dataset",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/dataset/Demo%20Dataset",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -257,9 +256,9 @@ func TestGetDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + org found + dataset not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/No%20Dataset",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/No%20Dataset",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -269,15 +268,15 @@ func TestGetDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + org found + dataset found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Dataset"`,
 				`"wiki":"Demo Dataset Wiki"`,
 				`"is_public":true`,
@@ -294,11 +293,11 @@ func TestGetDataset(t *testing.T) {
 }
 
 func TestCreateDataset(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "create dataset + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/test/create",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/test/create",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -307,9 +306,9 @@ func TestCreateDataset(t *testing.T) {
 		{
 			Name:   "create dataset + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/test/create",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -319,9 +318,9 @@ func TestCreateDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/dataset/test/create",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/dataset/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -331,9 +330,9 @@ func TestCreateDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/dataset/test/create",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/dataset/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -343,9 +342,9 @@ func TestCreateDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + org found + dataset name already exists",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/create",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/Demo%20Dataset/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"wiki":"test",
@@ -363,9 +362,9 @@ func TestCreateDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + org found + custom branch names without main",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/test/create",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"wiki":"test",
@@ -383,9 +382,9 @@ func TestCreateDataset(t *testing.T) {
 		{
 			Name:   "create dataset + valid token + org found + dataset and branches created successfully",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/dataset/test/create",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/dataset/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"wiki":"test",

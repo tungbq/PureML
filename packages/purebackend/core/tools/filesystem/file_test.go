@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/PureMLHQ/PureML/packages/purebackend/core/tools/filesystem"
-	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
+	"github.com/PureMLHQ/PureML/packages/purebackend/test"
 	"github.com/labstack/echo/v4"
 )
 
@@ -72,7 +72,7 @@ func TestNewFileFromBytes(t *testing.T) {
 }
 
 func TestNewFileFromMultipart(t *testing.T) {
-	formData, mp, err := tests.MockMultipartData(nil, "test")
+	formData, mp, err := test.MockMultipartData(nil, "test")
 	if err != nil {
 		t.Fatal(err)
 	}

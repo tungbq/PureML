@@ -1,1 +1,0 @@
-import{a as o}from"/build/_shared/chunk-Q6RXI4JL.js";import"/build/_shared/chunk-WNC7G6UM.js";import{e as r}from"/build/_shared/chunk-ADMCF34Z.js";var t=r(o());function e(){return(0,t.redirect)("/datasets")}export{e as default};

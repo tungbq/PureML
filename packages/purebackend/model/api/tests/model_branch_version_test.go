@@ -5,16 +5,15 @@ import (
 	"strings"
 	"testing"
 
-	coretests "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service/tests"
-	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
+	"github.com/PureMLHQ/PureML/packages/purebackend/test"
 )
 
 func TestGetModelBranchAllVersions(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "get specific version of model branch + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -23,9 +22,9 @@ func TestGetModelBranchAllVersions(t *testing.T) {
 		{
 			Name:   "get all versions of model branch + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -35,9 +34,9 @@ func TestGetModelBranchAllVersions(t *testing.T) {
 		{
 			Name:   "get all versions of model branch + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -47,9 +46,9 @@ func TestGetModelBranchAllVersions(t *testing.T) {
 		{
 			Name:   "get all versions of model branch + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/version",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -59,9 +58,9 @@ func TestGetModelBranchAllVersions(t *testing.T) {
 		{
 			Name:   "get all versions of model branch + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -71,9 +70,9 @@ func TestGetModelBranchAllVersions(t *testing.T) {
 		{
 			Name:   "get all versions of model branch + valid token + model not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/dev/version",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -83,9 +82,9 @@ func TestGetModelBranchAllVersions(t *testing.T) {
 		{
 			Name:   "get all versions of model branch + valid token + branch not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/version",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/version",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -95,15 +94,15 @@ func TestGetModelBranchAllVersions(t *testing.T) {
 		{
 			Name:   "get all versions of model branch + valid token + model branch found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserUuid.String() + `"`,
 				`"hash":"1234567890"`,
 				`"version":"v1"`,
 				`"branch":{`,
@@ -129,11 +128,11 @@ func TestGetModelBranchAllVersions(t *testing.T) {
 }
 
 func TestGetModelBranchVersion(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "get specific version of model branch + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -142,9 +141,9 @@ func TestGetModelBranchVersion(t *testing.T) {
 		{
 			Name:   "get specific version of model branch + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -154,9 +153,9 @@ func TestGetModelBranchVersion(t *testing.T) {
 		{
 			Name:   "get specific version of model branch + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -166,9 +165,9 @@ func TestGetModelBranchVersion(t *testing.T) {
 		{
 			Name:   "get specific version of model branch + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/version/v1",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -178,9 +177,9 @@ func TestGetModelBranchVersion(t *testing.T) {
 		{
 			Name:   "get specific version of model branch + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -190,9 +189,9 @@ func TestGetModelBranchVersion(t *testing.T) {
 		{
 			Name:   "get specific version of model branch + valid token + model not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/dev/version/v1",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/NoModel/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -202,9 +201,9 @@ func TestGetModelBranchVersion(t *testing.T) {
 		{
 			Name:   "get specific version of model branch + valid token + branch not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/version",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/version",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -214,9 +213,9 @@ func TestGetModelBranchVersion(t *testing.T) {
 		{
 			Name:   "get specific version of model branch + valid token + version not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v2",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v2",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -226,15 +225,15 @@ func TestGetModelBranchVersion(t *testing.T) {
 		{
 			Name:   "get specific version of model branch + valid token + model branch version found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/version/v1",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserUuid.String() + `"`,
 				`"hash":"1234567890"`,
 				`"version":"v1"`,
 				`"branch":{`,
@@ -260,11 +259,11 @@ func TestGetModelBranchVersion(t *testing.T) {
 }
 
 func TestVerifyModelBranchHashStatus(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "verify model hash status + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -273,9 +272,9 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 		{
 			Name:   "verify model hash status + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -285,9 +284,9 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 		{
 			Name:   "verify model hash status + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/hash-status",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -297,9 +296,9 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 		{
 			Name:   "verify model hash status + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -309,9 +308,9 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 		{
 			Name:   "verify model hash status + valid token + model not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/noModel/branch/dev/hash-status",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/noModel/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -321,9 +320,9 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 		{
 			Name:   "verify model hash status + valid token + hash empty",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"hash":""
@@ -338,9 +337,9 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 		{
 			Name:   "verify model hash status + valid token + branch not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/hash-status",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"hash":"test"
@@ -355,9 +354,9 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 		{
 			Name:   "verify model hash status + valid token + hash does not exist",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"hash":"test"
@@ -372,9 +371,9 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 		{
 			Name:   "verify model hash status + valid token + hash exists",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/hash-status",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"hash":"1234567890"
@@ -394,7 +393,7 @@ func TestVerifyModelBranchHashStatus(t *testing.T) {
 }
 
 func TestRegisterModel(t *testing.T) {
-	emptyHashMultipartBody, emptyHashMultipartContentType, err := tests.MockMultipartData(map[string]string{
+	emptyHashMultipartBody, emptyHashMultipartContentType, err := test.MockMultipartData(map[string]string{
 		"hash":     "",
 		"storage":  "local",
 		"is_empty": "true",
@@ -402,7 +401,7 @@ func TestRegisterModel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	emptyFileMultipartBody, emptyFileMultipartContentType, err := tests.MockMultipartData(map[string]string{
+	emptyFileMultipartBody, emptyFileMultipartContentType, err := test.MockMultipartData(map[string]string{
 		"hash":     "uniquehash",
 		"storage":  "local",
 		"is_empty": "true",
@@ -410,7 +409,7 @@ func TestRegisterModel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	invalidStorageMultipartBody, invalidStorageMultipartContentType, err := tests.MockMultipartData(map[string]string{
+	invalidStorageMultipartBody, invalidStorageMultipartContentType, err := test.MockMultipartData(map[string]string{
 		"hash":     "uniquehash",
 		"storage":  "nope",
 		"is_empty": "true",
@@ -418,7 +417,7 @@ func TestRegisterModel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	invalidHashMultipartBody, invalidHashMultipartContentType, err := tests.MockMultipartData(map[string]string{
+	invalidHashMultipartBody, invalidHashMultipartContentType, err := test.MockMultipartData(map[string]string{
 		"hash":     "1234567890",
 		"storage":  "local",
 		"is_empty": "true",
@@ -426,7 +425,7 @@ func TestRegisterModel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	validMultipartBody, validMultipartContentType, err := tests.MockMultipartData(map[string]string{
+	validMultipartBody, validMultipartContentType, err := test.MockMultipartData(map[string]string{
 		"hash":     "uniquehash",
 		"storage":  "local",
 		"is_empty": "true",
@@ -434,7 +433,7 @@ func TestRegisterModel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	validProtectedMultipartBody, validProtectedMultipartContentType, err := tests.MockMultipartData(map[string]string{
+	validProtectedMultipartBody, validProtectedMultipartContentType, err := test.MockMultipartData(map[string]string{
 		"hash":     "uniquehash",
 		"storage":  "local",
 		"is_empty": "true",
@@ -442,7 +441,7 @@ func TestRegisterModel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	validS3MultipartBody, validS3MultipartContentType, err := tests.MockMultipartData(map[string]string{
+	validS3MultipartBody, validS3MultipartContentType, err := test.MockMultipartData(map[string]string{
 		"hash":     "uniquehash",
 		"storage":  "s3",
 		"is_empty": "true",
@@ -450,7 +449,7 @@ func TestRegisterModel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	validR2MultipartBody, validR2MultipartContentType, err := tests.MockMultipartData(map[string]string{
+	validR2MultipartBody, validR2MultipartContentType, err := test.MockMultipartData(map[string]string{
 		"hash":     "uniquehash",
 		"storage":  "r2",
 		"is_empty": "true",
@@ -459,11 +458,11 @@ func TestRegisterModel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "register model + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -472,9 +471,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -484,9 +483,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -496,9 +495,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -508,9 +507,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + model not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/noModel/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/noModel/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -520,9 +519,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + branch not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/nobranch/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -532,9 +531,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + hash empty",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 				"Content-Type":  emptyHashMultipartContentType.FormDataContentType(),
 			},
 			Body:           emptyHashMultipartBody,
@@ -548,9 +547,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + file empty",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 				"Content-Type":  emptyFileMultipartContentType.FormDataContentType(),
 			},
 			Body:           emptyFileMultipartBody,
@@ -564,9 +563,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + protected main branch",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/main/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 				"Content-Type":  validProtectedMultipartContentType.FormDataContentType(),
 			},
 			Body:           validProtectedMultipartBody,
@@ -580,9 +579,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + unsupported storage",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 				"Content-Type":  invalidStorageMultipartContentType.FormDataContentType(),
 			},
 			Body:           invalidStorageMultipartBody,
@@ -596,9 +595,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + hash already exists",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 				"Content-Type":  invalidHashMultipartContentType.FormDataContentType(),
 			},
 			Body:           invalidHashMultipartBody,
@@ -612,9 +611,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + s3 not enabled",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 				"Content-Type":  validS3MultipartContentType.FormDataContentType(),
 			},
 			Body:           validS3MultipartBody,
@@ -628,9 +627,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + r2 not enabled",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 				"Content-Type":  validR2MultipartContentType.FormDataContentType(),
 			},
 			Body:           validR2MultipartBody,
@@ -644,9 +643,9 @@ func TestRegisterModel(t *testing.T) {
 		{
 			Name:   "register model + valid token + registered successfully",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/branch/dev/register",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 				"Content-Type":  validMultipartContentType.FormDataContentType(),
 			},
 			Body:           validMultipartBody,
