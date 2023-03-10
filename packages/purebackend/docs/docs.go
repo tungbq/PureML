@@ -2475,12 +2475,6 @@ const docTemplate = `{
                         "name": "branchName",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Include logs",
-                        "name": "withLogs",
-                        "in": "query"
                     }
                 ],
                 "responses": {

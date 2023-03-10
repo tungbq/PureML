@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/PuremlHQ/PureML/packages/purebackend/core"
+	"github.com/PureMLHQ/PureML/packages/purebackend/core"
 )
 
 type TestApp struct {
