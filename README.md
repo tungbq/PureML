@@ -2,7 +2,7 @@
   <img
     align="center"
     alt="PureML"
-    src="/assets/PureMLCoverImg.png"
+    src="/assets/PureMLCoverImg.svg"
     style="width:100%;"
   />
 </a>
@@ -13,65 +13,11 @@
 
 </div>
 
-## ⛳ Quick Access
-
-<p align="center">
-  <a
-    href="https://docs.pureml.com"
-  ><b>Documentation</b></a>
-  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="https://www.youtube.com/watch?v=HdzLFEWS4s8&t=1s"
-  ><b>Watch Demo</b></a>
-  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="https://docs.pureml.com/docs/get-started/quickstart_tabular"
-  ><b>Quick example</b></a>
-  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="#"
-  ><b>Get Instant Help</b></a>
-  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="https://app.pureml.com/auth/signup"
-  ><b>Sign Up for free</b></a>
-    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="https://pureml.notion.site/7de13568835a4cf18913307503a2cdd4?v=82199f96833a48e5907023c8a8d565c6"
-  ><b>Roadmap</b></a>
-</p>
-</br>
-</br>
-
 <div align="center">
   <a
     href="https://pypi.org/project/pureml/"
   >
     <img alt="PyPi" src="https://img.shields.io/pypi/v/pureml?color=green&logo=pureml" />
-  </a>
-  &nbsp;
-  <a
-    href="https://python-poetry.org/"
-  >
-    <img src="https://img.shields.io/badge/poetry-1.1.14-blue?style=flat&logo=poetry&logoColor=white" />
-  </a>
-  &nbsp;
-  <a
-    href="https://opensource.org/licenses/Apache-2.0"
-  >
-    <img alt="License" src="https://img.shields.io/pypi/l/pureml?color=red&logo=Apache&logoColor=red" />
-  </a>
-  &nbsp;
-  <a
-    href="https://discord.gg/xNUHt9yguJ"
-  >
-    <img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20Discord-blueviolet?style=flat&logo=discord&logoColor=white" />
-  </a>
-  &nbsp;
-  <a
-    href="https://pepy.tech/project/pureml"
-  >
-    <img alt="Downloads" src="https://static.pepy.tech/badge/pureml">
   </a>
   &nbsp;
   <a
@@ -87,29 +33,28 @@
   </a>
   &nbsp;
   <a
-    href="https://pypi.org/project/pureml/"
+    href="https://opensource.org/licenses/Apache-2.0"
   >
-    <img alt="Coverage" src="https://img.shields.io/github/stars/PureMLHQ/PureML?style=social">
+    <img alt="License" src="https://img.shields.io/pypi/l/pureml?color=red&logo=Apache&logoColor=red" />
   </a>
-
+  &nbsp;
+  <a
+    href="https://pepy.tech/project/pureml"
+  >
+    <img alt="Downloads" src="https://static.pepy.tech/badge/pureml">
+  </a>
 </div>
 
-## 💎 Intro
+<br/>
+<br/>
 
-PureML is an open-source version control for machine learning.
+## ⏳ Status
 
-1. [Quick start](#quick-start)
-2. [How it works](#how-it-works)
-3. [Demo](#demo)
-4. [Main Features](#main-features)
-5. [Core design principles](#core-design-principles)
-6. [Core abstractions](#core-abstractions)
-7. [Why to get involved](#why-to-get-involved)
-8. [Tutorials](#tutorials)
+This is an early alpha. The implementation might change between versions without warning. Please use at your own risk and pin to a specific version if you're relying on this for anything important!
 
-<br />
+## ⏱ Getting started
 
-## ⏱ Quick start
+### 1. Installation
 
 Manage versioning of datasets and models with our python SDK. Versioning is semantic and managed automatically. You can install and run PureML using `pip`.
 
@@ -121,15 +66,13 @@ pip install pureml
 
 <br />
 
-## 📋 How it works
-
-Just add a few lines of code. You don't need to change the way you work. PureML is a Python library that uploads metadata to S3.
-
 If you are trying to manage versions of dataset all you have to do is use our decorator `@dataset`.
 
-For managing models we have to use `@model` decorator. We have some other features built in such as data lineage and branching. For more information refer docs.
+For managing models we have to use `@model` decorator. We have some other features built in such as data lineage and branching. For more information refer [docs](https://docs.pureml.com).
 
 <br/>
+
+### 2. Pureml-eval : Testing & Quality Control
 
 #### Step 1: Use an existing model for validation
 
@@ -140,6 +83,8 @@ pureml.dataset.validation(“petdata:dev:v1”)
 ```
 
 If you want to add a dataset as validation while saving it, you can use our `@validation`. This helps us capture not just one instance of this dataset but all the future variations without any intervention.
+
+<br/>
 
 #### Step 2: Register validation dataset
 
@@ -226,7 +171,7 @@ Lets see how PureML makes it easier to identify and correct any issues with its 
 <h1 align="center">
 <img
    align="center"
-   src="/assets/ReviewDataset.svg"
+   src="/assets/ReviewModel.svg"
     />
 </h1>
 
