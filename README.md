@@ -1,21 +1,19 @@
-<h1 align="center">
-  <a href="https://pureml.com">
-    <img
-      align="center"
-      alt="PureML"
-      src="/assets/PureMLCoverImg.png"
-      style="width:100%;"
-    />
-  </a>
-</h1>
+<a href="https://pureml.com" align="center">
+  <img
+    align="center"
+    alt="PureML"
+    src="/assets/PureMLCoverImg.png"
+    style="width:100%;"
+  />
+</a>
 
 <div align="center">
 
-# The next-gen developer platform for Production ML
+# The next-gen developer platform for Production ML.
 
 </div>
 
-# ⛳ Quick Access
+## ⛳ Quick Access
 
 <p align="center">
   <a
@@ -96,7 +94,7 @@
 
 </div>
 
-# 💎 Intro
+## 💎 Intro
 
 PureML is an open-source version control for machine learning.
 
@@ -111,7 +109,7 @@ PureML is an open-source version control for machine learning.
 
 <br />
 
-# ⏱ Quick start
+## ⏱ Quick start
 
 Manage versioning of datasets and models with our python SDK. Versioning is semantic and managed automatically. You can install and run PureML using `pip`.
 
@@ -123,7 +121,7 @@ pip install pureml
 
 <br />
 
-# 📋 How it works
+## 📋 How it works
 
 Just add a few lines of code. You don't need to change the way you work. PureML is a Python library that uploads metadata to S3.
 
@@ -133,7 +131,7 @@ For managing models we have to use `@model` decorator. We have some other featur
 
 <br/>
 
-##### Step 1: Use an existing model for validation
+#### Step 1: Use an existing model for validation
 
 ```python
 import pureml
@@ -143,7 +141,7 @@ pureml.dataset.validation(“petdata:dev:v1”)
 
 If you want to add a dataset as validation while saving it, you can use our `@validation`. This helps us capture not just one instance of this dataset but all the future variations without any intervention.
 
-##### Step 2: Register validation dataset
+#### Step 2: Register validation dataset
 
 ```python
 import tensorflow as tf
@@ -182,7 +180,7 @@ def load_data(img_folder = "PetImages"):
 
 <br/>
 
-##### Step 3: Predictor for model
+#### Step 3: Predictor for model
 
 We recommend utilizing our base predictor class when developing your model. By doing so, you can leverage the predict function in this class as your model's prediction function, which can be used in various stages such as testing, inference, and dockerization.
 
@@ -213,7 +211,7 @@ class Predictor(BasePredictor):
 
 <br/>
 
-##### Step 4: Evaluating your model is done as follows
+#### Step 4: Evaluating your model is done as follows
 
 ```python
 import pureml
@@ -234,11 +232,12 @@ Lets see how PureML makes it easier to identify and correct any issues with its 
 
 For more detailed explanation, please visit our [Documentation](https://docs.pureml.com) for more reference.
 
-# 💻 Demo
+## 💻 Demo
 
 PureML quick start demo in just 2 mins.
 
 [![PureML Demo Video](https://img.youtube.com/vi/HdzLFEWS4s8/0.jpg)](https://www.youtube.com/watch?v=HdzLFEWS4s8 "PureML Demo Video")
+<br/>
 <sub><i>Click the image to play video</i></sub>
 
 ### Live demo
@@ -247,7 +246,7 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 <br />
 
-# 📍 [Main Features](https://docs.pureml.com/)
+## 📍 [Main Features](https://docs.pureml.com/)
 
 |                          |                                                                               |
 | ------------------------ | ----------------------------------------------------------------------------- |
@@ -260,7 +259,7 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 <br />
 
-# 🔮 Core design principles
+## 🔮 Core design principles
 
 |                                     |                                                                                                                 |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -272,7 +271,7 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 <br />
 
-# ⚙ Core abstractions
+## ⚙ Core abstractions
 
 These are the fundamental concepts that PureML uses to operate.
 
@@ -286,7 +285,7 @@ These are the fundamental concepts that PureML uses to operate.
 
 <br />
 
-# 🤝 Why to get involved
+## 🤝 Why to get involved
 
 Version control is much more common in software than in machine learning. So why isn’t everyone using Git? Git doesn’t work well with machine learning. It can’t handle large files, it can’t handle key/value metadata like metrics, and it can’t record information automatically from inside a training script.
 
@@ -300,7 +299,7 @@ Lets build this together. If you have faced this issue or have worked out a simi
 
 <br />
 
-# 🧮 Tutorials
+## 🧮 Tutorials
 
 - [Registering Data lineage](https://docs.pureml.com/docs/data/register_data_pipeline)
 - [Registering models](https://docs.pureml.com/docs/models/register_models)
@@ -311,36 +310,31 @@ Lets build this together. If you have faced this issue or have worked out a simi
 
 <br />
 
-# 🐞 Reporting Bugs
+## 🐞 Reporting Bugs
 
 To report any bugs you have faced while using PureML package, please
 
 1. Report it in [Discord](https://discord.gg/xNUHt9yguJ) channel
-1. Open an [issue](https://github.com/PureMLHQ/PureML/issues)
+2. Open an [issue](https://github.com/PureMLHQ/PureML/issues)
 
 <br />
 
-# ⌨ Contributing and Developing
+## ⌨ Contributing and Developing
 
-Lets work together to improve the features for everyone. For more details, please look at out [Contributing Guide](./CONTRIBUTING.md)
+Lets work together to improve the features for everyone. Here's step one for you to go through our [Contributing Guide](./CONTRIBUTING.md). We are already waiting for amazing ideas and features which you all have got.
 
-Work with mutual respect. Please take a look at our public roadmap here.
-[Roadmap](https://pureml.notion.site/7de13568835a4cf18913307503a2cdd4?v=82199f96833a48e5907023c8a8d565c6)
+Work with mutual respect. Please take a look at our public [Roadmap here](https://pureml.notion.site/7de13568835a4cf18913307503a2cdd4?v=82199f96833a48e5907023c8a8d565c6).
 
 <br />
 
-# 👨‍👩‍👧‍👦 Community
+## 👨‍👩‍👧‍👦 Community
 
-To get quick updates, feature release for PureML follow us on
-| |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [<img alt="Twitter" height="20" src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />](https://twitter.com/getPureML) |
-| [<img alt="LinkedIn" height="20" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/company/PuremlHQ/) |
-| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/PureMLHQ/PureML) |
-| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" />](https://discord.gg/DBvedzGu) |
+To get quick updates of feature releases of PureML, follow us on:
 
-# 📄 License
+[<img alt="Twitter" height="20" src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />](https://twitter.com/getPureML) [<img alt="LinkedIn" height="20" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/company/PuremlHQ/) [<img alt="GitHub" height="20" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/PureMLHQ/PureML) [<img alt="GitHub" height="20" src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" />](https://discord.gg/DBvedzGu)
+
+<br/>
+
+## 📄 License
 
 See the [Apache-2.0](./License) file for licensing information.
-
-<br />
