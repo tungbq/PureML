@@ -171,7 +171,7 @@ Lets see how PureML makes it easier to identify and correct any issues with its 
 <h1 align="center">
 <img
    align="center"
-   src="/assets/ReviewModel.svg"
+   src="/assets/ReadmeReviewModel.svg"
     />
 </h1>
 
