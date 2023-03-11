@@ -1,0 +1,383 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap");
+
+*,
+html,
+body {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-size: 14px;
+  font-feature-settings: "salt" on;
+}
+
+.overlay-bg {
+  background-color: #565f6c;
+}
+
+.w-inherit {
+  width: inherit;
+}
+
+/* ################ Loader ################ */
+
+@-webkit-keyframes loader-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loader-verify {
+  margin: -18px 0 0 -18px;
+  border: 2.5px solid #191f4d;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: 16px;
+  height: 16px;
+  animation: loader-spin 2s linear infinite reverse;
+  box-shadow: 0 0 0 1px #191f4d inset;
+}
+.loader-verify:before {
+  content: "";
+  position: absolute;
+  -webkit-animation: loader-spin 2s cubic-bezier(0.59, 0.25, 0.4, 0.69) infinite;
+  animation: loader-spin 2s cubic-bezier(0.59, 0.25, 0.4, 0.69) infinite;
+  background: #191f4d;
+  transform-origin: top center;
+  border-radius: 50%;
+  width: 150%;
+  height: 150%;
+  top: 50%;
+  left: -12.5%;
+}
+.loader {
+  position: absolute;
+  margin: -18px 0 0 -18px;
+  border: 3.6px solid #191f4d;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: 36px;
+  height: 36px;
+  left: 50%;
+  top: 50%;
+  animation: loader-spin 2s linear infinite reverse;
+  filter: url(#goo);
+  box-shadow: 0 0 0 1px #191f4d inset;
+}
+.loader:before {
+  content: "";
+  position: absolute;
+  -webkit-animation: loader-spin 2s cubic-bezier(0.59, 0.25, 0.4, 0.69) infinite;
+  animation: loader-spin 2s cubic-bezier(0.59, 0.25, 0.4, 0.69) infinite;
+  background: #191f4d;
+  transform-origin: top center;
+  border-radius: 50%;
+  width: 150%;
+  height: 150%;
+  top: 50%;
+  left: -12.5%;
+}
+
+/* ################ Scrollbar ################ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 12px;
+}
+
+/* ################ Button ################ */
+
+.btn {
+  height: 40px !important;
+}
+
+.btn-secondary:hover,
+.btn-secondary.btn-active {
+  background-color: #f1f5f9 !important;
+}
+
+/* ################ Input ################ */
+
+input[type="checkbox"] {
+  box-shadow: none;
+  --tw-ring-color: transparent !important;
+  width: 1rem;
+  height: 1rem;
+  background-color: transparent;
+}
+
+input[type="password"],
+[type="text"],
+[type="email"] {
+  box-shadow: none;
+  --tw-ring-color: #475569;
+  border-color: #e2e8f0;
+  font-size: 14px;
+  font-weight: 400;
+  height: 40px;
+  background-color: transparent;
+}
+
+input[type="text"]:hover,
+[type="password"]:hover,
+[type="email"]:hover {
+  border-color: #94a3b8;
+}
+
+input[type="text"]:focus,
+[type="password"]:focus,
+[type="email"]:focus {
+  box-shadow: none;
+  outline: none;
+  --tw-ring-color: #475569;
+  border-color: #0e4ddd;
+  border-width: 2px;
+  background-color: transparent;
+}
+
+.input-icons i {
+  position: absolute;
+  margin-left: -24px;
+  margin-top: 6px;
+}
+
+.input-icons {
+  width: 100%;
+}
+
+.input-field {
+  width: 24rem;
+  padding: 10px;
+}
+/* ################ Table ################ */
+
+.table :where(thead, tfoot) :where(th, td) {
+  background-color: white;
+  height: 48px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #94a3b8;
+  text-transform: capitalize;
+}
+
+.table :where(tbody) :where(td, th) {
+  background-color: transparent;
+}
+
+/* ################ Landing page ################ */
+.bgvideo {
+  background-image: url("/imgs/landingPage/hero.gif");
+}
+
+.codeblock span {
+  background-color: #0f172a !important;
+  border-radius: 8px !important;
+  font-family: "IBM Plex Mono", monospace !important;
+}
+
+.codeblock code {
+  padding: 20px !important;
+  width: 100% !important;
+}
+
+@layer components {
+  .font-spacegrotesk {
+    font-family: "Space Grotesk", sans-serif;
+  }
+}
+
+.letterSpaced {
+  letter-spacing: 0.1rem;
+}
+
+.landingpg-font div,
+.landingpg-font a,
+.landingpg-font button,
+.landingpg-font p,
+.landingpg-font h2,
+.landingpg-font h1,
+.landingpg-font span {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.landingpg-font p {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.landingpg-font h1 {
+  color: #1e293b;
+}
+
+.landingpg-font h2 {
+  color: #475569;
+}
+
+/* for landing pg btn */
+.hover-effect:hover {
+  box-shadow: 8px 8px #ffce84;
+  transition: 0.3s;
+}
+
+/* ################ Toast Notification ################ */
+.Toastify__toast {
+  min-height: auto !important;
+  box-shadow: none !important;
+}
+
+.Toastify__close-button {
+  align-self: center !important;
+  color: #475569 !important;
+  opacity: 100% !important;
+}
+
+.Toastify__toast--success {
+  border-radius: 8px !important;
+  background-color: #bbf7d0 !important;
+  border: none !important;
+}
+.Toastify__toast--error {
+  border-radius: 8px !important;
+  background-color: #ffd7d7 !important;
+  border: none !important;
+}
+.Toastify__toast--info {
+  border-radius: 8px !important;
+  background-color: #bbd2f7 !important;
+  border: none !important;
+}
+.Toastify__toast--warning {
+  border-radius: 8px !important;
+  background-color: #f3f7bb !important;
+  border: none !important;
+}
+.Toastify__toast--success .Toastify__toast-body,
+.Toastify__toast--error .Toastify__toast-body,
+.Toastify__toast--info .Toastify__toast-body,
+.Toastify__toast--warning .Toastify__toast-body {
+  color: #475569 !important;
+  font-weight: 500;
+}
+.Toastify__toast--success .Toastify__toast-icon svg {
+  fill: #16a34a !important;
+}
+.Toastify__toast--error .Toastify__toast-icon svg {
+  fill: #bd5254 !important;
+}
+.Toastify__toast--info .Toastify__toast-icon svg {
+  fill: #164aa3 !important;
+}
+.Toastify__toast--warning .Toastify__toast-icon svg {
+  fill: #a1a316 !important;
+}
+
+/* ################ Data lineage ################ */
+
+.react-flow__attribution a {
+  color: #ffffff !important;
+}
+
+.react-flow__node-default,
+.react-flow__node-input,
+.react-flow__node-output,
+.react-flow__node-group {
+  color: #1e293b !important;
+  border-color: #94a3b8 !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+}
+
+.react-flow__handle {
+  background-color: none !important;
+  min-width: 0px !important;
+  min-height: 0px !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+.react-flow__handle-bottom {
+  bottom: 0px !important;
+}
+
+.react-flow__handle-top {
+  top: 2px !important;
+}
+
+/* ################ Profile Contribution chart ################ */
+
+.react-calendar-heatmap text {
+  fill: #475569 !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.react-calendar-heatmap rect:hover {
+  stroke: #94a3b8 !important;
+}
+
+.react-calendar-heatmap-month-label {
+  font-size: 5px !important;
+}
+
+.react-calendar-heatmap-weekday-label {
+  font-size: 5px !important;
+}
+
+.react-calendar-heatmap .color-empty {
+  fill: #f1f5f9 !important;
+}
+
+.react-calendar-heatmap .color-github-1 {
+  fill: #fff3e0 !important;
+}
+
+.react-calendar-heatmap .color-github-2 {
+  fill: #fce4c0 !important;
+}
+.react-calendar-heatmap .color-github-3 {
+  fill: #ffce84 !important;
+}
+
+/* ################ Lineage Code ################ */
+
+.bimDGd {
+  padding: 16px !important;
+  border-radius: 8px !important;
+}
+
+.bimDGd,
+.hIHswE,
+.bimDGd span {
+  background-color: #f8fafc !important;
+  line-height: 18.46px !important;
+}
+
+.hIHswE .icon {
+  fill: #94a3b8 !important;
+}

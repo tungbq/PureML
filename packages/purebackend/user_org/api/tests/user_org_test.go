@@ -5,13 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	coretests "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service/tests"
-	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
+	"github.com/PureMLHQ/PureML/packages/purebackend/test"
 	"github.com/labstack/echo/v4"
 )
 
 func TestGetOrgsForUser(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "get user orgs + unauthorized",
 			Method:         http.MethodGet,
@@ -26,7 +25,7 @@ func TestGetOrgsForUser(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/org",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -38,7 +37,7 @@ func TestGetOrgsForUser(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/org",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -50,13 +49,13 @@ func TestGetOrgsForUser(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/org",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Org"`,
 				`"handle":"demo"`,
 				`"avatar":""`,
@@ -72,11 +71,11 @@ func TestGetOrgsForUser(t *testing.T) {
 }
 
 func TestAddUsersToOrg(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "add user to org + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -85,9 +84,9 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -97,9 +96,9 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + login user not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -109,9 +108,9 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/add",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -121,9 +120,9 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -133,9 +132,9 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + no email in body",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":""
@@ -150,9 +149,9 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + invalid email",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"invalidemail"
@@ -167,9 +166,9 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + user to add not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"noone@nomail.com"
@@ -184,21 +183,21 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + not authorized to add user",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"test@test.com"
 			}`),
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Create 3rd user
 				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.", true)
 				if err != nil {
 					t.Fatal(err)
 				}
 				// Make notadmin a "member" of the admin user org
-				_, err = app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err = app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -213,16 +212,16 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + user already added",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"notadmin@aztlan.in"
 			}`),
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Make notadmin a "member" of the admin user org
-				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -237,9 +236,9 @@ func TestAddUsersToOrg(t *testing.T) {
 		{
 			Name:   "add user to org + valid token + user added successfully",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/add",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/add",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"notadmin@aztlan.in"
@@ -258,11 +257,11 @@ func TestAddUsersToOrg(t *testing.T) {
 	}
 }
 func TestUpdateUserRole(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "update user role + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -271,9 +270,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -283,9 +282,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + login user not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -295,9 +294,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/role",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -307,9 +306,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -319,9 +318,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + no email in body",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"",
@@ -337,9 +336,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + no role in body",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"test@test.com",
@@ -355,9 +354,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + invalid email",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"invalidemail",
@@ -373,9 +372,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + invalid role",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"test@test.com",
@@ -391,9 +390,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + user to add not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"noone@nomail.com",
@@ -409,17 +408,17 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + not authorized to update user roles",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"demo@aztlan.in",
 				"role":"member"
 			}`),
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Make notadmin a "member" of the admin user org
-				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -434,9 +433,9 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + user not member",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"notadmin@aztlan.in",
@@ -452,17 +451,17 @@ func TestUpdateUserRole(t *testing.T) {
 		{
 			Name:   "update user role + valid token + user added successfully",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/role",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/role",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"notadmin@aztlan.in",
 				"role":"owner"
 			}`),
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Make notadmin a "member" of the admin user org
-				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -482,7 +481,7 @@ func TestUpdateUserRole(t *testing.T) {
 }
 
 func TestJoinOrg(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "join org + unauthorized",
 			Method:         http.MethodPost,
@@ -497,7 +496,7 @@ func TestJoinOrg(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/org/join",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -509,7 +508,7 @@ func TestJoinOrg(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/org/join",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -521,7 +520,7 @@ func TestJoinOrg(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/org/join",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"join_code":""
@@ -538,7 +537,7 @@ func TestJoinOrg(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/org/join",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"join_code":"joincodedoesnotexist"
@@ -555,7 +554,7 @@ func TestJoinOrg(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/org/join",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"join_code":"iwanttojoindemo"
@@ -572,7 +571,7 @@ func TestJoinOrg(t *testing.T) {
 			Method: http.MethodPost,
 			Url:    "/api/org/join",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"join_code":"iwanttojoinnotadmin"
@@ -592,11 +591,11 @@ func TestJoinOrg(t *testing.T) {
 }
 
 func TestLeaveOrg(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "leave org + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/leave",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/leave",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -605,9 +604,9 @@ func TestLeaveOrg(t *testing.T) {
 		{
 			Name:   "leave org + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/leave",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/leave",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -617,9 +616,9 @@ func TestLeaveOrg(t *testing.T) {
 		{
 			Name:   "leave org + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/leave",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/leave",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -629,9 +628,9 @@ func TestLeaveOrg(t *testing.T) {
 		{
 			Name:   "leave org + valid token + invalid org uuid",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/leave",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/leave",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -641,9 +640,9 @@ func TestLeaveOrg(t *testing.T) {
 		{
 			Name:   "leave org + valid token + org not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/leave",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/leave",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -653,9 +652,9 @@ func TestLeaveOrg(t *testing.T) {
 		{
 			Name:   "leave org + valid token + owner cannot leave",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/leave",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/leave",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -667,13 +666,13 @@ func TestLeaveOrg(t *testing.T) {
 		{
 			Name:   "leave org + valid token + leave org successfully",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/leave",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/leave",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Make notadmin a "member" of the admin user org
-				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -693,11 +692,11 @@ func TestLeaveOrg(t *testing.T) {
 }
 
 func TestRemoveOrg(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "remove org member + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -706,9 +705,9 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -718,9 +717,9 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + user not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -730,9 +729,9 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/remove",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -742,9 +741,9 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -754,9 +753,9 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + no email in body",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":""
@@ -771,9 +770,9 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + invalid email",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"invalidemail"
@@ -788,9 +787,9 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + user with email not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"nouser@noone.none"
@@ -805,16 +804,16 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + not authorized to remove user",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"notadmin@aztlan.in"
 			}`),
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Make notadmin a "member" of the admin user org
-				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -829,14 +828,14 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + user with email not member",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"test@test.com"
 			}`),
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Create 3rd user
 				_, err := app.Dao().CreateUser("test", "test@test.com", "test", "", "", "$2a$10$N..OOp8lPw0fRGCXT.HxH.LO8BUKwlncI/ufXK/bLTEvyeFmdCun.", true)
 				if err != nil {
@@ -853,9 +852,9 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + owner cannot be removed",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"demo@aztlan.in"
@@ -870,16 +869,16 @@ func TestRemoveOrg(t *testing.T) {
 		{
 			Name:   "remove org member + valid token + user removed successfully",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/remove",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/remove",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"email":"notadmin@aztlan.in"
 			}`),
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Make notadmin a "member" of the admin user org
-				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}

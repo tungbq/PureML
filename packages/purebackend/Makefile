@@ -48,8 +48,8 @@ deploy-server: serve ui-server
 
 .PHONY: docker-build
 docker-build:
-	docker build --pull --rm -f "Dockerfile" -t purebackend:v0.0.4 "."
+	docker build --pull --rm -f "Dockerfile" -t purebackend:dev "."
 
 .PHONY: docker-run
 docker-run:
-	docker run -it --rm --env-file=.env -p 8080:8080/tcp purebackend:v0.0.4
+	docker run -it --rm --env-file=.env -p 8080:8080/tcp pureml_backend:v0.1
