@@ -13,6 +13,8 @@ packages/purebackend/pureml_data
 packages/purebackend/purebackend.exe
 packages/purebackend/vendor
 
+packages/pureml_frontend/node_modules
+
 __pycache__/
 *.pyc
 

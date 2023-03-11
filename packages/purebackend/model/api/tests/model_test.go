@@ -5,13 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	coretests "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service/tests"
-	"github.com/PureMLHQ/PureML/packages/purebackend/tests"
+	"github.com/PureMLHQ/PureML/packages/purebackend/test"
 	"github.com/labstack/echo/v4"
 )
 
 func TestGetAllPublicModels(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "get all public models + unauthorized",
 			Method:         http.MethodGet,
@@ -20,7 +19,7 @@ func TestGetAllPublicModels(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserUuid.String() + `"`,
 				`"name":"Demo Model"`,
 				`"wiki":"Demo Model Wiki"`,
 				`"is_public":true`,
@@ -34,7 +33,7 @@ func TestGetAllPublicModels(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/public/model",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -46,13 +45,13 @@ func TestGetAllPublicModels(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/public/model",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Model"`,
 				`"wiki":"Demo Model Wiki"`,
 				`"is_public":true`,
@@ -66,13 +65,13 @@ func TestGetAllPublicModels(t *testing.T) {
 			Method: http.MethodGet,
 			Url:    "/api/public/model",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Model"`,
 				`"wiki":"Demo Model Wiki"`,
 				`"is_public":true`,
@@ -89,11 +88,11 @@ func TestGetAllPublicModels(t *testing.T) {
 }
 
 func TestGetAllModels(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "get all org models + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/all",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/all",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -102,9 +101,9 @@ func TestGetAllModels(t *testing.T) {
 		{
 			Name:   "get all org models + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/all",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -114,9 +113,9 @@ func TestGetAllModels(t *testing.T) {
 		{
 			Name:   "get all org models + valid token + user not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/all",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidTokenNoUser,
+				"Authorization": test.ValidTokenNoUser,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -126,9 +125,9 @@ func TestGetAllModels(t *testing.T) {
 		{
 			Name:   "get all org models + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/all",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/model/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -138,9 +137,9 @@ func TestGetAllModels(t *testing.T) {
 		{
 			Name:   "get all org models + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/all",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/model/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -150,13 +149,13 @@ func TestGetAllModels(t *testing.T) {
 		{
 			Name:   "get all org models + valid token + user not owner",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/all",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
-			BeforeTestFunc: func(t *testing.T, app *tests.TestApp, e *echo.Echo) {
+			BeforeTestFunc: func(t *testing.T, app *test.TestApp, e *echo.Echo) {
 				// Make notadmin a "member" of the admin user org
-				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", coretests.ValidAdminUserOrgUuid)
+				_, err := app.Dao().CreateUserOrganizationFromEmailAndOrgId("notadmin@aztlan.in", test.ValidAdminUserOrgUuid)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -165,7 +164,7 @@ func TestGetAllModels(t *testing.T) {
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Model"`,
 				`"wiki":"Demo Model Wiki"`,
 				`"is_public":true`,
@@ -177,21 +176,21 @@ func TestGetAllModels(t *testing.T) {
 		{
 			Name:   "get all org models + valid token + user is owner",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/all",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/all",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserUuid.String() + `"`,
 				`"name":"Demo Model"`,
 				`"wiki":"Demo Model Wiki"`,
 				`"is_public":true`,
 				`"created_by":{`,
 				`"updated_by":{`,
-				`"uuid":"` + coretests.ValidUserUuid.String() + `"`,
+				`"uuid":"` + test.ValidUserUuid.String() + `"`,
 				`"name":"Demo Private Model"`,
 				`"wiki":"Demo Private Model Wiki"`,
 				`"is_public":false`,
@@ -208,11 +207,11 @@ func TestGetAllModels(t *testing.T) {
 }
 
 func TestGetModel(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "create model + unauthorized",
 			Method:         http.MethodGet,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -221,9 +220,9 @@ func TestGetModel(t *testing.T) {
 		{
 			Name:   "create model + invalid token",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -233,9 +232,9 @@ func TestGetModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + invalid org uuid",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/Demo%20Model",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/model/Demo%20Model",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -245,9 +244,9 @@ func TestGetModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + org not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/Demo%20Model",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/model/Demo%20Model",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -257,9 +256,9 @@ func TestGetModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + org found + model not found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/No%20Model",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/No%20Model",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -269,15 +268,15 @@ func TestGetModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + org found + model found",
 			Method: http.MethodGet,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 200,
 			ExpectedContent: []string{
 				`"status":200`,
 				`"data":[{`,
-				`"uuid":"` + coretests.ValidAdminUserOrgUuid.String() + `"`,
+				`"uuid":"` + test.ValidAdminUserOrgUuid.String() + `"`,
 				`"name":"Demo Model"`,
 				`"wiki":"Demo Model Wiki"`,
 				`"is_public":true`,
@@ -294,11 +293,11 @@ func TestGetModel(t *testing.T) {
 }
 
 func TestCreateModel(t *testing.T) {
-	scenarios := []tests.ApiScenario{
+	scenarios := []test.ApiScenario{
 		{
 			Name:           "create model + unauthorized",
 			Method:         http.MethodPost,
-			Url:            "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/test/create",
+			Url:            "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/test/create",
 			ExpectedStatus: 401,
 			ExpectedContent: []string{
 				`Authentication token required`,
@@ -307,9 +306,9 @@ func TestCreateModel(t *testing.T) {
 		{
 			Name:   "create model + invalid token",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/test/create",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.InvalidToken,
+				"Authorization": test.InvalidToken,
 			},
 			ExpectedStatus: 403,
 			ExpectedContent: []string{
@@ -319,9 +318,9 @@ func TestCreateModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + invalid org uuid",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.InvalidOrgUuidString + "/model/test/create",
+			Url:    "/api/org/" + test.InvalidOrgUuidString + "/model/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			ExpectedStatus: 400,
 			ExpectedContent: []string{
@@ -331,9 +330,9 @@ func TestCreateModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + org not found",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidNoOrgUuid.String() + "/model/test/create",
+			Url:    "/api/org/" + test.ValidNoOrgUuid.String() + "/model/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidUserToken,
+				"Authorization": test.ValidUserToken,
 			},
 			ExpectedStatus: 404,
 			ExpectedContent: []string{
@@ -343,9 +342,9 @@ func TestCreateModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + org found + model name already exists",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/create",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/Demo%20Model/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"wiki":"test",
@@ -363,9 +362,9 @@ func TestCreateModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + org found + custom branch names without main",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/test/create",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"wiki":"test",
@@ -383,9 +382,9 @@ func TestCreateModel(t *testing.T) {
 		{
 			Name:   "create model + valid token + org found + model and branches created successfully",
 			Method: http.MethodPost,
-			Url:    "/api/org/" + coretests.ValidAdminUserOrgUuid.String() + "/model/test/create",
+			Url:    "/api/org/" + test.ValidAdminUserOrgUuid.String() + "/model/test/create",
 			RequestHeaders: map[string]string{
-				"Authorization": coretests.ValidAdminToken,
+				"Authorization": test.ValidAdminToken,
 			},
 			Body: strings.NewReader(`{
 				"wiki":"test",

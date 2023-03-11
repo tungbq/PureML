@@ -1,1 +1,0 @@
-import{a as o}from"/build/_shared/chunk-Q6RXI4JL.js";import"/build/_shared/chunk-WNC7G6UM.js";import{e as t}from"/build/_shared/chunk-ADMCF34Z.js";var e=t(o());function r(){return(0,e.redirect)("/models")}export{r as default};
