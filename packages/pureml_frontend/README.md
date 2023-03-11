@@ -41,23 +41,70 @@
 
 ## Quick start
 
-PureML UI takes no time to start on your local system. Follow below steps to run:
+PureML UI helps you to visualize all the details and versions of your models and datasets you want to work with. It takes no time to run PureML UI on your local system. Follow below steps to run:
 
-1. Install requirements
-
-```bash
-pnpm i
-```
-
-2. Start the server
+Start the server:
 
 ```bash
 pnpm dev
 ```
 
-3. Open [localhost:3000](localhost:3000) to use the UI.
+Open [http://localhost:3000](http://localhost:3000) to use the UI.
 
 <br/>
+
+## Directory Structure
+
+```
+pureml_frontend
+├─ app/
+│  ├─ analytics/             # Analytics
+│  │  ├─ gtags.client.ts     # Google Tag
+│  │  ├─ reportWebVitals.ts  # Vercel web vitals
+│  │  └─ vitals.ts           # Vitals
+|  |
+|  ├─ components/            # Components
+│  │  ├─ landingPage/        # Landing Page files
+│  │  ├─ ui/                 # Minimal UI components used in all
+│  │  └─ ...                 # other components used
+│  │
+│  ├─ routes/                # Route pages
+│  │  ├─ api/                # All apis used in app
+│  │  ├─ auth/               # Pages under Authentication
+│  │  ├─ datasets/           # Pages showing all datasets
+│  │  ├─ models/             # Pages showing all models
+│  │  ├─ org/                # Pages under Org feature
+│  │  ├─ settings/           # Pages under settings
+│  │  └─ ...                 # …that has layouts of each page
+│  │
+│  ├─ entry.client.ts        # Entry.client file by remix
+│  ├─ entry.server.ts        # Entry.server file by remix
+│  ├─ lib.type.d.ts          # Type file
+│  ├─ session.ts             # Session used for authentication
+│  └─ root.tsx               # Root Index
+│
+├─ public/                   # Public
+|  ├─ error/                 # Error images
+|  └─ imgs/                  # Images used in application
+|
+├─ styles/                   # Styles
+│  └─ app.css                # CSS file
+|
+├─ .gitignore                # List of files and folders not tracked by Git
+├─ .eslintrc                 # Linting preferences for JavasScript
+├─ remix.config.js           # Remix configuration file
+├─ tailwind.config.js        # Tailwind configuration file
+├─ package.json              # Project manifest
+└─ README.md                 # This file
+```
+
+## Technology used
+
+1. [Remix framework](https://remix.run/)
+2. [Tailwind CSS](https://remix.run/)
+3. [Tailwind Variants](https://www.tailwind-variants.org/docs/introduction)
+4. [Radix components](https://www.radix-ui.com/docs/primitives/overview/introduction)
+5. [Reactflow](https://reactflow.dev/)
 
 ## Reporting Bugs
 
