@@ -3,7 +3,7 @@
     <img
       align="center"
       alt="PureML"
-      src="https://github.com/PureML-Inc/PureML/blob/main/assets/coverImg.jpeg"
+      src="/assets/SDKCoverImg.svg"
       style="width:100%;"
     />
   </a>
