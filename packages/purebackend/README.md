@@ -1,4 +1,11 @@
-# Backend Pureml
+<a href="https://pureml.com" align="center">
+  <img
+    align="center"
+    alt="PureML"
+    src="/assets/BackendCoverImg.svg"
+    style="width:100%;"
+  />
+</a>
 
 ## APIs
 
@@ -58,6 +65,7 @@ api.go -> api scenario is defined to test any api
 data -> database which is used as a base for any test.
 
 ## Tools
+
 filesystem -> Interface to storage systems
 
 ## UI
@@ -67,6 +75,3 @@ Contains Frontend
 ## Root
 
 purebackend.go -> User interfacing file.
-
----
-
