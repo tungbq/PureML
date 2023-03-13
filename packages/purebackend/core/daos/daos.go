@@ -341,6 +341,10 @@ func (dao *Dao) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 	return dao.Datastore().DeleteDatasetActivity(activityUUID)
 }
 
+func (dao *Dao) GetSourceTypeByUUID(sourceTypeUUID uuid.UUID) (*commonmodels.SourceTypeResponse, error) {
+	return dao.Datastore().GetSourceTypeByUUID(sourceTypeUUID)
+}
+
 func (dao *Dao) GetSourceTypeByName(orgId uuid.UUID, sourceName string) (uuid.UUID, error) {
 	return dao.Datastore().GetSourceTypeByName(orgId, sourceName)
 }

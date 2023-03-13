@@ -881,6 +881,55 @@ paths:
       summary: Get Log data for dataset with specific key
       tags:
       - Dataset
+  /org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/logfile:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Log file data for dataset
+      parameters:
+      - description: Dataset files (multiple supported)
+        in: formData
+        items:
+          type: file
+        name: file
+        required: true
+        type: array
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Dataset Name
+        in: path
+        name: datasetName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - in: formData
+        name: storage
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Log file data for dataset
+      tags:
+      - Dataset
   /org/{orgId}/dataset/{datasetName}/branch/create:
     post:
       consumes:
@@ -1807,6 +1856,55 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Log data for model with specific key
+      tags:
+      - Model
+  /org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/logfile:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Log file data for model
+      parameters:
+      - description: Model files (multiple supported)
+        in: formData
+        items:
+          type: file
+        name: file
+        required: true
+        type: array
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Model Name
+        in: path
+        name: modelName
+        required: true
+        type: string
+      - description: Branch Name
+        in: path
+        name: branchName
+        required: true
+        type: string
+      - description: Version
+        in: path
+        name: version
+        required: true
+        type: string
+      - in: formData
+        name: storage
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Log file data for model
       tags:
       - Model
   /org/{orgId}/model/{modelName}/branch/create:
