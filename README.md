@@ -1,17 +1,10 @@
-<a href="https://pureml.com" align="center">
-  <img
-    align="center"
-    alt="PureML"
-    src="/assets/PureMLCoverImg.svg"
-    style="width:100%;"
-  />
-</a>
+[![PureML](/assets/PureMLCoverImg.svg)](https://pureml.com)
 
-<div align="center">
+<h align="center">
 
 # The next-gen developer platform for Production ML.
 
-</div>
+</h>
 
 <div align="center">
   <a
@@ -72,7 +65,7 @@ For managing models we have to use `@model` decorator. We have some other featur
 
 <br/>
 
-### 2. Pureml-eval : Testing & Quality Control
+### 2. PureML-eval : Testing & Quality Control
 
 #### Step 1: Use an existing model for validation
 
@@ -158,24 +151,45 @@ class Predictor(BasePredictor):
 
 #### Step 4: Evaluating your model is done as follows
 
+Lets see how PureML makes it easier to identify and correct any issues with its review feature and allows you to evaluate the quality of their data and the accuracy of their model.
+
 ```python
 import pureml
 
 pureml.model.evaluate("pet_classifier:dev:v1", "petdata:dev:v1")
 ```
 
-<br/>
-
-Lets see how PureML makes it easier to identify and correct any issues with its review feature and allows you to evaluate the quality of their data and the accuracy of their model.
-
-<h1 align="center">
-<img
-   align="center"
-   src="/assets/ReadmeReviewModel.svg"
-    />
-</h1>
+![Review](/assets/ReadmeReviewModel.svg)
 
 For more detailed explanation, please visit our [Documentation](https://docs.pureml.com) for more reference.
+
+### 3. PureML-package
+
+PureML is a versatile tool that allows you to package your machine learning models into a standard, production-ready container. Additionally, you can utilize a user-friendly web interface to demonstrate your machine learning model, making it easily accessible to anyone, from anywhere.
+
+Docker
+
+```python
+pureml.docker.create(“pet_classifier:dev:v1”)
+```
+
+FastAPI
+
+```python
+pureml.fastapi.create(“pet_classifier:dev:v1”)
+```
+
+<br/>
+
+### 4. PureML-deploy
+
+PureML gives you the ability to deploy machine learning models without the need for managing infrastructure or servers.
+
+```bash
+pureml deploy pet_classifier:dev:v1
+```
+
+<br/>
 
 ## 💻 Demo
 
