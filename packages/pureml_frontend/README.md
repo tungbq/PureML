@@ -1,4 +1,4 @@
-[![PureMLUI](/assets/FrontendCoverImg.svg)](https://pureml.com)
+[![PureMLUI](../../assets/FrontendCoverImg.png)](https://pureml.com)
 
 <br/>
 <br/>

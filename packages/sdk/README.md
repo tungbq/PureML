@@ -1,4 +1,4 @@
-[![PureML](/assets/SDKCoverImg.svg)](https://pureml.com)
+[![PureML](../../assets/SDKCoverImg.png)](https://pureml.com)
 
 <h align="center">
 

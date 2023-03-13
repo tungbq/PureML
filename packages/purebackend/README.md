@@ -1,4 +1,4 @@
-[![PureML](/assets/BackendCoverImg.svg)](https://pureml.com)
+[![PureML](../../assets/BackendCoverImg.png)](https://pureml.com)
 
 ## APIs
 
