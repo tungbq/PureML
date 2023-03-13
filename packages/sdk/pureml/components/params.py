@@ -45,7 +45,7 @@ def post_params(params, model_name: str, model_branch: str, model_version: str):
 
 def add(
     params,
-    label: str,
+    label: str = None,
     step=1,
 ) -> str:
     """`add()` takes a dictionary of parameters and a model name as input and returns a string

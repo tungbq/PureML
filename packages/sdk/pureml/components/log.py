@@ -16,7 +16,7 @@ from pureml.utils.version_utils import parse_version_label
 #         params.add(kwargs['params'])
 
 
-def log(label: str, metrics=None, params=None, step=1, **kwargs):
+def log(label: str = None, metrics=None, params=None, step=1, **kwargs):
 
     if metrics is not None:
         func_params = {}
