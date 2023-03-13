@@ -68,7 +68,7 @@ def check_model_hash(hash: str, label: str):
     hash_exists = False
 
     if response.ok:
-        hash_exists = response.json()["data"]
+        hash_exists = response.json()["data"][0]
 
     return hash_exists
 
@@ -340,7 +340,7 @@ def model_status(label: str):
 
     name, _, _ = parse_version_label(label)
 
-    model_details = details(name=name)
+    model_details = details(label=label)
 
     if model_details:
         return True
@@ -459,7 +459,7 @@ def fetch(label: str):
     user_token = get_token()
     org_id = get_org_id()
 
-    model_details = version_details(name=name, branch=branch, version=version)
+    model_details = version_details(label=label)
 
     if model_details is None:
         print(f"[bold red]Unable to fetch Model version")

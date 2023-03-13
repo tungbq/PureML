@@ -69,7 +69,7 @@ def check_dataset_hash(hash: str, label: str):
     hash_exists = False
 
     if response.ok:
-        hash_exists = response.json()["data"]
+        hash_exists = response.json()["data"][0]
 
     return hash_exists
 
@@ -398,7 +398,7 @@ def dataset_status(label: str):
 
     name, _, _ = parse_version_label(label)
 
-    dataset_details = details(name=name)
+    dataset_details = details(label=label)
 
     if dataset_details:
         return True
@@ -517,7 +517,7 @@ def fetch(label: str):
     org_id = get_org_id()
     dataset_schema = DatasetSchema()
 
-    dataset_details = version_details(name=name, branch=branch, version=version)
+    dataset_details = version_details(label=label)
 
     if dataset_details is None:
         print(f"[bold red]Unable to fetch Dataset version")
