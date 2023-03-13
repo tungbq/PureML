@@ -1,4 +1,4 @@
-[![PureML](/assets/PureMLCoverImg.svg)](https://pureml.com)
+[![PureML](/assets/PureMLCoverImg.png)](https://pureml.com)
 
 <h align="center">
 
@@ -159,7 +159,7 @@ import pureml
 pureml.model.evaluate("pet_classifier:dev:v1", "petdata:dev:v1")
 ```
 
-![Review](/assets/ReadmeReviewModel.svg)
+![Review](/assets/ReviewModel.png)
 
 For more detailed explanation, please visit our [Documentation](https://docs.pureml.com) for more reference.
 
