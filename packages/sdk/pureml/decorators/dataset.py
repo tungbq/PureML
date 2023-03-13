@@ -26,8 +26,7 @@ def dataset(label: str, parent: str = None, upload=False):
 
             dataset_exists_in_remote, dataset_hash, dataset_version = register(
                 dataset=func_output,
-                name=name,
-                branch=branch,
+                label=label,
                 lineage=lineage,
                 is_empty=is_empty,
             )

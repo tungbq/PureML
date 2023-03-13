@@ -7,7 +7,7 @@ from pureml.utils.pipeline import (
 )
 from pureml import metrics, params
 from pureml.components import figure
-from pureml.utils.version_utils import parse_version_label
+from pureml.utils.version_utils import parse_version_label, generate_label
 
 
 def model(label: str):
@@ -31,6 +31,8 @@ def model(label: str):
                 model_exists_in_remote
             ):  # Only add the model to config if it is successfully pushed
 
+                label_new = generate_label(name, branch, model_version)
+
                 add_model_to_config(
                     name=name,
                     branch=branch,
@@ -41,30 +43,15 @@ def model(label: str):
 
                 metric_values = load_metrics_from_config()
                 if len(metric_values) != 0:
-                    metrics.add(
-                        metrics=metric_values,
-                        model_name=name,
-                        model_branch=branch,
-                        model_version=model_version,
-                    )
+                    metrics.add(metrics=metric_values, label=label_new)
 
                 param_values = load_params_from_config()
                 if len(param_values) != 0:
-                    params.add(
-                        params=param_values,
-                        model_name=name,
-                        model_branch=branch,
-                        model_version=model_version,
-                    )
+                    params.add(params=param_values, label=label_new)
 
                 figure_file_paths = load_figures_from_config()
                 if len(figure_file_paths) != 0:
-                    figure.add(
-                        file_paths=figure_file_paths,
-                        model_name=name,
-                        model_branch=branch,
-                        model_version=model_version,
-                    )
+                    figure.add(file_paths=figure_file_paths, label=label_new)
 
             else:
                 add_model_to_config(
