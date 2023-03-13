@@ -124,6 +124,14 @@ func (r *Request) GetFormFile(formKeyName string) *multipart.FileHeader {
 	}
 }
 
+func (r *Request) GetFormMultipleFiles(formKeyName string) []*multipart.FileHeader {
+	if val, ok := r.FormFiles[formKeyName]; !ok || len(val) == 0 {
+		return nil
+	} else {
+		return val
+	}
+}
+
 func getValueFromMap(m map[string]string, param string) string {
 	if val, ok := m[param]; ok {
 		return val

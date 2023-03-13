@@ -28,6 +28,10 @@ type RegisterDatasetRequest struct {
 	IsEmpty bool   `json:"is_empty"`
 }
 
+type LogFileRequest struct {
+	Storage string `json:"storage"`
+}
+
 type DatasetReviewRequest struct {
 	FromBranch        string `json:"from_branch"`
 	FromBranchVersion string `json:"from_branch_version"`

@@ -2682,6 +2682,22 @@ func (ds *Datastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 
 /////////////////////////////// SECRET API METHODS ///////////////////////////////
 
+func (ds *Datastore) GetSourceTypeByUUID(sourceTypeUUID uuid.UUID) (*commonmodels.SourceTypeResponse, error) {
+	var sourceType userorgdbmodels.SourceType
+	res := ds.DB.Where("uuid = ?", sourceTypeUUID).Find(&sourceType)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	return &commonmodels.SourceTypeResponse{
+		UUID:      sourceType.UUID,
+		Name:      sourceType.Name,
+		PublicURL: sourceType.PublicURL,
+	}, nil
+}
+
 func (ds *Datastore) GetSourceTypeByName(orgId uuid.UUID, name string) (uuid.UUID, error) {
 	var sourceType userorgdbmodels.SourceType
 	res := ds.DB.Where("UPPER(name) = ?", name).Where("org_uuid = ?", orgId).Limit(1).Find(&sourceType)
