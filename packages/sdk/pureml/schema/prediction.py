@@ -1,8 +1,18 @@
 from pydantic import BaseModel
 from .backend import BackendSchema
-
 from .paths import PathSchema
 import os
+from .types import DataTypes
+
+
+class Input(BaseModel):
+    type: DataTypes
+    shape: tuple = None
+
+
+class Output(BaseModel):
+    type: DataTypes = None
+    shape: tuple = None
 
 
 class PredictionSchema(BaseModel):

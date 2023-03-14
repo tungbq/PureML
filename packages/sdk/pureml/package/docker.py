@@ -128,27 +128,17 @@ def run_docker_container(image, name):
 
 
 def create(
-    model_name,
-    model_branch,
-    model_version,
+    label,
     org_id,
     access_token,
     image_tag=None,
     predict_path=None,
     requirements_path=None,
     container_name=None,
-    input: dict = None,
-    output: dict = None,
 ):
 
     create_fastapi_file(
-        model_name=model_name,
-        model_branch=model_branch,
-        model_version=model_version,
-        predict_path=predict_path,
-        requirements_path=requirements_path,
-        input=input,
-        output=output,
+        label=label, predict_path=predict_path, requirements_path=requirements_path
     )
 
     create_docker_file(org_id=org_id, access_token=access_token)
