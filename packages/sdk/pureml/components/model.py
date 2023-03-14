@@ -1,10 +1,8 @@
 import requests
 from rich import print
 
-
 import os
 import json
-
 
 from . import get_token, get_org_id
 from pureml.schema import ModelSchema, StorageSchema
@@ -13,14 +11,17 @@ from urllib.parse import urljoin
 import joblib
 from pureml.utils.hash import generate_hash_for_file
 from pureml.utils.readme import load_readme
+from pureml.utils.version_utils import parse_version_label
 
 
-def init_branch(branch: str, model_name: str):
+def init_branch(label):
+    name, branch, _ = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
     model_schema = ModelSchema()
 
-    url = "org/{}/model/{}/branch/create".format(org_id, model_name)
+    url = "org/{}/model/{}/branch/create".format(org_id, name)
     url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
@@ -28,7 +29,7 @@ def init_branch(branch: str, model_name: str):
         "Authorization": "Bearer {}".format(user_token),
     }
 
-    data = {"model_name": model_name, "branchName": branch}
+    data = {"model_name": name, "branchName": branch}
 
     data = json.dumps(data)
 
@@ -45,13 +46,15 @@ def init_branch(branch: str, model_name: str):
         return False
 
 
-def check_model_hash(hash: str, name: str, branch: str):
+def check_model_hash(hash: str, label: str):
+
+    name, branch, _ = parse_version_label(label)
 
     user_token = get_token()
     org_id = get_org_id()
     model_schema = ModelSchema()
 
-    url = "org/{}/model/{}/branch/{}/hash-status".format(org_id, branch, name)
+    url = "org/{}/model/{}/branch/{}/hash-status".format(org_id, name, branch)
     url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {"Authorization": "Bearer {}".format(user_token)}
@@ -65,17 +68,19 @@ def check_model_hash(hash: str, name: str, branch: str):
     hash_exists = False
 
     if response.ok:
-        hash_exists = response.json()["data"]
+        hash_exists = response.json()["data"][0]
 
     return hash_exists
 
 
-def branch_details(branch: str, model_name: str):
+def branch_details(label: str):
+    name, branch, _ = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
     model_schema = ModelSchema()
 
-    url = "org/{}/model/{}/branch/{}".format(org_id, model_name, branch)
+    url = "org/{}/model/{}/branch/{}".format(org_id, name, branch)
     url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
@@ -100,9 +105,9 @@ def branch_details(branch: str, model_name: str):
         return
 
 
-def branch_status(branch: str, model_name: str):
+def branch_status(label: str):
 
-    details = branch_details(branch=branch, model_name=model_name)
+    details = branch_details(label=label)
 
     if details:
         return True
@@ -110,13 +115,14 @@ def branch_status(branch: str, model_name: str):
         return False
 
 
-def branch_delete(branch: str, model_name: str) -> str:
+def branch_delete(label: str) -> str:
+    name, branch, _ = parse_version_label(label)
 
     user_token = get_token()
     org_id = get_org_id()
     model_schema = ModelSchema()
 
-    url = "org/{}/model/{}/branch/{}/delete".format(org_id, model_name, branch)
+    url = "org/{}/model/{}/branch/{}/delete".format(org_id, name, branch)
     url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
@@ -135,13 +141,15 @@ def branch_delete(branch: str, model_name: str) -> str:
     return response.text
 
 
-def branch_list(model_name: str) -> str:
+def branch_list(label: str) -> str:
+
+    name, _, _ = parse_version_label(label)
 
     user_token = get_token()
     org_id = get_org_id()
     model_schema = ModelSchema()
 
-    url = "org/{}/model/{}/branch".format(org_id, model_name)
+    url = "org/{}/model/{}/branch".format(org_id, name)
     url = urljoin(model_schema.backend.BASE_URL, url)
 
     headers = {
@@ -200,7 +208,10 @@ def list():
     return
 
 
-def init(name: str, readme: str = None, branch: str = None):
+def init(label: str, readme: str = None):
+
+    name, branch, _ = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
     model_schema = ModelSchema()
@@ -246,11 +257,13 @@ def init(name: str, readme: str = None, branch: str = None):
 
 def register(
     model,
-    name: str,
-    branch: str,
+    label,
     is_empty: bool = False,
     storage: str = StorageSchema().STORAGE,
 ):
+
+    name, branch, _ = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
     model_schema = ModelSchema()
@@ -266,27 +279,27 @@ def register(
         file_path=model_path, name=name, branch=branch, is_empty=is_empty
     )
 
-    model_exists = model_status(name)
+    model_exists = model_status(label)
 
     if not model_exists:
-        model_created = init(name=name, branch=branch)
+        model_created = init(label)
         print("model_created", model_created)
         if not model_created:
             print("[bold red] Unable to register the model")
             return False, model_hash, "latest"
 
-    branch_exists = branch_status(branch=branch, model_name=name)
+    branch_exists = branch_status(label)
     print("branch_exists", branch_exists)
 
     if not branch_exists:
-        branch_created = init_branch(branch=branch, model_name=name)
+        branch_created = init_branch(label)
         print("branch_created", branch_created)
 
         if not branch_created:
             print("[bold red] Unable to register the model")
             return False, model_hash, "latest"
 
-    model_exists_remote = check_model_hash(hash=model_hash, name=name, branch=branch)
+    model_exists_remote = check_model_hash(hash=model_hash, label=label)
 
     if model_exists_remote:
         print(f"[bold red]Model already exists. Not registering a new version!")
@@ -323,9 +336,11 @@ def register(
         return False, model_hash, None
 
 
-def model_status(name: str):
+def model_status(label: str):
 
-    model_details = details(name=name)
+    name, _, _ = parse_version_label(label)
+
+    model_details = details(label=label)
 
     if model_details:
         return True
@@ -333,7 +348,7 @@ def model_status(name: str):
         return False
 
 
-def details(name: str):
+def details(label: str):
     """It fetches the details of a model.
 
     Parameters
@@ -347,6 +362,8 @@ def details(name: str):
         The details of the model.
 
     """
+
+    name, _, _ = parse_version_label(label)
 
     user_token = get_token()
     org_id = get_org_id()
@@ -377,7 +394,7 @@ def details(name: str):
         return
 
 
-def version_details(name: str, branch: str, version: str = "latest"):
+def version_details(label: str):
     """It fetches the details of a model.
 
     Parameters
@@ -391,6 +408,8 @@ def version_details(name: str, branch: str, version: str = "latest"):
         The details of the model.
 
     """
+
+    name, branch, version = parse_version_label(label)
 
     user_token = get_token()
     org_id = get_org_id()
@@ -419,7 +438,7 @@ def version_details(name: str, branch: str, version: str = "latest"):
         return
 
 
-def fetch(name: str, branch: str, version: str = "latest"):
+def fetch(label: str):
     """This function fetches a model from the server and returns it as a `Model` object
 
     Parameters
@@ -435,10 +454,12 @@ def fetch(name: str, branch: str, version: str = "latest"):
 
     """
 
+    name, branch, version = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
 
-    model_details = version_details(name=name, branch=branch, version=version)
+    model_details = version_details(label=label)
 
     if model_details is None:
         print(f"[bold red]Unable to fetch Model version")
@@ -478,39 +499,41 @@ def fetch(name: str, branch: str, version: str = "latest"):
         return
 
 
-def delete(name: str) -> str:
-    """This function deletes a model from the project
+# def delete(label: str) -> str:
+#     """This function deletes a model from the project
 
-    Parameters
-    ----------
-    name : str
-        The name of the model you want to delete
-    version : str
-        The version of the model to delete.
+#     Parameters
+#     ----------
+#     name : str
+#         The name of the model you want to delete
+#     version : str
+#         The version of the model to delete.
 
-    """
+#     """
 
-    user_token = get_token()
-    org_id = get_org_id()
-    model_schema = ModelSchema()
+#     name, _, _ = parse_version_label(label)
 
-    url = "org/{}/model/{}/delete".format(org_id, name)
-    url = urljoin(model_schema.backend.BASE_URL, url)
+#     user_token = get_token()
+#     org_id = get_org_id()
+#     model_schema = ModelSchema()
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": "Bearer {}".format(user_token),
-    }
+#     url = "org/{}/model/{}/delete".format(org_id, name)
+#     url = urljoin(model_schema.backend.BASE_URL, url)
 
-    response = requests.delete(url, headers=headers)
+#     headers = {
+#         "Content-Type": "application/x-www-form-urlencoded",
+#         "Authorization": "Bearer {}".format(user_token),
+#     }
 
-    if response.ok:
-        print(f"[bold green]Model has been deleted")
+#     response = requests.delete(url, headers=headers)
 
-    else:
-        print(f"[bold red]Unable to delete Model")
+#     if response.ok:
+#         print(f"[bold green]Model has been deleted")
 
-    return response.text
+#     else:
+#         print(f"[bold red]Unable to delete Model")
+
+#     return response.text
 
 
 def serve_model():

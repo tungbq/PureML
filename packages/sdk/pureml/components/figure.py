@@ -13,6 +13,7 @@ from pureml.schema import PathSchema, BackendSchema
 from rich import print
 
 from . import get_org_id, get_token
+from pureml.utils.version_utils import parse_version_label
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
@@ -86,10 +87,8 @@ def post_figures(figure_paths, model_name: str, model_branch: str, model_version
 
 
 def add(
+    label: str,
     figure: dict = None,
-    model_name: str = None,
-    model_branch: str = None,
-    model_version: str = "latest",
     file_paths: dict = None,
 ) -> str:
     """`add` function takes in the path of the figure, name of the figure and the model name and
@@ -111,6 +110,7 @@ def add(
         The response is a JSON object
 
     """
+    model_name, model_branch, model_version = parse_version_label(label)
     # print('file_paths', file_paths)
     # print('figure', figure)
 
@@ -141,7 +141,8 @@ def add(
     # return response.text
 
 
-def details(model_name: str, model_branch: str, model_version: str = "latest"):
+def details(label: str):
+    model_name, model_branch, model_version = parse_version_label(label)
     user_token = get_token()
     org_id = get_org_id()
 
@@ -171,7 +172,7 @@ def details(model_name: str, model_branch: str, model_version: str = "latest"):
         return
 
 
-def fetch(model_name: str, model_branch: str, model_version: str = "latest"):
+def fetch(label: str):
     """It fetches the figure from the server and stores it in the local directory
 
     Parameters
@@ -188,6 +189,7 @@ def fetch(model_name: str, model_branch: str, model_version: str = "latest"):
         The response text is being returned.
 
     """
+    model_name, model_branch, model_version = parse_version_label(label)
 
     user_token = get_token()
     org_id = get_org_id()

@@ -8,6 +8,7 @@ from pureml.utils.pipeline import add_metrics_to_config
 from rich import print
 
 from . import convert_values_to_string, get_org_id, get_token
+from pureml.utils.version_utils import parse_version_label
 
 
 def post_metrics(metrics, model_name: str, model_branch: str, model_version: str):
@@ -45,9 +46,7 @@ def post_metrics(metrics, model_name: str, model_branch: str, model_version: str
 
 def add(
     metrics,
-    model_name: str = None,
-    model_branch: str = None,
-    model_version: str = "latest",
+    label: str = None,
     step=1,
 ) -> str:
     """`add()` takes a dictionary of metrics and a model name as input and returns a string
@@ -66,6 +65,7 @@ def add(
         The response.text is being returned.
 
     """
+    model_name, model_branch, model_version = parse_version_label(label)
 
     metrics = convert_values_to_string(logged_dict=metrics)
     # metrics = merge_step_with_value(values_dict=metrics, step=step)
@@ -94,9 +94,7 @@ def add(
     # return
 
 
-def fetch(
-    model_name: str, model_branch: str, model_version: str = "latest", metric: str = ""
-) -> str:
+def fetch(label: str, metric: str = "") -> str:
     """This function fetches the metrics of a model
 
     Parameters
@@ -113,6 +111,8 @@ def fetch(
         The metrics that are fetched
 
     """
+    model_name, model_branch, model_version = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
     log_schema = LogSchema()
@@ -167,9 +167,7 @@ def fetch(
         return
 
 
-def delete(
-    metric: str, model_name: str, model_branch: str, model_version: str = "latest"
-) -> str:
+def delete(metric: str, label: str) -> str:
     """This function deletes a metric from a model
 
     Parameters
@@ -182,6 +180,8 @@ def delete(
         The version of the model
 
     """
+    model_name, model_branch, model_version = parse_version_label(label)
+
     user_token = get_token()
     org_id = get_org_id()
     log_schema = LogSchema()
