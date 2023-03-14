@@ -6,7 +6,7 @@ import joblib
 import os
 import random
 
-from pureml.packaging import save_model, load_model
+from pureml.metadata import save_model, load_model
 from pureml.utils.constants import PATH_MODEL_DIR
 
 torch.manual_seed(1)

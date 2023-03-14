@@ -1,6 +1,6 @@
 from sklearn.datasets import make_classification
 from lightgbm import LGBMClassifier
-from pureml.packaging import save_model, load_model
+from pureml.metadata import save_model, load_model
 from pureml.utils.constants import PATH_MODEL_DIR
 import os
 import random

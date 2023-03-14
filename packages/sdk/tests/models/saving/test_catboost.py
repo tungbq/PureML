@@ -1,6 +1,6 @@
 from sklearn.datasets import make_classification
 from catboost import CatBoostClassifier
-from pureml.packaging import save_model, load_model
+from pureml.metadata import save_model, load_model
 import os
 import random
 import string
