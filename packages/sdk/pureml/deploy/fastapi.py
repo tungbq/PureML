@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from pureml.schema import FastAPISchema, PredictionSchema
 from pureml.utils.deploy import process_input, process_output
+from pureml.utils.version_utils import parse_version_label
 
 
 prediction_schema = PredictionSchema()
@@ -42,18 +43,11 @@ def get_requirements_file(requirements_path):
         raise Exception(requirements_path, "doesnot exists!!!")
 
 
-def generate_file_upload_api(
-    model_name,
-    model_branch,
-    model_version,
-    input_type,
-    input_shape,
-    output_type,
-    output_shape,
-):
+def generate_api(label: str):
+    name, branch, version = parse_version_label(label=label)
 
-    query = """
-from fastapi import FastAPI, Depends, Request, UploadFile
+    api = """
+from fastapi import FastAPI, Depends, Request, UploadFile, File
 import uvicorn
 import pureml
 from predict import Predictor
@@ -62,7 +56,8 @@ from dotenv import load_dotenv
 import json
 import shutil
 from pureml.utils.deploy import parse_input, parse_output
-from typing import Union
+from typing import Union, Optional
+from pureml.utils.prediction import predict_request_with_json, predict_request_with_file
 
 load_dotenv()
 
@@ -74,210 +69,51 @@ pureml.login(org_id=org_id, access_token=access_token)
 predictor = Predictor()
 predictor.load_models()
 
-# Create the app
-app = FastAPI()     
-
-@app.post('/predict')
-async def predict(file: Union[UploadFile, None] = None):
-    input_type = '{INPUT_TYPE}'
-    input_shape = '{INPUT_SHAPE}'
-    output_type = '{OUTPUT_TYPE}'
-    output_shape = '{OUTPUT_SHAPE}'
-
-    if input_type == 'None':
-        print('Rebuild the docker container with non null input_type')
-        predictions = json.dumps(None)
-        return predictions
-
-    path = None
-
-    if not file:
-        print('No upload file sent')
-        predictions = json.dumps(None)
-        return predictions
-    else:
-        path = file.filename
-        print(path)
-        with open(path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
-    if path is None:
-        print('Input imagepath is None')
-        predictions = json.dumps(None)
-        return predictions
-
-
-    data = parse_input(data=path, input_type=input_type, input_shape=input_shape)
-
-    if data is None:
-        print('Error in data input format')
-        predictions = json.dumps(None)
-        return predictions
-
-
-    predictions = predictor.predict(data)
-
-    predictions = parse_output(data=predictions, output_type=output_type, output_shape=output_shape)
-
-
-    return predictions
-
-
-if __name__ == '__main__':
-    uvicorn.run(app, host='{HOST}', port={PORT})""".format(
-        HOST=fastapi_schema.API_IP_HOST,
-        PORT=fastapi_schema.PORT_FASTAPI,
-        MODEL_NAME=model_name,
-        MODEL_BRANCH=model_branch,
-        MODEL_VERSION=model_version,
-        INPUT_TYPE=input_type,
-        INPUT_SHAPE=input_shape,
-        OUTPUT_TYPE=output_type,
-        OUTPUT_SHAPE=output_shape,
-    )
-
-    return query
-
-
-def generate_json_api(
-    model_name,
-    model_branch,
-    model_version,
-    input_type,
-    input_shape,
-    output_type,
-    output_shape,
-):
-
-    query = """
-from fastapi import FastAPI, Depends, Request
-import uvicorn
-import pureml
-from predict import Predictor
-import os
-from dotenv import load_dotenv
-import pandas as pd
-import json
-import numpy as np
-from pureml.utils.deploy import parse_input, parse_output
-
-load_dotenv()
-
-org_id = os.getenv('ORG_ID')
-access_token = os.getenv('ACCESS_TOKEN')
-
-pureml.login(org_id=org_id, access_token=access_token)
-
-
-predictor = Predictor()
-predictor.load_models()
+input_type, input_shape = process_input(input=predictor.input)
+output_type, output_shape = process_output(output=predictor.output)
 
 
 # Create the app
 app = FastAPI()     
 
+
 @app.post('/predict')
-async def predict(request: Request):
-    input_type = '{INPUT_TYPE}'
-    input_shape = '{INPUT_SHAPE}'
-    output_type = '{OUTPUT_TYPE}'
-    output_shape = '{OUTPUT_SHAPE}'
-
-    if input_type == 'None':
-        print('Rebuild the docker container with non null input_type')
-        predictions = json.dumps(None)
-        return predictions
-
-    req_json = await request.json()
-
-    data_json = req_json['test_data']
-
-
-    data = parse_input(data=data_json, input_type=input_type, input_shape=input_shape)
-
-    if data is None:
+async def predict(Optional[Request] = None, file: Optional[UploadFile] = File(None)):
+    if request is None and file is None:
         print('Error in data input format')
         predictions = json.dumps(None)
         return predictions
+    
+
+    if request is not None:
+        predictions = predict_request_with_json(request=request, predictor=predictor)
 
 
-    predictions = predictor.predict(data)
-
-    predictions = parse_output(data=predictions, output_type=output_type, output_shape=output_shape)
-
-
-    return predictions
+    if file is not None:
+        predictions = predict_request_with_file(file=file, predictor=predictor)
+        
 
 
 if __name__ == '__main__':
     uvicorn.run(app, host='{HOST}', port={PORT})""".format(
-        HOST=fastapi_schema.API_IP_HOST,
-        PORT=fastapi_schema.PORT_FASTAPI,
-        MODEL_NAME=model_name,
-        MODEL_BRANCH=model_branch,
-        MODEL_VERSION=model_version,
-        INPUT_TYPE=input_type,
-        INPUT_SHAPE=input_shape,
-        OUTPUT_TYPE=output_type,
-        OUTPUT_SHAPE=output_shape,
+        HOST=fastapi_schema.API_IP_HOST, PORT=fastapi_schema.PORT_FASTAPI
     )
-
-    return query
-
-
-def generate_api(input, output, model_name, model_branch, model_version):
-
-    input_type, input_shape = process_input(input=input)
-    output_type, output_shape = process_output(output=output)
-
-    if input_type == "image":
-        api = generate_file_upload_api(
-            model_name=model_name,
-            model_branch=model_branch,
-            model_version=model_version,
-            input_type=input_type,
-            input_shape=input_shape,
-            output_type=output_type,
-            output_shape=output_shape,
-        )
-    else:
-        api = generate_json_api(
-            model_name=model_name,
-            model_branch=model_branch,
-            model_version=model_version,
-            input_type=input_type,
-            input_shape=input_shape,
-            output_type=output_type,
-            output_shape=output_shape,
-        )
 
     return api
 
 
 def create_fastapi_file(
-    model_name,
-    model_branch,
-    model_version,
+    label,
     predict_path,
     requirements_path,
-    input,
-    output,
 ):
     fastapi_schema = FastAPISchema()
-
-    # get_project_file()
 
     get_predict_file(predict_path)
 
     get_requirements_file(requirements_path)
 
-    api = generate_api(
-        input=input,
-        output=output,
-        model_name=model_name,
-        model_branch=model_branch,
-        model_version=model_version,
-    )
+    api = generate_api(label=label)
 
     with open(fastapi_schema.PATH_FASTAPI_FILE, "w") as api_writer:
         api_writer.write(api)
@@ -293,24 +129,10 @@ def create_fastapi_file(
 #           """)
 
 
-def run_fastapi_server(
-    model_name,
-    model_branch,
-    model_version,
-    predict_path,
-    requirements_path,
-    input,
-    output,
-):
+def run_fastapi_server(label, predict_path, requirements_path):
 
     create_fastapi_file(
-        model_name=model_name,
-        model_branch=model_branch,
-        model_version=model_version,
-        predict_path=predict_path,
-        requirements_path=requirements_path,
-        input=input,
-        output=output,
+        label, predict_path=predict_path, requirements_path=requirements_path
     )
 
     run_command = "python {api_path}".format(api_path=fastapi_schema.PATH_FASTAPI_FILE)

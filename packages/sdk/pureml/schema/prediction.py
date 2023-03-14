@@ -5,6 +5,16 @@ from .paths import PathSchema
 import os
 
 
+class InputSchema(BaseModel):
+    type: str
+    shape: tuple = None
+
+
+class OutputSchema(BaseModel):
+    type: str
+    shape: tuple = None
+
+
 class PredictionSchema(BaseModel):
     paths: PathSchema = PathSchema().get_instance()
     backend: BackendSchema = BackendSchema().get_instance()
