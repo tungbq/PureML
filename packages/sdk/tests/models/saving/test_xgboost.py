@@ -5,7 +5,7 @@ import random
 import string
 import joblib
 import pytest
-from pureml.metadata import load_model, save_model
+from pureml.packaging import load_model, save_model
 from pureml.utils.constants import PATH_MODEL_DIR
 
 

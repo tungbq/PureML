@@ -9,7 +9,7 @@ from pydantic import BaseModel
 import typing
 import joblib
 
-from pureml.metadata.errors import FrameworkNotSupportedError
+from pureml.packaging.errors import FrameworkNotSupportedError
 from .model_framework import ModelFramework, ModelFrameworkType
 
 # from . import MODEL_FRAMEWORKS_BY_TYPE, SUPPORTED_MODEL_FRAMEWORKS

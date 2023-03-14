@@ -1,7 +1,7 @@
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
 from pureml.utils.constants import PATH_MODEL_DIR
-from pureml.metadata import load_model, save_model
+from pureml.packaging import load_model, save_model
 import os
 import random
 import string
