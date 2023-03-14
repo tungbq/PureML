@@ -1,11 +1,4 @@
-<a href="https://pureml.com" align="center">
-  <img
-    align="center"
-    alt="PureML"
-    src="/assets/BackendCoverImg.svg"
-    style="width:100%;"
-  />
-</a>
+[![PureML](/assets/BackendCoverImg.png)](https://pureml.com)
 
 ## APIs
 

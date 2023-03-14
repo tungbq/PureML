@@ -1,11 +1,4 @@
-<a href="https://pureml.com" align="center">
-  <img
-    align="center"
-    alt="PureML"
-    src="/assets/FrontendCoverImg.svg"
-    style="width:100%;"
-  />
-</a>
+[![PureMLUI](/assets/FrontendCoverImg.png)](https://pureml.com)
 
 <br/>
 <br/>

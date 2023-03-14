@@ -1,17 +1,10 @@
-<a href="https://pureml.com" align="center">
-  <img
-    align="center"
-    alt="PureML"
-    src="/assets/PureMLCoverImg.svg"
-    style="width:100%;"
-  />
-</a>
+[![PureML](/assets/PureMLCoverImg.png)](https://pureml.com)
 
-<div align="center">
+<h align="center">
 
 # The next-gen developer platform for Production ML.
 
-</div>
+</h>
 
 <div align="center">
   <a
@@ -68,11 +61,84 @@ pip install pureml
 
 If you are trying to manage versions of dataset all you have to do is use our decorator `@dataset`.
 
-For managing models we have to use `@model` decorator. We have some other features built in such as data lineage and branching. For more information refer [docs](https://docs.pureml.com).
+
+```python
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from pureml.decorators import dataset
+
+@dataset("petdata:dev")
+def load_data(img_folder = "PetImages"):
+  image_size = (180, 180)
+  batch_size = 16
+  train_ds,
+  val_ds = tf.keras.utils.img_dataset_from_directory(
+      img_folder,
+      validation_split=0.2,
+      subset="both",
+      seed=1337,
+      image_size=image_size,
+      batch_size=batch_size,
+  )
+  data_augmentation = keras.Sequential(
+   [layers.RandomFlip("horizontal"),
+   layers.RandomRotation(0.1),]
+  )
+  train_ds = train_ds.map(
+    lambda img, label: (data_augmentation(img), label),
+    num_parallel_calls=tf.data.AUTOTUNE,
+  )
+  train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+  val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
+  return train_ds, val_ds
+```
 
 <br/>
 
-### 2. Pureml-eval : Testing & Quality Control
+For managing models we have to use `@model` decorator. We have some other features built in such as data lineage and branching. For more information refer [docs](https://docs.pureml.com).
+
+```python
+from tensorflow.keras.applications.inception_v3
+import InceptionV3
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense,
+GlobalAveragePooling2D, Input
+from pureml.decorators import model
+
+@model("pet_classifier:dev")
+def train_model(train_ds, val_ds):
+  input_tensor = Input(shape=(180, 180, 3))
+  base_model = InceptionV3(
+   input_tensor=input_tensor,
+   weights='imagenet',
+   include_top=False
+  )
+  x = base_model.output
+  x = GlobalAveragePooling2D()(x)
+  x = Dense(1024, activation='relu')(x)
+  predictions = Dense(1, activation='softmax')(x)
+  model_inc = Model(
+   inputs=base_model.input,
+   outputs=predictions
+  )
+  model_inc.compile(
+   optimizer='rmsprop',
+   loss='binary_crossentropy',
+   metrics=["accuracy"]
+  )
+  model_inc.fit(
+    train_ds,
+    epochs=2,
+    validation_data=val_ds,
+    )
+  return model_inc
+```
+
+<br/>
+
+### 2. PureML-eval : Testing & Quality Control
 
 #### Step 1: Use an existing model for validation
 
@@ -158,24 +224,45 @@ class Predictor(BasePredictor):
 
 #### Step 4: Evaluating your model is done as follows
 
+Lets see how PureML makes it easier to identify and correct any issues with its review feature and allows you to evaluate the quality of their data and the accuracy of their model.
+
 ```python
 import pureml
 
 pureml.model.evaluate("pet_classifier:dev:v1", "petdata:dev:v1")
 ```
 
-<br/>
-
-Lets see how PureML makes it easier to identify and correct any issues with its review feature and allows you to evaluate the quality of their data and the accuracy of their model.
-
-<h1 align="center">
-<img
-   align="center"
-   src="/assets/ReadmeReviewModel.svg"
-    />
-</h1>
+![Review](/assets/ReviewModel.png)
 
 For more detailed explanation, please visit our [Documentation](https://docs.pureml.com) for more reference.
+
+### 3. PureML-package
+
+PureML is a versatile tool that allows you to package your machine learning models into a standard, production-ready container. Additionally, you can utilize a user-friendly web interface to demonstrate your machine learning model, making it easily accessible to anyone, from anywhere.
+
+Docker
+
+```python
+pureml.docker.create(“pet_classifier:dev:v1”)
+```
+
+FastAPI
+
+```python
+pureml.fastapi.create(“pet_classifier:dev:v1”)
+```
+
+<br/>
+
+### 4. PureML-deploy
+
+PureML gives you the ability to deploy machine learning models without the need for managing infrastructure or servers.
+
+```bash
+pureml deploy pet_classifier:dev:v1
+```
+
+<br/>
 
 ## 💻 Demo
 
