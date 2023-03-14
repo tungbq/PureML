@@ -1,24 +1,16 @@
 from pydantic import BaseModel
 from .backend import BackendSchema
-from enum import Enum
 from .paths import PathSchema
 import os
+from .types import DataTypes
 
 
-class DataTypes(Enum):
-    PD_DATAFRAME = "pandas dataframe"
-    NUMPY_NDARRAY = "numpy ndarray'"
-    TEXT = "text"
-    IMAGE = "image"
-    JSON = "json"
-
-
-class InputSchema(BaseModel):
+class Input(BaseModel):
     type: DataTypes
     shape: tuple = None
 
 
-class OutputSchema(BaseModel):
+class Output(BaseModel):
     type: DataTypes = None
     shape: tuple = None
 

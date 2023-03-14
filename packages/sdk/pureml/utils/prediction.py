@@ -1,6 +1,6 @@
 from fastapi import Request, UploadFile
 from pureml.predictor.predictor import BasePredictor
-from pureml.schema.prediction import InputSchema, OutputSchema
+from pureml.schema.prediction import Input, Output
 import json
 from .deploy import parse_input, parse_output, process_input, process_output
 import shutil
@@ -8,20 +8,24 @@ import shutil
 
 async def predict_request_with_json(request: Request, predictor: BasePredictor):
 
-    input_type, input_shape = process_input(input=predictor.input)
-    output_type, output_shape = process_output(output=predictor.output)
+    # input_type, input_shape = process_input(input=predictor.input)
+    # output_type, output_shape = process_output(output=predictor.output)
     print("predictor.input", predictor.input)
-    print("input_type", input_type)
-    print("input_shape", input_shape)
-    print("output_type", output_type)
-    print("output_shape", output_shape)
+    print("input_type", predictor.input.type)
+    print("input_shape", predictor.input.shape)
+    print("output_type", predictor.output.type)
+    print("output_shape", predictor.output.shape)
 
     headers = request.headers
     body = await request.json()
     data_json = body["test_data"]
     print("data_json", data_json)
 
-    data = parse_input(data=data_json, input_type=input_type, input_shape=input_shape)
+    data = parse_input(
+        data=data_json,
+        input_type=predictor.input.type,
+        input_shape=predictor.input.shape,
+    )
 
     if data is None:
         print("Error in data input format")
@@ -32,7 +36,9 @@ async def predict_request_with_json(request: Request, predictor: BasePredictor):
     print("predictions", predictions)
 
     predictions = parse_output(
-        data=predictions, output_type=output_type, output_shape=output_shape
+        data=predictions,
+        output_type=predictor.output.type,
+        output_shape=predictor.output.shape,
     )
 
     return predictions
@@ -40,10 +46,15 @@ async def predict_request_with_json(request: Request, predictor: BasePredictor):
 
 async def predict_request_with_file(file: UploadFile, predictor: BasePredictor):
 
-    input_type, input_shape = process_input(input=predictor.input)
-    output_type, output_shape = process_output(output=predictor.output)
+    # input_type, input_shape = process_input(input=predictor.input)
+    # output_type, output_shape = process_output(output=predictor.output)
+    print("predictor.input", predictor.input)
+    print("input_type", predictor.input.type)
+    print("input_shape", predictor.input.shape)
+    print("output_type", predictor.output.type)
+    print("output_shape", predictor.output.shape)
 
-    if input_type == "None":
+    if predictor.input.type == "None":
         print("Rebuild the docker container with non null input_type")
         predictions = json.dumps(None)
         return predictions
@@ -65,7 +76,9 @@ async def predict_request_with_file(file: UploadFile, predictor: BasePredictor):
         predictions = json.dumps(None)
         return predictions
 
-    data = parse_input(data=path, input_type=input_type, input_shape=input_shape)
+    data = parse_input(
+        data=path, input_type=predictor.input.type, input_shape=predictor.input.shape
+    )
 
     if data is None:
         print("Error in data input format")
@@ -75,7 +88,9 @@ async def predict_request_with_file(file: UploadFile, predictor: BasePredictor):
     predictions = predictor.predict(data)
 
     predictions = parse_output(
-        data=predictions, output_type=output_type, output_shape=output_shape
+        data=predictions,
+        output_type=predictor.output.type,
+        output_shape=predictor.output.shape,
     )
 
     return predictions

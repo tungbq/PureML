@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 import json
+from pureml.schema import DataTypes
 
 
 def process_input(input):
@@ -40,18 +41,18 @@ def parse_input(data, input_type, input_shape):
     # if input_type == 'json':
     #     data = data
 
-    if input_type == "numpy ndarray":
+    if input_type == DataTypes.NUMPY_NDARRAY:
         if type(data) == str:
             data = json.loads(data)
         data = np.array(data)
         data = data.reshape(input_shape)
-    elif input_type == "pandas dataframe":
+    elif input_type == DataTypes.PD_DATAFRAME:
         if type(data) == str:
             data = json.loads(data)
         data = pd.DataFrame.from_dict(data)
-    elif input_type == "text":
+    elif input_type == DataTypes.TEXT:
         data = json.loads(data)
-    elif input_type == "image":
+    elif input_type == DataTypes.IMAGE:
         data = Image.open(data)
         data = np.array(data)
         print("input image shape", data.shape)
@@ -68,13 +69,13 @@ def parse_output(data, output_type, output_shape):
     # if input_type == 'json':
     #     data = data
 
-    if output_type == "numpy ndarray":
+    if output_type == DataTypes.NUMPY_NDARRAY:
         data = data.tolist()
         data = json.dumps(data)
-    elif output_type == "pandas dataframe":
+    elif output_type == DataTypes.PD_DATAFRAME:
         data = data.to_dict()
         data = json.dumps(data)
-    elif output_type == "text":
+    elif output_type == DataTypes.TEXT:
         data = json.dumps(data)
     else:
         data = json.dumps(data)

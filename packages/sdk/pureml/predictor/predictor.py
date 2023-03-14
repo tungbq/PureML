@@ -2,15 +2,15 @@ from pydantic import BaseModel, Field
 import typing
 from typing import List, Any
 from abc import ABC, abstractmethod
-from pureml.schema import InputSchema, OutputSchema
+from pureml.schema import Input, Output
 from enum import Enum
 
 
 class BasePredictor(BaseModel, ABC):
     label: str
     model: Any = None
-    input: InputSchema
-    output: OutputSchema = OutputSchema()
+    input: Input
+    output: Output = Output()
     requirements_py: list = None
     requirements_sys: list = None
 

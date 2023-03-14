@@ -69,8 +69,8 @@ pureml.login(org_id=org_id, access_token=access_token)
 predictor = Predictor()
 predictor.load_models()
 
-input_type, input_shape = process_input(input=predictor.input)
-output_type, output_shape = process_output(output=predictor.output)
+# input_type, input_shape = process_input(input=predictor.input)
+# output_type, output_shape = process_output(output=predictor.output)
 
 
 # Create the app
@@ -85,7 +85,7 @@ async def predict(request:Request = None, file: Optional[UploadFile] = File(None
         return predictions
     
 
-    if request is not None:
+    if request is not None and file is None:
         print("Processing request")
         predictions = await predict_request_with_json(request=request, predictor=predictor)
 
