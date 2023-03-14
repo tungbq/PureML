@@ -1,89 +1,16 @@
-<h1 align="center">
-  <a href="https://pureml.com">
-    <img
-      align="center"
-      alt="PureML"
-      src="https://github.com/PuremlHQ/PureML/blob/main/assets/coverImg.jpeg"
-      style="width:100%;"
-    />
-  </a>
-</h1>
+[![PureML](/assets/PureMLCoverImg.png)](https://pureml.com)
 
+<h align="center">
 
+# The next-gen developer platform for Production ML.
 
-
-<div align="center">
-
-# Track, version, compare and review your data and models.
-
-</div>
-
-
-# ⛳ Quick Access
-
-<p align="center">
-  <a
-    href="https://docs.pureml.com"
-  ><b>Documentation</b></a>
-  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="https://www.youtube.com/watch?v=HdzLFEWS4s8&t=1s"
-  ><b>Watch Demo</b></a>
-  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="https://docs.pureml.com/docs/get-started/quickstart_tabular"
-  ><b>Quick example</b></a>
-  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="#"
-  ><b>Get Instant Help</b></a>
-  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="https://app.pureml.com/auth/signup"
-  ><b>Sign Up for free</b></a>
-    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-  <a
-    href="https://pureml.height.app/roadmap"
-  ><b>Roadmap</b></a>
-
-
-</p>
-
-
-
-</br>
-</br>
-
+</h>
 
 <div align="center">
   <a
     href="https://pypi.org/project/pureml/"
   >
     <img alt="PyPi" src="https://img.shields.io/pypi/v/pureml?color=green&logo=pureml" />
-  </a>
-  &nbsp;
-  <a
-    href="https://python-poetry.org/"
-  >
-    <img src="https://img.shields.io/badge/poetry-1.1.14-blue?style=flat&logo=poetry&logoColor=white" />
-  </a>
-  &nbsp;
-  <a
-    href="https://opensource.org/licenses/Apache-2.0"
-  >
-    <img alt="License" src="https://img.shields.io/pypi/l/pureml?color=red&logo=Apache&logoColor=red" />
-  </a>
-  &nbsp;
-  <a
-    href="https://discord.gg/xNUHt9yguJ"
-  >
-    <img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20Discord-blueviolet?style=flat&logo=discord&logoColor=white" />
-  </a>
-  &nbsp;
-  <a
-    href="https://pepy.tech/project/pureml"
-  >
-    <img alt="Downloads" src="https://static.pepy.tech/badge/pureml">
   </a>
   &nbsp;
   <a
@@ -95,156 +22,276 @@
   <a
     href="https://pypi.org/project/pureml/"
   >
-    <img alt="Coverage" src="https://img.shields.io/codecov/c/github/PuremlHQ/pureml">
+    <img alt="Coverage" src="https://img.shields.io/codecov/c/github/PureMLHQ/PureML">
   </a>
   &nbsp;
   <a
-    href="https://pypi.org/project/pureml/"
+    href="https://opensource.org/licenses/Apache-2.0"
   >
-    <img alt="Coverage" src="https://img.shields.io/github/stars/PuremlHQ/pureml?style=social">
+    <img alt="License" src="https://img.shields.io/pypi/l/pureml?color=red&logo=Apache&logoColor=red" />
   </a>
-
-
-
+  &nbsp;
+  <a
+    href="https://pepy.tech/project/pureml"
+  >
+    <img alt="Downloads" src="https://static.pepy.tech/badge/pureml">
+  </a>
 </div>
 
+<br/>
+<br/>
 
-</br>
-</br>
+## ⏳ Status
 
+This is an early alpha. The implementation might change between versions without warning. Please use at your own risk and pin to a specific version if you're relying on this for anything important!
 
+## ⏱ Getting started
 
-# 💎 Intro
+### 1. Installation
 
-PureML is an open-source version control for machine learning.
+Manage versioning of datasets and models with our python SDK. Versioning is semantic and managed automatically. You can install and run PureML using `pip`.
 
-1. [Quick start](#quick-start)
-1. [How it works](#how-it-works)
-1. [Demo](#demo)
-1. [Main Features](#main-features)
-1. [Core design principles](#core-design-principles)
-1. [Core abstractions](#core-abstractions)
-1. [Why to get involved](#why-to-get-involved)
-1. [Tutorials](#tutorials)
+Getting started is simple:
 
-<br />
-
-# ⏱ Quick start
-
-You can install and run PureML using `pip`.
-
-
-Install PureML
 ```bash
 pip install pureml
 ```
 
 <br />
 
-# 📋 How it works
-Just add a few lines of code. You don't need to change the way you work.
+If you are trying to manage versions of dataset all you have to do is use our decorator `@dataset`.
 
-PureML is a Python library that uploads metadata to S3.
 
-### Generating Data Lineage
-
-1. Load Data
 ```python
-@load_data(name='loading data')
-def loading_data():
-    
-    return pd.read_csv('churn.csv')
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from pureml.decorators import dataset
+
+@dataset("petdata:dev")
+def load_data(img_folder = "PetImages"):
+  image_size = (180, 180)
+  batch_size = 16
+  train_ds,
+  val_ds = tf.keras.utils.img_dataset_from_directory(
+      img_folder,
+      validation_split=0.2,
+      subset="both",
+      seed=1337,
+      image_size=image_size,
+      batch_size=batch_size,
+  )
+  data_augmentation = keras.Sequential(
+   [layers.RandomFlip("horizontal"),
+   layers.RandomRotation(0.1),]
+  )
+  train_ds = train_ds.map(
+    lambda img, label: (data_augmentation(img), label),
+    num_parallel_calls=tf.data.AUTOTUNE,
+  )
+  train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+  val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
+  return train_ds, val_ds
 ```
 
-2. Transform Data
+<br/>
+
+For managing models we have to use `@model` decorator. We have some other features built in such as data lineage and branching. For more information refer [docs](https://docs.pureml.com).
+
 ```python
-@transformer(name='fill missing values')
-def fill_missing_values(df):
-    return df.fillna()
-    
+from tensorflow.keras.applications.inception_v3
+import InceptionV3
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense,
+GlobalAveragePooling2D, Input
+from pureml.decorators import model
 
-@transformer(name='encode ordinal')
-def encode_ordinal(df):
-    col_ord = ['state', 'phone number']
-    df_ord = df[col_ord]
-    feat = OrdinalEncoder().fit_transform(df_ord)    
-    df[col_ord] = feat
-    
-    return df
-
-@transformer(name='encode binary')
-def encode_binary(df):
-
-    df['voice mail plan'] = df['voice mail plan'].map({'yes':1, 'no':0})
-    df['international plan'] = df['international plan'].map({'yes':1, 'no':0})
-    df['churn'] = df['churn'].map({True:1, False:0})
-
-    return df
+@model("pet_classifier:dev")
+def train_model(train_ds, val_ds):
+  input_tensor = Input(shape=(180, 180, 3))
+  base_model = InceptionV3(
+   input_tensor=input_tensor,
+   weights='imagenet',
+   include_top=False
+  )
+  x = base_model.output
+  x = GlobalAveragePooling2D()(x)
+  x = Dense(1024, activation='relu')(x)
+  predictions = Dense(1, activation='softmax')(x)
+  model_inc = Model(
+   inputs=base_model.input,
+   outputs=predictions
+  )
+  model_inc.compile(
+   optimizer='rmsprop',
+   loss='binary_crossentropy',
+   metrics=["accuracy"]
+  )
+  model_inc.fit(
+    train_ds,
+    epochs=2,
+    validation_data=val_ds,
+    )
+  return model_inc
 ```
 
-3. Register Dataset
+<br/>
+
+### 2. PureML-eval : Testing & Quality Control
+
+#### Step 1: Use an existing model for validation
+
 ```python
-@dataset(name='telecom churn', parent='encode binary')
-def build_dataset():
-    df = loading_data()
+import pureml
 
-    df = fill_missing_values(df)
-
-    df = encode_ordinal(df)
-
-    df = encode_binary(df)
-
-    return df
-
-df = build_dataset()
+pureml.dataset.validation(“petdata:dev:v1”)
 ```
 
-This is how generated data lineage will look like in the UI
+If you want to add a dataset as validation while saving it, you can use our `@validation`. This helps us capture not just one instance of this dataset but all the future variations without any intervention.
 
-<h1 align="center">
-    <img
-      align="center"
-      src="https://github.com/PuremlHQ/PureML/blob/main/assets/pipeline.png?raw=true"
-      style="width:60%;"
-    />
-  </a>
-</h1>
+<br/>
 
-For more detailed explanation, please visit our [Documentation](https://docs.pureml.com)
+#### Step 2: Register validation dataset
 
-# 💻 Demo
+```python
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from pureml.decorators import dataset, validation
+
+@validation
+@dataset("petdata:dev")
+def load_data(img_folder = "PetImages"):
+  image_size = (180, 180)
+  batch_size = 16
+  train_ds,
+  val_ds = tf.keras.utils.img_dataset_from_directory(
+    img_folder,
+    validation_split=0.2,
+    subset="both",
+    seed=1337,
+    image_size=image_size,
+    batch_size=batch_size,
+  )
+  data_augmentation = keras.Sequential(
+   [
+     layers.RandomFlip("horizontal"),
+     layers.RandomRotation(0.1),
+   ]
+  )
+  train_ds = train_ds.map(
+    lambda img, label: (data_augmentation(img), label),
+    num_parallel_calls=tf.data.AUTOTUNE,
+  )
+  train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+  val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
+  return train_ds, val_ds
+```
+
+<br/>
+
+#### Step 3: Predictor for model
+
+We recommend utilizing our base predictor class when developing your model. By doing so, you can leverage the predict function in this class as your model's prediction function, which can be used in various stages such as testing, inference, and dockerization.
+
+```python
+from pureml import BasePredictor
+import pureml
+import tensorflow as tf
+from tensorflow import keras
+
+class Predictor(BasePredictor):
+  model_details = ['pet_classifier:dev:latest']
+  input={'type': 'image'},
+  output={'type': 'numpy ndarray' }
+
+  def load_models(self):
+    self.model = pureml.model.fetch(self.model_details)
+
+  def predict(self, pred_img):
+    pred_img = keras.preprocessing.image.img_to_array(
+      pred_img
+    )
+    pred_img = tf.expand_dims(pred_img, 0)
+    predictions = self.model.predict(pred_img)
+    predictions = float(predictions[0])
+
+    return predictions
+```
+
+<br/>
+
+#### Step 4: Evaluating your model is done as follows
+
+Lets see how PureML makes it easier to identify and correct any issues with its review feature and allows you to evaluate the quality of their data and the accuracy of their model.
+
+```python
+import pureml
+
+pureml.model.evaluate("pet_classifier:dev:v1", "petdata:dev:v1")
+```
+
+![Review](/assets/ReviewModel.png)
+
+For more detailed explanation, please visit our [Documentation](https://docs.pureml.com) for more reference.
+
+### 3. PureML-package
+
+PureML is a versatile tool that allows you to package your machine learning models into a standard, production-ready container. Additionally, you can utilize a user-friendly web interface to demonstrate your machine learning model, making it easily accessible to anyone, from anywhere.
+
+Docker
+
+```python
+pureml.docker.create(“pet_classifier:dev:v1”)
+```
+
+FastAPI
+
+```python
+pureml.fastapi.create(“pet_classifier:dev:v1”)
+```
+
+<br/>
+
+### 4. PureML-deploy
+
+PureML gives you the ability to deploy machine learning models without the need for managing infrastructure or servers.
+
+```bash
+pureml deploy pet_classifier:dev:v1
+```
+
+<br/>
+
+## 💻 Demo
+
+PureML quick start demo in just 2 mins.
+
+[![PureML Demo Video](https://img.youtube.com/vi/HdzLFEWS4s8/0.jpg)](https://www.youtube.com/watch?v=HdzLFEWS4s8 "PureML Demo Video")
+<br/>
+<sub><i>Click the image to play video</i></sub>
 
 ### Live demo
 
 Build and run a PureML project to create data lineage and a model with our <b>[demo colab link](https://colab.research.google.com/drive/1LlrpaKiREwgesaRcnwkJP-w2MPesXf1t?usp=sharing)</b>.
 
-
-### Demo video (2 min)
-PureML quick start demo
-
-[![PureML Demo Video](https://img.youtube.com/vi/HdzLFEWS4s8/0.jpg)](https://www.youtube.com/watch?v=HdzLFEWS4s8 "PureML Demo Video")
-
-
-
-<sub><i>Click the image to play video</i></sub>
-
 <br />
 
+## 📍 [Main Features](https://docs.pureml.com/)
 
-# 📍 [Main Features](https://docs.pureml.com/)
 |                          |                                                                               |
 | ------------------------ | ----------------------------------------------------------------------------- |
 | Data Lineage             | Automatic generation of data lineage                                          |
 | Dataset Versioning       | Object-based Automatic Semantic Versioning of datasets                        |
 | Model Versioning         | Object-based Automatic Semantic Versioning of models                          |
 | Comparision              | Comparing different versions of models or datasets                            |
-| Branches (*Coming Soon*) | Separation between experimentation and production ready models using branches |
-| Review (*Coming Soon*)   | Review and approve models, and datasets to production ready branch            |
+| Branches (_Coming Soon_) | Separation between experimentation and production ready models using branches |
+| Review (_Coming Soon_)   | Review and approve models, and datasets to production ready branch            |
 
 <br />
 
-
-# 🔮 Core design principles
+## 🔮 Core design principles
 
 |                                     |                                                                                                                 |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -254,11 +301,9 @@ PureML quick start demo
 | Data is a first-class citizen       | Your data is secure. It will never leave your system.                                                           |
 | Reduce Friction                     | Have access to operations performed on data using data lineage without having to spend time on lengthy meetings |
 
-
-
 <br />
 
-# ⚙ Core abstractions
+## ⚙ Core abstractions
 
 These are the fundamental concepts that PureML uses to operate.
 
@@ -270,10 +315,10 @@ These are the fundamental concepts that PureML uses to operate.
 | Model Versioning                                                    | Versioning of the model should be comprehensible to the user and should encapuslate the changes in training data, model architecture, hyper parameters. |
 | Fetch                                                               | This functionality is used to fetch registered Models, and Datasets.                                                                                    |
 
-
 <br />
 
-# 🤝 Why to get involved
+## 🤝 Why to get involved
+
 Version control is much more common in software than in machine learning. So why isn’t everyone using Git? Git doesn’t work well with machine learning. It can’t handle large files, it can’t handle key/value metadata like metrics, and it can’t record information automatically from inside a training script.
 
 GitHub wasn’t designed with data as a core project component. This along with a number of other differences between AI and more traditional software projects makes GitHub a bad fit for artificial intelligence, contributing to the reproducibility crisis in machine learning.
@@ -286,8 +331,7 @@ Lets build this together. If you have faced this issue or have worked out a simi
 
 <br />
 
-
-# 🧮 Tutorials
+## 🧮 Tutorials
 
 - [Registering Data lineage](https://docs.pureml.com/docs/data/register_data_pipeline)
 - [Registering models](https://docs.pureml.com/docs/models/register_models)
@@ -296,38 +340,33 @@ Lets build this together. If you have faced this issue or have worked out a simi
 - [Quick Start: NLP](https://docs.pureml.com/docs/get-started/quickstart_nlp)
 - [Logging](https://docs.pureml.com/docs/log/overview)
 
-
 <br />
 
-# 🐞 Reporting Bugs
+## 🐞 Reporting Bugs
+
 To report any bugs you have faced while using PureML package, please
+
 1. Report it in [Discord](https://discord.gg/xNUHt9yguJ) channel
-1. Open an [issue](https://github.com/PuremlHQ/PureML/issues)
+2. Open an [issue](https://github.com/PureMLHQ/PureML/issues)
 
 <br />
 
-# ⌨ Contributing and Developing
-Lets work together to improve the features for everyone. For more details, please look at out [Contributing Guide](./CONTRIBUTING.md)
+## ⌨ Contributing and Developing
 
-Work with mutual respect. Please take a look at our public roadmap here.
-[Roadmap](https://pureml.height.app/roadmap)
+Lets work together to improve the features for everyone. Here's step one for you to go through our [Contributing Guide](./CONTRIBUTING.md). We are already waiting for amazing ideas and features which you all have got.
 
+Work with mutual respect. Please take a look at our public [Roadmap here](https://pureml.notion.site/7de13568835a4cf18913307503a2cdd4?v=82199f96833a48e5907023c8a8d565c6).
 
 <br />
 
-# 👨‍👩‍👧‍👦 Community
-To get quick updates, feature release for PureML follow us on
-|                                                                                                                                                                                       |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [<img alt="Twitter" height="20" src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />](https://twitter.com/getPureML)                 |
-| [<img alt="LinkedIn" height="20" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/company/PuremlHQ/) |
-| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/PuremlHQ/PureML)               |
-| [<img alt="GitHub" height="20" src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" />](https://discord.gg/DBvedzGu)                    |
+## 👨‍👩‍👧‍👦 Community
 
+To get quick updates of feature releases of PureML, follow us on:
 
-# 📄 License
+[<img alt="Twitter" height="20" src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />](https://twitter.com/getPureML) [<img alt="LinkedIn" height="20" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/company/PuremlHQ/) [<img alt="GitHub" height="20" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/PureMLHQ/PureML) [<img alt="GitHub" height="20" src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" />](https://discord.gg/DBvedzGu)
+
+<br/>
+
+## 📄 License
+
 See the [Apache-2.0](./License) file for licensing information.
-
-
-
-<br />
