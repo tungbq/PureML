@@ -2,7 +2,7 @@ from fastapi import Request, UploadFile
 from pureml.predictor.predictor import BasePredictor
 from pureml.schema.prediction import Input, Output
 import json
-from .deploy import parse_input, parse_output, process_input, process_output
+from .package import parse_input, parse_output
 import shutil
 
 

@@ -3,7 +3,7 @@ import shutil
 import uvicorn
 from fastapi import FastAPI
 from pureml.schema import FastAPISchema, PredictionSchema
-from pureml.utils.deploy import process_input, process_output
+from pureml.utils.package import process_input, process_output
 from pureml.utils.version_utils import parse_version_label
 
 
