@@ -1,11 +1,6 @@
 import os
 
-# from .utils.constants import PATH_USER_PROJECT_DIR
-
-# os.makedirs(PATH_USER_PROJECT_DIR, exist_ok=True)
-
-
-from .metadata import load_model, save_model
+from .packaging import load_model, save_model
 
 
 from .components import model as model
