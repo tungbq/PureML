@@ -55,7 +55,7 @@ import os
 from dotenv import load_dotenv
 import json
 import shutil
-from pureml.utils.deploy import process_input, process_output
+from pureml.utils.package import process_input, process_output
 from typing import Union, Optional
 from pureml.utils.prediction import predict_request_with_json, predict_request_with_file
 
@@ -131,7 +131,7 @@ def create_fastapi_file(
 #           """)
 
 
-def run_fastapi_server(label, predict_path, requirements_path):
+def run(label, predict_path, requirements_path):
 
     create_fastapi_file(
         label, predict_path=predict_path, requirements_path=requirements_path
