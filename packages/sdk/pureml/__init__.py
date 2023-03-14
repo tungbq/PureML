@@ -20,5 +20,6 @@ from .components.log import log
 from .deploy import docker
 
 from .predictor.predictor import BasePredictor
+from .schema import Input, Output
 
 __version__ = "0.3.0"
