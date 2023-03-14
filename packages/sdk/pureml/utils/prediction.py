@@ -10,10 +10,16 @@ async def predict_request_with_json(request: Request, predictor: BasePredictor):
 
     input_type, input_shape = process_input(input=predictor.input)
     output_type, output_shape = process_output(output=predictor.output)
+    print("predictor.input", predictor.input)
+    print("input_type", input_type)
+    print("input_shape", input_shape)
+    print("output_type", output_type)
+    print("output_shape", output_shape)
 
     headers = request.headers
     body = await request.json()
     data_json = body["test_data"]
+    print("data_json", data_json)
 
     data = parse_input(data=data_json, input_type=input_type, input_shape=input_shape)
 
@@ -23,6 +29,7 @@ async def predict_request_with_json(request: Request, predictor: BasePredictor):
         return predictions
 
     predictions = predictor.predict(data)
+    print("predictions", predictions)
 
     predictions = parse_output(
         data=predictions, output_type=output_type, output_shape=output_shape

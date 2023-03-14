@@ -55,7 +55,7 @@ import os
 from dotenv import load_dotenv
 import json
 import shutil
-from pureml.utils.deploy import parse_input, parse_output
+from pureml.utils.deploy import process_input, process_output
 from typing import Union, Optional
 from pureml.utils.prediction import predict_request_with_json, predict_request_with_file
 
@@ -78,7 +78,7 @@ app = FastAPI()
 
 
 @app.post('/predict')
-async def predict(Optional[Request] = None, file: Optional[UploadFile] = File(None)):
+async def predict(request:Request = None, file: Optional[UploadFile] = File(None)):
     if request is None and file is None:
         print('Error in data input format')
         predictions = json.dumps(None)
@@ -86,13 +86,15 @@ async def predict(Optional[Request] = None, file: Optional[UploadFile] = File(No
     
 
     if request is not None:
-        predictions = predict_request_with_json(request=request, predictor=predictor)
+        print("Processing request")
+        predictions = await predict_request_with_json(request=request, predictor=predictor)
 
 
     if file is not None:
-        predictions = predict_request_with_file(file=file, predictor=predictor)
+        print("Processing uploaded file")
+        predictions = await predict_request_with_file(file=file, predictor=predictor)
         
-
+    return predictions
 
 if __name__ == '__main__':
     uvicorn.run(app, host='{HOST}', port={PORT})""".format(

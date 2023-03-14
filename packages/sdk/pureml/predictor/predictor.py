@@ -7,7 +7,7 @@ from enum import Enum
 
 
 class BasePredictor(BaseModel, ABC):
-    model_label: list
+    label: str
     model: Any = None
     input: InputSchema
     output: OutputSchema = OutputSchema()
