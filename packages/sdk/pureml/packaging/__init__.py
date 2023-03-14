@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from .metadata import Model
+from .packaging import Model
 
 
 def save_model(model, model_name, model_path) -> None:
