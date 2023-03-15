@@ -260,8 +260,8 @@ def create_fastapi_file(
     model_version,
     predict_path,
     requirements_path,
-    input,
-    output,
+    # input,
+    # output,
 ):
     fastapi_schema = FastAPISchema()
 
@@ -272,8 +272,8 @@ def create_fastapi_file(
     get_requirements_file(requirements_path)
 
     api = generate_api(
-        input=input,
-        output=output,
+        # input=input,
+        # output=output,
         model_name=model_name,
         model_branch=model_branch,
         model_version=model_version,
