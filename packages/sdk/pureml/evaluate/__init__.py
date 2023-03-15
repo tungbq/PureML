@@ -1,1 +1,2 @@
-from .evaluate import evaluator
+from .evaluator import evaluator
+from .eval import eval
