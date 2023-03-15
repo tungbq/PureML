@@ -81,7 +81,7 @@ func (api *Api) ValidateAndGetOrCreateSourceType(datasetSourceType string, orgId
 				}
 				sourceTypeUUID = sourceType.UUID
 			} else {
-				return uuid.Nil, models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not enabled", datasetSourceType))
+				return uuid.Nil, models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("%s source not enabled", datasetSourceType))
 			}
 		}
 	}

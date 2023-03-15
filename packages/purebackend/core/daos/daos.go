@@ -161,7 +161,7 @@ func (dao *Dao) UpdateUserPassword(userUUID uuid.UUID, hashedPassword string) er
 	return dao.Datastore().UpdateUserPassword(userUUID, hashedPassword)
 }
 
-func (dao *Dao) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]commonmodels.LogDataResponse, error) {
+func (dao *Dao) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
 	return dao.Datastore().GetLogForModelVersion(modelVersionUUID)
 }
 
