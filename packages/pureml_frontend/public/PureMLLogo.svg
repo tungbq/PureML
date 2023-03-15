@@ -1,0 +1,19 @@
+<svg width="201" height="201" viewBox="0 0 201 201" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_2339_8646)">
+<rect width="201" height="201" rx="100.5" fill="#191F4D"/>
+<path d="M221.71 102.212C123.722 118.24 86.467 187.585 80.0876 220.206C69.8487 217.22 60.4392 212.693 56.9305 210.381C92.4508 126.543 181.647 102.982 221.71 102.212Z" fill="white"/>
+<path d="M221.146 92.8176C121.907 104.091 38.7615 140.375 25.255 180.374C17.496 170.98 12.7065 160.458 11.4613 157.358C84.0702 106.346 181.042 93.5692 221.146 92.8176Z" fill="white"/>
+<line x1="90.7506" y1="182.629" x2="90.7506" y2="221.334" stroke="white" stroke-width="6.01246"/>
+<line x1="109.54" y1="157.827" x2="109.54" y2="222.461" stroke="white" stroke-width="6.01246"/>
+<line x1="128.329" y1="140.729" x2="128.329" y2="222.461" stroke="white" stroke-width="6.01246"/>
+<line x1="147.117" y1="126.638" x2="147.117" y2="220.207" stroke="white" stroke-width="6.01246"/>
+<line x1="165.906" y1="116.116" x2="165.906" y2="213.442" stroke="white" stroke-width="6.01246"/>
+<line x1="184.695" y1="110.479" x2="184.695" y2="204.611" stroke="white" stroke-width="6.01246"/>
+<line x1="203.484" y1="105.03" x2="203.484" y2="197.472" stroke="white" stroke-width="6.01246"/>
+</g>
+<defs>
+<clipPath id="clip0_2339_8646">
+<rect width="201" height="201" rx="100.5" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,0 +1,11 @@
+
+User-agent: *
+Allow: https://docs.pureml.com/
+Allow: https://tally.so/r/wa96xv
+Allow: https://pureml.notion.site/da715e5b1081460b9b3190e90183350d?v=59770ac8c51e4b7eaf811fa8b89fde15
+Allow: https://pureml.notion.site/PureML-Changelog-096f7541dd6245c0a3c244e9f216ad31
+Allow: https://github.com/PuremlHQ/PureML
+Allow: https://discord.gg/xNUHt9yguJ
+Allow: https://twitter.com/puremlHQ
+Allow: https://www.linkedin.com/company/pureml-inc/
+Allow: /auth/signin
