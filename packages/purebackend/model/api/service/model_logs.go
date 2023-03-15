@@ -28,6 +28,56 @@ func BindModelLogsApi(app core.App, rg *echo.Group) {
 	modelGroup.POST("/:modelName/branch/:branchName/version/:version/logfile", api.DefaultHandler(LogFileModel), middlewares.ValidateModel(api.app), middlewares.ValidateModelBranch(api.app), middlewares.ValidateModelBranchVersion(api.app))
 }
 
+// GetAllLogsModel godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get Log data for model
+//	@Description	Get Log data for model
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			modelName	path	string	true	"Model Name"
+//	@Param			branchName	path	string	true	"Branch Name"
+//	@Param			version		path	string	true	"Version"
+func (api *Api) GetAllLogsModel(request *models.Request) *models.Response {
+	versionUUID := request.GetModelBranchVersionUUID()
+	result, err := api.app.Dao().GetLogForModelVersion(versionUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Logs for model version")
+	return response
+}
+
+// GetKeyLogsModel godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get Log data for model with specific key
+//	@Description	Get Log data for model with specific key
+//	@Tags			Model
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log/{key} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			modelName	path	string	true	"Model Name"
+//	@Param			branchName	path	string	true	"Branch Name"
+//	@Param			version		path	string	true	"Version"
+//	@Param			key			path	string	true	"Key"
+func (api *Api) GetKeyLogsModel(request *models.Request) *models.Response {
+	versionUUID := request.GetModelBranchVersionUUID()
+	key := request.PathParams["key"]
+	result, err := api.app.Dao().GetKeyLogForModelVersion(versionUUID, key)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Specific Key Logs for model version")
+	return response
+}
+
 // LogModel godoc
 //
 //	@Security		ApiKeyAuth
@@ -58,6 +108,9 @@ func (api *Api) LogModel(request *models.Request) *models.Response {
 		dataData = data.(string)
 	} else {
 		dataData = ""
+	}
+	if keyData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Key is required")
 	}
 	versionUUID := request.GetModelBranchVersionUUID()
 	result, err := api.app.Dao().CreateLogForModelVersion(keyData, dataData, versionUUID)
@@ -142,58 +195,7 @@ func (api *Api) LogFileModel(request *models.Request) *models.Response {
 	return response
 }
 
-
-// GetAllLogsModel godoc
-//
-//	@Security		ApiKeyAuth
-//	@Summary		Get Log data for model
-//	@Description	Get Log data for model
-//	@Tags			Model
-//	@Accept			*/*
-//	@Produce		json
-//	@Success		200	{object}	map[string]interface{}
-//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log [get]
-//	@Param			orgId		path	string	true	"Organization Id"
-//	@Param			modelName	path	string	true	"Model Name"
-//	@Param			branchName	path	string	true	"Branch Name"
-//	@Param			version		path	string	true	"Version"
-func (api *Api) GetAllLogsModel(request *models.Request) *models.Response {
-	versionUUID := request.GetModelBranchVersionUUID()
-	result, err := api.app.Dao().GetLogForModelVersion(versionUUID)
-	if err != nil {
-		return models.NewServerErrorResponse(err)
-	}
-	response := models.NewDataResponse(http.StatusOK, result, "Logs for model version")
-	return response
-}
-
-// GetKeyLogsModel godoc
-//
-//	@Security		ApiKeyAuth
-//	@Summary		Get Log data for model with specific key
-//	@Description	Get Log data for model with specific key
-//	@Tags			Model
-//	@Accept			*/*
-//	@Produce		json
-//	@Success		200	{object}	map[string]interface{}
-//	@Router			/org/{orgId}/model/{modelName}/branch/{branchName}/version/{version}/log/{key} [get]
-//	@Param			orgId		path	string	true	"Organization Id"
-//	@Param			modelName	path	string	true	"Model Name"
-//	@Param			branchName	path	string	true	"Branch Name"
-//	@Param			version		path	string	true	"Version"
-//	@Param			key			path	string	true	"Key"
-func (api *Api) GetKeyLogsModel(request *models.Request) *models.Response {
-	versionUUID := request.GetModelBranchVersionUUID()
-	key := request.PathParams["key"]
-	result, err := api.app.Dao().GetKeyLogForModelVersion(versionUUID, key)
-	if err != nil {
-		return models.NewServerErrorResponse(err)
-	}
-	response := models.NewDataResponse(http.StatusOK, result, "Specific Key Logs for model version")
-	return response
-}
-
-var LogModel ServiceFunc = (*Api).LogModel
-var LogFileModel ServiceFunc = (*Api).LogFileModel
 var GetAllLogsModel ServiceFunc = (*Api).GetAllLogsModel
 var GetKeyLogsModel ServiceFunc = (*Api).GetKeyLogsModel
+var LogModel ServiceFunc = (*Api).LogModel
+var LogFileModel ServiceFunc = (*Api).LogFileModel

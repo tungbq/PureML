@@ -28,6 +28,56 @@ func BindDatasetLogsApi(app core.App, rg *echo.Group) {
 	datasetGroup.POST("/:datasetName/branch/:branchName/version/:version/logfile", api.DefaultHandler(LogFileDataset), middlewares.ValidateDataset(api.app), middlewares.ValidateDatasetBranch(api.app), middlewares.ValidateDatasetBranchVersion(api.app))
 }
 
+// GetAllLogsDataset godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get Log data for dataset
+//	@Description	Get Log data for dataset
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
+//	@Param			branchName	path	string	true	"Branch Name"
+//	@Param			version		path	string	true	"Version"
+func (api *Api) GetAllLogsDataset(request *models.Request) *models.Response {
+	versionUUID := request.GetDatasetBranchVersionUUID()
+	result, err := api.app.Dao().GetLogForDatasetVersion(versionUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Logs for dataset version")
+	return response
+}
+
+// GetKeyLogsDataset godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get Log data for dataset with specific key
+//	@Description	Get Log data for dataset with specific key
+//	@Tags			Dataset
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log/{key} [get]
+//	@Param			orgId		path	string	true	"Organization Id"
+//	@Param			datasetName	path	string	true	"Dataset Name"
+//	@Param			branchName	path	string	true	"Branch Name"
+//	@Param			version		path	string	true	"Version"
+//	@Param			key			path	string	true	"Key"
+func (api *Api) GetKeyLogsDataset(request *models.Request) *models.Response {
+	versionUUID := request.GetDatasetBranchVersionUUID()
+	key := request.PathParams["key"]
+	result, err := api.app.Dao().GetKeyLogForDatasetVersion(versionUUID, key)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Specific Key Logs for dataset version")
+	return response
+}
+
 // LogDataset godoc
 //
 //	@Security		ApiKeyAuth
@@ -58,6 +108,9 @@ func (api *Api) LogDataset(request *models.Request) *models.Response {
 		dataData = data.(string)
 	} else {
 		dataData = ""
+	}
+	if keyData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Key is required")
 	}
 	versionUUID := request.GetDatasetBranchVersionUUID()
 	result, err := api.app.Dao().CreateLogForDatasetVersion(keyData, dataData, versionUUID)
@@ -142,57 +195,7 @@ func (api *Api) LogFileDataset(request *models.Request) *models.Response {
 	return response
 }
 
-// GetAllLogsDataset godoc
-//
-//	@Security		ApiKeyAuth
-//	@Summary		Get Log data for dataset
-//	@Description	Get Log data for dataset
-//	@Tags			Dataset
-//	@Accept			*/*
-//	@Produce		json
-//	@Success		200	{object}	map[string]interface{}
-//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log [get]
-//	@Param			orgId		path	string	true	"Organization Id"
-//	@Param			datasetName	path	string	true	"Dataset Name"
-//	@Param			branchName	path	string	true	"Branch Name"
-//	@Param			version		path	string	true	"Version"
-func (api *Api) GetAllLogsDataset(request *models.Request) *models.Response {
-	versionUUID := request.GetDatasetBranchVersionUUID()
-	result, err := api.app.Dao().GetLogForDatasetVersion(versionUUID)
-	if err != nil {
-		return models.NewServerErrorResponse(err)
-	}
-	response := models.NewDataResponse(http.StatusOK, result, "Logs for dataset version")
-	return response
-}
-
-// GetKeyLogsDataset godoc
-//
-//	@Security		ApiKeyAuth
-//	@Summary		Get Log data for dataset with specific key
-//	@Description	Get Log data for dataset with specific key
-//	@Tags			Dataset
-//	@Accept			*/*
-//	@Produce		json
-//	@Success		200	{object}	map[string]interface{}
-//	@Router			/org/{orgId}/dataset/{datasetName}/branch/{branchName}/version/{version}/log/{key} [get]
-//	@Param			orgId		path	string	true	"Organization Id"
-//	@Param			datasetName	path	string	true	"Dataset Name"
-//	@Param			branchName	path	string	true	"Branch Name"
-//	@Param			version		path	string	true	"Version"
-//	@Param			key			path	string	true	"Key"
-func (api *Api) GetKeyLogsDataset(request *models.Request) *models.Response {
-	versionUUID := request.GetDatasetBranchVersionUUID()
-	key := request.PathParams["key"]
-	result, err := api.app.Dao().GetKeyLogForDatasetVersion(versionUUID, key)
-	if err != nil {
-		return models.NewServerErrorResponse(err)
-	}
-	response := models.NewDataResponse(http.StatusOK, result, "Specific Key Logs for dataset version")
-	return response
-}
-
-var LogDataset ServiceFunc = (*Api).LogDataset
-var LogFileDataset ServiceFunc = (*Api).LogFileDataset
 var GetAllLogsDataset ServiceFunc = (*Api).GetAllLogsDataset
 var GetKeyLogsDataset ServiceFunc = (*Api).GetKeyLogsDataset
+var LogDataset ServiceFunc = (*Api).LogDataset
+var LogFileDataset ServiceFunc = (*Api).LogFileDataset

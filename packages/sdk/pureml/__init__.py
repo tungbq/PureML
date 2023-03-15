@@ -13,6 +13,7 @@ from .components.auth import login
 from .components.log import log
 
 from .evaluate import evaluator
+from .components import figure
 
 from .package import docker, fastapi
 
