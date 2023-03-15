@@ -12,6 +12,8 @@ from .components import auth as auth
 from .components.auth import login
 from .components.log import log
 
+from .components import figure
+
 from .package import docker, fastapi
 
 from .predictor.predictor import BasePredictor
