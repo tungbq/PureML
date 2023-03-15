@@ -203,6 +203,7 @@ def add_params_to_config(
         param_values = values
 
     hash = generate_hash_for_dict(values=param_values)
+    # print("params", model_version)
 
     config["params"].update(
         {
@@ -242,10 +243,12 @@ def add_figures_to_config(
 
     if len(config["figure"]) != 0:
         figure_values = config["figure"]["values"]
+        figure_values.update(values)
     else:
         figure_values = values
 
     hash = generate_hash_for_dict(values=figure_values)
+    # print("figures", model_version)
 
     config["figure"].update(
         {
