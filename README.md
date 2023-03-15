@@ -139,7 +139,7 @@ def train_model(train_ds, val_ds):
 
 ### 2. PureML-eval : Testing & Quality Control
 
-#### Step 1: Use an existing model for validation
+#### Step A: Use an existing model for validation
 
 ```python
 import pureml
@@ -151,7 +151,7 @@ If you want to add a dataset as validation while saving it, you can use our `@va
 
 <br/>
 
-#### Step 2: Register validation dataset
+#### Step B: Register validation dataset
 
 ```python
 import tensorflow as tf
@@ -190,7 +190,7 @@ def load_data(img_folder = "PetImages"):
 
 <br/>
 
-#### Step 3: Predictor for model
+#### Step C: Predictor for model
 
 We recommend utilizing our base predictor class when developing your model. By doing so, you can leverage the predict function in this class as your model's prediction function, which can be used in various stages such as testing, inference, and dockerization.
 
@@ -221,7 +221,7 @@ class Predictor(BasePredictor):
 
 <br/>
 
-#### Step 4: Evaluating your model is done as follows
+#### Step D: Evaluating your model is done as follows
 
 Lets see how PureML makes it easier to identify and correct any issues with its review feature and allows you to evaluate the quality of their data and the accuracy of their model.
 
@@ -306,12 +306,12 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 These are the fundamental concepts that PureML uses to operate.
 
-|                                                               |                                                                                                                                                                                                                                                                               |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Model](https://docs.pureml.com/docs/core-concepts/model)     | Centralized location for users to store their models and manage their lifecycle collaboratively. This makes it easier for stakeholders to manage models and promotes transparency in accessing models for tests, deployment, audit, and other purposes.                       |
-| [Dataset](https://docs.pureml.com/docs/core-concepts/dataset) | Serves as an empty container for storing the elements of the datasets and contains lineage, dataset-related graphs, and dataset files.                                                                                                                                        |
-| [Log](https://docs.pureml.com/docs/core-concepts/log)         | Provides the ability to log a range of metadata related to models and datasets. The specific types of metadata that can be logged via the PureML package and how they are represented in the PureML app will depend on the data type and format being used.                   |
-| [Lineage](https://docs.pureml.com/docs/core-concepts/lineage) | Enables the tracking of the data flow from its origin to the end goal, which includes all the intermediate processes and transformations. In the context of PureML, lineage involves capturing the provenance of data and transformations applied to produce a final dataset. |
+|         |                                                                                                                                                                                                                                                                               |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model   | Centralized location for users to store their models and manage their lifecycle collaboratively. This makes it easier for stakeholders to manage models and promotes transparency in accessing models for tests, deployment, audit, and other purposes.                       |
+| Dataset | Serves as an empty container for storing the elements of the datasets and contains lineage, dataset-related graphs, and dataset files.                                                                                                                                        |
+| Log     | Provides the ability to log a range of metadata related to models and datasets. The specific types of metadata that can be logged via the PureML package and how they are represented in the PureML app will depend on the data type and format being used.                   |
+| Lineage | Enables the tracking of the data flow from its origin to the end goal, which includes all the intermediate processes and transformations. In the context of PureML, lineage involves capturing the provenance of data and transformations applied to produce a final dataset. |
 
 <br />
 
