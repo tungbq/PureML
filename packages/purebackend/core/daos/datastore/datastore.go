@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	commondbmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/dbmodels"
 	commonmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/models"
@@ -1453,7 +1454,32 @@ func (ds *Datastore) MigrateModelVersionBranch(modelVersion uuid.UUID, toBranch 
 	//Update the branch of the model version
 	modelVersionDB.Branch.UUID = toBranch
 	modelVersionDB.BaseModel.UUID = uuid.Nil
+	modelVersionDB.CreatedAt = time.Now()
+	modelVersionDB.UpdatedAt = time.Now()
 	err = ds.DB.Save(&modelVersionDB).Error
+	if err != nil {
+		return nil, err
+	}
+	
+	// Migrate logs
+	var logs []dbmodels.Log
+	err = ds.DB.Where("model_version_uuid = ?", modelVersion).Preload("ModelVersion").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	err = ds.DB.Transaction(func(tx *gorm.DB) error {
+		for _, log := range logs {
+			log.BaseModel.UUID = uuid.Nil
+			log.ModelVersion.BaseModel.UUID = modelVersionDB.UUID
+			log.CreatedAt = time.Now()
+			log.UpdatedAt = time.Now()
+			err = tx.Save(&log).Error
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -1603,10 +1629,18 @@ func (ds *Datastore) GetModelBranchAllVersions(modelBranchUUID uuid.UUID, withLo
 			CreatedAt: modelVersion.CreatedAt,
 		}
 		if withLogs {
-			modelBranchVersion.Logs, err = ds.GetLogForModelVersion(modelVersion.UUID)
+			logResponses, err := ds.GetLogForModelVersion(modelVersion.UUID)
 			if err != nil {
 				return nil, err
 			}
+			var logData []commonmodels.LogDataResponse
+			for _, log := range logResponses {
+				logData = append(logData, commonmodels.LogDataResponse{
+					Key:  log.Key,
+					Data: log.Data,
+				})
+			}
+			modelBranchVersion.Logs = logData
 		}
 		modelVersionsResponse = append(modelVersionsResponse, modelBranchVersion)
 	}
@@ -2135,7 +2169,32 @@ func (ds *Datastore) MigrateDatasetVersionBranch(datasetVersion uuid.UUID, toBra
 	datasetVersionDB.BaseModel.UUID = uuid.Nil
 	//Create a new lineage record
 	datasetVersionDB.Lineage.UUID = uuid.Nil
+	datasetVersionDB.CreatedAt = time.Now()
+	datasetVersionDB.UpdatedAt = time.Now()
 	err = ds.DB.Save(&datasetVersionDB).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Migrate logs
+	var logs []dbmodels.Log
+	err = ds.DB.Where("dataset_version_uuid = ?", datasetVersion).Preload("DatasetVersion").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	err = ds.DB.Transaction(func(tx *gorm.DB) error {
+		for _, log := range logs {
+			log.BaseModel.UUID = uuid.Nil
+			log.DatasetVersion.BaseModel.UUID = datasetVersionDB.UUID
+			log.CreatedAt = time.Now()
+			log.UpdatedAt = time.Now()
+			err = tx.Save(&log).Error
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -2342,17 +2401,21 @@ func (ds *Datastore) GetDatasetBranchVersion(datasetBranchUUID uuid.UUID, versio
 
 //////////////////////////////// LOG METHODS /////////////////////////////////
 
-func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]commonmodels.LogDataResponse, error) {
+func (ds *Datastore) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
 	var logs []dbmodels.Log
 	err := ds.DB.Where("model_version_uuid = ?", modelVersionUUID).Preload("ModelVersion").Find(&logs).Error
 	if err != nil {
 		return nil, err
 	}
-	var logsResponse []commonmodels.LogDataResponse
+	var logsResponse []models.LogResponse
 	for _, log := range logs {
-		logsResponse = append(logsResponse, commonmodels.LogDataResponse{
+		logsResponse = append(logsResponse, models.LogResponse{
 			Key:  log.Key,
 			Data: log.Data,
+			ModelVersion: modelmodels.ModelBranchVersionNameResponse{
+				UUID:    log.ModelVersion.UUID,
+				Version: log.ModelVersion.Version,
+			},
 		})
 	}
 	return logsResponse, nil
@@ -3330,7 +3393,8 @@ func (ds *Datastore) UpdateDatasetReview(reviewUUID uuid.UUID, updatedAttributes
 	err = ds.DB.Transaction(func(tx *gorm.DB) error {
 		// CHECK IF REVIEW ACCEPTED
 		if review.IsAccepted && !alreadyAccepted {
-			// make a new version in to_branch from from_branch specified version
+			// make a new version in "to_branch" from "from_branch" specified version
+			// also migrate all corresponsing logs
 			_, err := ds.MigrateDatasetVersionBranch(review.FromBranchVersion.UUID, review.ToBranch.UUID)
 			if err != nil {
 				return err
