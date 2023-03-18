@@ -185,7 +185,7 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	if !sourceValid {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model storage")
 	}
-	versions, err := api.app.Dao().GetModelBranchAllVersions(modelBranchUUID, false)
+	versions, err := api.app.Dao().GetModelBranchAllVersions(modelBranchUUID, true)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
@@ -205,42 +205,9 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	if modelSourceType == "R2" && !api.app.Settings().R2.Enabled {
 		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
 	}
-	var sourceTypeUUID uuid.UUID
-	if modelSourceType == "PUREML-STORAGE" {
-		sourceTypeUUID, err = api.app.Dao().GetSourceTypeByName(uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111")), modelSourceType)
-		if sourceTypeUUID == uuid.Nil || err != nil {
-			return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
-		}
-	} else {
-		sourceTypeUUID, err = api.app.Dao().GetSourceTypeByName(orgId, modelSourceType)
-		if err != nil {
-			return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
-		}
-		if sourceTypeUUID == uuid.Nil {
-			if modelSourceType == "S3" && api.app.Settings().S3.Enabled {
-				publicUrl := fmt.Sprintf("https://%s.%s", api.app.Settings().S3.Bucket, api.app.Settings().S3.Endpoint)
-				sourceType, err := api.app.Dao().CreateS3Source(orgId, publicUrl)
-				if err != nil {
-					return models.NewServerErrorResponse(err)
-				}
-				sourceTypeUUID = sourceType.UUID
-			} else if modelSourceType == "R2" && api.app.Settings().R2.Enabled {
-				publicUrl := fmt.Sprintf("https://%s/%s", api.app.Settings().R2.Endpoint, api.app.Settings().R2.Bucket)
-				sourceType, err := api.app.Dao().CreateR2Source(orgId, publicUrl)
-				if err != nil {
-					return models.NewServerErrorResponse(err)
-				}
-				sourceTypeUUID = sourceType.UUID
-			} else if modelSourceType == "LOCAL" {
-				sourceType, err := api.app.Dao().CreateLocalSource(orgId)
-				if err != nil {
-					return models.NewServerErrorResponse(err)
-				}
-				sourceTypeUUID = sourceType.UUID
-			} else {
-				return models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not enabled", modelSourceType))
-			}
-		}
+	modelSourceTypePublicURL, errresp := api.ValidateSourceTypeAndGetPublicURL(modelSourceType, orgId)
+	if errresp != nil {
+		return errresp
 	}
 	var filePath string
 	if !modelIsEmpty {
@@ -253,7 +220,7 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 			return models.NewServerErrorResponse(err)
 		}
 	}
-	modelVersion, err := api.app.Dao().RegisterModelFile(modelBranchUUID, sourceTypeUUID, filePath, modelIsEmpty, modelHash, userUUID)
+	modelVersion, err := api.app.Dao().RegisterModelFile(modelBranchUUID, modelSourceType, modelSourceTypePublicURL, filePath, modelIsEmpty, modelHash, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
