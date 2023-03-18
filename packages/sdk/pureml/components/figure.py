@@ -9,11 +9,12 @@ from PIL import Image
 
 # from pureml.utils.constants import BASE_URL, PATH_FIGURE_DIR
 from pureml.utils.pipeline import add_figures_to_config
-from pureml.schema import PathSchema, BackendSchema
+from pureml.schema import PathSchema, BackendSchema, StorageSchema
 from rich import print
 
 from . import get_org_id, get_token
 from pureml.utils.version_utils import parse_version_label
+
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
@@ -24,9 +25,12 @@ def save_images(figure):
     os.makedirs(path_schema.PATH_FIGURE_DIR, exist_ok=True)
     figure_paths = {}
     for figure_key, figure_value in figure.items():
-        save_name = os.path.join(
-            path_schema.PATH_FIGURE_DIR, ".".join([figure_key, "png"])
-        )
+        if figure_key.rsplit(".", 1)[-1] == "png":
+            save_name = figure_key
+        else:
+            save_name = os.path.join(
+                path_schema.PATH_FIGURE_DIR, ".".join([figure_key, "png"])
+            )
 
         canvas = figure_value.canvas
         canvas.draw()
@@ -41,24 +45,28 @@ def save_images(figure):
     return figure_paths
 
 
-def post_figures(figure_paths, model_name: str, model_branch: str, model_version: str):
+def post_figures(
+    figure_paths, model_name: str, model_branch: str, model_version: str, storage: str
+):
     user_token = get_token()
     org_id = get_org_id()
 
     # print('figure_paths', figure_paths)
 
-    url = "org/{}/model/{}/branch/{}/version/{}/log".format(
+    url = "org/{}/model/{}/branch/{}/version/{}/logfile".format(
         org_id, model_name, model_branch, model_version
     )
     url = urljoin(backend_schema.BASE_URL, url)
 
     headers = {"Authorization": "Bearer {}".format(user_token)}
 
-    files = {}
+    files = []
     for file_name, file_path in figure_paths.items():
+        # print("filename", file_name)
 
         if os.path.isfile(file_path):
-            files[file_name] = open(file_path, "rb")
+            files.append(("file", (file_name, open(file_path, "rb"))))
+
         else:
             print("[bold red] figure", file_name, "doesnot exist at the given path")
 
@@ -67,6 +75,7 @@ def post_figures(figure_paths, model_name: str, model_branch: str, model_version
         "model_name": model_name,
         "model_version": model_branch,
         "model_version": model_version,
+        "storage": storage,
     }
 
     # data = json.dumps(data)
@@ -90,6 +99,7 @@ def add(
     label: str,
     figure: dict = None,
     file_paths: dict = None,
+    storage: str = StorageSchema().STORAGE,
 ) -> str:
     """`add` function takes in the path of the figure, name of the figure and the model name and
     registers the figure
@@ -134,6 +144,7 @@ def add(
             model_name=model_name,
             model_branch=model_branch,
             model_version=model_version,
+            storage=storage,
         )
 
         # print(response.text)
@@ -172,7 +183,7 @@ def details(label: str):
         return
 
 
-def fetch(label: str):
+def fetch(label: str, key: str):
     """It fetches the figure from the server and stores it in the local directory
 
     Parameters
@@ -236,16 +247,15 @@ def fetch(label: str):
 
             return response.text
 
-    figure_details = details(
-        model_name=model_name, model_branch=model_branch, model_version=model_version
-    )
+    figure_details = details(label=label)
 
     if figure_details is None:
         return
 
-    fig_urls = give_fig_urls(details=figure_details)
+    # fig_urls = give_fig_urls(details=figure_details)
+    fig_urls = give_fig_url(details=figure_details, key=key)
 
-    if len(fig_urls) <= 1:
+    if len(fig_urls) == 1:
 
         res_text = fetch_figure(fig_urls[0])
 
@@ -257,27 +267,52 @@ def fetch(label: str):
     return res_text
 
 
-def give_fig_urls(details):
-
-    fig_paths = None
+def give_fig_url(details, key: str):
+    fig_paths = []
+    # file_url = None
+    source_path = None
+    file_url = None
 
     if details is not None:
 
-        details = details[0]["data"]
-        if "figure" in details.keys():
-            fig_paths = []
-
-            fig_details_all = details["figure"]
-
-            for fig_key, path in fig_details_all.items():
-                source_path = fig_details_all[fig_key]["path"]["source_path"]
-                source_url = fig_details_all[fig_key]["path"]["source_type"][
-                    "public_url"
-                ]
-                file_url = urljoin(source_url, source_path)
+        for det in details:
+            # print(det["key"])
+            if det["key"] == key:
+                source_path = det["key"]
+                file_url = det["data"]
+                source_path = ".".join([source_path, "jpg"])
+                source_path = os.path.join(path_schema.PATH_FIGURE_DIR, source_path)
                 fig_paths.append([source_path, file_url])
 
+                # print(source_path, file_url)
+
+                return fig_paths
+    print("[bold red] Unable to find the figure")
+
     return fig_paths
+
+
+# def give_fig_urls(details):
+
+#     fig_paths = None
+
+#     if details is not None:
+
+#         details = details[0]["data"]
+#         if "figure" in details.keys():
+#             fig_paths = []
+
+#             fig_details_all = details["figure"]
+
+#             for fig_key, path in fig_details_all.items():
+#                 source_path = fig_details_all[fig_key]["path"]["source_path"]
+#                 source_url = fig_details_all[fig_key]["path"]["source_type"][
+#                     "public_url"
+#                 ]
+#                 file_url = urljoin(source_url, source_path)
+#                 fig_paths.append([source_path, file_url])
+
+#     return fig_paths
 
 
 # def delete(name:str, model_name:str,  model_version:str='latest') -> str:

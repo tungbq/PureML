@@ -61,7 +61,6 @@ pip install pureml
 
 If you are trying to manage versions of dataset all you have to do is use our decorator `@dataset`.
 
-
 ```python
 import tensorflow as tf
 from tensorflow import keras
@@ -303,17 +302,16 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 <br />
 
-## ⚙ Core abstractions
+## ⚙ Core concepts
 
 These are the fundamental concepts that PureML uses to operate.
 
-|                                                                     |                                                                                                                                                         |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Project](https://docs.pureml.com/docs/projects/about_projects)     | A data science project. This is where you store datasets, models, and their related objects. It is similar to a github repository with object storage.  |
-| [Lineage](https://docs.pureml.com/docs/data/register_data_pipeline) | Contains a series of transformations performed on data to generate a dataset.                                                                           |
-| Data Versioning                                                     | Versioning of the data should be comprehensible to the user and should encapsulate the changes in the data, its creation mechanism, among others.       |
-| Model Versioning                                                    | Versioning of the model should be comprehensible to the user and should encapuslate the changes in training data, model architecture, hyper parameters. |
-| Fetch                                                               | This functionality is used to fetch registered Models, and Datasets.                                                                                    |
+|                                                               |                                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Model](https://docs.pureml.com/docs/core-concepts/model)     | Centralized location for users to store their models and manage their lifecycle collaboratively. This makes it easier for stakeholders to manage models and promotes transparency in accessing models for tests, deployment, audit, and other purposes.                       |
+| [Dataset](https://docs.pureml.com/docs/core-concepts/dataset) | Serves as an empty container for storing the elements of the datasets and contains lineage, dataset-related graphs, and dataset files.                                                                                                                                        |
+| [Log](https://docs.pureml.com/docs/core-concepts/log)         | Provides the ability to log a range of metadata related to models and datasets. The specific types of metadata that can be logged via the PureML package and how they are represented in the PureML app will depend on the data type and format being used.                   |
+| [Lineage](https://docs.pureml.com/docs/core-concepts/lineage) | Enables the tracking of the data flow from its origin to the end goal, which includes all the intermediate processes and transformations. In the context of PureML, lineage involves capturing the provenance of data and transformations applied to produce a final dataset. |
 
 <br />
 
