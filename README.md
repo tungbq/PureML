@@ -269,12 +269,12 @@ PureML quick start demo in just 2 mins.
 
 #### For models:
 
-<iframe width="569" height="348" src="https://www.youtube.com/embed/gqHjN4kPywo" title="Demo: Model features" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[![PureML Demo Video](http://i3.ytimg.com/vi/gqHjN4kPywo/hqdefault.jpg)](https://www.youtube.com/watch?v=gqHjN4kPywo "PureML Demo Video")
 <br/>
 
 #### For datasets:
 
-<iframe width="569" height="348" src="https://www.youtube.com/embed/HSUh66nZbyo" title="Demo: Dataset features" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[![PureML Demo Video](http://i3.ytimg.com/vi/gqHjN4kPywo/hqdefault.jpg)](https://www.youtube.com/watch?v=HSUh66nZbyo "PureML Demo Video")
 
 <sub><i>Click the image to play video</i></sub>
 <br/>
