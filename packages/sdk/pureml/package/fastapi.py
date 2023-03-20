@@ -131,7 +131,7 @@ def create_fastapi_file(
 #           """)
 
 
-def run(label, predict_path, requirements_path):
+def run(label, predict_path=None, requirements_path=None):
 
     create_fastapi_file(
         label, predict_path=predict_path, requirements_path=requirements_path
