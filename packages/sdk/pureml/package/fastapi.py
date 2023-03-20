@@ -48,6 +48,7 @@ def generate_api(label: str):
 
     api = """
 from fastapi import FastAPI, Depends, Request, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import pureml
 from predict import Predictor
@@ -58,6 +59,9 @@ import shutil
 from pureml.utils.package import process_input, process_output
 from typing import Union, Optional
 from pureml.utils.prediction import predict_request_with_json, predict_request_with_file
+
+import nest_asyncio
+from pyngrok import ngrok
 
 load_dotenv()
 
@@ -75,6 +79,15 @@ predictor.load_models()
 
 # Create the app
 app = FastAPI()     
+
+# middlewares
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True, 
+    allow_methods=['*'], 
+    allow_headers=['*']
+)
 
 
 @app.post('/predict')
@@ -97,6 +110,13 @@ async def predict(request:Request = None, file: Optional[UploadFile] = File(None
     return predictions
 
 if __name__ == '__main__':
+    ngrok_tunnel = ngrok.connect({PORT})
+
+    # Public URL for fastapi server
+    print('Public URL:', ngrok_tunnel.public_url)
+
+    nest_asyncio.apply()
+
     uvicorn.run(app, host='{HOST}', port={PORT})""".format(
         HOST=fastapi_schema.API_IP_HOST, PORT=fastapi_schema.PORT_FASTAPI
     )
