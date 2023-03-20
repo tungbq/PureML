@@ -1,4 +1,5 @@
 from .accuracy import Accuracy
+from .confusion_matrix import ConfusionMatrix
 from .f1 import F1
 from .mae import MAE
 from .mse import MSE

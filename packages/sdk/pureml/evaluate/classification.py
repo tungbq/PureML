@@ -1,4 +1,4 @@
-from .metrics import Accuracy, Precision, Recall, F1, ROC_AUC
+from .metrics import Accuracy, Precision, Recall, F1, ConfusionMatrix
 
 
 class Classification:
@@ -13,7 +13,13 @@ class Classification:
 
         self.label_type = "binary"
 
-        self.metrics = [Accuracy(), Precision(), Recall(), F1()]  # , ROC_AUC()]
+        self.metrics = [
+            Accuracy(),
+            Precision(),
+            Recall(),
+            F1(),
+            ConfusionMatrix(),
+        ]  # , ROC_AUC()]
         self.scores = {}
 
     def compute(self):
