@@ -1,9 +1,9 @@
 from .metrics import Accuracy, Precision, Recall, F1, ROC_AUC
 
 
-class Classification():
+class Classification:
     def __init__(self):
-        self.task_type = 'classification'
+        self.task_type = "classification"
 
         self.kwargs = None
 
@@ -11,19 +11,40 @@ class Classification():
         self.predictions = None
         self.prediction_scores = None
 
-        self.metrics = [Accuracy(), Precision(), Recall(), F1()]#, ROC_AUC()]
+        self.label_type = "binary"
+
+        self.metrics = [Accuracy(), Precision(), Recall(), F1()]  # , ROC_AUC()]
         self.scores = {}
 
-    
     def compute(self):
-        
-        for m in self.metrics:
-            #Adding  prediction scores to kwargs. It will be utilized my metrics needing it(roc_auc).
-            self.kwargs['prediction_scores'] = self.prediction_scores
+        self.setup()
 
-            score = m.compute(references=self.references, predictions=self.predictions, **self.kwargs)
+        for m in self.metrics:
+            # Adding  prediction scores to kwargs. It will be utilized my metrics needing it(roc_auc).
+            self.kwargs["prediction_scores"] = self.prediction_scores
+
+            score = m.compute(
+                references=self.references, predictions=self.predictions, **self.kwargs
+            )
 
             self.scores.update(score)
 
         return self.scores
-    
+
+    def setup(self):
+        self.is_multiclass()
+        self.setup_kwargs()
+
+    def get_predictions(self):
+        pass
+
+    def is_multiclass(self):
+        if self.predictions is not None:
+            labels_all = set(self.references).union(self.predictions)
+            if len(labels_all) > 2:
+                self.label_type = "multilabel"
+
+    def setup_kwargs(self):
+        if "average" not in self.kwargs:
+            if self.label_type == "multilabel":
+                self.kwargs["average"] = "micro"
