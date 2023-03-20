@@ -139,7 +139,7 @@ def train_model(train_ds, val_ds):
 
 ### 2. PureML-eval : Testing & Quality Control
 
-#### Step 1: Use an existing model for validation
+#### Step A: Use an existing model for validation
 
 ```python
 import pureml
@@ -151,7 +151,7 @@ If you want to add a dataset as validation while saving it, you can use our `@va
 
 <br/>
 
-#### Step 2: Register validation dataset
+#### Step B: Register validation dataset
 
 ```python
 import tensorflow as tf
@@ -190,7 +190,7 @@ def load_data(img_folder = "PetImages"):
 
 <br/>
 
-#### Step 3: Predictor for model
+#### Step C: Predictor for model
 
 We recommend utilizing our base predictor class when developing your model. By doing so, you can leverage the predict function in this class as your model's prediction function, which can be used in various stages such as testing, inference, and dockerization.
 
@@ -221,7 +221,7 @@ class Predictor(BasePredictor):
 
 <br/>
 
-#### Step 4: Evaluating your model is done as follows
+#### Step D: Evaluating your model is done as follows
 
 Lets see how PureML makes it easier to identify and correct any issues with its review feature and allows you to evaluate the quality of their data and the accuracy of their model.
 
@@ -267,9 +267,17 @@ pureml deploy pet_classifier:dev:v1
 
 PureML quick start demo in just 2 mins.
 
-[![PureML Demo Video](https://img.youtube.com/vi/HdzLFEWS4s8/0.jpg)](https://www.youtube.com/watch?v=HdzLFEWS4s8 "PureML Demo Video")
+#### For models:
+
+<iframe width="569" height="348" src="https://www.youtube.com/embed/gqHjN4kPywo" title="Demo: Model features" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 <br/>
+
+#### For datasets:
+
+<iframe width="569" height="348" src="https://www.youtube.com/embed/HSUh66nZbyo" title="Demo: Dataset features" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
 <sub><i>Click the image to play video</i></sub>
+<br/>
 
 ### Live demo
 
@@ -279,26 +287,14 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 ## 📍 [Main Features](https://docs.pureml.com/)
 
-|                          |                                                                               |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| Data Lineage             | Automatic generation of data lineage                                          |
-| Dataset Versioning       | Object-based Automatic Semantic Versioning of datasets                        |
-| Model Versioning         | Object-based Automatic Semantic Versioning of models                          |
-| Comparision              | Comparing different versions of models or datasets                            |
-| Branches (_Coming Soon_) | Separation between experimentation and production ready models using branches |
-| Review (_Coming Soon_)   | Review and approve models, and datasets to production ready branch            |
-
-<br />
-
-## 🔮 Core design principles
-
-|                                     |                                                                                                                 |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Easy developer experience           | An intuitive open source package aimed to bridge the gaps in data science teams                                 |
-| Engineering best practices built-in | Integrating PureML functionalities in your code doesnot disrupt your workflow                                   |
-| Object Versioning                   | A reliable object versioning mechanism to track changes to your datasets, and models                            |
-| Data is a first-class citizen       | Your data is secure. It will never leave your system.                                                           |
-| Reduce Friction                     | Have access to operations performed on data using data lineage without having to spend time on lengthy meetings |
+|                 |                                                                                                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Version Control | Easily version your models and datasets, ensuring that you have a clear record of all changes made throughout the development process.                                                                        |
+| Commit Process  | Use review commit process that helps you ensure that only the best and most reliable models and datasets are shipped to your customers.                                                                       |
+| Packaging       | Whether you need to package your models into Docker, Gradio, or FastAPI, Pureml has you covered. Our platform allows you to easily package your models in the format that works best for your specific needs. |
+| Data Lineage    | Get full visibility into your datasets' lineage, making it easy to trace back any issues that may arise during development or deployment.                                                                     |
+| Branches        | Enabling teams to work on multiple versions of a model or dataset simultaneously by customising in different branches for both models and datasets.                                                           |
+| Testing         | Pureml includes testing for ML, making it easy to ship models reliably to your customers. With Pureml, you can be confident that your models will work as expected, every time.                               |
 
 <br />
 
@@ -306,12 +302,12 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 These are the fundamental concepts that PureML uses to operate.
 
-|                                                               |                                                                                                                                                                                                                                                                               |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Model](https://docs.pureml.com/docs/core-concepts/model)     | Centralized location for users to store their models and manage their lifecycle collaboratively. This makes it easier for stakeholders to manage models and promotes transparency in accessing models for tests, deployment, audit, and other purposes.                       |
-| [Dataset](https://docs.pureml.com/docs/core-concepts/dataset) | Serves as an empty container for storing the elements of the datasets and contains lineage, dataset-related graphs, and dataset files.                                                                                                                                        |
-| [Log](https://docs.pureml.com/docs/core-concepts/log)         | Provides the ability to log a range of metadata related to models and datasets. The specific types of metadata that can be logged via the PureML package and how they are represented in the PureML app will depend on the data type and format being used.                   |
-| [Lineage](https://docs.pureml.com/docs/core-concepts/lineage) | Enables the tracking of the data flow from its origin to the end goal, which includes all the intermediate processes and transformations. In the context of PureML, lineage involves capturing the provenance of data and transformations applied to produce a final dataset. |
+|         |                                                                                                                                                                                                                                                                               |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model   | Centralized location for users to store their models and manage their lifecycle collaboratively. This makes it easier for stakeholders to manage models and promotes transparency in accessing models for tests, deployment, audit, and other purposes.                       |
+| Dataset | Serves as an empty container for storing the elements of the datasets and contains lineage, dataset-related graphs, and dataset files.                                                                                                                                        |
+| Log     | Provides the ability to log a range of metadata related to models and datasets. The specific types of metadata that can be logged via the PureML package and how they are represented in the PureML app will depend on the data type and format being used.                   |
+| Lineage | Enables the tracking of the data flow from its origin to the end goal, which includes all the intermediate processes and transformations. In the context of PureML, lineage involves capturing the provenance of data and transformations applied to produce a final dataset. |
 
 <br />
 
