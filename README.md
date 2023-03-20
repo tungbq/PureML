@@ -267,9 +267,17 @@ pureml deploy pet_classifier:dev:v1
 
 PureML quick start demo in just 2 mins.
 
-[![PureML Demo Video](https://img.youtube.com/vi/HdzLFEWS4s8/0.jpg)](https://www.youtube.com/watch?v=HdzLFEWS4s8 "PureML Demo Video")
+#### For models:
+
+<iframe width="569" height="348" src="https://www.youtube.com/embed/gqHjN4kPywo" title="Demo: Model features" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 <br/>
+
+#### For datasets:
+
+<iframe width="569" height="348" src="https://www.youtube.com/embed/HSUh66nZbyo" title="Demo: Dataset features" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
 <sub><i>Click the image to play video</i></sub>
+<br/>
 
 ### Live demo
 
@@ -279,26 +287,14 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 ## 📍 [Main Features](https://docs.pureml.com/)
 
-|                          |                                                                               |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| Data Lineage             | Automatic generation of data lineage                                          |
-| Dataset Versioning       | Object-based Automatic Semantic Versioning of datasets                        |
-| Model Versioning         | Object-based Automatic Semantic Versioning of models                          |
-| Comparision              | Comparing different versions of models or datasets                            |
-| Branches (_Coming Soon_) | Separation between experimentation and production ready models using branches |
-| Review (_Coming Soon_)   | Review and approve models, and datasets to production ready branch            |
-
-<br />
-
-## 🔮 Core design principles
-
-|                                     |                                                                                                                 |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Easy developer experience           | An intuitive open source package aimed to bridge the gaps in data science teams                                 |
-| Engineering best practices built-in | Integrating PureML functionalities in your code doesnot disrupt your workflow                                   |
-| Object Versioning                   | A reliable object versioning mechanism to track changes to your datasets, and models                            |
-| Data is a first-class citizen       | Your data is secure. It will never leave your system.                                                           |
-| Reduce Friction                     | Have access to operations performed on data using data lineage without having to spend time on lengthy meetings |
+|                 |                                                                                                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Version Control | Easily version your models and datasets, ensuring that you have a clear record of all changes made throughout the development process.                                                                        |
+| Commit Process  | Use review commit process that helps you ensure that only the best and most reliable models and datasets are shipped to your customers.                                                                       |
+| Packaging       | Whether you need to package your models into Docker, Gradio, or FastAPI, Pureml has you covered. Our platform allows you to easily package your models in the format that works best for your specific needs. |
+| Data Lineage    | Get full visibility into your datasets' lineage, making it easy to trace back any issues that may arise during development or deployment.                                                                     |
+| Branches        | Enabling teams to work on multiple versions of a model or dataset simultaneously by customising in different branches for both models and datasets.                                                           |
+| Testing         | Pureml includes testing for ML, making it easy to ship models reliably to your customers. With Pureml, you can be confident that your models will work as expected, every time.                               |
 
 <br />
 
