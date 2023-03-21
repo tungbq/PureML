@@ -6,7 +6,7 @@ import shutil
 from .log_utils import update_step_dict
 
 
-def add_load_data_to_config(name, func=None, hash=""):
+def add_load_data_to_config(name, description=None, func=None, hash=""):
 
     config = load_config()
     code = ""
@@ -20,6 +20,7 @@ def add_load_data_to_config(name, func=None, hash=""):
 
     config["load_data"] = {
         "name": name,
+        "description": description,
         "hash": hash,
         "type": "load_data",
         "code": code,
@@ -28,7 +29,7 @@ def add_load_data_to_config(name, func=None, hash=""):
     save_config(config=config)
 
 
-def add_transformer_to_config(name, func=None, hash="", parent=None):
+def add_transformer_to_config(name, description=None, func=None, hash="", parent=None):
 
     config = load_config()
     # print(config)
@@ -55,6 +56,7 @@ def add_transformer_to_config(name, func=None, hash="", parent=None):
 
     config["transformer"][position] = {
         "name": name,
+        "description": description,
         "hash": hash,
         "type": "transformer",
         "parent": parent,
@@ -64,7 +66,9 @@ def add_transformer_to_config(name, func=None, hash="", parent=None):
     save_config(config=config)
 
 
-def add_dataset_to_config(name, branch, func=None, hash="", version="", parent=None):
+def add_dataset_to_config(
+    name, branch, description=None, func=None, hash="", version="", parent=None
+):
 
     config = load_config()
 
@@ -87,6 +91,7 @@ def add_dataset_to_config(name, branch, func=None, hash="", version="", parent=N
     config["dataset"] = {
         "name": name,
         "branch": branch,
+        "description": description,
         "hash": hash,
         "type": "dataset",
         "version": version,

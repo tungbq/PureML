@@ -122,8 +122,24 @@ func (app *BaseApp) Bootstrap() error {
 		return err
 	}
 
+	if err := app.Dao().Datastore().SeedAdminIfNotExists(); err != nil {
+		return err
+	}
+
 	if app.settings.Search.Enabled {
 		app.Dao().Datastore().SeedSearchClient()
+	}
+
+	if app.settings.S3.Enabled {
+		if err := app.Dao().Datastore().SeedAdminS3SecretsIfNotExists(&app.settings.S3); err != nil {
+			return err
+		}
+	}
+
+	if app.settings.R2.Enabled {
+		if err := app.Dao().Datastore().SeedAdminR2SecretsIfNotExists(&app.settings.R2); err != nil {
+			return err
+		}
 	}
 
 	// app.RefreshSettings()

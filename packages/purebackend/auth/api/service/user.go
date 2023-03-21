@@ -123,7 +123,164 @@ func (api *Api) UserSignUp(request *models.Request) *models.Response {
 		}
 		verifyLink := api.app.Settings().Site.BaseURL + "/verify-email?token=" + signedString
 		emailTemplate := coreservice.BaseEmailTemplate("Verify your email address",
-			`Hi `+user.Handle+`,<br><br>Thanks for signing up for PureML. Please click the link below to verify your email address.<br><br><a href="`+verifyLink+`">Verify Email</a><br><br>Thanks,<br>Team PureML`,
+			`<div style="
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				padding: 0px;
+				gap: 32px;
+				height: 675px;
+			">
+			<div style="
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				padding: 32px;
+				gap: 16px;
+				width: 523px;
+				height: 437px;
+
+				border: 1px solid #e2e8f0;
+				border-radius: 16px;
+				">
+				<img src="./Verify your email_files/lULPiXM.png" alt="PureML_Logo" style="width: 100px; height: 28px">
+				<div style="
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					padding: 0px;
+					gap: 24px;
+
+					width: 459px;
+					height: 329px;
+				">
+				<div style="
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					padding: 0px;
+					gap: 24px;
+
+					width: 459px;
+					height: 121px;
+					">
+					<div style="
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						gap: 8px;
+						width: 459px;
+						height: 57px;
+					">
+					<span style="font-size: 24px; color: #1e293b; font-weight: 500">Verify your email</span>
+					<span>Hi `+user.Handle+`, click on the button below to verify your email.</span>
+					</div>
+					<a href="`+verifyLink+`" style="text-decoration: none">
+						<button style="
+							color: white;
+							border-radius: 8px;
+							background-color: #191f4d;
+							padding-right: 16px;
+							padding-left: 16px;
+							padding-top: 8px;
+							padding-bottom: 8px;
+							">
+							Verify Email
+						</button>
+					</a>
+				</div>
+				<div style="width: 459px; border: 0.2px solid #e2e8f0"></div>
+				<div style="
+					font-style: normal;
+					font-weight: 400;
+					font-size: 14px;
+					line-height: 125%;
+					font-feature-settings: &#39;salt&#39; on;
+					">
+					If you did not make this request, then please ignore this mail.<br><br>
+					If you run into any issues you can drop a message on any of our
+					social media platforms or reach out to us on
+					<a href="mailto:contact.pureml@gmail.com" style="color: #0e4ddd">contact.pureml@gmail.com.</a>
+					We look forward to serving you and your business.
+				</div>
+				<div style="
+					display: flex;
+					flex-direction: column;
+					align-items: flex-start;
+					width: 100%;
+					">
+					Regards<br>Team PureML
+				</div>
+				</div>
+			</div>
+			<div style="
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				padding: 24px 32px;
+				gap: 32px;
+				width: 523px;
+				height: 206px;
+				background: #f8fafc;
+				border-radius: 8px;
+				">
+				<div style="
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					align-items: left;
+					padding: 0px;
+					font-size: 14px;
+					gap: 24px;
+					width: 100%;
+				">
+				<div>
+					You recieved this email because you just requested for new
+					password.<br>If it's not you
+					<a target="_blank" href="mailto:contact.pureml@gmail.com" style="color: #0e4ddd">contact us.</a>
+					<br><br>©️ 2022 PureML. Inc | Texas, USA
+				</div>
+				<div style="justify-content: center; align-items: left; width: 100%">
+					Please visit our
+					<a target="_blank" href="http://www.pureml.com/">website</a> for more
+					support.
+				</div>
+				</div>
+				<div style="width: 474px; border: 1px solid #e2e8f0"></div>
+				<div style="
+					display: flex;
+					flex-direction: row;
+					justify-content: space-between;
+					align-items: center;
+					padding: 0px;
+					gap: 253px;
+					width: 100%;
+					height: 18px;
+				">
+				<img src="./Verify your email_files/lULPiXM.png" alt="PureML_Logo" style="width: 64px">
+				<div style="
+					display: flex;
+					flex-direction: row;
+					align-items: center;
+					padding: 0px;
+					gap: 16px;
+
+					width: 80px;
+					height: 16px;
+					">
+					<a href="https://www.linkedin.com/company/pureml-inc/" alt="Linkedin" target="_blank">
+					<img src="./Verify your email_files/l1ROz7q.png" alt="LI" style="width: 16px; height: 16px"></a>
+					<a href="https://twitter.com/getPureML" alt="Twitter" target="_blank">
+					<img src="./Verify your email_files/ph5MnVi.png" alt="TW" style="width: 16px; height: 16px"></a>
+					<a href="https://discord.gg/xNUHt9yguJ" alt="Discord" target="_blank">
+					<img src="./Verify your email_files/bBQ5HJb.png" alt="DC" style="width: 16px; height: 16px"></a>
+				</div>
+				</div>
+			</div>
+			</div>
+			<div id="DCFE8FFC-9B4C-8A56-8C72-80898549AB42"></div>`,
 		)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
@@ -330,7 +487,164 @@ func (api *Api) UserResendVerification(request *models.Request) *models.Response
 	}
 	verifyLink := api.app.Settings().Site.BaseURL + "/verify-email?token=" + signedString
 	emailTemplate := coreservice.BaseEmailTemplate("Verify your email address",
-		`Hi `+user.Handle+`,<br><br>Thanks for signing up for PureML. Please click the link below to verify your email address.<br><br><a href="`+verifyLink+`">Verify Email</a><br><br>Thanks,<br>Team PureML`,
+		`<div style="
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				padding: 0px;
+				gap: 32px;
+				height: 675px;
+			">
+			<div style="
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				padding: 32px;
+				gap: 16px;
+				width: 523px;
+				height: 437px;
+
+				border: 1px solid #e2e8f0;
+				border-radius: 16px;
+				">
+				<img src="./Verify your email_files/lULPiXM.png" alt="PureML_Logo" style="width: 100px; height: 28px">
+				<div style="
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					padding: 0px;
+					gap: 24px;
+
+					width: 459px;
+					height: 329px;
+				">
+				<div style="
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					padding: 0px;
+					gap: 24px;
+
+					width: 459px;
+					height: 121px;
+					">
+					<div style="
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						gap: 8px;
+						width: 459px;
+						height: 57px;
+					">
+					<span style="font-size: 24px; color: #1e293b; font-weight: 500">Verify your email</span>
+					<span>Hi `+user.Handle+`, click on the button below to verify your email.</span>
+					</div>
+					<a href="`+verifyLink+`" style="text-decoration: none">
+						<button style="
+							color: white;
+							border-radius: 8px;
+							background-color: #191f4d;
+							padding-right: 16px;
+							padding-left: 16px;
+							padding-top: 8px;
+							padding-bottom: 8px;
+							">
+							Verify Email
+						</button>
+					</a>
+				</div>
+				<div style="width: 459px; border: 0.2px solid #e2e8f0"></div>
+				<div style="
+					font-style: normal;
+					font-weight: 400;
+					font-size: 14px;
+					line-height: 125%;
+					font-feature-settings: &#39;salt&#39; on;
+					">
+					If you did not make this request, then please ignore this mail.<br><br>
+					If you run into any issues you can drop a message on any of our
+					social media platforms or reach out to us on
+					<a href="mailto:contact.pureml@gmail.com" style="color: #0e4ddd">contact.pureml@gmail.com.</a>
+					We look forward to serving you and your business.
+				</div>
+				<div style="
+					display: flex;
+					flex-direction: column;
+					align-items: flex-start;
+					width: 100%;
+					">
+					Regards<br>Team PureML
+				</div>
+				</div>
+			</div>
+			<div style="
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				padding: 24px 32px;
+				gap: 32px;
+				width: 523px;
+				height: 206px;
+				background: #f8fafc;
+				border-radius: 8px;
+				">
+				<div style="
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					align-items: left;
+					padding: 0px;
+					font-size: 14px;
+					gap: 24px;
+					width: 100%;
+				">
+				<div>
+					You recieved this email because you just requested for new
+					password.<br>If it's not you
+					<a target="_blank" href="mailto:contact.pureml@gmail.com" style="color: #0e4ddd">contact us.</a>
+					<br><br>©️ 2022 PureML. Inc | Texas, USA
+				</div>
+				<div style="justify-content: center; align-items: left; width: 100%">
+					Please visit our
+					<a target="_blank" href="http://www.pureml.com/">website</a> for more
+					support.
+				</div>
+				</div>
+				<div style="width: 474px; border: 1px solid #e2e8f0"></div>
+				<div style="
+					display: flex;
+					flex-direction: row;
+					justify-content: space-between;
+					align-items: center;
+					padding: 0px;
+					gap: 253px;
+					width: 100%;
+					height: 18px;
+				">
+				<img src="./Verify your email_files/lULPiXM.png" alt="PureML_Logo" style="width: 64px">
+				<div style="
+					display: flex;
+					flex-direction: row;
+					align-items: center;
+					padding: 0px;
+					gap: 16px;
+
+					width: 80px;
+					height: 16px;
+					">
+					<a href="https://www.linkedin.com/company/pureml-inc/" alt="Linkedin" target="_blank">
+					<img src="./Verify your email_files/l1ROz7q.png" alt="LI" style="width: 16px; height: 16px"></a>
+					<a href="https://twitter.com/getPureML" alt="Twitter" target="_blank">
+					<img src="./Verify your email_files/ph5MnVi.png" alt="TW" style="width: 16px; height: 16px"></a>
+					<a href="https://discord.gg/xNUHt9yguJ" alt="Discord" target="_blank">
+					<img src="./Verify your email_files/bBQ5HJb.png" alt="DC" style="width: 16px; height: 16px"></a>
+				</div>
+				</div>
+			</div>
+			</div>
+			<div id="DCFE8FFC-9B4C-8A56-8C72-80898549AB42"></div>`,
 	)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
@@ -375,7 +689,167 @@ func (api *Api) UserForgotPassword(request *models.Request) *models.Response {
 	}
 	verifyLink := api.app.Settings().Site.BaseURL + "/reset-password?token=" + signedString
 	emailTemplate := coreservice.BaseEmailTemplate("Reset your password",
-		`Hi `+user.Handle+`,<br><br>Someone requested a password reset for your PureML account. If it was you, click the link below to reset your password.<br><br><a href="`+verifyLink+`">Reset Password</a><br><br>Thanks,<br>Team PureML`,
+		`<div style="
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			padding: 0px;
+			gap: 32px;
+			height: 675px;
+		">
+		<div style="
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			padding: 32px;
+			gap: 16px;
+			width: 523px;
+			height: 437px;
+
+			border: 1px solid #e2e8f0;
+			border-radius: 16px;
+			">
+			<img src="./Reset your password_files/lULPiXM.png" alt="PureML_Logo" style="width: 100px; height: 28px">
+			<div style="
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 0px;
+				gap: 24px;
+
+				width: 459px;
+				height: 329px;
+			">
+			<div style="
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 0px;
+				gap: 24px;
+
+				width: 459px;
+				height: 121px;
+				">
+				<div style="
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					gap: 8px;
+					width: 459px;
+					height: 57px;
+				">
+				<span style="font-size: 24px; color: #1e293b; font-weight: 500">Reset your password</span>
+				<span>Hi `+user.Handle+`, click on the button below to reset your
+					password.</span>
+				</div>
+				<a href="`+verifyLink+`" style="text-decoration: none">
+					<button style="
+						color: white;
+						border-radius: 8px;
+						background-color: #191f4d;
+						padding-right: 16px;
+						padding-left: 16px;
+						padding-top: 8px;
+						padding-bottom: 8px;
+					">
+					Reset Password
+					</button>
+				</a>
+			</div>
+			<div style="width: 459px; border: 0.2px solid #e2e8f0"></div>
+			<div style="
+				font-style: normal;
+				font-weight: 400;
+				font-size: 14px;
+				line-height: 125%;
+				font-feature-settings: &#39;salt&#39; on;
+				">
+				If you did not make this request, then please ignore this mail.<br><br>
+				If you run into any issues you can drop a message on any of our
+				social media platforms or reach out to us on
+				<a href="mailto:contact.pureml@gmail.com" style="color: #0e4ddd">contact.pureml@gmail.com.</a>
+				We look forward to serving you and your business.
+			</div>
+			<div style="
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				width: 100%;
+				">
+				Regards<br>Team PureML
+			</div>
+			</div>
+		</div>
+		<div style="
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			padding: 24px 32px;
+			gap: 32px;
+			width: 523px;
+			height: 206px;
+			background: #f8fafc;
+			border-radius: 8px;
+			">
+			<div style="
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: left;
+				padding: 0px;
+				font-size: 14px;
+				gap: 24px;
+				width: 100%;
+			">
+			<div>
+				You recieved this email because you just requested for new
+				password.<br>If it’s not you
+				<a target="_blank" href="mailto:contact.pureml@gmail.com" style="color: #0e4ddd">contact us.</a>
+				<br><br>©️ 2022 PureML. Inc | Texas, USA
+			</div>
+			<div style="justify-content: center; align-items: left; width: 100%">
+				Please visit our
+				<a target="_blank" href="http://www.pureml.com/">website</a> for more
+				support.
+			</div>
+			</div>
+			<div style="width: 472px; border: 1px solid #e2e8f0"></div>
+			<div style="
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				padding: 0px;
+				gap: 253px;
+				width: 100%;
+				height: 18px;
+			">
+			<img src="./Reset your password_files/lULPiXM.png" alt="PureML_Logo" style="width: 64px">
+			<div style="
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				padding: 0px;
+				gap: 16px;
+
+				width: 80px;
+				height: 16px;
+				">
+				<a href="https://www.linkedin.com/company/pureml-inc/" alt="Linkedin" target="_blank">
+				<img src="./Reset your password_files/l1ROz7q.png" alt="Linkedin" style="width: 16px; height: 16px"></a>
+				<a href="https://twitter.com/getPureML" alt="Twitter" target="_blank">
+				<img src="./Reset your password_files/ph5MnVi.png" alt="Twitter" style="width: 16px; height: 16px"></a>
+				<a href="https://discord.gg/xNUHt9yguJ" alt="Discord" target="_blank">
+				<img src="./Reset your password_files/bBQ5HJb.png" alt="Discord" style="width: 16px; height: 16px"></a>
+			</div>
+			</div>
+		</div>
+		</div>
+	
+
+	<div id="763B5B14-27EC-CABC-9C2E-973F68AB4B1D"></div>`,
 	)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
