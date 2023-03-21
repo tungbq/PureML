@@ -8,6 +8,7 @@ from pureml.utils.pipeline import (
 from pureml import metrics, params
 from pureml.components import figure
 from pureml.utils.version_utils import parse_version_label, generate_label
+import functools
 
 
 def model(label: str):
@@ -18,8 +19,11 @@ def model(label: str):
         # print('Adding model name: ', name, 'to config before invoking user function')
         add_model_to_config(name=name, branch=branch)
 
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # print("Inside wrapper")
+            func_name = func.__name__
+            func_description = func.__doc__
 
             func_output = func(*args, **kwargs)
 
