@@ -90,16 +90,15 @@ type DatasetBranchVersionNameResponse struct {
 }
 
 type DatasetBranchVersionResponse struct {
-	UUID       uuid.UUID                        `json:"uuid"`
-	Version    string                           `json:"version"`
-	Branch     DatasetBranchNameResponse        `json:"branch"`
-	Lineage    LineageResponse                  `json:"lineage"`
-	Hash       string                           `json:"hash"`
-	Path       string                           `json:"path"`
-	SourceType string                           `json:"source_type"`
-	IsEmpty    bool                             `json:"is_empty"`
-	CreatedBy  userorgmodels.UserHandleResponse `json:"created_by"`
-	CreatedAt  time.Time                        `json:"created_at"`
+	UUID      uuid.UUID                        `json:"uuid"`
+	Version   string                           `json:"version"`
+	Branch    DatasetBranchNameResponse        `json:"branch"`
+	Lineage   LineageResponse                  `json:"lineage"`
+	Hash      string                           `json:"hash"`
+	Path      commonmodels.PathResponse        `json:"path"`
+	IsEmpty   bool                             `json:"is_empty"`
+	CreatedBy userorgmodels.UserHandleResponse `json:"created_by"`
+	CreatedAt time.Time                        `json:"created_at"`
 }
 
 type LineageResponse struct {

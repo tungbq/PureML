@@ -208,7 +208,7 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	if datasetSourceType == "R2" && !api.app.Settings().R2.Enabled {
 		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
 	}
-	datasetSourceTypePublicURL, errresp := api.ValidateSourceTypeAndGetPublicURL(datasetSourceType, orgId)
+	sourceTypeUUID, errresp := api.ValidateAndGetOrCreateSourceType(datasetSourceType, orgId)
 	if errresp != nil {
 		return errresp
 	}
@@ -223,7 +223,7 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 			return models.NewServerErrorResponse(err)
 		}
 	}
-	datasetVersion, err := api.app.Dao().RegisterDatasetFile(datasetBranchUUID, datasetSourceType, datasetSourceTypePublicURL, filePath, datasetIsEmpty, datasetHash, datasetLineage, userUUID)
+	datasetVersion, err := api.app.Dao().RegisterDatasetFile(datasetBranchUUID, sourceTypeUUID, filePath, datasetIsEmpty, datasetHash, datasetLineage, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
