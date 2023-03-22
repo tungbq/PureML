@@ -45,17 +45,45 @@ func populateErrorResponse(context echo.Context, response *models.Response, resp
 	}
 }
 
-func (api *Api) ValidateSourceTypeAndGetPublicURL(modelSourceType string, orgId uuid.UUID) (string, *models.Response) {
-	var sourceTypePublicURL string
+func (api *Api) ValidateAndGetOrCreateSourceType(datasetSourceType string, orgId uuid.UUID) (uuid.UUID, *models.Response) {
+	var sourceTypeUUID uuid.UUID
 	var err error
-	modelSourceType = strings.ToUpper(modelSourceType)
-	if modelSourceType == "PUREML-STORAGE" {
-		sourceTypePublicURL, err = api.app.Dao().GetSourcePublicURL(uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111")), "R2")
+	datasetSourceType = strings.ToUpper(datasetSourceType)
+	if datasetSourceType == "PUREML-STORAGE" {
+		sourceTypeUUID, err = api.app.Dao().GetSourceTypeByName(uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111")), datasetSourceType)
+		if sourceTypeUUID == uuid.Nil || err != nil {
+			return uuid.Nil, models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", datasetSourceType))
+		}
 	} else {
-		sourceTypePublicURL, err = api.app.Dao().GetSourcePublicURL(orgId, modelSourceType)
+		sourceTypeUUID, err = api.app.Dao().GetSourceTypeByName(orgId, datasetSourceType)
+		if err != nil {
+			return uuid.Nil, models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", datasetSourceType))
+		}
+		if sourceTypeUUID == uuid.Nil {
+			if datasetSourceType == "S3" && api.app.Settings().S3.Enabled {
+				publicUrl := fmt.Sprintf("https://%s.%s", api.app.Settings().S3.Bucket, api.app.Settings().S3.Endpoint)
+				sourceType, err := api.app.Dao().CreateS3Source(orgId, publicUrl)
+				if err != nil {
+					return uuid.Nil, models.NewServerErrorResponse(err)
+				}
+				sourceTypeUUID = sourceType.UUID
+			} else if datasetSourceType == "R2" && api.app.Settings().R2.Enabled {
+				publicUrl := fmt.Sprintf("https://%s/%s", api.app.Settings().R2.Endpoint, api.app.Settings().R2.Bucket)
+				sourceType, err := api.app.Dao().CreateR2Source(orgId, publicUrl)
+				if err != nil {
+					return uuid.Nil, models.NewServerErrorResponse(err)
+				}
+				sourceTypeUUID = sourceType.UUID
+			} else if datasetSourceType == "LOCAL" {
+				sourceType, err := api.app.Dao().CreateLocalSource(orgId)
+				if err != nil {
+					return uuid.Nil, models.NewServerErrorResponse(err)
+				}
+				sourceTypeUUID = sourceType.UUID
+			} else {
+				return uuid.Nil, models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("%s source not enabled", datasetSourceType))
+			}
+		}
 	}
-	if sourceTypePublicURL == "" || err != nil {
-		return "", models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
-	}
-	return sourceTypePublicURL, nil
+	return sourceTypeUUID, nil
 }

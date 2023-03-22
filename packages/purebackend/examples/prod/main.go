@@ -54,6 +54,7 @@ func main() {
 	// Set admin details in .env file
 	//
 	// Refer:= URL_TO_README_GOES_HERE
+	app.Dao().Datastore().SeedAdminIfNotExists()
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}
