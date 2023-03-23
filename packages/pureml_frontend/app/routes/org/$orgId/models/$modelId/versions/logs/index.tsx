@@ -11,6 +11,7 @@ import { useSubmit } from "@remix-run/react";
 import {
   fetchModelBranch,
   fetchModelVersions,
+  submitModelReview,
 } from "~/routes/api/models.server";
 import { getSession } from "~/session";
 import Loader from "~/components/ui/Loading";
@@ -19,6 +20,7 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import AvatarIcon from "~/components/ui/Avatar";
 import Select from "~/components/ui/Select";
 import Breadcrumbs from "~/components/Breadcrumbs";
+import { toast } from "react-toastify";
 
 export async function loader({ params, request }: any) {
   const session = await getSession(request.headers.get("Cookie"));
@@ -36,22 +38,38 @@ export async function loader({ params, request }: any) {
   return {
     versions: versions,
     branches: allBranch,
+    params: params,
   };
 }
 
 export async function action({ params, request }: any) {
   const formData = await request.formData();
-  let branch = formData.get("branch");
+  let option = Object.fromEntries(formData);
   const session = await getSession(request.headers.get("Cookie"));
-  const versions = await fetchModelVersions(
-    session.get("orgId"),
-    params.modelId,
-    branch,
-    session.get("accessToken")
-  );
-  return {
-    versions: versions,
-  };
+  if (option._action === "changeBranch") {
+    let branch = formData.get("branch");
+    const versions = await fetchModelVersions(
+      session.get("orgId"),
+      params.modelId,
+      branch,
+      session.get("accessToken")
+    );
+    return {
+      _action: "changeBranch",
+      versions: versions,
+    };
+  } else if (option._action === "submitReview") {
+    const submitReview = await submitModelReview(
+      session.get("orgId"),
+      params.modelId,
+      option.fromBranch,
+      option.version,
+      session.get("accessToken")
+    );
+    return { _action: "submitReview", submitReview: submitReview };
+  } else {
+    return null;
+  }
 }
 
 export default function ModelMetrics() {
@@ -63,13 +81,15 @@ export default function ModelMetrics() {
   const [params, setParams] = useState(true);
   const [ver1, setVer1] = useState("");
   const [ver2, setVer2] = useState("");
+  const [submitReviewVersion, setSubmitReviewVersion] = useState("");
   const [branch, setBranch] = useState("main");
-  const [metricsData, setMetricsData] = useState({});
-  const [metricsData2, setMetricsData2] = useState({});
-  const [paramsData, setParamsData] = useState({});
-  const [paramsData2, setParamsData2] = useState({});
-  const [metricsDict, setMetricsDict] = useState({});
-  const [paramsDict, setParamsDict] = useState({});
+  const [dataVersion, setDataVersion] = useState({});
+  const [ver1Metrics, setVer1Metrics] = useState({});
+  const [ver1Params, setVer1Params] = useState({});
+  const [ver2Metrics, setVer2Metrics] = useState({});
+  const [ver2Params, setVer2Params] = useState({});
+  const [metricsKeys, setMetricsKeys] = useState<string[]>([]);
+  const [paramsKeys, setParamsKeys] = useState<string[]>([]);
   const [versionData, setVersionData] = useState(data.versions);
   const branchData = data.branches;
 
@@ -77,6 +97,7 @@ export default function ModelMetrics() {
   useEffect(() => {
     if (!versionData) return;
     if (!versionData[0]) return;
+
     setVer1(versionData.at(0).version);
     setVer2("");
   }, [versionData]);
@@ -84,126 +105,99 @@ export default function ModelMetrics() {
   // ##### fetching & displaying latest version data #####
   useEffect(() => {
     if (!versionData) return;
-    if (versionData.at(-Number(ver1.slice(1))).logs === null) {
-      setMetricsData({});
-      setParamsData({});
-      setMetricsDict({});
-      setParamsDict({});
-      return;
+    const tempDict = {};
+    versionData.forEach((version: { version: any }) => {
+      // @ts-ignore
+      tempDict[version.version] = version;
+    });
+    setDataVersion(tempDict);
+    const tt = dataVersion[ver1];
+    console.log("tt=", tt);
+    if (tt) {
+      if (tt.logs) {
+        if (tt.logs[0] === null) {
+          setVer1Metrics({});
+          setVer1Params({});
+          return;
+        }
+        setVer1Metrics(JSON.parse(tt.logs[0].data));
+        setVer1Params(JSON.parse(tt.logs[1].data));
+        setMetricsKeys(Object.keys(JSON.parse(tt.logs[0].data)));
+        setParamsKeys(Object.keys(JSON.parse(tt.logs[1].data)));
+      }
     }
-    setMetricsData(
-      JSON.parse(versionData.at(-Number(ver1.slice(1))).logs[0].data)
-    );
-    const temp = JSON.parse(
-      versionData.at(-Number(ver1.slice(1))).logs[0].data
-    );
-    Object.keys(temp).forEach((key) => {
-      temp[key] = [temp[key], "-"];
-    });
-    setMetricsDict(temp);
-
-    setParamsData(
-      JSON.parse(versionData.at(-Number(ver1.slice(1))).logs[1].data)
-    );
-    const temp2 = JSON.parse(
-      versionData.at(-Number(ver1.slice(1))).logs[1].data
-    );
-    Object.keys(temp2).forEach((key) => {
-      temp2[key] = [temp2[key], "-"];
-    });
-    setParamsDict(temp2);
   }, [ver1, versionData]);
 
   // ##### comparing versions #####
   useEffect(() => {
     if (!versionData) return;
+    const t1 = dataVersion[ver1];
+    console.log("t1=", t1);
+    if (t1) {
+      if (t1.logs) {
+        if (t1.logs[0] === null) {
+          return;
+        }
+        setMetricsKeys(Object.keys(JSON.parse(t1.logs[0].data)));
+        setParamsKeys(Object.keys(JSON.parse(t1.logs[1].data)));
+      }
+    }
     if (ver2 === "") {
-      setMetricsData2({});
-      setParamsData2({});
+      setVer2Metrics({});
+      setVer2Params({});
       return;
     }
-    if (versionData.at(Number(ver2.slice(1)) - 1).logs === null) {
-      setMetricsData2({});
-      setParamsData2({});
-      const emptyTemp = metricsDict;
-      const emptyTemp2 = paramsDict;
-      Object.keys(emptyTemp).forEach((key) => {
-        if (emptyTemp[key][0] === "-") {
-          delete emptyTemp[key];
-        } else {
-          emptyTemp[key] = [emptyTemp[key][0], "-"];
+    const tt = dataVersion[ver2];
+    console.log("tt2=", tt);
+    if (tt) {
+      if (tt.logs) {
+        if (tt.logs[0] === null) {
+          console.log("nul");
+          setVer2Metrics({});
+          setVer2Params({});
+          return;
         }
-      });
-      setMetricsDict(emptyTemp);
-
-      Object.keys(emptyTemp2).forEach((key) => {
-        if (emptyTemp2[key][0] === "-") {
-          delete emptyTemp2[key];
-        } else {
-          emptyTemp2[key] = [emptyTemp2[key][0], "-"];
-        }
-      });
-      setParamsDict(emptyTemp2);
-
-      return;
+        setVer2Metrics(JSON.parse(tt.logs[0].data));
+        setVer2Params(JSON.parse(tt.logs[1].data));
+        const metKeys = Object.keys(JSON.parse(tt.logs[0].data));
+        const parKeys = Object.keys(JSON.parse(tt.logs[1].data));
+        metKeys.forEach((key) => {
+          if (!metricsKeys.includes(key)) {
+            setMetricsKeys((prev) => [...prev, key]);
+          }
+        });
+        parKeys.forEach((key) => {
+          if (!paramsKeys.includes(key)) {
+            setParamsKeys((prev) => [...prev, key]);
+          }
+        });
+      }
     }
-    setMetricsData2(
-      JSON.parse(versionData.at(Number(ver2.slice(1)) - 1).logs[0].data)
-    );
-    setParamsData2(
-      JSON.parse(versionData.at(Number(ver2.slice(1)) - 1).logs[1].data)
-    );
+  }, [ver2, versionData]);
 
-    const original = metricsDict;
-    const original2 = paramsDict;
+  console.log(ver2Metrics, ver2Params, ver1Metrics, ver1Params);
 
-    Object.keys(original).forEach((key) => {
-      if (original[key][0] === "-") {
-        delete original[key];
-      }
-    });
-
-    Object.keys(original2).forEach((key) => {
-      if (original2[key][0] === "-") {
-        delete original2[key];
-      }
-    });
-
-    const temp = JSON.parse(
-      versionData.at(-Number(ver2.slice(1))).logs[0].data
-    );
-    const temp2 = JSON.parse(
-      versionData.at(-Number(ver2.slice(1))).logs[1].data
-    );
-
-    Object.keys(temp).forEach((key) => {
-      if (key in original) {
-        original[key][1] = temp[key];
-      } else {
-        original[key] = ["-", temp[key]];
-      }
-    });
-    Object.keys(temp2).forEach((key) => {
-      if (key in original2) {
-        original2[key][1] = temp2[key];
-      } else {
-        original2[key] = ["-", temp2[key]];
-      }
-    });
-    setMetricsDict(original);
-    setParamsDict(original2);
-  }, [metricsDict, paramsDict, ver2, versionData]);
-
+  // ##### submit review functionality #####
   useEffect(() => {
     if (adata === null || adata === undefined) {
       return;
     }
-    setVersionData(adata.versions);
+    if (adata._action === "submitReview") {
+      toast.success(adata.submitReview.message);
+      navigate(
+        `/org/${data.params.orgId}/models/${data.params.modelId}/review`
+      );
+    } else {
+      setVersionData(adata.versions);
+    }
   }, [adata]);
 
-  // ##### dropdown branch switch functionality #####
   function branchChange(event: any) {
     setBranch(event.target.value);
+    submit(event.currentTarget, { replace: true });
+  }
+  function submitReview(event: any) {
+    console.log(event.target.value);
     submit(event.currentTarget, { replace: true });
   }
 
@@ -238,12 +232,10 @@ export default function ModelMetrics() {
                   </div>
                   {metrics && (
                     <div className="py-6">
-                      {(Object.keys(metricsData).length !== 0 ||
-                        Object.keys(metricsData2).length !== 0) &&
-                      versionData !== null ? (
+                      {metricsKeys.length !== 0 && versionData !== null ? (
                         <>
                           <table className="max-w-[1000px] w-full">
-                            {Object.keys(metricsDict).length !== 0 && (
+                            {metricsKeys.length !== 0 && (
                               <>
                                 <thead>
                                   <tr>
@@ -260,17 +252,22 @@ export default function ModelMetrics() {
                                     ) : null}
                                   </tr>
                                 </thead>
-                                {Object.keys(metricsDict).map((metric, i) => (
+                                {metricsKeys.map((metric, i) => (
                                   <tr key={i}>
                                     <th className="text-slate-600 font-medium text-left border p-4">
                                       {metric}
                                     </th>
+                                    {/* {console.log(ver1Metrics[metric])} */}
                                     <td className="text-slate-600 font-medium text-left border p-4 w-1/5 truncate">
-                                      {metricsDict[metric][0].slice(0, 5)}
+                                      {ver1Metrics[metric]
+                                        ? ver1Metrics[metric].slice(0, 5)
+                                        : "-"}
                                     </td>
                                     {ver2 !== "" && (
                                       <td className="text-slate-600 font-medium text-left border p-4 w-1/5 truncate">
-                                        {metricsDict[metric][1].slice(0, 5)}
+                                        {ver2Metrics[metric]
+                                          ? ver2Metrics[metric].slice(0, 5)
+                                          : "-"}
                                       </td>
                                     )}
                                   </tr>
@@ -302,12 +299,10 @@ export default function ModelMetrics() {
                   </div>
                   {params && (
                     <div className="py-6">
-                      {(Object.keys(paramsData).length !== 0 ||
-                        Object.keys(paramsData2).length !== 0) &&
-                      versionData !== null ? (
+                      {paramsKeys.length !== 0 && versionData !== null ? (
                         <>
                           <table className=" max-w-[1000px] w-full">
-                            {Object.keys(paramsDict).length !== 0 && (
+                            {paramsKeys.length !== 0 && (
                               <>
                                 <thead>
                                   <tr>
@@ -324,23 +319,25 @@ export default function ModelMetrics() {
                                     ) : null}
                                   </tr>
                                 </thead>
-                                {Object.keys(paramsDict).map(
-                                  (metric: any, index: number) => (
-                                    <tr key={index}>
-                                      <th className="text-slate-600 font-medium text-left border p-4">
-                                        {metric}
-                                      </th>
+                                {paramsKeys.map((param: any, index: number) => (
+                                  <tr key={index}>
+                                    <th className="text-slate-600 font-medium text-left border p-4">
+                                      {param}
+                                    </th>
+                                    <td className="text-slate-600 font-medium text-left border p-4">
+                                      {ver1Params[param]
+                                        ? ver1Params[param].slice(0, 5)
+                                        : "-"}
+                                    </td>
+                                    {ver2 !== "" && (
                                       <td className="text-slate-600 font-medium text-left border p-4">
-                                        {paramsDict[metric][0].slice(0, 5)}
+                                        {ver2Params[param]
+                                          ? ver2Params[param].slice(0, 5)
+                                          : "-"}
                                       </td>
-                                      {ver2 !== "" && (
-                                        <td className="text-slate-600 font-medium text-left border p-4">
-                                          {paramsDict[metric][1].slice(0, 5)}
-                                        </td>
-                                      )}
-                                    </tr>
-                                  )
-                                )}
+                                    )}
+                                  </tr>
+                                ))}
                               </>
                             )}
                           </table>
@@ -360,7 +357,8 @@ export default function ModelMetrics() {
                 onChange={branchChange}
                 className="flex justify-end"
               >
-                <Select name="branch" title={branch}>
+                <input name="_action" value="changeBranch" type="hidden" />
+                <Select intent="primary" name="branch" title={branch}>
                   {branchData.map((branch: any, index: number) => (
                     <SelectPrimitive.Item
                       key={`${branch}-${index}`}
@@ -425,23 +423,39 @@ export default function ModelMetrics() {
                           </div>
                         </div>
                       </div>
-                      {/* <DropdownMenu.Root>
-                        <DropdownMenu.Trigger className="focus:outline-none">
-                          <MoreVertical className="text-slate-400" />
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content sideOffset={7} align="end">
-                          <DropdownMenu.Item
-                            className="bg-white flex px-3 py-2 text-slate-600 justify-left items-center rounded outline-none focus:outline-none hover:bg-slate-100 cursor-pointer"
-                            onClick={() => {
-                              navigate(
-                                `/org/${data.params.orgId}/datasets/${data.params.datasetId}/review`
-                              );
-                            }}
+                      {branch !== "main" && (
+                        <Form
+                          method="post"
+                          onChange={submitReview}
+                          className="flex justify-end"
+                        >
+                          <input
+                            name="_action"
+                            value="submitReview"
+                            type="hidden"
+                          />
+                          <input
+                            name="fromBranch"
+                            value={branch}
+                            type="hidden"
+                          />
+                          <input name="toBranch" value="main" type="hidden" />
+                          <Select
+                            intent="more"
+                            name="version"
+                            title={submitReviewVersion}
                           >
-                            Submit for Review
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Root> */}
+                            <SelectPrimitive.Item
+                              value={version.version}
+                              className="flex items-center justify-between px-4 py-2 rounded-md text-base text-slate-600 font-medium cursor-pointer  hover:bg-slate-100 hover:border-none focus:outline-none"
+                            >
+                              <SelectPrimitive.ItemText className="text-slate-600 text-base font-medium">
+                                Submit For review
+                              </SelectPrimitive.ItemText>
+                            </SelectPrimitive.Item>
+                          </Select>
+                        </Form>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -460,24 +474,24 @@ export default function ModelMetrics() {
 
 export function ErrorBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }
 
 export function CatchBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }

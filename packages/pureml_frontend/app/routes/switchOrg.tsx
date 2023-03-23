@@ -87,7 +87,7 @@ export default function SwitchOrg() {
                         method="post"
                         className="text-sm text-slate-600 font-medium"
                       >
-                        <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-between w-2/3 gap-x-4">
+                        <div className="bg-slate-100 rounded-2xl p-4 flex items-center justify-between w-2/3 gap-x-4">
                           <div className="flex justify-start w-4/5">
                             <div className="flex justify-center items-center">
                               <AvatarIcon intent="org">
@@ -145,24 +145,24 @@ export default function SwitchOrg() {
 
 export function ErrorBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }
 
 export function CatchBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }

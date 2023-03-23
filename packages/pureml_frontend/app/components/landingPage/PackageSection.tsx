@@ -11,7 +11,7 @@ export default function PackageSection() {
         <div className="flex flex-col gap-y-6">
           <div className="md:w-3/4">
             <h1 className="text-3xl md:text-4xl lg:text-5xl pb-2">
-              Pureml-package
+              PureML-package
             </h1>
           </div>
           <div className="flex flex-col md:flex-row gap-x-12 gap-y-6">

@@ -105,6 +105,28 @@ export async function fetchDatasetBranch(
 
 // ########################## dataset version details ###########################
 
+export async function fetchOneDatasetVersion(
+  orgId: string,
+  datasetId: string,
+  branchName: string,
+  version: string,
+  accessToken: string
+) {
+  const url = makeUrl(
+    `org/${orgId}/dataset/${datasetId}/branch/${branchName}/version/${version}`
+  );
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application / json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((res) => res.json());
+  return res.data;
+}
+
 export async function fetchDatasetVersions(
   orgId: string,
   datasetName: string,
@@ -144,7 +166,7 @@ export async function fetchDatasetReview(
   return res.data;
 }
 
-export async function postVersionReview(
+export async function submitDatasetReview(
   orgId: string,
   datasetName: string,
   branch: string,
@@ -160,13 +182,40 @@ export async function postVersionReview(
       Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
-      description: "-",
+      description: "desc",
       from_branch: branch,
       from_branch_version: version,
       is_accepted: false,
       is_complete: false,
-      title: "string",
+      title: "title",
       to_branch: "main",
+    }),
+  }).then((res) => res.json());
+  return res;
+}
+
+export async function updateDatasetReview(
+  orgId: string,
+  datasetName: string,
+  reviewId: string,
+  accepted: string,
+  accessToken: string
+) {
+  const url = makeUrl(
+    `org/${orgId}/dataset/${datasetName}/review/${reviewId}/update`
+  );
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application / json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      description: "-",
+      is_accepted: accepted === "true",
+      is_complete: true,
+      title: "-",
     }),
   }).then((res) => res.json());
   return res;

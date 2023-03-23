@@ -195,6 +195,35 @@ input[type="text"]:focus,
   background-image: url("/imgs/landingPage/hero.gif");
 }
 
+.mltoolsbg {
+  background-image: url("/imgs/landingPage/MLToolsHeroBG.svg");
+}
+
+.whypuremlbg {
+  background: linear-gradient(
+    101.3deg,
+    #191f4d -18.29%,
+    rgba(28, 35, 82, 0.88) 48.28%,
+    rgba(39, 46, 100, 0.43) 126.37%
+  );
+  backdrop-filter: blur(2px);
+}
+
+@layer utilities {
+  .snap {
+    scroll-snap-type: var(--scroll-snap-direction) var(--scroll-snap-constraint);
+  }
+  .snap-y {
+    --scroll-snap-direction: y;
+  }
+  .snap-mandatory {
+    --scroll-snap-constraint: mandatory;
+  }
+  .snap-start {
+    scroll-snap-align: start;
+  }
+}
+
 .codeblock span {
   background-color: #0f172a !important;
   border-radius: 8px !important;
