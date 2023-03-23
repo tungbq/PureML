@@ -51,7 +51,6 @@ export default function OrgIndex() {
     <Suspense fallback={<Loader />}>
       <div className="flex h-[93%] overflow-auto">
         <div className="w-full pt-8 px-12">
-
           {/* ###### org details ##### */}
 
           <div className="p-6 bg-orange-50 flex items-center rounded-lg">
@@ -165,24 +164,24 @@ export default function OrgIndex() {
 
 export function ErrorBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }
 
 export function CatchBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }

@@ -55,7 +55,7 @@ export default function ModelsLayout() {
           <div className="flex justify-between px-12 pt-6 pb-4 font-medium text-slate-800">
             Models
           </div>
-          <div className="h-[95%] overflow-auto pb-8">
+          <div className="h-[84%] overflow-auto pb-8">
             <Outlet />
           </div>
         </div>

@@ -24,6 +24,11 @@ export default function Navbar() {
                 </div>
                 <div className="flex flex-col gap-y-4 p-4 font-medium text-brand-200">
                   <div className="flex items-center">
+                    <a href="/mltools" className="w-max letterSpaced">
+                      MLOps Tools
+                    </a>
+                  </div>
+                  <div className="flex items-center">
                     <a
                       href="https://docs.pureml.com"
                       target="_blank"
@@ -95,6 +100,14 @@ export default function Navbar() {
               </div>
             </div>
             <div className="hidden sm:flex flex font-medium">
+              <div className="px-4 flex justify-center items-center">
+                <a
+                  href="/mltools"
+                  className="w-full text-lg letterSpaced text-brand-200 hover:underline hover:underline-offset-2"
+                >
+                  MLOPS TOOLS
+                </a>
+              </div>
               <div className="px-4 flex justify-center items-center">
                 <a
                   href="https://pureml.notion.site/PureML-Changelog-096f7541dd6245c0a3c244e9f216ad31"

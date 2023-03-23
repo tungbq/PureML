@@ -3,13 +3,9 @@ import {
   Form,
   useActionData,
   useLoaderData,
-  useSubmit,
+  useNavigate,
 } from "@remix-run/react";
-import {
-  GitFork,
-  GitPullRequest,
-  User,
-} from "lucide-react";
+import { GitFork, GitPullRequest, User } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import Breadcrumbs from "~/components/Breadcrumbs";
 import ReviewTabbar from "~/components/ReviewTabbar";
@@ -21,8 +17,11 @@ import AvatarIcon from "~/components/ui/Avatar";
 import { getSession } from "~/session";
 import {
   fetchDatasetVersions,
+  fetchOneDatasetVersion,
+  updateDatasetReview,
 } from "~/routes/api/datasets.server";
 import Button from "~/components/ui/Button";
+import { toast } from "react-toastify";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -32,32 +31,71 @@ export const meta: MetaFunction = () => ({
 
 export async function loader({ params, request }: any) {
   const session = await getSession(request.headers.get("Cookie"));
+  // fetching review dataset version from it's branch
+  const reviewData = await fetchOneDatasetVersion(
+    session.get("orgId"),
+    params.datasetId,
+    session.get("fromBranch"),
+    session.get("version"),
+    session.get("accessToken")
+  );
   const versions = await fetchDatasetVersions(
     session.get("orgId"),
     params.datasetId,
-    "dev",
+    session.get("toBranch"),
     session.get("accessToken")
   );
   // "dev" branch should be replaced by to_branch of submitted review
   return {
+    reviewData,
+    reviewVersion: session.get("version"),
+    reviewBranch: session.get("fromBranch"),
+    toBranch: session.get("toBranch"),
     versions: versions,
     params: params,
   };
 }
 
-// export async function action({ params, request }: any) {
-
-// }
+export async function action({ params, request }: any) {
+  const formData = await request.formData();
+  let option = Object.fromEntries(formData);
+  const session = await getSession(request.headers.get("Cookie"));
+  if (option._action) {
+    const updatedReview = await updateDatasetReview(
+      session.get("orgId"),
+      params.datasetId,
+      params.reviewId,
+      option.isAccepted,
+      session.get("accessToken")
+    );
+    return {
+      _action: option._action,
+      updatedReview: updatedReview,
+    };
+  } else {
+    return null;
+  }
+}
 
 export default function Review() {
   const data = useLoaderData();
+  const reviewData = data.reviewData;
+  const reviewVersion = data.reviewVersion;
+  const reviewBranch = data.reviewBranch;
+  const toBranch = data.toBranch;
+
   const adata = useActionData();
-  const submit = useSubmit();
-  // function branchChange(event: any) {
-  //   setBranch(event.target.value);
-  //   submit(event.currentTarget, { replace: true });
-  // }
+  const navigate = useNavigate();
   const [versionData, setVersionData] = useState(data.versions);
+  const [ver1, setVer1] = useState("");
+  const [ver2, setVer2] = useState("");
+  const [dataVersion, setDataVersion] = useState({});
+
+  const [node, setNode] = useState(null);
+  const [edge, setEdge] = useState(null);
+  const [node2, setNode2] = useState(null);
+  const [edge2, setEdge2] = useState(null);
+
   useEffect(() => {
     if (!adata) return;
     adata.versions !== undefined
@@ -65,32 +103,32 @@ export default function Review() {
       : setVersionData(null);
   }, [adata]);
 
-  const [ver1, setVer1] = useState("");
-  const [ver2, setVer2] = useState("");
-  const [node, setNode] = useState(null);
-  const [edge, setEdge] = useState(null);
-  const [node2, setNode2] = useState(null);
-  const [edge2, setEdge2] = useState(null);
-
   // ##### checking version data #####
   useEffect(() => {
     if (!versionData) return;
     if (!versionData[0]) return;
-    if (!versionData[0].lineage.lineage) return;
     setVer1(versionData.at(0).version);
     setVer2("");
+
+    const tempDict = {};
+    versionData.forEach((version: { version: any }) => {
+      // @ts-ignore
+      tempDict[version.version] = version;
+    });
+    setDataVersion(tempDict);
   }, [versionData]);
 
   // ##### fetching & comparing latest version data #####
   useEffect(() => {
     if (!versionData) return;
+    if (Object.keys(dataVersion).length === 0) return;
     if (ver2 === "") {
       setNode2(null);
       setEdge2(null);
       return;
     }
 
-    let lineageData2 = versionData.at(-Number(ver2.slice(1))).lineage.lineage;
+    let lineageData2 = dataVersion[ver2].lineage.lineage;
     lineageData2 = lineageData2.replace(/'/g, "");
     const validJson = versionDataSchema.safeParse(lineageData2);
     const validNodes = nodesSchema.safeParse(JSON.parse(lineageData2).nodes);
@@ -121,7 +159,8 @@ export default function Review() {
 
   useEffect(() => {
     if (!versionData) return;
-    let lineageData1 = versionData.at(-Number(ver1.slice(1))).lineage.lineage;
+    // if (Object.keys(dataVersion).length === 0) return;
+    let lineageData1 = reviewData[0].lineage.lineage;
     lineageData1 = lineageData1.replace(/'/g, "");
     const validJson = versionDataSchema.safeParse(lineageData1);
     const validNodes = nodesSchema.safeParse(JSON.parse(lineageData1).nodes);
@@ -150,6 +189,27 @@ export default function Review() {
     }
   }, [ver1, versionData]);
 
+  // ##### review action functionality #####
+  useEffect(() => {
+    if (adata === null || adata === undefined) {
+      return;
+    }
+    if (adata._action === "rejected") {
+      if (adata.updatedReview.message === "Dataset review updated")
+        toast.success("Dataset review version rejected!");
+      else toast.error("Something went wrong!");
+    } else if (adata._action === "accepted") {
+      if (adata.updatedReview.message === "Dataset review updated")
+        toast.success("Dataset review version accepted!");
+      else toast.error("Something went wrong!");
+    } else {
+      setVersionData(adata.versions);
+    }
+    navigate(
+      `/org/${data.params.orgId}/datasets/${data.params.datasetId}/versions/datalineage`
+    );
+  }, [adata]);
+
   return (
     <Suspense fallback={<Loader />}>
       <div className="flex justify-center sticky top-0 bg-slate-50 w-full border-b border-slate-200">
@@ -166,7 +226,7 @@ export default function Review() {
                 intent="datasetReviewLineageTab"
                 tab="datalineage"
               />
-              <div className="px-12 pt-2 pb-8 h-[100vh] overflow-auto">
+              <div className="px-12 pt-8 pb-8 h-[100vh] overflow-auto">
                 <section>
                   {!versionData && (
                     <div className="text-slate-600 pt-6">
@@ -184,7 +244,7 @@ export default function Review() {
                         <>
                           <div className="w-1/2 h-screen max-h-[600px]">
                             <div className="text-sm text-slate-600 font-medium pb-6">
-                              {ver1}
+                              Submitted commit {ver1}
                             </div>
                             {node && <Pipeline pnode={node} pedge={edge} />}
                           </div>
@@ -206,8 +266,13 @@ export default function Review() {
               <div className="flex justify-end">
                 <select
                   name="branch"
-                  className="text-slate-500 border-slate-500 cursor-not-allowed bg-transparent rounded"
-                ></select>
+                  className="text-slate-500 border-slate-400 bg-transparent rounded"
+                  disabled
+                >
+                  <option value="value" selected>
+                    {reviewBranch}
+                  </option>
+                </select>
               </div>
               {/* incoming branch for review will be displayed here */}
               {versionData ? (
@@ -219,11 +284,14 @@ export default function Review() {
                         name={"version2"}
                         type="checkbox"
                         defaultChecked
+                        disabled
                       />
                       <div className="flex items-center justify-center pl-4 text-slate-600">
                         <AvatarIcon>S</AvatarIcon>
                         <div>
-                          <p className="px-4 font-medium">Submitted review</p>
+                          <p className="px-4 font-medium">
+                            Submitted review {reviewVersion}
+                          </p>
                           <p className="px-4">Created by Kessshhhaaa</p>
                         </div>
                       </div>
@@ -240,25 +308,9 @@ export default function Review() {
                           name={"version2"}
                           value={version.version}
                           type="checkbox"
-                          checked={
-                            version.version === ver1 || version.version === ver2
-                          }
+                          checked={version.version === ver2}
                           onChange={(e) => {
-                            if (e.target.checked) {
-                              setVer2(version.version);
-                            } else if (
-                              ver1 === version.version &&
-                              ver2 === ""
-                            ) {
-                              new Error(
-                                "You can't uncheck the present version"
-                              );
-                            } else if (ver1 === version.version) {
-                              setVer1(ver2);
-                              setVer2("");
-                            } else {
-                              setVer2("");
-                            }
+                            setVer2(version.version);
                           }}
                         />
                         <div className="flex items-center justify-center pl-4 text-slate-600">
@@ -293,8 +345,7 @@ export default function Review() {
                       </span>
                       <span className="w-1/2 pl-2">Commit version</span>
                       <span className="w-1/2 pl-2 text-slate-600 font-medium">
-                        {/* {`${datasetDetails[0].created_by.name}` || "Created By"} */}
-                        vx
+                        {/* {reviewVersion || "Version"} */}Version
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
@@ -303,8 +354,7 @@ export default function Review() {
                       </span>
                       <span className="w-1/2 pl-2">Commit branch</span>
                       <span className="w-1/2 pl-2 text-slate-600 font-medium">
-                        {/* {datasetDetails[0].updated_by.name || "User X"} */}
-                        dev
+                        {/* {reviewBranch || "Branch"} */}Branch
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
@@ -319,12 +369,40 @@ export default function Review() {
                     </div>
                   </div>
                   <div className="flex gap-x-4 mt-6">
-                    <Button intent="secondary" fullWidth={false}>
-                      Reject
-                    </Button>
-                    <Button intent="primary" fullWidth={false}>
-                      Approve
-                    </Button>
+                    <Form method="post">
+                      <input name="_action" value="rejected" type="hidden" />
+                      <input
+                        name="fromBranch"
+                        value={data.from_branch}
+                        type="hidden"
+                      />
+                      <input
+                        name="fromBranchVersion"
+                        value={data.from_branch_version}
+                        type="hidden"
+                      />
+                      <input name="isAccepted" value="false" type="hidden" />
+                      <Button intent="secondary" fullWidth={false}>
+                        Reject
+                      </Button>
+                    </Form>
+                    <Form method="post">
+                      <input name="_action" value="accepted" type="hidden" />
+                      <input
+                        name="fromBranch"
+                        value={data.from_branch}
+                        type="hidden"
+                      />
+                      <input
+                        name="fromBranchVersion"
+                        value={data.from_branch_version}
+                        type="hidden"
+                      />
+                      <input name="isAccepted" value="true" type="hidden" />
+                      <Button intent="primary" fullWidth={false}>
+                        Approve
+                      </Button>
+                    </Form>
                   </div>
                 </div>
               </div>
@@ -340,24 +418,24 @@ export default function Review() {
 
 export function ErrorBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }
 
 export function CatchBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }

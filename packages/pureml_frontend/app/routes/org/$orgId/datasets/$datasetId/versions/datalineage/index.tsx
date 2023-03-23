@@ -3,12 +3,14 @@ import {
   Form,
   useActionData,
   useLoaderData,
+  useNavigate,
   useSubmit,
 } from "@remix-run/react";
 import { getSession } from "~/session";
 import {
   fetchDatasetBranch,
   fetchDatasetVersions,
+  submitDatasetReview,
 } from "~/routes/api/datasets.server";
 import Pipeline from "../Pipeline";
 import { Suspense, useEffect, useState } from "react";
@@ -21,6 +23,7 @@ import { edgesSchema, nodesSchema, versionDataSchema } from "~/lib.schema";
 import Select from "~/components/ui/Select";
 import Loader from "~/components/ui/Loading";
 import Breadcrumbs from "~/components/Breadcrumbs";
+import { toast } from "react-toastify";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -50,32 +53,50 @@ export async function loader({ params, request }: any) {
 
 export async function action({ params, request }: any) {
   const formData = await request.formData();
-  let { _action, ...values } = Object.fromEntries(formData);
-  console.log(_action);
-  console.log(formData.get("branch"));
-  console.log(formData);
-  let branch = formData.get("branch");
+  let option = Object.fromEntries(formData);
   const session = await getSession(request.headers.get("Cookie"));
-  const versions = await fetchDatasetVersions(
-    session.get("orgId"),
-    params.datasetId,
-    branch,
-    session.get("accessToken")
-  );
-  return {
-    versions: versions,
-  };
+  if (option._action === "changeBranch") {
+    let branch = formData.get("branch");
+    const versions = await fetchDatasetVersions(
+      session.get("orgId"),
+      params.datasetId,
+      branch,
+      session.get("accessToken")
+    );
+    return {
+      versions: versions,
+    };
+  } else if (option._action === "submitReview") {
+    const submitReview = await submitDatasetReview(
+      session.get("orgId"),
+      params.datasetId,
+      option.fromBranch,
+      option.version,
+      session.get("accessToken")
+    );
+    return { _action: "submitReview", submitReview: submitReview };
+  } else {
+    return null;
+  }
 }
 
 export default function DatasetVersions() {
   const data = useLoaderData();
   const adata = useActionData();
   const submit = useSubmit();
-  function branchChange(event: any) {
-    setBranch(event.target.value);
-    submit(event.currentTarget, { replace: true });
-  }
+  const navigate = useNavigate();
   const [versionData, setVersionData] = useState(data.versions);
+  const [submitReviewVersion, setSubmitReviewVersion] = useState("");
+  const branchData = data.branches;
+  const [ver1, setVer1] = useState("");
+  const [ver2, setVer2] = useState("");
+  const [dataVersion, setDataVersion] = useState({});
+  const [node, setNode] = useState(null);
+  const [edge, setEdge] = useState(null);
+  const [node2, setNode2] = useState(null);
+  const [edge2, setEdge2] = useState(null);
+  const [branch, setBranch] = useState("main");
+
   useEffect(() => {
     if (!adata) return;
     adata.versions !== undefined
@@ -83,104 +104,139 @@ export default function DatasetVersions() {
       : setVersionData(null);
   }, [adata]);
 
-  const branchData = data.branches;
-  const [ver1, setVer1] = useState("");
-  const [ver2, setVer2] = useState("");
-  const [node, setNode] = useState(null);
-  const [edge, setEdge] = useState(null);
-  const [node2, setNode2] = useState(null);
-  const [edge2, setEdge2] = useState(null);
-  const [branch, setBranch] = useState("main");
-
   // ##### checking version data #####
   useEffect(() => {
     if (!versionData) return;
     if (!versionData[0]) return;
-    if (!versionData[0].lineage.lineage) return;
     setVer1(versionData.at(0).version);
     setVer2("");
+
+    const tempDict = {};
+    versionData.forEach((version: { version: any }) => {
+      // @ts-ignore
+      tempDict[version.version] = version;
+    });
+    setDataVersion(tempDict);
   }, [versionData]);
+
+  useEffect(() => {
+    if (!versionData) return;
+    if (Object.keys(dataVersion).length === 0) return;
+    if (dataVersion[ver1].lineage) {
+      if (dataVersion[ver1].lineage.lineage) {
+        let lineageData1 = dataVersion[ver1].lineage.lineage;
+        lineageData1 = lineageData1.replace(/'/g, "");
+        const validJson = versionDataSchema.safeParse(lineageData1);
+        const validNodes = nodesSchema.safeParse(
+          JSON.parse(lineageData1).nodes
+        );
+        const validEdges = edgesSchema.safeParse(
+          JSON.parse(lineageData1).edges
+        );
+        if (validJson.success && validNodes.success && validEdges.success) {
+          const n = JSON.parse(lineageData1).nodes;
+          n.forEach((e: any) => {
+            e.data = { label: e.text };
+          });
+          setNode(null);
+          setTimeout(() => {
+            setNode(n);
+          }, 10);
+          const ed = JSON.parse(lineageData1).edges;
+          ed.forEach((e: any) => {
+            e.source = e.from;
+            e.target = e.to;
+          });
+          setEdge(null);
+          setTimeout(() => {
+            setEdge(ed);
+          }, 10);
+        } else {
+          setNode(null);
+          setEdge(null);
+        }
+      } else {
+        setNode(null);
+        setEdge(null);
+      }
+    }
+  }, [ver1, dataVersion]);
 
   // ##### fetching & comparing latest version data #####
   useEffect(() => {
     if (!versionData) return;
+    if (Object.keys(dataVersion).length === 0) return;
+
     if (ver2 === "") {
       setNode2(null);
       setEdge2(null);
       return;
     }
 
-    let lineageData2 = versionData.at(-Number(ver2.slice(1))).lineage.lineage;
-    lineageData2 = lineageData2.replace(/'/g, "");
-    const validJson = versionDataSchema.safeParse(lineageData2);
-    const validNodes = nodesSchema.safeParse(JSON.parse(lineageData2).nodes);
-    const validEdges = edgesSchema.safeParse(JSON.parse(lineageData2).edges);
-    if (validJson.success && validNodes.success && validEdges.success) {
-      const n = JSON.parse(lineageData2).nodes;
-      n.forEach((e: any) => {
-        e.data = { label: e.text };
-      });
-      setNode2(null);
-      setTimeout(() => {
-        setNode2(n);
-      }, 10);
-      const ed = JSON.parse(lineageData2).edges;
-      ed.forEach((e: any) => {
-        e.source = e.from;
-        e.target = e.to;
-      });
-      setEdge2(null);
-      setTimeout(() => {
-        setEdge2(ed);
-      }, 10);
-    } else {
-      setNode2(null);
-      setEdge2(null);
+    if (dataVersion[ver2].lineage) {
+      if (dataVersion[ver2].lineage.lineage) {
+        let lineageData2 = dataVersion[ver2].lineage.lineage;
+        lineageData2 = lineageData2.replace(/'/g, "");
+        const validJson = versionDataSchema.safeParse(lineageData2);
+        const validNodes = nodesSchema.safeParse(
+          JSON.parse(lineageData2).nodes
+        );
+        const validEdges = edgesSchema.safeParse(
+          JSON.parse(lineageData2).edges
+        );
+        if (validJson.success && validNodes.success && validEdges.success) {
+          const n = JSON.parse(lineageData2).nodes;
+          n.forEach((e: any) => {
+            e.data = { label: e.text };
+          });
+          setNode2(null);
+          setTimeout(() => {
+            setNode2(n);
+          }, 10);
+          const ed = JSON.parse(lineageData2).edges;
+          ed.forEach((e: any) => {
+            e.source = e.from;
+            e.target = e.to;
+          });
+          setEdge2(null);
+          setTimeout(() => {
+            setEdge2(ed);
+          }, 10);
+        } else {
+          setNode2(null);
+          setEdge2(null);
+        }
+      } else {
+        setNode2(null);
+        setEdge2(null);
+      }
     }
-  }, [ver2, versionData]);
+  }, [ver2, dataVersion]);
+
+  // ##### submit review functionality #####
 
   useEffect(() => {
-    if (!versionData) return;
-    let lineageData1 = versionData.at(-Number(ver1.slice(1))).lineage.lineage;
-    lineageData1 = lineageData1.replace(/'/g, "");
-    const validJson = versionDataSchema.safeParse(lineageData1);
-    const validNodes = nodesSchema.safeParse(JSON.parse(lineageData1).nodes);
-    const validEdges = edgesSchema.safeParse(JSON.parse(lineageData1).edges);
-    if (validJson.success && validNodes.success && validEdges.success) {
-      const n = JSON.parse(lineageData1).nodes;
-      n.forEach((e: any) => {
-        e.data = { label: e.text };
-      });
-      setNode(null);
-      setTimeout(() => {
-        setNode(n);
-      }, 10);
-      const ed = JSON.parse(lineageData1).edges;
-      ed.forEach((e: any) => {
-        e.source = e.from;
-        e.target = e.to;
-      });
-      setEdge(null);
-      setTimeout(() => {
-        setEdge(ed);
-      }, 10);
-    } else {
-      setNode(null);
-      setEdge(null);
+    if (adata === null || adata === undefined) {
+      return;
     }
-  }, [ver1, versionData]);
+    if (adata._action === "submitReview") {
+      toast.success(adata.submitReview.message);
+      navigate(
+        `/org/${data.params.orgId}/datasets/${data.params.datasetId}/review`
+      );
+    } else {
+      setVersionData(adata.versions);
+    }
+  }, [adata]);
 
-  function submitForReview() {
-    console.log("submit");
-    submit(null, {
-      method: "post",
-      action: `/`,
-      // action: `/org/${data.params.orgId}/datasets/${data.params.datasetId}/review`,
-    });
-    // navigate(
-    //   `/org/${data.params.orgId}/datasets/${data.params.datasetId}/review`
-    // );
+  function branchChange(event: any) {
+    setBranch(event.target.value);
+    submit(event.currentTarget, { replace: true });
   }
+  function submitReview(event: any) {
+    submit(event.currentTarget, { replace: true });
+  }
+
   return (
     <Suspense fallback={<Loader />}>
       <div className="flex justify-center sticky top-0 bg-slate-50 w-full border-b border-slate-200">
@@ -203,24 +259,36 @@ export default function DatasetVersions() {
                   )}
                   {versionData && (
                     <div className="flex pt-6 gap-x-8">
-                      {!node2 && (
+                      {!ver2 && !node2 && (
                         <div className="w-full h-screen max-h-[600px]">
-                          {node && <Pipeline pnode={node} pedge={edge} />}
+                          {node ? (
+                            <Pipeline pnode={node} pedge={edge} />
+                          ) : (
+                            "No datalineage available"
+                          )}
                         </div>
                       )}
-                      {node2 && (
+                      {ver2 && (
                         <>
                           <div className="w-1/2 h-screen max-h-[600px]">
                             <div className="text-sm text-slate-600 font-medium pb-6">
                               {ver1}
                             </div>
-                            {node && <Pipeline pnode={node} pedge={edge} />}
+                            {node ? (
+                              <Pipeline pnode={node} pedge={edge} />
+                            ) : (
+                              "No datalineage available"
+                            )}
                           </div>
                           <div className="w-1/2 h-screen max-h-[600px]">
                             <div className="text-sm text-slate-600 font-medium pb-6">
                               {ver2}
                             </div>
-                            {node2 && <Pipeline pnode={node2} pedge={edge2} />}
+                            {node2 ? (
+                              <Pipeline pnode={node2} pedge={edge2} />
+                            ) : (
+                              "No datalineage available"
+                            )}
                           </div>
                         </>
                       )}
@@ -236,7 +304,8 @@ export default function DatasetVersions() {
                 onChange={branchChange}
                 className="flex justify-end"
               >
-                <Select name="branch" title={branch}>
+                <input name="_action" value="changeBranch" type="hidden" />
+                <Select intent="primary" name="branch" title={branch}>
                   {branchData.map((branch: any, index: number) => (
                     <SelectPrimitive.Item
                       key={`${branch}-${index}`}
@@ -301,35 +370,39 @@ export default function DatasetVersions() {
                           </div>
                         </div>
                       </div>
-                      {/* <DropdownMenu.Root>
-                        <DropdownMenu.Trigger className="focus:outline-none">
-                          <MoreVertical className="text-slate-400" />
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content sideOffset={7} align="end">
-                          <DropdownMenu.Item
-                            className="bg-white p-2"
-                            // onClick={(e) => {
-                            //   submitForReview(e);
-                            // }}
+                      {branch !== "main" && (
+                        <Form
+                          method="post"
+                          onChange={submitReview}
+                          className="flex justify-end"
+                        >
+                          <input
+                            name="_action"
+                            value="submitReview"
+                            type="hidden"
+                          />
+                          <input
+                            name="fromBranch"
+                            value={branch}
+                            type="hidden"
+                          />
+                          <input name="toBranch" value="main" type="hidden" />
+                          <Select
+                            intent="more"
+                            name="version"
+                            title={submitReviewVersion}
                           >
-                            {" "}
-                            <Form method="post">
-                              <input
-                                hidden
-                                value={version.version}
-                                name="version"
-                              />
-                              <button
-                                name="_action"
-                                type="submit"
-                                value="submitForReview"
-                              >
-                                Submit for Review
-                              </button>
-                            </Form>
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Root> */}
+                            <SelectPrimitive.Item
+                              value={version.version}
+                              className="flex items-center justify-between px-4 py-2 rounded-md text-base text-slate-600 font-medium cursor-pointer  hover:bg-slate-100 hover:border-none focus:outline-none"
+                            >
+                              <SelectPrimitive.ItemText className="text-slate-600 text-base font-medium">
+                                Submit For review
+                              </SelectPrimitive.ItemText>
+                            </SelectPrimitive.Item>
+                          </Select>
+                        </Form>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -348,24 +421,24 @@ export default function DatasetVersions() {
 
 export function ErrorBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }
 
 export function CatchBoundary() {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
       <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
       <div className="text-3xl text-slate-600 font-medium">
         Something went wrong :(
       </div>
-      <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }

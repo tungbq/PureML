@@ -11,14 +11,14 @@ export default function VersionSection() {
         <div className="flex flex-col gap-y-8">
           <div className="md:w-3/4">
             <h1 className="text-3xl md:text-4xl lg:text-5xl pb-2">
-              Pureml-version
+              PureML-version
             </h1>
           </div>
           <div className="flex flex-col md:flex-row gap-x-12 gap-y-6">
             <div className="md:w-1/2 flex flex-col gap-y-12">
               <h2 className="text-lg md:text-xl lg:text-2xl">
                 Manage versioning of datasets and models with our python SDK.
-                Versioning is semantic and managed automatically.
+                Versioning is semantic and automatically managed.
               </h2>
               <div className="flex flex-col gap-y-4">
                 <div className="flex flex-col gap-y-2">
@@ -44,11 +44,11 @@ export default function VersionSection() {
                   Dataset
                 </h2>
                 <h2 className="text-lg md:text-xl lg:text-2xl">
-                  If you are trying to manage versions of dataset all you have
-                  to do is use our decorator{" "}
+                  Simply use our decorator{" "}
                   <span className="bg-slate-200 px-2 py-1 text-lg md:text-xl lg:text-2xl">
                     @dataset
-                  </span>
+                  </span>{" "}
+                  for managing the versions of your dataset.
                 </h2>
               </div>
               <div className="flex flex-col gap-y-6">
@@ -57,17 +57,23 @@ export default function VersionSection() {
                     Model
                   </h2>
                   <h2 className="text-lg md:text-xl lg:text-2xl">
-                    For managing models we have to use{" "}
+                    Use{" "}
                     <span className="bg-slate-200 px-2 py-1 text-lg md:text-xl lg:text-2xl">
                       @model
                     </span>{" "}
-                    decorator. We have some other features built in such as data
-                    lineage and branching. For more information refer docs.
+                    decorator for managing models. Check out the docs for other
+                    built in features such as data lineage and branching.
                   </h2>
                 </div>
-                <button className="btn btn-primary btn-sm font-normal text-white w-full md:w-fit hover-effect px-4 rounded-lg text-lg">
-                  READ DOCS
-                </button>
+                <a
+                  href="https://docs.pureml.com"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <button className="btn btn-primary btn-sm font-normal text-white w-full md:w-fit hover-effect px-4 rounded-lg text-lg">
+                    READ DOCS
+                  </button>
+                </a>
               </div>
             </div>
             <div className="md:w-1/2">
@@ -184,7 +190,7 @@ def train_model(train_ds, val_ds):
                 alt="FlashIcon"
                 className="w-6"
               />
-              Key value pairs
+              Key-value pairs
             </h1>
             <h2 className="text-lg md:text-xl lg:text-2xl">
               Our system captures key-value metadata such as metrics and
@@ -201,8 +207,8 @@ def train_model(train_ds, val_ds):
               Large files
             </h1>
             <h2 className="text-lg md:text-xl lg:text-2xl">
-              Our ML versioning system was built to natively support large
-              files, unlike Git.
+              Our ML versioning system is built to natively support large files,
+              unlike Git.
             </h2>
           </div>
           <div className="w-full">
@@ -215,7 +221,7 @@ def train_model(train_ds, val_ds):
               Powerful yet flexible
             </h1>
             <h2 className="text-lg md:text-xl lg:text-2xl">
-              We designed our SDK to be user-friendly, yet robust enough to meet
+              Our SDK is designed to be user-friendly, yet robust enough to meet
               a wide range of use cases.
             </h2>
           </div>

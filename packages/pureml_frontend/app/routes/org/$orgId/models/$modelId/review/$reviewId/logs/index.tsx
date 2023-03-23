@@ -1,14 +1,11 @@
 import type { MetaFunction } from "@remix-run/node";
 import {
-  Link,
+  Form,
   useActionData,
   useLoaderData,
-  useMatches,
   useNavigate,
-  useSubmit,
 } from "@remix-run/react";
 import {
-  ArrowLeft,
   ChevronDown,
   ChevronUp,
   GitFork,
@@ -16,14 +13,18 @@ import {
   User,
 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Breadcrumbs from "~/components/Breadcrumbs";
 import ReviewTabbar from "~/components/ReviewTabbar";
 import Tabbar from "~/components/Tabbar";
 import AvatarIcon from "~/components/ui/Avatar";
 import Button from "~/components/ui/Button";
-import Dropdown from "~/components/ui/Dropdown";
 import Loader from "~/components/ui/Loading";
-import { fetchModelVersions } from "~/routes/api/models.server";
+import {
+  fetchModelVersions,
+  fetchOneModelVersion,
+  updateModelReview,
+} from "~/routes/api/models.server";
 import { getSession } from "~/session";
 
 export const meta: MetaFunction = () => ({
@@ -34,167 +35,156 @@ export const meta: MetaFunction = () => ({
 
 export async function loader({ params, request }: any) {
   const session = await getSession(request.headers.get("Cookie"));
+  // fetching review model version from it's branch
+  const reviewData = await fetchOneModelVersion(
+    session.get("orgId"),
+    params.modelId,
+    session.get("fromBranch"),
+    session.get("version"),
+    session.get("accessToken")
+  );
   const versions = await fetchModelVersions(
     session.get("orgId"),
     params.modelId,
-    "dev",
+    session.get("toBranch"),
     session.get("accessToken")
   );
   // "dev" branch should be replaced by to_branch of submitted review
   return {
+    reviewData,
+    reviewVersion: session.get("version"),
+    reviewBranch: session.get("fromBranch"),
+    toBranch: session.get("toBranch"),
     versions: versions,
     params: params,
   };
 }
 
-// export async function action({ params, request }: any) {
-
-// }
+export async function action({ params, request }: any) {
+  const formData = await request.formData();
+  let option = Object.fromEntries(formData);
+  const session = await getSession(request.headers.get("Cookie"));
+  if (option._action) {
+    const updatedReview = await updateModelReview(
+      session.get("orgId"),
+      params.modelId,
+      params.reviewId,
+      option.isAccepted,
+      session.get("accessToken")
+    );
+    return {
+      _action: option._action,
+      updatedReview: updatedReview,
+    };
+  } else {
+    return null;
+  }
+}
 
 export default function Review() {
   const data = useLoaderData();
   const adata = useActionData();
-  const submit = useSubmit();
   const navigate = useNavigate();
   const [metrics, setMetrics] = useState(true);
   const [params, setParams] = useState(true);
   const [ver1, setVer1] = useState("");
   const [ver2, setVer2] = useState("");
-  const [metricsData, setMetricsData] = useState({});
-  const [metricsData2, setMetricsData2] = useState({});
-  const [paramsData, setParamsData] = useState({});
-  const [paramsData2, setParamsData2] = useState({});
-  const [metricsDict, setMetricsDict] = useState({});
-  const [paramsDict, setParamsDict] = useState({});
+  const [dataVersion, setDataVersion] = useState({});
+  const [reviewMetrics, setReviewMetrics] = useState({});
+  const [reviewParams, setReviewParams] = useState({});
+  const [ver2Metrics, setVer2Metrics] = useState({});
+  const [ver2Params, setVer2Params] = useState({});
+  const [metricsKeys, setMetricsKeys] = useState<string[]>([]);
+  const [paramsKeys, setParamsKeys] = useState<string[]>([]);
   const [versionData, setVersionData] = useState(data.versions);
+  const reviewData = data.reviewData;
+  const reviewVersion = data.reviewVersion;
+  const reviewBranch = data.reviewBranch;
+  const toBranch = data.toBranch;
 
   // ##### checking version data #####
   useEffect(() => {
     if (!versionData) return;
     if (!versionData[0]) return;
-    setVer1(versionData.at(0).version);
+    setVer1(data.reviewVersion);
     setVer2("");
   }, [versionData]);
 
-  // ##### fetching & displaying latest version data #####
+  useEffect(() => {
+    if (!reviewData) return;
+    if (reviewData === null) return;
+    setReviewMetrics(JSON.parse(reviewData[0].data));
+    setMetricsKeys(Object.keys(JSON.parse(reviewData[0].data)));
+    setReviewParams(JSON.parse(reviewData[1].data));
+    setParamsKeys(Object.keys(JSON.parse(reviewData[1].data)));
+  }, [reviewData]);
+
   useEffect(() => {
     if (!versionData) return;
-    if (versionData.at(-Number(ver1.slice(1))).logs === null) {
-      setMetricsData({});
-      setParamsData({});
-      setMetricsDict({});
-      setParamsDict({});
-      return;
-    }
-    setMetricsData(
-      JSON.parse(versionData.at(-Number(ver1.slice(1))).logs[0].data)
-    );
-    const temp = JSON.parse(
-      versionData.at(-Number(ver1.slice(1))).logs[0].data
-    );
-    Object.keys(temp).forEach((key) => {
-      temp[key] = [temp[key], "-"];
+    if (!versionData[0]) return;
+    const tempDict = {};
+    versionData.forEach((version: { version: any }) => {
+      // @ts-ignore
+      tempDict[version.version] = version;
     });
-    setMetricsDict(temp);
+    setDataVersion(tempDict);
 
-    setParamsData(
-      JSON.parse(versionData.at(-Number(ver1.slice(1))).logs[1].data)
-    );
-    const temp2 = JSON.parse(
-      versionData.at(-Number(ver1.slice(1))).logs[1].data
-    );
-    Object.keys(temp2).forEach((key) => {
-      temp2[key] = [temp2[key], "-"];
-    });
-    setParamsDict(temp2);
-  }, [ver1, versionData]);
-
-  // ##### comparing versions #####
-  useEffect(() => {
-    if (!versionData) return;
     if (ver2 === "") {
-      setMetricsData2({});
-      setParamsData2({});
+      setVer2Metrics({});
+      setMetricsKeys(Object.keys(JSON.parse(reviewData[0].data)));
+      setVer2Params({});
+      setParamsKeys(Object.keys(JSON.parse(reviewData[1].data)));
       return;
     }
-    if (versionData.at(Number(ver2.slice(1)) - 1).logs === null) {
-      setMetricsData2({});
-      setParamsData2({});
-      const emptyTemp = metricsDict;
-      const emptyTemp2 = paramsDict;
-      Object.keys(emptyTemp).forEach((key) => {
-        if (emptyTemp[key][0] === "-") {
-          delete emptyTemp[key];
-        } else {
-          emptyTemp[key] = [emptyTemp[key][0], "-"];
+
+    const tt = dataVersion[ver2];
+    if (tt) {
+      if (tt.logs[0] === null) {
+        setVer2Metrics({});
+        setVer2Params({});
+        return;
+      }
+
+      setMetricsKeys(Object.keys(JSON.parse(reviewData[0].data)));
+      setParamsKeys(Object.keys(JSON.parse(reviewData[1].data)));
+      setVer2Metrics(JSON.parse(tt.logs[0].data));
+      setVer2Params(JSON.parse(tt.logs[1].data));
+      const metKeys = Object.keys(JSON.parse(tt.logs[0].data));
+      const parKeys = Object.keys(JSON.parse(tt.logs[1].data));
+      metKeys.forEach((key) => {
+        if (!metricsKeys.includes(key)) {
+          setMetricsKeys((prev) => [...prev, key]);
         }
       });
-      setMetricsDict(emptyTemp);
-
-      Object.keys(emptyTemp2).forEach((key) => {
-        if (emptyTemp2[key][0] === "-") {
-          delete emptyTemp2[key];
-        } else {
-          emptyTemp2[key] = [emptyTemp2[key][0], "-"];
+      parKeys.forEach((key) => {
+        if (!paramsKeys.includes(key)) {
+          setParamsKeys((prev) => [...prev, key]);
         }
       });
-      setParamsDict(emptyTemp2);
-
-      return;
     }
-    setMetricsData2(
-      JSON.parse(versionData.at(Number(ver2.slice(1)) - 1).logs[0].data)
-    );
-    setParamsData2(
-      JSON.parse(versionData.at(Number(ver2.slice(1)) - 1).logs[1].data)
-    );
+  }, [ver2]);
 
-    const original = metricsDict;
-    const original2 = paramsDict;
-
-    Object.keys(original).forEach((key) => {
-      if (original[key][0] === "-") {
-        delete original[key];
-      }
-    });
-
-    Object.keys(original2).forEach((key) => {
-      if (original2[key][0] === "-") {
-        delete original2[key];
-      }
-    });
-
-    const temp = JSON.parse(
-      versionData.at(-Number(ver2.slice(1))).logs[0].data
-    );
-    const temp2 = JSON.parse(
-      versionData.at(-Number(ver2.slice(1))).logs[1].data
-    );
-
-    Object.keys(temp).forEach((key) => {
-      if (key in original) {
-        original[key][1] = temp[key];
-      } else {
-        original[key] = ["-", temp[key]];
-      }
-    });
-    Object.keys(temp2).forEach((key) => {
-      if (key in original2) {
-        original2[key][1] = temp2[key];
-      } else {
-        original2[key] = ["-", temp2[key]];
-      }
-    });
-    setMetricsDict(original);
-    setParamsDict(original2);
-  }, [metricsDict, paramsDict, ver2, versionData]);
-
+  // ##### review action functionality #####
   useEffect(() => {
     if (adata === null || adata === undefined) {
       return;
     }
-    setVersionData(adata.versions);
+    if (adata._action === "rejected") {
+      if (adata.updatedReview.message === "Model review updated")
+        toast.success("Model review version rejected!");
+      else toast.error("Something went wrong!");
+    } else if (adata._action === "accepted") {
+      if (adata.updatedReview.message === "Model review updated")
+        toast.success("Model review version accepted!");
+      else toast.error("Something went wrong!");
+    } else {
+      setVersionData(adata.versions);
+    }
+    navigate(
+      `/org/${data.params.orgId}/models/${data.params.modelId}/versions/logs`
+    );
   }, [adata]);
+
   return (
     <Suspense fallback={<Loader />}>
       <div className="w-full max-w-screen-2xl">
@@ -209,7 +199,7 @@ export default function Review() {
             <div className="flex justify-between h-full">
               <div className="w-4/5">
                 <ReviewTabbar intent="modelReviewMetricsTab" tab="metrics" />
-                <div className="px-12 pt-2 pb-8 h-[70vh] overflow-auto">
+                <div className="px-12 pt-8 pb-8 h-[70vh] overflow-auto">
                   {/* ##### metrics secion ##### */}
                   <section>
                     <div
@@ -227,12 +217,10 @@ export default function Review() {
                     </div>
                     {metrics && (
                       <div className="py-6">
-                        {(Object.keys(metricsData).length !== 0 ||
-                          Object.keys(metricsData2).length !== 0) &&
-                        versionData !== null ? (
+                        {metricsKeys.length !== 0 && versionData !== null ? (
                           <>
                             <table className="max-w-[1000px] w-full">
-                              {Object.keys(metricsDict).length !== 0 && (
+                              {metricsKeys.length !== 0 && (
                                 <>
                                   <thead>
                                     <tr>
@@ -240,7 +228,7 @@ export default function Review() {
                                         {" "}
                                       </th>
                                       <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
-                                        {ver1}
+                                        Submitted commit {ver1}
                                       </th>
                                       {ver2 !== "" ? (
                                         <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
@@ -249,17 +237,21 @@ export default function Review() {
                                       ) : null}
                                     </tr>
                                   </thead>
-                                  {Object.keys(metricsDict).map((metric, i) => (
+                                  {metricsKeys.map((metric, i) => (
                                     <tr key={i}>
                                       <th className="text-slate-600 font-medium text-left border p-4">
                                         {metric}
                                       </th>
                                       <td className="text-slate-600 font-medium text-left border p-4 w-1/5 truncate">
-                                        {metricsDict[metric][0].slice(0, 5)}
+                                        {reviewMetrics[metric]
+                                          ? reviewMetrics[metric].slice(0, 5)
+                                          : "-"}
                                       </td>
                                       {ver2 !== "" && (
                                         <td className="text-slate-600 font-medium text-left border p-4 w-1/5 truncate">
-                                          {metricsDict[metric][1].slice(0, 5)}
+                                          {ver2Metrics[metric]
+                                            ? ver2Metrics[metric].slice(0, 5)
+                                            : "-"}
                                         </td>
                                       )}
                                     </tr>
@@ -291,12 +283,10 @@ export default function Review() {
                     </div>
                     {params && (
                       <div className="py-6">
-                        {(Object.keys(paramsData).length !== 0 ||
-                          Object.keys(paramsData2).length !== 0) &&
-                        versionData !== null ? (
+                        {paramsKeys.length !== 0 && versionData !== null ? (
                           <>
                             <table className=" max-w-[1000px] w-full">
-                              {Object.keys(paramsDict).length !== 0 && (
+                              {paramsKeys.length !== 0 && (
                                 <>
                                   <thead>
                                     <tr>
@@ -304,7 +294,7 @@ export default function Review() {
                                         {" "}
                                       </th>
                                       <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
-                                        {ver1}
+                                        Submitted commit {ver1}
                                       </th>
                                       {ver2 !== "" ? (
                                         <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
@@ -313,18 +303,22 @@ export default function Review() {
                                       ) : null}
                                     </tr>
                                   </thead>
-                                  {Object.keys(paramsDict).map(
-                                    (metric: any, index: number) => (
+                                  {paramsKeys.map(
+                                    (param: any, index: number) => (
                                       <tr key={index}>
                                         <th className="text-slate-600 font-medium text-left border p-4">
-                                          {metric}
+                                          {param}
                                         </th>
                                         <td className="text-slate-600 font-medium text-left border p-4">
-                                          {paramsDict[metric][0].slice(0, 5)}
+                                          {reviewParams[param]
+                                            ? reviewParams[param].slice(0, 5)
+                                            : "-"}
                                         </td>
                                         {ver2 !== "" && (
                                           <td className="text-slate-600 font-medium text-left border p-4">
-                                            {paramsDict[metric][1].slice(0, 5)}
+                                            {ver2Params[param]
+                                              ? ver2Params[param].slice(0, 5)
+                                              : "-"}
                                           </td>
                                         )}
                                       </tr>
@@ -347,10 +341,11 @@ export default function Review() {
                 <div className="flex justify-end">
                   <select
                     name="branch"
-                    className="text-slate-500 border-slate-500 cursor-not-allowed bg-transparent rounded"
+                    className="text-slate-500 border-slate-400 bg-transparent rounded"
+                    disabled
                   >
                     <option value="value" selected>
-                      dev
+                      {toBranch}
                     </option>
                   </select>
                 </div>
@@ -364,12 +359,15 @@ export default function Review() {
                           name={"version2"}
                           type="checkbox"
                           defaultChecked
+                          disabled
                         />
                         <div className="flex items-center justify-center pl-4 text-slate-600">
                           <AvatarIcon>S</AvatarIcon>
                           <div>
-                            <p className="px-4 font-medium">Submitted review</p>
-                            <p className="px-4">Created by Kessshhhaaa</p>
+                            <p className="px-4 font-medium">
+                              Submitted review {reviewVersion}
+                            </p>
+                            <p className="px-4">from branch {reviewBranch}</p>
                           </div>
                         </div>
                       </div>
@@ -385,26 +383,9 @@ export default function Review() {
                             name={"version2"}
                             value={version.version}
                             type="checkbox"
-                            checked={
-                              version.version === ver1 ||
-                              version.version === ver2
-                            }
+                            checked={version.version === ver2}
                             onChange={(e) => {
-                              if (e.target.checked) {
-                                setVer2(version.version);
-                              } else if (
-                                ver1 === version.version &&
-                                ver2 === ""
-                              ) {
-                                new Error(
-                                  "You can't uncheck the present version"
-                                );
-                              } else if (ver1 === version.version) {
-                                setVer1(ver2);
-                                setVer2("");
-                              } else {
-                                setVer2("");
-                              }
+                              setVer2(version.version);
                             }}
                           />
                           <div className="flex items-center justify-center pl-4 text-slate-600">
@@ -439,8 +420,7 @@ export default function Review() {
                         </span>
                         <span className="w-1/2 pl-2">Commit version</span>
                         <span className="w-1/2 pl-2 text-slate-600 font-medium">
-                          {/* {`${datasetDetails[0].created_by.name}` || "Created By"} */}
-                          vx
+                          {reviewVersion || "Version"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center py-1">
@@ -449,8 +429,7 @@ export default function Review() {
                         </span>
                         <span className="w-1/2 pl-2">Commit branch</span>
                         <span className="w-1/2 pl-2 text-slate-600 font-medium">
-                          {/* {datasetDetails[0].updated_by.name || "User X"} */}
-                          dev
+                          {reviewBranch || "Branch"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center py-1">
@@ -465,12 +444,40 @@ export default function Review() {
                       </div>
                     </div>
                     <div className="flex gap-x-4 mt-6">
-                      <Button intent="secondary" fullWidth={false}>
-                        Reject
-                      </Button>
-                      <Button intent="primary" fullWidth={false}>
-                        Approve
-                      </Button>
+                      <Form method="post">
+                        <input name="_action" value="rejected" type="hidden" />
+                        <input
+                          name="fromBranch"
+                          value={data.from_branch}
+                          type="hidden"
+                        />
+                        <input
+                          name="fromBranchVersion"
+                          value={data.from_branch_version}
+                          type="hidden"
+                        />
+                        <input name="isAccepted" value="false" type="hidden" />
+                        <Button intent="secondary" fullWidth={false}>
+                          Reject
+                        </Button>
+                      </Form>
+                      <Form method="post">
+                        <input name="_action" value="accepted" type="hidden" />
+                        <input
+                          name="fromBranch"
+                          value={data.from_branch}
+                          type="hidden"
+                        />
+                        <input
+                          name="fromBranchVersion"
+                          value={data.from_branch_version}
+                          type="hidden"
+                        />
+                        <input name="isAccepted" value="true" type="hidden" />
+                        <Button intent="primary" fullWidth={false}>
+                          Approve
+                        </Button>
+                      </Form>
                     </div>
                   </div>
                 </div>

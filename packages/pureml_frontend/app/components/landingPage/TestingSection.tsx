@@ -11,21 +11,20 @@ export default function TestingSection() {
         <div className="flex flex-col gap-y-12">
           <div className="flex flex-col gap-y-6 md:w-3/4">
             <h1 className="text-3xl md:text-4xl lg:text-5xl pb-2">
-              Pureml-eval : Testing & Quality Control
+              PureML-eval : Testing & Quality Control
             </h1>
           </div>
           <div className="flex flex-col md:flex-row gap-x-12 gap-y-6">
             <div className="md:w-1/2 flex flex-col gap-y-12">
               <div className="flex flex-col gap-y-6">
                 <h2 className="text-lg md:text-xl lg:text-2xl">
-                  The terms L0, L1, L2, L3, and L4 are used to refer to teams
-                  that are involved in developing machine learning systems.
-                  According to our research study, which surveyed 100 companies,
-                  it was found that the majority of teams are currently at L0
-                  level. However, there are teams that are striving to build
-                  highly dependable systems and are at L3 or L4 level. To
-                  facilitate the journey for teams to attain L4 level, we are
-                  developing tooling that will accelerate their progress.
+                  The terms L0, L1, L2, L3, and L4 refer to teams involved in
+                  developing machine learning systems. Our research study which
+                  surveyed 100 companies found that the majority of teams are
+                  currently at the L0 level. However, some teams are striving to
+                  build highly dependable systems and are at L3 or L4 levels. We
+                  are developing tools for the teams to facilitate their journey
+                  to attain the L4 level.
                 </h2>
                 <Tag intent="landingpg" />
               </div>
@@ -60,14 +59,14 @@ pureml.dataset.validation(“petdata:dev:v1”)`}
                 />
               </div>
               <h2 className="text-lg md:text-xl lg:text-2xl">
-                If you want to add a dataset as validation while saving it. You
-                can use our{" "}
+                Use{" "}
                 <span className="bg-slate-200 px-2 py-1 text-lg md:text-xl lg:text-2xl">
                   @validation
                 </span>
+                for adding a dataset as validation while saving it.
               </h2>
               <h2 className="text-lg md:text-xl lg:text-2xl">
-                This helps us capture not just one instance of this dataset but
+                This helps us capture not just one instance of this dataset, but
                 all the future variations without any intervention.
               </h2>
             </div>

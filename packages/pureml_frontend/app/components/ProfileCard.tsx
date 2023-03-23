@@ -4,7 +4,7 @@ const cardStyles = tv({
   base: "items-center justify-center p-8 text-lg font-medium focus:outline-none",
   variants: {
     intent: {
-      profile: "bg-slate-0 text-slate-600 rounded-xl border border-slate-200",
+      profile: "text-slate-600 rounded-xl border border-slate-200",
     },
     fullWidth: {
       true: "w-full",

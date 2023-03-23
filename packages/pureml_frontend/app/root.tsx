@@ -7,7 +7,6 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useActionData,
   useCatch,
   useLoaderData,
   useLocation,
@@ -21,7 +20,7 @@ import Footer from "./components/landingPage/Footer";
 import HeroSection from "./components/landingPage/HeroSection";
 import Navbar from "./components/landingPage/Navbar";
 import PackageSection from "./components/landingPage/PackageSection";
-import base, { fetchUserSettings } from "./routes/api/auth.server";
+import { fetchUserSettings } from "./routes/api/auth.server";
 import { destroySession, getSession } from "./session";
 import * as gtag from "~/analytics/gtags.client";
 import { Analytics } from "@vercel/analytics/react";
@@ -36,7 +35,6 @@ import TrustedByCompanies from "./components/landingPage/TrustedByCompanies";
 import VersionSection from "./components/landingPage/VersionSection";
 import ReviewSection from "./components/landingPage/ReviewSection";
 import TestingSection from "./components/landingPage/TestingSection";
-import TestimonialsSection from "./components/landingPage/Testimonials";
 import DeploySection from "./components/landingPage/DeploySection";
 
 export function links() {
@@ -63,8 +61,8 @@ export const meta: MetaFunction = () => ({
   charset: "utf-8",
   title: "PureML",
   description: "Developer Platform for Production ML.",
-  "og:image": "/PureMLMetaTag.svg",
-  "twitter:image": "/PureMLMetaTag.svg",
+  "og:image": "/PureMLMetaImg.svg",
+  "twitter:image": "/PureMLMetaImg.svg",
   viewport: "width=device-width, height=device-height, initial-scale=1",
 });
 
@@ -88,35 +86,12 @@ export async function loader({ request }: any) {
   return { profile: null, gaTrackingId: process.env.GA_TRACKING_ID };
 }
 
-export const action = async ({ request }: any) => {
-  const form = await request.formData();
-  const email = form.get("email");
-  console.log(email);
-  const submit = base("tblxctpn3uWjLg9TP").create(
-    [
-      {
-        fields: {
-          Email: email,
-        },
-      },
-    ],
-    (err: string) => {
-      if (err) {
-        console.error(err);
-      }
-    }
-  );
-  console.log(submit);
-  return redirect("/", {});
-};
-
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
   const pathname = matches[1].pathname;
   const profile = useLoaderData();
-  const actData = useActionData();
   const { prof, gaTrackingId } = useLoaderData();
   useEffect(() => {
     if (profile.profile && pathname === "/") return navigate("/models");
@@ -153,6 +128,7 @@ export default function App() {
                   <TrustedByCompanies />
                 </div>
               </div>
+
               <div className="bg-slate-50 flex justify-center">
                 <div className="md:max-w-screen-xl px-4 md:px-8">
                   <VersionSection />
@@ -191,9 +167,30 @@ function Document({
   return (
     <html lang="en">
       <head>
+        <meta name="title" content="PureML" />
+        <meta
+          name="description"
+          content="Developer platform for Production ML."
+        />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://metatags.io/" />
+        <meta property="og:title" content="PureML" />
+        <meta
+          property="og:description"
+          content="Developer platform for Production ML."
+        />
+        <meta property="og:image" content="https://imgur.com/a/IpiHnFY" />
+
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://metatags.io/" />
+        <meta property="twitter:title" content="PureML" />
+        <meta
+          property="twitter:description"
+          content="Developer platform for Production ML."
+        />
+        <meta property="twitter:image" content="/PureMLMetaImg.svg" />
         <Meta />
-        <meta property="og:image" content="/PureMLMetaTag.svg" />
-        <meta property="twitter:image" content="/PureMLMetaTag.svg" />
         <Links />
       </head>
       <body>
@@ -222,7 +219,7 @@ function Document({
         )}
         <Scripts />
         <Analytics />
-        <div>{children}</div>
+        <div className="h-screen bg-slate-50">{children}</div>
         <ScrollRestoration />
         <LiveReload />
       </body>
@@ -240,12 +237,12 @@ export function ErrorBoundary({ error }: { error: Error }) {
         <p>{error.message}</p>
         <div className="text-xl pt-8 font-medium">The stack trace is:</div>
         <pre className="whitespace-pre-wrap">{error.stack}</pre> */}
-      <div className="flex flex-col h-screen justify-center items-center">
+      <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
         <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
         <div className="text-3xl text-slate-600 font-medium">
           Something went wrong :(
         </div>
-        <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+        <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
       </div>
       {/* </div> */}
     </Document>
@@ -260,12 +257,12 @@ export function CatchBoundary() {
       {/* <div className="p-12">
         <span className="text-3xl font-medium">Status: {caught?.status}</span>
         <div className="text-xl pt-8 font-medium">Data: {caught?.data}</div> */}
-      <div className="flex flex-col h-screen justify-center items-center">
+      <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
         <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
         <div className="text-3xl text-slate-600 font-medium">
           Something went wrong :(
         </div>
-        <img src="/error/FunctionalError.gif" alt="Error" width="500" />
+        <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
       </div>
       {/* </div> */}
     </Document>
