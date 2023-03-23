@@ -6,9 +6,12 @@
     "build:css": "tailwindcss -m -i ./styles/app.css -o app/styles/app.css",
     "dev": "concurrently \"npm run dev:css\" \"remix dev\"",
     "dev:css": "tailwindcss -w -i ./styles/app.css -o app/styles/app.css",
-    "start": "remix-serve build",
+    "dev:remix": "remix watch",
+    "dev:wrangler": "cross-env NODE_ENV=development npm run wrangler",
+    "start": "cross-env NODE_ENV=production npm run wrangler",
     "format": "npx prettier --write .",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "wrangler": "wrangler pages dev ./public"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.10",
@@ -22,6 +25,8 @@
     "@remix-run/serve": "*",
     "@remix-run/server-runtime": "^1.10.0",
     "@remix-run/vercel": "^1.11.0",
+    "@remix-run/cloudflare": "^1.14.3",
+    "@remix-run/cloudflare-pages": "^1.14.3",
     "@tanstack/react-table": "^8.7.9",
     "@types/react-calendar-heatmap": "^1.6.3",
     "@vercel/analytics": "^0.1.10",
@@ -68,7 +73,8 @@
     "eslint": "^8.27.0",
     "prettier": "2.8.2",
     "tailwindcss": "^3.2.4",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "wrangler": "^2.2.1"
   },
   "engines": {
     "node": ">=14"
