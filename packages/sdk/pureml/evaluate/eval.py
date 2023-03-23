@@ -7,7 +7,7 @@ from importlib import import_module
 from rich import print
 
 
-class Test(BaseModel):
+class Evaluator(BaseModel):
     task_type: str
     label_model: str
     label_dataset: str
@@ -53,12 +53,12 @@ class Test(BaseModel):
 
 
 def eval(label_model: str, label_dataset: str, task_type: str):
-    tester = Test(
+    evaluator = Evaluator(
         task_type=task_type, label_dataset=label_dataset, label_model=label_model
     )
 
-    tester.load()
+    evaluator.load()
 
-    values = tester.evaluate()
+    values = evaluator.evaluate()
 
     return values
