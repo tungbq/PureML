@@ -121,10 +121,10 @@ export default function App() {
         <>
           {!prof && (
             <div className="bg-slate-50 landingpg-font flex flex-col justify-center">
-              <div className="flex flex-col justify-between h-screen 2xl:h-fit bgvideo bg-cover">
+              <div className="flex flex-col justify-between h-screen bgvideo bg-cover">
                 <Navbar />
-                <div className="flex flex-col gap-y-64 md:gap-y-48 pb-24 md:pb-24 2xl:pt-32">
-                  <HeroSection />
+                <HeroSection />
+                <div className="md:gap-y-48 pb-24 md:pb-24 2xl:pt-32">
                   <TrustedByCompanies />
                 </div>
               </div>
