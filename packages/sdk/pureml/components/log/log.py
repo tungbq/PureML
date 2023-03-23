@@ -1,19 +1,10 @@
 import typing
 import numpy as np
 import matplotlib.pyplot as plt
-from pureml.components import metrics as pure_metrics
-from pureml.components import params as pure_params
-from pureml.components import figure as pure_figure
+from .. import metrics as pure_metrics
+from .. import params as pure_params
+from . import figure as pure_figure
 from pureml.utils.version_utils import parse_version_label
-
-# def log(**kwargs):
-
-#     if 'metrics' in kwargs.keys():
-#         metrics.add(kwargs['metrics'])
-
-
-#     if 'params' in kwargs.keys():
-#         params.add(kwargs['params'])
 
 
 def log(label: str = None, metrics=None, params=None, step=1, **kwargs):

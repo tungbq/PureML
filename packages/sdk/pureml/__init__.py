@@ -11,8 +11,9 @@ from .components import artifacts as artifacts
 from .components import auth as auth
 from .components.auth import login
 from .components.log import log
+from .components.log import figure
 
-from .components import figure
+from .evaluate import grader, eval
 
 from .package import docker, fastapi
 

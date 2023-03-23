@@ -11,8 +11,8 @@ from PIL import Image
 from pureml.utils.pipeline import add_figures_to_config
 from pureml.schema import PathSchema, BackendSchema, StorageSchema
 from rich import print
-
 from . import get_org_id, get_token
+
 from pureml.utils.version_utils import parse_version_label
 
 
@@ -210,14 +210,14 @@ def fetch(label: str, key: str):
         file_name, url = file_details
 
         save_path = os.path.join(path_schema.PATH_FIGURE_DIR, file_name)
-        print("save path", save_path)
+        # print("save path", save_path)
 
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": "Bearer {}".format(user_token),
         }
 
-        print("figure url", url)
+        # print("figure url", url)
 
         # response = requests.get(url, headers=headers)
         response = requests.get(url)
@@ -272,6 +272,7 @@ def give_fig_url(details, key: str):
     # file_url = None
     source_path = None
     file_url = None
+    # print(details)
 
     if details is not None:
 
