@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import {
   Links,
@@ -37,24 +37,22 @@ import ReviewSection from "./components/landingPage/ReviewSection";
 import TestingSection from "./components/landingPage/TestingSection";
 import DeploySection from "./components/landingPage/DeploySection";
 
-export function links() {
-  return [
-    { rel: "stylesheet", href: styles },
-    { rel: "stylesheet", href: style },
-    { rel: "stylesheet", href: toastStyle },
-    { rel: "stylesheet", href: contributionStyle },
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    {
-      rel: "preconnect",
-      href: "https://fonts.gstatic.com",
-      crossOrigin: "anonymous",
-    },
-    {
-      rel: "stylesheet",
-      href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;500&family=Space+Grotesk:wght@400;500&display=swap",
-    },
-  ];
-}
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: styles },
+  { rel: "stylesheet", href: style },
+  { rel: "stylesheet", href: toastStyle },
+  { rel: "stylesheet", href: contributionStyle },
+  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  {
+    rel: "preconnect",
+    href: "https://fonts.gstatic.com",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;500&family=Space+Grotesk:wght@400;500&display=swap",
+  },
+];
 // ---------------------------------------------------------------------------
 
 export const meta: MetaFunction = () => ({
