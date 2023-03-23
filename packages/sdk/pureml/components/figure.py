@@ -96,7 +96,7 @@ def post_figures(
 
 
 def add(
-    label: str,
+    label: str = None,
     figure: dict = None,
     file_paths: dict = None,
     storage: str = StorageSchema().STORAGE,
@@ -121,18 +121,20 @@ def add(
 
     """
     model_name, model_branch, model_version = parse_version_label(label)
+    # print(model_name, model_branch, model_version)
     # print('file_paths', file_paths)
     # print('figure', figure)
 
     if file_paths is None:
         file_paths = save_images(figure)
         # print('figre paths', figure_paths)
-        add_figures_to_config(
-            values=file_paths,
-            model_name=model_name,
-            model_branch=model_branch,
-            model_version=model_version,
-        )
+
+    add_figures_to_config(
+        values=file_paths,
+        model_name=model_name,
+        model_branch=model_branch,
+        model_version=model_version,
+    )
 
     if (
         model_name is not None
