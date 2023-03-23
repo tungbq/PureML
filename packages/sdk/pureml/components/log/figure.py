@@ -7,7 +7,6 @@ import requests
 from joblib import Parallel, delayed
 from PIL import Image
 
-# from pureml.utils.constants import BASE_URL, PATH_FIGURE_DIR
 from pureml.utils.pipeline import add_figures_to_config
 from pureml.schema import PathSchema, BackendSchema, StorageSchema
 from rich import print
@@ -181,7 +180,7 @@ def details(label: str):
         return details
 
     else:
-        print(f"[bold red]Branch details details have not been found")
+        print(f"[bold red]Unable to fetch Figure!")
         return
 
 

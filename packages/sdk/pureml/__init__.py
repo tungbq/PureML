@@ -5,9 +5,9 @@ from .packaging import load_model, save_model
 
 from .components import model as model
 from .components import dataset as dataset
-from .components import metrics as metrics
-from .components import params as params
-from .components import artifacts as artifacts
+from .components.log import metrics
+from .components.log import params
+from .components.log import artifacts
 from .components import auth as auth
 from .components.auth import login
 from .components.log import log
