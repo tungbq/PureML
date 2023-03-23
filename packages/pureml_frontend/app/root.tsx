@@ -61,7 +61,13 @@ export const meta: MetaFunction = () => ({
   charset: "utf-8",
   title: "PureML",
   description: "Developer Platform for Production ML.",
+  "og:url": "https://pureml.com",
+  "og:title": "PureML",
+  "og:description": "Developer Platform for Production ML.",
   "og:image": "/PureMLMetaImg.svg",
+  "twitter:url": "https://pureml.com",
+  "twitter:title": "PureML",
+  "twitter:description": "Developer Platform for Production ML.",
   "twitter:image": "/PureMLMetaImg.svg",
   viewport: "width=device-width, height=device-height, initial-scale=1",
 });
@@ -121,10 +127,10 @@ export default function App() {
         <>
           {!prof && (
             <div className="bg-slate-50 landingpg-font flex flex-col justify-center">
-              <div className="flex flex-col justify-between h-screen 2xl:h-fit bgvideo bg-cover">
+              <div className="flex flex-col justify-between h-screen bgvideo bg-cover">
                 <Navbar />
-                <div className="flex flex-col gap-y-64 md:gap-y-48 pb-24 md:pb-24 2xl:pt-32">
-                  <HeroSection />
+                <HeroSection />
+                <div className="md:gap-y-48 pb-24 md:pb-24 2xl:pt-32">
                   <TrustedByCompanies />
                 </div>
               </div>
@@ -172,18 +178,16 @@ function Document({
           name="description"
           content="Developer platform for Production ML."
         />
-
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://metatags.io/" />
+        <meta property="og:url" content="https://pureml.com" />
         <meta property="og:title" content="PureML" />
         <meta
           property="og:description"
           content="Developer platform for Production ML."
         />
-        <meta property="og:image" content="https://imgur.com/a/IpiHnFY" />
-
+        <meta property="og:image" content="/PureMLMetaImg.svg" />
         <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="https://metatags.io/" />
+        <meta property="twitter:url" content="https://pureml.com" />
         <meta property="twitter:title" content="PureML" />
         <meta
           property="twitter:description"
