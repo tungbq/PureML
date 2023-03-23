@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from pureml.predictor.predictor import BasePredictor
-from .evaluator import Evaluator
+from .grade import Grader
 from pureml.components import dataset
 from typing import Any
 from importlib import import_module
@@ -13,7 +13,7 @@ class Test(BaseModel):
     label_dataset: str
     predictor: BasePredictor = None
     predictor_path: str = "predict.py"
-    evaluator: Evaluator = None
+    grader: Grader = None
     dataset: Any = None
 
     class Config:
@@ -44,8 +44,8 @@ class Test(BaseModel):
 
     def evaluate(self):
         pred = self.predictor.predict(self.dataset["x_test"])
-        self.evaluator = Evaluator(task_type=self.task_type)
-        values = self.evaluator.compute(
+        self.grader = Grader(task_type=self.task_type)
+        values = self.grader.compute(
             references=self.dataset["y_test"], predictions=pred
         )
 

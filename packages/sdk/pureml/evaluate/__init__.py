@@ -1,2 +1,2 @@
-from .evaluator import evaluator
+from .grade import grader
 from .eval import eval

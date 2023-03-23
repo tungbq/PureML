@@ -12,7 +12,7 @@ from .components import auth as auth
 from .components.auth import login
 from .components.log import log
 
-from .evaluate import evaluator, eval
+from .evaluate import grader, eval
 from .components import figure
 
 from .package import docker, fastapi
