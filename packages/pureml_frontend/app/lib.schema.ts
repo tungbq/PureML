@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const versionDataSchema = z.string();
 export type versionDataType = z.infer<typeof versionDataSchema>;

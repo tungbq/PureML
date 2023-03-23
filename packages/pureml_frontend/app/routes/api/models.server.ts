@@ -118,6 +118,27 @@ export async function fetchModelBranch(
 
 // ########################## model version details ###########################
 
+export async function fetchOneModelVersion(
+  orgId: string,
+  modelId: string,
+  branchName: string,
+  version: string,
+  accessToken: string
+) {
+  const url = makeUrl(
+    `org/${orgId}/model/${modelId}/branch/${branchName}/version/${version}/log`
+  );
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application / json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((res) => res.json());
+  return res.data;
+}
+
 export async function fetchModelVersions(
   orgId: string,
   modelId: string,
@@ -196,4 +217,59 @@ export async function fetchModelReview(
     },
   }).then((res) => res.json());
   return res.data;
+}
+
+export async function submitModelReview(
+  orgId: string,
+  modelName: string,
+  branch: string,
+  version: string,
+  accessToken: string
+) {
+  const url = makeUrl(`org/${orgId}/model/${modelName}/review/create`);
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application / json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      description: "string",
+      from_branch: branch,
+      from_branch_version: version,
+      is_accepted: false,
+      is_complete: false,
+      title: "string",
+      to_branch: "main",
+    }),
+  }).then((res) => res.json());
+  return res;
+}
+
+export async function updateModelReview(
+  orgId: string,
+  modelName: string,
+  reviewId: string,
+  accepted: string,
+  accessToken: string
+) {
+  const url = makeUrl(
+    `org/${orgId}/model/${modelName}/review/${reviewId}/update`
+  );
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application / json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      description: "-",
+      is_accepted: accepted === "true",
+      is_complete: true,
+      title: "-",
+    }),
+  }).then((res) => res.json());
+  return res;
 }

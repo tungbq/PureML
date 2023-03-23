@@ -52,11 +52,11 @@ export default function TabBar(props: Props) {
       name: "Versions",
       hyperlink: `/org/${orgId}/models/${modelId}/versions/logs`,
     },
-    // {
-    //   id: "review",
-    //   name: "Review",
-    //   hyperlink: `/org/${orgId}/models/${modelId}/review`,
-    // },
+    {
+      id: "review",
+      name: "Review",
+      hyperlink: `/org/${orgId}/models/${modelId}/review`,
+    },
   ];
   const primaryDatasetTabs = [
     {
@@ -69,11 +69,11 @@ export default function TabBar(props: Props) {
       name: "Versions",
       hyperlink: `/org/${orgId}/datasets/${datasetId}/versions/datalineage`,
     },
-    // {
-    //   id: "review",
-    //   name: "Review",
-    //   hyperlink: `/org/${orgId}/datasets/${datasetId}/review`,
-    // },
+    {
+      id: "review",
+      name: "Review",
+      hyperlink: `/org/${orgId}/datasets/${datasetId}/review`,
+    },
   ];
   const primarySettingTabs = [
     {

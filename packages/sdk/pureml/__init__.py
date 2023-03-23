@@ -17,7 +17,7 @@ from .evaluate import grader, eval
 
 from .package import docker, fastapi
 
-from .predictor.predictor import BasePredictor
 from .schema import Input, Output
+from .predictor.predictor import BasePredictor
 
 __version__ = "0.3.0"

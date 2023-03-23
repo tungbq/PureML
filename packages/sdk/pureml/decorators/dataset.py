@@ -2,6 +2,7 @@ from pureml.components.dataset import register
 from pureml.utils.pipeline import add_dataset_to_config
 from pureml.lineage.data.create_lineage import create_lineage
 from pureml.utils.version_utils import parse_version_label
+import functools
 
 
 def dataset(label: str, parent: str = None, upload=False):
@@ -11,7 +12,10 @@ def dataset(label: str, parent: str = None, upload=False):
         # Add dataset name to config here if it is being used by any of the pipeline components.
         # add_dataset_to_config(name=name, parent=parent)
 
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            func_name = func.__name__
+            func_description = func.__doc__
 
             func_output = func(*args, **kwargs)
 
@@ -20,7 +24,13 @@ def dataset(label: str, parent: str = None, upload=False):
             if not upload or func_output is None:
                 is_empty = True
 
-            add_dataset_to_config(name=name, branch=branch, parent=parent, func=func)
+            add_dataset_to_config(
+                name=name,
+                branch=branch,
+                description=func_description,
+                parent=parent,
+                func=func,
+            )
 
             lineage = create_lineage()
 
