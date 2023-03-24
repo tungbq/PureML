@@ -69,13 +69,7 @@ def post_figures(
         else:
             print("[bold red] figure", file_name, "doesnot exist at the given path")
 
-    data = {
-        "name_path_mapping": figure_paths,
-        "model_name": model_name,
-        "model_version": model_branch,
-        "model_version": model_version,
-        "storage": storage,
-    }
+    data = {"data": figure_paths, "key": "figure"}
 
     # data = json.dumps(data)
 
