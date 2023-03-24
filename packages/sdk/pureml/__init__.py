@@ -12,6 +12,8 @@ from .components import auth as auth
 from .components.auth import login
 from .components.log import log
 from .components.log import figure
+from .components.log import predict
+from .components.log import pip_requirement
 
 from .evaluate import grader, eval
 

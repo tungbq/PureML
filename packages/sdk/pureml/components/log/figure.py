@@ -69,7 +69,11 @@ def post_figures(
         else:
             print("[bold red] figure", file_name, "doesnot exist at the given path")
 
-    data = {"data": figure_paths, "key": "figure"}
+    data = {
+        "data": figure_paths,
+        "key": "figure",
+        "storage": storage,
+    }
 
     # data = json.dumps(data)
 
@@ -205,7 +209,7 @@ def fetch(label: str, key: str):
         file_name, url = file_details
 
         save_path = os.path.join(path_schema.PATH_FIGURE_DIR, file_name)
-        # print("save path", save_path)
+        # print("save path in fetching", save_path)
 
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -217,7 +221,7 @@ def fetch(label: str, key: str):
         # response = requests.get(url, headers=headers)
         response = requests.get(url)
 
-        print(response.status_code)
+        # print(response.status_code)
 
         if response.ok:
             print("[bold green] figure {} has been fetched".format(file_name))
@@ -259,7 +263,7 @@ def fetch(label: str, key: str):
             delayed(fetch_figure)(fig_url) for fig_url in fig_urls
         )
 
-    return res_text
+    # return res_text
 
 
 def give_fig_url(details, key: str):
@@ -277,7 +281,7 @@ def give_fig_url(details, key: str):
                 source_path = det["key"]
                 file_url = det["data"]
                 source_path = ".".join([source_path, "jpg"])
-                source_path = os.path.join(path_schema.PATH_FIGURE_DIR, source_path)
+                # source_path = os.path.join(path_schema.PATH_FIGURE_DIR, source_path)
                 fig_paths.append([source_path, file_url])
 
                 # print(source_path, file_url)
