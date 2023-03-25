@@ -6,18 +6,15 @@ import ReactFlow, {
   useEdgesState,
   Controls,
   MarkerType,
-  Handle,
-  Position,
 } from "reactflow";
 import dagre from "dagre";
 import DetailedNode from "./customNode";
-import { Table } from "lucide-react";
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
 const nodeWidth = 190;
-const nodeHeight = 96;
+const nodeHeight = 110;
 
 const getLayoutedElements = (nodes: any, edges: any, direction = "TB") => {
   const isHorizontal = direction === "LR";

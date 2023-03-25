@@ -251,7 +251,7 @@ export default function DatasetVersions() {
           <div className="flex justify-between h-full">
             <div className="w-4/5">
               <Tabbar intent="datasetTab" tab="datalineage" />
-              <div className="px-12 pt-2 pb-8 h-full overflow-auto">
+              <div className="px-12 pt-2 pb-8 h-[100vh] overflow-auto">
                 <section>
                   {!versionData && (
                     <div className="text-slate-600">
@@ -395,7 +395,7 @@ export default function DatasetVersions() {
                           >
                             <SelectPrimitive.Item
                               value={version.version}
-                              className="flex items-center justify-between px-4 py-2 rounded-md text-base text-slate-600 font-medium cursor-pointer  hover:bg-slate-100 hover:border-none focus:outline-none"
+                              className="flex items-center justify-between px-4 py-2 rounded-md text-base text-slate-600 font-medium cursor-pointer hover:bg-slate-100 hover:border-none focus:outline-none"
                             >
                               <SelectPrimitive.ItemText className="text-slate-600 text-base font-medium">
                                 Submit For review
