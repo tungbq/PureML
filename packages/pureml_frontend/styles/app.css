@@ -355,7 +355,7 @@ input[type="text"]:focus,
 }
 
 .react-flow__handle-top {
-  top: 2px !important;
+  top: 0px !important;
 }
 
 /* ################ Profile Contribution chart ################ */

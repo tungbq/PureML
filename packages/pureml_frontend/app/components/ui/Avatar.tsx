@@ -5,9 +5,10 @@ const avatarStyles = tv({
   base: "avatar flex items-center justify-center text-blue-600 rounded-full",
   variants: {
     intent: {
-      primary: "w-6 bg-blue-200",
+      primary: "bg-blue-200 w-6",
       profile: "w-6",
       org: "bg-blue-200 w-9 h-9",
+      avatar: "bg-blue-200 w-8 h-8 text-base",
     },
   },
   defaultVariants: {

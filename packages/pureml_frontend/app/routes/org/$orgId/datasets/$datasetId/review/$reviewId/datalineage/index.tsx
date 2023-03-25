@@ -314,7 +314,7 @@ export default function Review() {
                           }}
                         />
                         <div className="flex items-center justify-center pl-4 text-slate-600">
-                          <AvatarIcon>
+                          <AvatarIcon intent="avatar">
                             {version.created_by.name.charAt(0).toUpperCase()}
                           </AvatarIcon>
                           <div>

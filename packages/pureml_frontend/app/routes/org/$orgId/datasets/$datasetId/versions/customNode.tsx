@@ -9,7 +9,7 @@ function DetailedNode({ data, isConnectable }: any) {
         position={Position.Top}
         isConnectable={isConnectable}
       />
-      <div className="flex gap-x-2 bg-slate-100 px-4 py-1.5">
+      <div className="flex gap-x-2 bg-slate-100 px-4 py-1.5 rounded-t-lg">
         <Table className="w-4" />
         <div className="truncate w-3/4">{data.title || "Node Title"}</div>
       </div>
