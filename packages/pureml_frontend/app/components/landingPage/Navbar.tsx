@@ -26,6 +26,11 @@ export default function Navbar() {
                 </div>
                 <div className="flex flex-col gap-y-4 p-4 font-medium text-brand-200">
                   <div className="flex items-center">
+                    <a href="/whypureml" className="w-max letterSpaced">
+                      WHY PUREML
+                    </a>
+                  </div>
+                  <div className="flex items-center">
                     <a href="/mltools" className="w-max letterSpaced">
                       MLOPS TOOLS
                     </a>
@@ -48,16 +53,6 @@ export default function Navbar() {
                       className="w-max letterSpaced"
                     >
                       DOCS
-                    </a>
-                  </div>
-                  <div className="flex items-center">
-                    <a
-                      href="https://discord.gg/xNUHt9yguJ"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-max letterSpaced"
-                    >
-                      JOIN DISCORD
                     </a>
                   </div>
                   <div className="flex items-center text-brand-200 letterSpaced">
@@ -106,6 +101,14 @@ export default function Navbar() {
             <div className="hidden sm:flex flex font-medium">
               <div className="px-4 flex justify-center items-center">
                 <a
+                  href="/whypureml"
+                  className="w-full text-lg letterSpaced text-brand-200 hover:underline hover:underline-offset-2"
+                >
+                  WHY PUREML
+                </a>
+              </div>
+              <div className="px-4 flex justify-center items-center">
+                <a
                   href="/mltools"
                   className="w-full text-lg letterSpaced text-brand-200 hover:underline hover:underline-offset-2"
                 >
@@ -130,16 +133,6 @@ export default function Navbar() {
                   rel="noreferrer"
                 >
                   DOCS
-                </a>
-              </div>
-              <div className="px-4 flex justify-center items-center">
-                <a
-                  href="https://discord.gg/xNUHt9yguJ"
-                  className="w-max text-lg letterSpaced text-brand-200 hover:underline hover:underline-offset-2"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  JOIN DISCORD
                 </a>
               </div>
               <div className="px-4 flex justify-center items-center">

@@ -75,9 +75,9 @@ export default function Footer() {
               >
                 Docs
               </a>
-              {/* <a href="/whypureml" className="underline text-lg xl:text-xl">
+              <a href="/whypureml" className="underline text-lg xl:text-xl">
                 Why PureML
-              </a> */}
+              </a>
               <a href="/mltools" className="underline text-lg xl:text-xl">
                 ML Tools
               </a>
@@ -99,6 +99,14 @@ export default function Footer() {
               </a>
             </div>
             <div className="flex flex-col gap-x-2">
+              <a
+                href="https://discord.gg/xNUHt9yguJ"
+                target="_blank"
+                rel="noreferrer"
+                className="text-lg xl:text-xl"
+              >
+                Join Discord
+              </a>
               <a
                 href="https://pureml.instatus.com"
                 target="_blank"
