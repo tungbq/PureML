@@ -21,6 +21,7 @@ import AvatarIcon from "~/components/ui/Avatar";
 import Select from "~/components/ui/Select";
 import Breadcrumbs from "~/components/Breadcrumbs";
 import { toast } from "react-toastify";
+import ComparisionTable from "~/components/ComparisionTable";
 
 export async function loader({ params, request }: any) {
   const session = await getSession(request.headers.get("Cookie"));
@@ -84,12 +85,9 @@ export default function ModelMetrics() {
   const [submitReviewVersion, setSubmitReviewVersion] = useState("");
   const [branch, setBranch] = useState("main");
   const [dataVersion, setDataVersion] = useState({});
-  const [ver1Metrics, setVer1Metrics] = useState({});
-  const [ver1Params, setVer1Params] = useState({});
-  const [ver2Metrics, setVer2Metrics] = useState({});
-  const [ver2Params, setVer2Params] = useState({});
-  const [metricsKeys, setMetricsKeys] = useState<string[]>([]);
-  const [paramsKeys, setParamsKeys] = useState<string[]>([]);
+  const [ver1Logs, setVer1Logs] = useState<{ [key: string]: string }>({});
+  const [ver2Logs, setVer2Logs] = useState<{ [key: string]: string }>({});
+  const [commonMetrics, setCommonMetrics] = useState<string[]>([]);
   const [versionData, setVersionData] = useState(data.versions);
   const branchData = data.branches;
 
@@ -112,18 +110,23 @@ export default function ModelMetrics() {
     });
     setDataVersion(tempDict);
     const tt = dataVersion[ver1];
-    console.log("tt=", tt);
+    // console.log("tt=", tt);
     if (tt) {
-      if (tt.logs) {
-        if (tt.logs[0] === null) {
-          setVer1Metrics({});
-          setVer1Params({});
-          return;
-        }
-        setVer1Metrics(JSON.parse(tt.logs[0].data));
-        setVer1Params(JSON.parse(tt.logs[1].data));
-        setMetricsKeys(Object.keys(JSON.parse(tt.logs[0].data)));
-        setParamsKeys(Object.keys(JSON.parse(tt.logs[1].data)));
+      if (tt.logs === null) {
+        setVer1Logs({});
+        setCommonMetrics([]);
+        return;
+      } else {
+        const tempDictv1 = {};
+        const tempArr1: string[] = [];
+        tt.logs.forEach((log: { key: string; data: any }) => {
+          tempDictv1[log.key] = JSON.parse(log.data);
+          tempArr1.push(log.key as string);
+        });
+        setVer1Logs(tempDictv1);
+        // console.log(tt.logs);
+
+        setCommonMetrics(tempArr1);
       }
     }
   }, [ver1, versionData]);
@@ -131,51 +134,50 @@ export default function ModelMetrics() {
   // ##### comparing versions #####
   useEffect(() => {
     if (!versionData) return;
+    if (!versionData[ver1]) return;
     const t1 = dataVersion[ver1];
     console.log("t1=", t1);
     if (t1) {
-      if (t1.logs) {
-        if (t1.logs[0] === null) {
-          return;
-        }
-        setMetricsKeys(Object.keys(JSON.parse(t1.logs[0].data)));
-        setParamsKeys(Object.keys(JSON.parse(t1.logs[1].data)));
+      if (t1.logs === null) {
+        return;
+      } else {
+        const tempArr1: string[] = [];
+        t1.logs.forEach((log: { key: string }) => {
+          tempArr1.push(log.key as string);
+        });
+        setCommonMetrics(tempArr1);
       }
     }
     if (ver2 === "") {
-      setVer2Metrics({});
-      setVer2Params({});
+      setVer2Logs({});
+
       return;
     }
     const tt = dataVersion[ver2];
-    console.log("tt2=", tt);
+    // console.log('tt2=', tt);
     if (tt) {
-      if (tt.logs) {
-        if (tt.logs[0] === null) {
-          console.log("nul");
-          setVer2Metrics({});
-          setVer2Params({});
-          return;
-        }
-        setVer2Metrics(JSON.parse(tt.logs[0].data));
-        setVer2Params(JSON.parse(tt.logs[1].data));
-        const metKeys = Object.keys(JSON.parse(tt.logs[0].data));
-        const parKeys = Object.keys(JSON.parse(tt.logs[1].data));
-        metKeys.forEach((key) => {
-          if (!metricsKeys.includes(key)) {
-            setMetricsKeys((prev) => [...prev, key]);
+      if (tt.logs === null) {
+        setVer2Logs({});
+        return;
+      } else {
+        const tempDictv2 = {};
+        console.log("tt.logs=", tt.logs);
+
+        tt.logs.forEach((log: { data: any }) => {
+          try {
+            tempDictv2[log.key] = JSON.parse(log.data);
+            if (!commonMetrics.includes(log.key)) {
+              setCommonMetrics((prev) => [...prev, log.key]);
+            }
+          } catch {
+            console.log("Invalid log.key=", log.key);
           }
         });
-        parKeys.forEach((key) => {
-          if (!paramsKeys.includes(key)) {
-            setParamsKeys((prev) => [...prev, key]);
-          }
-        });
+        setVer2Logs(tempDictv2);
       }
     }
   }, [ver2, versionData]);
-
-  console.log(ver2Metrics, ver2Params, ver1Metrics, ver1Params);
+  console.log("commonMetrics=", commonMetrics);
 
   // ##### submit review functionality #####
   useEffect(() => {
@@ -197,7 +199,7 @@ export default function ModelMetrics() {
     submit(event.currentTarget, { replace: true });
   }
   function submitReview(event: any) {
-    console.log(event.target.value);
+    // console.log(event.target.value);
     submit(event.currentTarget, { replace: true });
   }
 
@@ -215,139 +217,30 @@ export default function ModelMetrics() {
             <div className="w-4/5">
               <Tabbar intent="modelTab" tab="metrics" />
               <div className="px-12 pt-2 pb-8 h-[70vh] overflow-auto">
-                {/* ##### metrics secion ##### */}
-                <section>
-                  <div
-                    className="flex items-center justify-between w-full border-b-slate-300 border-b pb-4"
-                    onClick={() => setMetrics(!metrics)}
-                  >
-                    <h1 className="text-slate-800 font-medium text-sm">
-                      Metrics
-                    </h1>
-                    {metrics ? (
-                      <ChevronUp className="text-slate-400" />
-                    ) : (
-                      <ChevronDown className="text-slate-400" />
-                    )}
-                  </div>
-                  {metrics && (
-                    <div className="py-6">
-                      {metricsKeys.length !== 0 && versionData !== null ? (
-                        <>
-                          <table className="max-w-[1000px] w-full">
-                            {metricsKeys.length !== 0 && (
-                              <>
-                                <thead>
-                                  <tr>
-                                    <th className="text-slate-600 font-medium text-left border p-4">
-                                      {" "}
-                                    </th>
-                                    <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
-                                      {ver1}
-                                    </th>
-                                    {ver2 !== "" ? (
-                                      <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
-                                        {ver2}
-                                      </th>
-                                    ) : null}
-                                  </tr>
-                                </thead>
-                                {metricsKeys.map((metric, i) => (
-                                  <tr key={i}>
-                                    <th className="text-slate-600 font-medium text-left border p-4">
-                                      {metric}
-                                    </th>
-                                    {/* {console.log(ver1Metrics[metric])} */}
-                                    <td className="text-slate-600 font-medium text-left border p-4 w-1/5 truncate">
-                                      {ver1Metrics[metric]
-                                        ? ver1Metrics[metric].slice(0, 5)
-                                        : "-"}
-                                    </td>
-                                    {ver2 !== "" && (
-                                      <td className="text-slate-600 font-medium text-left border p-4 w-1/5 truncate">
-                                        {ver2Metrics[metric]
-                                          ? ver2Metrics[metric].slice(0, 5)
-                                          : "-"}
-                                      </td>
-                                    )}
-                                  </tr>
-                                ))}
-                              </>
-                            )}
-                          </table>
-                        </>
-                      ) : (
-                        <div>No Metrics available</div>
-                      )}
-                    </div>
-                  )}
-                </section>
-                {/* ##### parameters section ##### */}
-                <section className="pt-16">
-                  <div
-                    className="flex items-center justify-between w-full border-b-slate-300 border-b pb-4"
-                    onClick={() => setParams(!params)}
-                  >
-                    <h1 className="text-slate-800 font-medium text-sm">
-                      Parameters
-                    </h1>
-                    {params ? (
-                      <ChevronUp className="text-slate-400" />
-                    ) : (
-                      <ChevronDown className="text-slate-400" />
-                    )}
-                  </div>
-                  {params && (
-                    <div className="py-6">
-                      {paramsKeys.length !== 0 && versionData !== null ? (
-                        <>
-                          <table className=" max-w-[1000px] w-full">
-                            {paramsKeys.length !== 0 && (
-                              <>
-                                <thead>
-                                  <tr>
-                                    <th className="text-slate-600 font-medium text-left border p-4">
-                                      {" "}
-                                    </th>
-                                    <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
-                                      {ver1}
-                                    </th>
-                                    {ver2 !== "" ? (
-                                      <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
-                                        {ver2}
-                                      </th>
-                                    ) : null}
-                                  </tr>
-                                </thead>
-                                {paramsKeys.map((param: any, index: number) => (
-                                  <tr key={index}>
-                                    <th className="text-slate-600 font-medium text-left border p-4">
-                                      {param}
-                                    </th>
-                                    <td className="text-slate-600 font-medium text-left border p-4">
-                                      {ver1Params[param]
-                                        ? ver1Params[param].slice(0, 5)
-                                        : "-"}
-                                    </td>
-                                    {ver2 !== "" && (
-                                      <td className="text-slate-600 font-medium text-left border p-4">
-                                        {ver2Params[param]
-                                          ? ver2Params[param].slice(0, 5)
-                                          : "-"}
-                                      </td>
-                                    )}
-                                  </tr>
-                                ))}
-                              </>
-                            )}
-                          </table>
-                        </>
-                      ) : (
-                        <div>No parameters available</div>
-                      )}
-                    </div>
-                  )}
-                </section>
+                {/* ##### version section ##### */}
+                {commonMetrics.length !== 0 && versionData !== null ? (
+                  <>
+                    {commonMetrics.map((key) => {
+                      return (
+                        <ComparisionTable
+                          metric={key}
+                          ver1={ver1}
+                          ver2={ver2}
+                          dataVer1={
+                            ver1Logs[key] as unknown as {
+                              [key: string]: string;
+                            }
+                          }
+                          dataVer2={
+                            ver2Logs[key] as unknown as {
+                              [key: string]: string;
+                            }
+                          }
+                        />
+                      );
+                    })}
+                  </>
+                ) : null}
               </div>
             </div>
             {/* ##### versions list right sidebar ##### */}
