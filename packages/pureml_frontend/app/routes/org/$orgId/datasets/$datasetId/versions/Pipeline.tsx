@@ -29,6 +29,10 @@ const getLayoutedElements = (nodes: any, edges: any, direction = "TB") => {
     });
   });
   edges.forEach((edge: any) => {
+    edge.type = "smoothstep";
+    edge.markerEnd = {
+      type: MarkerType.ArrowClosed,
+    };
     dagreGraph.setEdge(edge.source, edge.target);
   });
   dagre.layout(dagreGraph);

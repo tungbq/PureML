@@ -2,7 +2,7 @@ import { tv, type VariantProps } from "tailwind-variants";
 import { Box, Database } from "lucide-react";
 
 const cardStyles = tv({
-  base: "rounded-lg border border-slate-200 justify-center px-6 py-4 font-normal focus:outline-none cursor-pointer hover:bg-slate-50 transform transition duration-300",
+  base: "rounded-lg border border-slate-200 justify-center px-6 py-4 font-normal focus:outline-none cursor-pointer hover:bg-slate-100 transform transition duration-300",
   variants: {
     intent: {
       modelCard: "text-slate-600",
