@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from . import metrics as pure_metrics
 from . import params as pure_params
 from . import figure as pure_figure
+from . import predict as pure_predict
+from . import pip_requirement as pure_pip_req
 from pureml.utils.version_utils import parse_version_label
 from pureml.schema import PathSchema, BackendSchema
 import requests
@@ -51,3 +53,25 @@ def log(label: str = None, metrics=None, params=None, step=1, **kwargs):
         # func_params['step']  = step
 
         pure_figure.add(**func_params)
+
+    if "predict" in kwargs.keys():
+        predict = kwargs["predict"]
+        func_params = {}
+
+        if label is not None:
+            func_params["label"] = label
+
+        func_params["path"] = predict
+
+        pure_predict.add(**func_params)
+
+    if "requirements" in kwargs.keys():
+        requirement = kwargs["requirements"]
+        func_params = {}
+
+        if label is not None:
+            func_params["label"] = label
+
+        func_params["path"] = requirement
+
+        pure_pip_req.add(**func_params)

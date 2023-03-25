@@ -5,42 +5,53 @@ from fastapi import FastAPI
 from pureml.schema import FastAPISchema, PredictionSchema
 from pureml.utils.package import process_input, process_output
 from pureml.utils.version_utils import parse_version_label
+from pureml import predict, pip_requirement
 
 
 prediction_schema = PredictionSchema()
 fastapi_schema = FastAPISchema()
 
 
-def get_predict_file(predict_path):
+def get_predict_file(label, predict_path):
 
-    # os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
+    predict.fetch(label)
 
-    if predict_path is None:
-        predict_path = prediction_schema.PATH_PREDICT_USER
-        print("Taking the default predict.py file path: ", predict_path)
+    if not os.path.exists(prediction_schema.PATH_PREDICT):
+        print("[orange] Prediction Function is not logged")
+
+        # os.makedirs(PATH_PREDICT_DIR, exist_ok=True)
+
+        if predict_path is None:
+            predict_path = prediction_schema.PATH_PREDICT_USER
+            print("Taking the default predict.py file path: ", predict_path)
+        else:
+            print("Taking the predict.py file path: ", predict_path)
+
+        if os.path.exists(predict_path):
+            shutil.copy(predict_path, prediction_schema.PATH_PREDICT)
+        else:
+            raise Exception(predict_path, "doesnot exists!!!")
     else:
-        print("Taking the predict.py file path: ", predict_path)
+        print("Taking the fetched predict.py file path")
 
-    if os.path.exists(predict_path):
-        shutil.copy(predict_path, prediction_schema.PATH_PREDICT)
+
+def get_requirements_file(label, requirements_path):
+    pip_requirement.fetch(label=label)
+
+    if not os.path.exists(prediction_schema.PATH_PREDICT_REQUIREMENTS):
+
+        if requirements_path is None:
+            requirements_path = prediction_schema.PATH_PREDICT_REQUIREMENTS_USER
+            print("Taking the default requirements.txt file path: ", requirements_path)
+        else:
+            print("Taking the requirements.txt file path: ", requirements_path)
+
+        if os.path.exists(requirements_path):
+            shutil.copy(requirements_path, prediction_schema.PATH_PREDICT_REQUIREMENTS)
+        else:
+            raise Exception(requirements_path, "doesnot exists!!!")
     else:
-        raise Exception(predict_path, "doesnot exists!!!")
-
-
-def get_requirements_file(requirements_path):
-
-    # os.makedirs(prediction_schema.paths.PATH_PREDICT_DIR, exist_ok=True)
-
-    if requirements_path is None:
-        requirements_path = prediction_schema.PATH_PREDICT_REQUIREMENTS_USER
-        print("Taking the default requirements.txt file path: ", requirements_path)
-    else:
-        print("Taking the requirements.txt file path: ", requirements_path)
-
-    if os.path.exists(requirements_path):
-        shutil.copy(requirements_path, prediction_schema.PATH_PREDICT_REQUIREMENTS)
-    else:
-        raise Exception(requirements_path, "doesnot exists!!!")
+        print("Taking the fetched requirements.txt file path")
 
 
 def generate_api(label: str):
@@ -131,9 +142,9 @@ def create_fastapi_file(
 ):
     fastapi_schema = FastAPISchema()
 
-    get_predict_file(predict_path)
+    get_predict_file(label, predict_path)
 
-    get_requirements_file(requirements_path)
+    get_requirements_file(label, requirements_path)
 
     api = generate_api(label=label)
 
@@ -157,7 +168,9 @@ def run(label, predict_path=None, requirements_path=None):
         label, predict_path=predict_path, requirements_path=requirements_path
     )
 
-    run_command = "python {api_path}".format(api_path=fastapi_schema.PATH_FASTAPI_FILE)
+    run_command = "python '{api_path}'".format(
+        api_path=fastapi_schema.PATH_FASTAPI_FILE
+    )
 
     os.system(run_command)
 

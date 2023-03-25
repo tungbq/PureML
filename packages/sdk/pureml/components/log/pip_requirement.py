@@ -73,7 +73,7 @@ def add(
 
     model_name, model_branch, model_version = parse_version_label(label)
 
-    file_paths = {"requirement": path}
+    file_paths = {"requirements": path}
 
     add_pip_req_to_config(
         values=path,
@@ -190,7 +190,7 @@ def fetch(label: str):
 
     # pred_urls = give_pip_requirement_urls(details=pip_requirement_details)
     pred_urls = give_pip_requirement_url(
-        details=pip_requirement_details, key="requirement"
+        details=pip_requirement_details, key="requirements"
     )
 
     if len(pred_urls) == 1:
