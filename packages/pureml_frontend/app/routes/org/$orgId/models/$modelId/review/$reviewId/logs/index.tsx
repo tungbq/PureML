@@ -432,16 +432,15 @@ export default function Review() {
                           {reviewBranch || "Branch"}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center py-1">
+                      {/* <div className="flex justify-between items-center py-1">
                         <span className="w-1/7 flex items-center">
                           <User className="w-4" />
                         </span>
                         <span className="w-1/2 pl-2">Pushed by</span>
                         <span className="w-1/2 pl-2 text-slate-600 font-medium">
-                          {/* {`${datasetDetails[0].is_public ? "Yes" : "No"}`} */}
-                          Name
+                          {`${datasetDetails[0].is_public ? "Yes" : "No"}`}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
                     <div className="flex gap-x-4 mt-6">
                       <Form method="post">

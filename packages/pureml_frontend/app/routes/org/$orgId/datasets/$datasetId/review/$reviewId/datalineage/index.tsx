@@ -155,7 +155,7 @@ export default function Review() {
       setNode2(null);
       setEdge2(null);
     }
-  }, [ver2, versionData]);
+  }, [dataVersion, ver2, versionData]);
 
   useEffect(() => {
     if (!versionData) return;
@@ -187,7 +187,7 @@ export default function Review() {
       setNode(null);
       setEdge(null);
     }
-  }, [ver1, versionData]);
+  }, [reviewData, ver1, versionData]);
 
   // ##### review action functionality #####
   useEffect(() => {
@@ -236,19 +236,19 @@ export default function Review() {
                   {versionData && (
                     <div className="flex pt-6 gap-x-8">
                       {!node2 && (
-                        <div className="w-full h-screen max-h-[600px]">
+                        <div className="w-full h-screen max-h-full">
                           {node && <Pipeline pnode={node} pedge={edge} />}
                         </div>
                       )}
                       {node2 && (
                         <>
-                          <div className="w-1/2 h-screen max-h-[600px]">
+                          <div className="w-1/2 h-screen max-h-full">
                             <div className="text-sm text-slate-600 font-medium pb-6">
-                              Submitted commit {ver1}
+                              Submitted commit {reviewVersion}
                             </div>
                             {node && <Pipeline pnode={node} pedge={edge} />}
                           </div>
-                          <div className="w-1/2 h-screen max-h-[600px]">
+                          <div className="w-1/2 h-screen max-h-full">
                             <div className="text-sm text-slate-600 font-medium pb-6">
                               {ver2}
                             </div>
@@ -270,7 +270,7 @@ export default function Review() {
                   disabled
                 >
                   <option value="value" selected>
-                    {reviewBranch}
+                    {toBranch}
                   </option>
                 </select>
               </div>
@@ -292,7 +292,7 @@ export default function Review() {
                           <p className="px-4 font-medium">
                             Submitted review {reviewVersion}
                           </p>
-                          <p className="px-4">Created by Kessshhhaaa</p>
+                          <p className="px-4">from branch {reviewBranch}</p>
                         </div>
                       </div>
                     </div>
@@ -345,7 +345,7 @@ export default function Review() {
                       </span>
                       <span className="w-1/2 pl-2">Commit version</span>
                       <span className="w-1/2 pl-2 text-slate-600 font-medium">
-                        {/* {reviewVersion || "Version"} */}Version
+                        {reviewVersion || "Version"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-1">
@@ -354,19 +354,18 @@ export default function Review() {
                       </span>
                       <span className="w-1/2 pl-2">Commit branch</span>
                       <span className="w-1/2 pl-2 text-slate-600 font-medium">
-                        {/* {reviewBranch || "Branch"} */}Branch
+                        {reviewBranch || "Branch"}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-1">
+                    {/* <div className="flex justify-between items-center py-1">
                       <span className="w-1/7 flex items-center">
                         <User className="w-4" />
                       </span>
                       <span className="w-1/2 pl-2">Pushed by</span>
                       <span className="w-1/2 pl-2 text-slate-600 font-medium">
-                        {/* {`${datasetDetails[0].is_public ? "Yes" : "No"}`} */}
-                        Name
+                        {`${datasetDetails[0].is_public ? "Yes" : "No"}`}
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="flex gap-x-4 mt-6">
                     <Form method="post">

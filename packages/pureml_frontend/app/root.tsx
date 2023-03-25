@@ -195,7 +195,7 @@ function Document({
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="overflow-hidden">
         <script async defer src="https://buttons.github.io/buttons.js"></script>
         {!gaTrackingId ? null : (
           <>
@@ -221,7 +221,7 @@ function Document({
         )}
         <Scripts />
         <Analytics />
-        <div className="h-screen bg-slate-50">{children}</div>
+        <div className="h-screen overflow-hidden bg-slate-50">{children}</div>
         <ScrollRestoration />
         <LiveReload />
       </body>

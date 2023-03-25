@@ -290,7 +290,7 @@ export default function Review() {
                           {reviewBranch || "Branch"}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center py-1">
+                      {/* <div className="flex justify-between items-center py-1">
                         <span className="w-1/7 flex items-center">
                           <User className="w-4" />
                         </span>
@@ -298,7 +298,7 @@ export default function Review() {
                         <span className="w-1/2 pl-2 text-slate-600 font-medium">
                           Name
                         </span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
