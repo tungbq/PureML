@@ -34,7 +34,6 @@ function ComparisionTable({ metric, ver1, ver2, dataVer1, dataVer2 }: Props) {
       }
     });
   }, [dataVer2]);
-  console.log("commonMetrics Table", commonMetrics, metric);
 
   return (
     <section>
@@ -50,23 +49,23 @@ function ComparisionTable({ metric, ver1, ver2, dataVer1, dataVer2 }: Props) {
         )}
       </div>
 
-      {/* {open && (
-        <div className='py-6'>
+      {open && (
+        <div className="py-6">
           {commonMetrics.length !== 0 && dataVer1 !== null ? (
             <>
-              <table className='max-w-[1000px] w-full'>
+              <table className="max-w-[1000px] w-full">
                 {commonMetrics.length !== 0 && (
                   <>
                     <thead>
                       <tr>
-                        <th className='text-slate-600 font-medium text-left border p-4'>
-                          {' '}
+                        <th className="text-slate-600 font-medium text-left border p-4">
+                          {" "}
                         </th>
-                        <th className='text-slate-600 font-medium text-left border p-4 w-1/5'>
+                        <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
                           {ver1}
                         </th>
-                        {ver2 !== '' ? (
-                          <th className='text-slate-600 font-medium text-left border p-4 w-1/5'>
+                        {ver2 !== "" ? (
+                          <th className="text-slate-600 font-medium text-left border p-4 w-1/5">
                             {ver2}
                           </th>
                         ) : null}
@@ -74,23 +73,23 @@ function ComparisionTable({ metric, ver1, ver2, dataVer1, dataVer2 }: Props) {
                     </thead>
                     {commonMetrics.map((metric, i) => (
                       <tr key={i}>
-                        <th className='text-slate-600 font-medium text-left border p-4'>
+                        <th className="text-slate-600 font-medium text-left border p-4">
                           {metric}
                         </th>
-                        <td className='text-slate-600 font-medium text-left border p-4 w-1/5 truncate'>
+                        <td className="text-slate-600 font-medium text-left border p-4 w-1/5 truncate">
                           {Object.keys(dataVer1).length > 0
                             ? dataVer1[metric]
                               ? dataVer1[metric].slice(0, 5)
-                              : '-'
-                            : 'No-data'}
+                              : "-"
+                            : "No-data"}
                         </td>
-                        {ver2 !== '' && (
-                          <td className='text-slate-600 font-medium text-left border p-4 w-1/5 truncate'>
-                            {Object.keys(dataVer2).length > 0
+                        {ver2 !== "" && (
+                          <td className="text-slate-600 font-medium text-left border p-4 w-1/5 truncate">
+                            {dataVer2
                               ? dataVer2[metric]
                                 ? dataVer2[metric].slice(0, 5)
-                                : '-'
-                              : 'No-data'}
+                                : "-"
+                              : "No-data"}
                           </td>
                         )}
                       </tr>
@@ -103,7 +102,7 @@ function ComparisionTable({ metric, ver1, ver2, dataVer1, dataVer2 }: Props) {
             <div>No {metric} available</div>
           )}
         </div>
-      )} */}
+      )}
     </section>
   );
 }

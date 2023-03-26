@@ -73,6 +73,17 @@ export async function action({ params, request }: any) {
   }
 }
 
+function isJson(item: string | object) {
+  let value = typeof item !== "string" ? JSON.stringify(item) : item;
+  try {
+    value = JSON.parse(value);
+  } catch (e) {
+    return false;
+  }
+
+  return typeof value === "object" && value !== null;
+}
+
 export default function ModelMetrics() {
   const data = useLoaderData();
   const adata = useActionData();
@@ -103,6 +114,7 @@ export default function ModelMetrics() {
   // ##### fetching & displaying latest version data #####
   useEffect(() => {
     if (!versionData) return;
+
     const tempDict = {};
     versionData.forEach((version: { version: any }) => {
       // @ts-ignore
@@ -110,7 +122,7 @@ export default function ModelMetrics() {
     });
     setDataVersion(tempDict);
     const tt = dataVersion[ver1];
-    // console.log("tt=", tt);
+    // console.log('tt=', tt);
     if (tt) {
       if (tt.logs === null) {
         setVer1Logs({});
@@ -118,38 +130,41 @@ export default function ModelMetrics() {
         return;
       } else {
         const tempDictv1 = {};
-        const tempArr1: string[] = [];
         tt.logs.forEach((log: { key: string; data: any }) => {
-          tempDictv1[log.key] = JSON.parse(log.data);
-          tempArr1.push(log.key as string);
+          if (isJson(log.data)) {
+            tempDictv1[log.key] = JSON.parse(log.data);
+            if (!commonMetrics.includes(log.key)) {
+              setCommonMetrics((prev) => [...prev, log.key]);
+            }
+          }
         });
         setVer1Logs(tempDictv1);
         // console.log(tt.logs);
-
-        setCommonMetrics(tempArr1);
       }
     }
   }, [ver1, versionData]);
-
   // ##### comparing versions #####
   useEffect(() => {
     if (!versionData) return;
-    if (!versionData[ver1]) return;
+
     const t1 = dataVersion[ver1];
-    console.log("t1=", t1);
+    // console.log('t1=', t1);
     if (t1) {
       if (t1.logs === null) {
-        return;
+        setCommonMetrics([]);
       } else {
-        const tempArr1: string[] = [];
-        t1.logs.forEach((log: { key: string }) => {
-          tempArr1.push(log.key as string);
+        t1.logs.forEach((log: { key: string; data: any }) => {
+          if (isJson(log.data)) {
+            if (!commonMetrics.includes(log.key)) {
+              setCommonMetrics((prev) => [...prev, log.key]);
+            }
+          }
         });
-        setCommonMetrics(tempArr1);
       }
     }
     if (ver2 === "") {
       setVer2Logs({});
+      // console.log('ver2 is empty');
 
       return;
     }
@@ -161,7 +176,7 @@ export default function ModelMetrics() {
         return;
       } else {
         const tempDictv2 = {};
-        console.log("tt.logs=", tt.logs);
+        // console.log('tt.logs=', tt.logs);
 
         tt.logs.forEach((log: { data: any }) => {
           try {
@@ -173,11 +188,12 @@ export default function ModelMetrics() {
             console.log("Invalid log.key=", log.key);
           }
         });
+        // console.log(tempDictv2);
+
         setVer2Logs(tempDictv2);
       }
     }
   }, [ver2, versionData]);
-  console.log("commonMetrics=", commonMetrics);
 
   // ##### submit review functionality #####
   useEffect(() => {
