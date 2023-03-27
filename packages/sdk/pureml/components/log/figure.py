@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 from PIL import Image
 
 from pureml.utils.pipeline import add_figures_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema
+from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
 from rich import print
 from . import get_org_id, get_token
 
@@ -17,6 +17,7 @@ from pureml.utils.version_utils import parse_version_label
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
+post_key_figure = LogSchema().key.figure.value
 
 
 def save_images(figure):

@@ -7,13 +7,15 @@ from . import figure as pure_figure
 from . import predict as pure_predict
 from . import pip_requirement as pure_pip_req
 from pureml.utils.version_utils import parse_version_label
-from pureml.schema import PathSchema, BackendSchema
+from pureml.schema import PathSchema, BackendSchema, LogSchema
 import requests
 from urllib.parse import urljoin
 from . import get_org_id, get_token
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
+
+post_keys = LogSchema().key
 
 
 def log(label: str = None, metrics=None, params=None, step=1, **kwargs):
@@ -42,8 +44,8 @@ def log(label: str = None, metrics=None, params=None, step=1, **kwargs):
 
         pure_params.add(**func_params)
 
-    if "fig" in kwargs.keys():
-        figure = kwargs["fig"]
+    if post_keys.figure.value in kwargs.keys():
+        figure = kwargs[post_keys.figure.value]
         func_params = {}
 
         if label is not None:
@@ -54,8 +56,8 @@ def log(label: str = None, metrics=None, params=None, step=1, **kwargs):
 
         pure_figure.add(**func_params)
 
-    if "predict" in kwargs.keys():
-        predict = kwargs["predict"]
+    if post_keys.predict.value in kwargs.keys():
+        predict = kwargs[post_keys.predict.value]
         func_params = {}
 
         if label is not None:
@@ -65,8 +67,8 @@ def log(label: str = None, metrics=None, params=None, step=1, **kwargs):
 
         pure_predict.add(**func_params)
 
-    if "requirements" in kwargs.keys():
-        requirement = kwargs["requirements"]
+    if post_keys.requirements.value in kwargs.keys():
+        requirement = kwargs[post_keys.requirements.value]
         func_params = {}
 
         if label is not None:

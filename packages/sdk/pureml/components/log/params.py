@@ -2,7 +2,7 @@ import json
 from urllib.parse import urljoin
 
 import requests
-from pureml.schema.log import BackendSchema
+from pureml.schema.log import BackendSchema, LogSchema
 from pureml.utils.log_utils import merge_step_with_value
 from pureml.utils.pipeline import add_params_to_config
 from rich import print
@@ -11,6 +11,7 @@ from . import convert_values_to_string, get_org_id, get_token
 from pureml.utils.version_utils import parse_version_label
 
 backend_schema = BackendSchema().get_instance()
+post_key_params = LogSchema().key.params.value
 
 
 def post_params(params, model_name: str, model_branch: str, model_version: str):
@@ -29,7 +30,7 @@ def post_params(params, model_name: str, model_branch: str, model_version: str):
 
     params = json.dumps(params)
 
-    data = {"data": params, "key": "params"}
+    data = {"data": params, "key": post_key_params}
 
     data = json.dumps(data)
 
@@ -126,7 +127,7 @@ def details(label: str):
         return
 
 
-def get_value_from_log(details, key_log="params", key=None):
+def get_value_from_log(details, key_log=post_key_params, key=None):
     value = None
     if details is not None:
         # print(details)
@@ -180,7 +181,7 @@ def fetch(label: str, param: str = None) -> str:
     if metric_details:
 
         metrics = get_value_from_log(
-            details=metric_details, key_log="params", key=param
+            details=metric_details, key_log=post_key_params, key=param
         )
 
         return metrics

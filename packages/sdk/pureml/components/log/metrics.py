@@ -2,7 +2,7 @@ import json
 from urllib.parse import urljoin
 
 import requests
-from pureml.schema.log import BackendSchema
+from pureml.schema.log import BackendSchema, LogSchema
 from pureml.utils.log_utils import merge_step_with_value
 from pureml.utils.pipeline import add_metrics_to_config
 from rich import print
@@ -12,6 +12,7 @@ from pureml.utils.version_utils import parse_version_label
 
 
 backend_schema = BackendSchema().get_instance()
+post_key_predict = LogSchema().key.metrics.value
 
 
 def post_metrics(metrics, model_name: str, model_branch: str, model_version: str):
@@ -31,7 +32,7 @@ def post_metrics(metrics, model_name: str, model_branch: str, model_version: str
     }
 
     metrics = json.dumps(metrics)
-    data = {"data": metrics, "key": "metrics"}
+    data = {"data": metrics, "key": post_key_predict}
 
     data = json.dumps(data)
 
@@ -127,7 +128,7 @@ def details(label: str):
         return
 
 
-def get_value_from_log(details, key_log="metrics", key=None):
+def get_value_from_log(details, key_log=post_key_predict, key=None):
     value = None
     if details is not None:
         # print(details)
@@ -180,7 +181,7 @@ def fetch(label: str, metric: str = None) -> str:
     if metric_details:
 
         metrics = get_value_from_log(
-            details=metric_details, key_log="metrics", key=metric
+            details=metric_details, key_log=post_key_predict, key=metric
         )
 
         return metrics

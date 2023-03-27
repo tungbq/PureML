@@ -8,15 +8,18 @@ from joblib import Parallel, delayed
 from PIL import Image
 
 from pureml.utils.pipeline import add_pred_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema
+from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
 from rich import print
 from . import get_org_id, get_token
 import shutil
 from pureml.utils.version_utils import parse_version_label
+from . import pip_requirement
 
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
+post_key_predict = LogSchema().key.predict.value
+post_key_requirements = LogSchema().key.requirements.value
 
 
 def post_predict(
@@ -44,7 +47,7 @@ def post_predict(
 
     data = {
         "data": file_paths,
-        "key": "predict",
+        "key": post_key_predict,
         "storage": storage,
     }
 
@@ -63,16 +66,21 @@ def post_predict(
 
 def add(
     label: str = None,
-    path: str = None,
+    paths: dict = None,
     storage: str = StorageSchema().STORAGE,
 ) -> str:
 
     model_name, model_branch, model_version = parse_version_label(label)
 
-    file_paths = {"predict": path}
+    pred_path = paths[post_key_predict]
+
+    if "requirements" in paths.keys():
+        pip_requirement.add(label, path=paths[post_key_requirements])
+
+    file_paths = {post_key_predict: pred_path}
 
     add_pred_to_config(
-        values=path,
+        values=pred_path,
         model_name=model_name,
         model_branch=model_branch,
         model_version=model_version,
@@ -180,7 +188,7 @@ def fetch(label: str):
         return
 
     # pred_urls = give_predict_urls(details=predict_details)
-    pred_urls = give_predict_url(details=predict_details, key="predict")
+    pred_urls = give_predict_url(details=predict_details, key=post_key_predict)
 
     if len(pred_urls) == 1:
 

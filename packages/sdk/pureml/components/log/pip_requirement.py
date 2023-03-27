@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 from PIL import Image
 
 from pureml.utils.pipeline import add_pip_req_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema
+from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
 from rich import print
 from . import get_org_id, get_token
 
@@ -17,6 +17,7 @@ from pureml.utils.version_utils import parse_version_label
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
+post_key_pip_req = LogSchema().key.requirements.value
 
 
 def post_pip_requirement(
@@ -48,7 +49,7 @@ def post_pip_requirement(
 
     data = {
         "data": file_paths,
-        "key": "pip_requirement",
+        "key": post_key_pip_req,
         "storage": storage,
     }
 
@@ -73,7 +74,7 @@ def add(
 
     model_name, model_branch, model_version = parse_version_label(label)
 
-    file_paths = {"requirements": path}
+    file_paths = {post_key_pip_req: path}
 
     add_pip_req_to_config(
         values=path,
@@ -190,7 +191,7 @@ def fetch(label: str):
 
     # pred_urls = give_pip_requirement_urls(details=pip_requirement_details)
     pred_urls = give_pip_requirement_url(
-        details=pip_requirement_details, key="requirements"
+        details=pip_requirement_details, key=post_key_pip_req
     )
 
     if len(pred_urls) == 1:
