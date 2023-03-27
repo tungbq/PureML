@@ -1,7 +1,7 @@
 from .dataset import DatasetSchema
 from .paths import PathSchema
 from .model import ModelSchema
-from .predict import PredictionSchema, Input, Output, DataTypes
+from .predict import PredictSchema, Input, Output, DataTypes
 from .storage import StorageSchema
 from .packaging import DockerSchema, FastAPISchema
 from .log import LogSchema

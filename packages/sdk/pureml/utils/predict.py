@@ -1,6 +1,6 @@
 from fastapi import Request, UploadFile
 from pureml.predictor.predictor import BasePredictor
-from pureml.schema.prediction import Input, Output
+from pureml.schema.predict import Input, Output
 import json
 from .package import parse_input, parse_output
 import shutil

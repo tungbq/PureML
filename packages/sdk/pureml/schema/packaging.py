@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from .backend import BackendSchema
-from .predict import PredictionSchema
+from .predict import PredictSchema
 
 import typing
 import os

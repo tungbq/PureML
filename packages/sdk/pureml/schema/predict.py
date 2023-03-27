@@ -15,7 +15,7 @@ class Output(BaseModel):
     shape: tuple = None
 
 
-class PredictionSchema(BaseModel):
+class PredictSchema(BaseModel):
     paths: PathSchema = PathSchema().get_instance()
     backend: BackendSchema = BackendSchema().get_instance()
 

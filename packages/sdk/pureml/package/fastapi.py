@@ -2,13 +2,13 @@ import os
 import shutil
 import uvicorn
 from fastapi import FastAPI
-from pureml.schema import FastAPISchema, PredictionSchema
+from pureml.schema import FastAPISchema, PredictSchema
 from pureml.utils.package import process_input, process_output
 from pureml.utils.version_utils import parse_version_label
 from pureml import predict, pip_requirement
 
 
-prediction_schema = PredictionSchema()
+prediction_schema = PredictSchema()
 fastapi_schema = FastAPISchema()
 
 
@@ -69,7 +69,7 @@ import json
 import shutil
 from pureml.utils.package import process_input, process_output
 from typing import Union, Optional
-from pureml.utils.prediction import predict_request_with_json, predict_request_with_file
+from pureml.utils.predict import predict_request_with_json, predict_request_with_file
 
 import nest_asyncio
 from pyngrok import ngrok
