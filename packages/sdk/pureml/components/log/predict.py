@@ -13,13 +13,14 @@ from rich import print
 from . import get_org_id, get_token
 import shutil
 from pureml.utils.version_utils import parse_version_label
-from . import pip_requirement
+from . import pip_requirement, resources
 
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 post_key_predict = LogSchema().key.predict.value
 post_key_requirements = LogSchema().key.requirements.value
+post_key_resources = LogSchema().key.resources.value
 
 
 def post_predict(
@@ -74,8 +75,11 @@ def add(
 
     pred_path = paths[post_key_predict]
 
-    if "requirements" in paths.keys():
+    if post_key_requirements in paths.keys():
         pip_requirement.add(label, path=paths[post_key_requirements])
+
+    if post_key_resources in paths.keys():
+        resources.add(label, path=paths[post_key_resources])
 
     file_paths = {post_key_predict: pred_path}
 
