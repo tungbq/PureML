@@ -373,6 +373,52 @@ def load_pip_req_from_config():
     return pip_req_file
 
 
+def add_resource_to_config(
+    values, model_name=None, model_branch=None, model_version=None, func=None
+):
+    config = load_config()
+
+    if model_name is None:
+        model_name, model_branch, model_version, model_hash = get_model_latest(
+            config=config
+        )
+
+    if len(config["resource"]) != 0:
+        # pip_requirement_values = config["pip_requirement"]["values"]
+        # pip_requirement_values.update(values)
+        pip_requirement_values = values
+    else:
+        pip_requirement_values = values
+
+    hash = generate_hash_for_dict(values=pip_requirement_values)
+    # print("pred_function", model_version)
+
+    config["resource"].update(
+        {
+            "values": pip_requirement_values,
+            "hash": hash,
+            "model_name": model_name,
+            "model_branch": model_branch,
+            "model_version": model_version,
+        }
+    )
+
+    save_config(config=config)
+
+
+def load_resource_from_config():
+
+    config = load_config()
+    try:
+        pip_req_file = config["resource"]["values"]
+    except Exception as e:
+        # print(e)
+        print("No resource are found in config")
+        pip_req_file = {}
+
+    return pip_req_file
+
+
 def add_artifacts_to_config(name, values, func):
     hash = ""
     version = ""

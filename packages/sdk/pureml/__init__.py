@@ -14,6 +14,7 @@ from .components.log import log
 from .components.log import figure
 from .components.log import predict
 from .components.log import pip_requirement
+from .components.log import resources
 
 from .evaluate import grader, eval
 

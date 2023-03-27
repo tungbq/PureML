@@ -28,6 +28,7 @@ def load_config():
 
         config["pred_function"] = defaultdict()
         config["pip_requirement"] = defaultdict()
+        config["resource"] = defaultdict()
 
         joblib.dump(config, path_schema.PATH_CONFIG)
 
