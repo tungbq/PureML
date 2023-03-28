@@ -176,6 +176,7 @@ export default function DatasetVersions() {
     if (dataVersion[ver2].lineage) {
       if (dataVersion[ver2].lineage.lineage) {
         let lineageData2 = dataVersion[ver2].lineage.lineage;
+        console.log(typeof lineageData2);
         lineageData2 = lineageData2.replace(/'/g, "");
         const validJson = versionDataSchema.safeParse(lineageData2);
         const validNodes = nodesSchema.safeParse(
@@ -260,7 +261,7 @@ export default function DatasetVersions() {
                   {versionData && (
                     <div className="flex pt-6 gap-x-8">
                       {!ver2 && !node2 && (
-                        <div className="w-full h-screen max-h-[600px]">
+                        <div className="w-full h-[80vh] max-h-full">
                           {node ? (
                             <Pipeline pnode={node} pedge={edge} />
                           ) : (
@@ -270,7 +271,7 @@ export default function DatasetVersions() {
                       )}
                       {ver2 && (
                         <>
-                          <div className="w-1/2 h-screen max-h-[600px]">
+                          <div className="w-1/2 h-[80vh] max-h-full">
                             <div className="text-sm text-slate-600 font-medium pb-6">
                               {ver1}
                             </div>
@@ -280,7 +281,7 @@ export default function DatasetVersions() {
                               "No datalineage available"
                             )}
                           </div>
-                          <div className="w-1/2 h-screen max-h-[600px]">
+                          <div className="w-1/2 h-[80vh] max-h-full">
                             <div className="text-sm text-slate-600 font-medium pb-6">
                               {ver2}
                             </div>
@@ -357,7 +358,7 @@ export default function DatasetVersions() {
                           }}
                         />
                         <div className="flex items-center justify-center pl-4 text-slate-600">
-                          <AvatarIcon>
+                          <AvatarIcon intent="avatar">
                             {version.created_by.name.charAt(0).toUpperCase()}
                           </AvatarIcon>
                           <div>
@@ -394,7 +395,7 @@ export default function DatasetVersions() {
                           >
                             <SelectPrimitive.Item
                               value={version.version}
-                              className="flex items-center justify-between px-4 py-2 rounded-md text-base text-slate-600 font-medium cursor-pointer  hover:bg-slate-100 hover:border-none focus:outline-none"
+                              className="flex items-center justify-between px-4 py-2 rounded-md text-base text-slate-600 font-medium cursor-pointer hover:bg-slate-100 hover:border-none focus:outline-none"
                             >
                               <SelectPrimitive.ItemText className="text-slate-600 text-base font-medium">
                                 Submit For review

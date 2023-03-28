@@ -4,35 +4,35 @@ import ReactFlow, {
   ConnectionLineType,
   useNodesState,
   useEdgesState,
-  MiniMap,
   Controls,
   MarkerType,
 } from "reactflow";
 import dagre from "dagre";
+import DetailedNode from "./customNode";
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-const nodeWidth = 172;
-const nodeHeight = 36;
+const nodeWidth = 190;
+const nodeHeight = 110;
 
-const getLayoutedElements = (nodes, edges, direction = "TB") => {
+const getLayoutedElements = (nodes: any, edges: any, direction = "TB") => {
   const isHorizontal = direction === "LR";
   dagreGraph.setGraph({ rankdir: direction });
-
   nodes.forEach((node: any) => {
     dagreGraph.setNode(node.id, {
       width: nodeWidth,
       height: nodeHeight,
     });
   });
-
   edges.forEach((edge: any) => {
+    edge.type = "smoothstep";
+    edge.markerEnd = {
+      type: MarkerType.ArrowClosed,
+    };
     dagreGraph.setEdge(edge.source, edge.target);
   });
-
   dagre.layout(dagreGraph);
-
   nodes.forEach((node: any) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     node.targetPosition = isHorizontal ? "left" : "top";
@@ -44,20 +44,30 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
       x: nodeWithPosition.x - nodeWidth / 2,
       y: nodeWithPosition.y - nodeHeight / 2,
     };
+    node.data = {
+      ...node.data,
+      id: node.id,
+      title: node.text,
+      type: node.nodeType,
+      desc: node.desc,
+      time: node.time,
+    };
+    node.type = "detailedNode";
     node.style =
       node.nodeType === "load_data"
-        ? { background: "#CDBBFF" }
+        ? { background: "#CDBBFF", borderRadius: "8px" }
         : node.nodeType === "transformer"
-        ? { background: "#D6E0FF" }
+        ? { background: "#D6E0FF", borderRadius: "8px" }
         : node.nodeType === "dataset"
-        ? { background: "#FFDFA6" }
-        : { background: "#f1f5f9" };
+        ? { background: "#FFDFA6", borderRadius: "8px" }
+        : { background: "#f1f5f9", borderRadius: "8px" };
 
     return node;
   });
-
   return { nodes, edges };
 };
+
+const nodeTypes = { detailedNode: DetailedNode };
 
 function Pipeline({ pnode, pedge }: any) {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -73,29 +83,22 @@ function Pipeline({ pnode, pedge }: any) {
           {
             ...params,
             type: ConnectionLineType.SmoothStep,
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+            },
             animated: true,
           },
           eds
         )
       ),
-    []
+    [setEdges]
   );
-  const onLayout = useCallback(
-    (direction) => {
-      const { nodes: layoutedNodes, edges: layoutedEdges } =
-        getLayoutedElements(nodes, edges, direction);
-
-      setNodes([...layoutedNodes]);
-      setEdges([...layoutedEdges]);
-    },
-    [nodes, edges]
-  );
-
   return (
     <div className="h-4/5">
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

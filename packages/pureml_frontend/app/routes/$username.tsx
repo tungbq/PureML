@@ -162,6 +162,7 @@ export default function UserProfile() {
                       showWeekdayLabels={true}
                     />
                   </div>
+                  <div className="flex justify-end"><img src="/imgs/ContributionScale.png" /></div>
                 </div> */}
                     <div className="font-medium">Overview</div>
                     <div className="pt-8 flex flex-col gap-y-4 md:flex md:flex-row w-full md:gap-x-4">
@@ -267,6 +268,7 @@ export default function UserProfile() {
                     showWeekdayLabels={true}
                   />
                 </div>
+                <div className="flex justify-end"><img src="/imgs/ContributionScale.png" /></div>
               </div> */}
                 <div className="font-medium">Overview</div>
                 <div className="pt-8 flex flex-col gap-y-4 md:flex md:flex-row w-full md:gap-x-4">
