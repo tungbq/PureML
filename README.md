@@ -290,7 +290,8 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 ### Using [Docker Compose](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/docker-compose.yml)
 
-```docker-compose.yml
+Create a new file `docker-compose.yml`
+```yml
 version: "3"
 
 services:
@@ -317,7 +318,14 @@ volumes:
   pureml-data:
 ```
 
-**The PureML UI will be available at http://localhost:3000. For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).**
+### Running the containers
+
+Check out the [official documentation](https://docs.docker.com/compose/gettingstarted/) for more information on running docker compose
+```bash
+docker compose up
+```
+
+> **The PureML UI will be available at http://localhost:3000. For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).**
 
 ## 📍 [Main Features](https://docs.pureml.com/)
 
