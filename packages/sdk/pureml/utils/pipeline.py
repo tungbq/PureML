@@ -281,6 +281,144 @@ def load_figures_from_config():
     return figures
 
 
+def add_pred_to_config(
+    values, model_name=None, model_branch=None, model_version=None, func=None
+):
+    config = load_config()
+
+    if model_name is None:
+        model_name, model_branch, model_version, model_hash = get_model_latest(
+            config=config
+        )
+
+    if len(config["pred_function"]) != 0:
+        # pred_function_values = config["pred_function"]["values"]
+        # pred_function_values.update(values)
+        pred_function_values = values
+    else:
+        pred_function_values = values
+
+    hash = generate_hash_for_dict(values=pred_function_values)
+    # print("pred_function", model_version)
+
+    config["pred_function"].update(
+        {
+            "values": pred_function_values,
+            "hash": hash,
+            "model_name": model_name,
+            "model_branch": model_branch,
+            "model_version": model_version,
+        }
+    )
+
+    save_config(config=config)
+
+
+def load_pred_from_config():
+
+    config = load_config()
+    try:
+        pred_file = config["pred_function"]["values"]
+    except Exception as e:
+        # print(e)
+        print("No pred_functions are found in config")
+        pred_file = {}
+
+    return pred_file
+
+
+def add_pip_req_to_config(
+    values, model_name=None, model_branch=None, model_version=None, func=None
+):
+    config = load_config()
+
+    if model_name is None:
+        model_name, model_branch, model_version, model_hash = get_model_latest(
+            config=config
+        )
+
+    if len(config["pip_requirement"]) != 0:
+        # pip_requirement_values = config["pip_requirement"]["values"]
+        # pip_requirement_values.update(values)
+        pip_requirement_values = values
+    else:
+        pip_requirement_values = values
+
+    hash = generate_hash_for_dict(values=pip_requirement_values)
+    # print("pred_function", model_version)
+
+    config["pip_requirement"].update(
+        {
+            "values": pip_requirement_values,
+            "hash": hash,
+            "model_name": model_name,
+            "model_branch": model_branch,
+            "model_version": model_version,
+        }
+    )
+
+    save_config(config=config)
+
+
+def load_pip_req_from_config():
+
+    config = load_config()
+    try:
+        pip_req_file = config["pip_requirement"]["values"]
+    except Exception as e:
+        # print(e)
+        print("No pip_requirement are found in config")
+        pip_req_file = {}
+
+    return pip_req_file
+
+
+def add_resource_to_config(
+    values, model_name=None, model_branch=None, model_version=None, func=None
+):
+    config = load_config()
+
+    if model_name is None:
+        model_name, model_branch, model_version, model_hash = get_model_latest(
+            config=config
+        )
+
+    if len(config["resource"]) != 0:
+        # pip_requirement_values = config["pip_requirement"]["values"]
+        # pip_requirement_values.update(values)
+        pip_requirement_values = values
+    else:
+        pip_requirement_values = values
+
+    hash = generate_hash_for_dict(values=pip_requirement_values)
+    # print("pred_function", model_version)
+
+    config["resource"].update(
+        {
+            "values": pip_requirement_values,
+            "hash": hash,
+            "model_name": model_name,
+            "model_branch": model_branch,
+            "model_version": model_version,
+        }
+    )
+
+    save_config(config=config)
+
+
+def load_resource_from_config():
+
+    config = load_config()
+    try:
+        pip_req_file = config["resource"]["values"]
+    except Exception as e:
+        # print(e)
+        print("No resource are found in config")
+        pip_req_file = {}
+
+    return pip_req_file
+
+
 def add_artifacts_to_config(name, values, func):
     hash = ""
     version = ""

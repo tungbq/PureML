@@ -7,17 +7,17 @@ import requests
 from joblib import Parallel, delayed
 from PIL import Image
 
-# from pureml.utils.constants import BASE_URL, PATH_FIGURE_DIR
 from pureml.utils.pipeline import add_figures_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema
+from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
 from rich import print
-
 from . import get_org_id, get_token
+
 from pureml.utils.version_utils import parse_version_label
 
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
+post_key_figure = LogSchema().key.figure.value
 
 
 def save_images(figure):
@@ -71,10 +71,8 @@ def post_figures(
             print("[bold red] figure", file_name, "doesnot exist at the given path")
 
     data = {
-        "name_path_mapping": figure_paths,
-        "model_name": model_name,
-        "model_version": model_branch,
-        "model_version": model_version,
+        "data": figure_paths,
+        "key": "figure",
         "storage": storage,
     }
 
@@ -181,7 +179,7 @@ def details(label: str):
         return details
 
     else:
-        print(f"[bold red]Branch details details have not been found")
+        print(f"[bold red]Unable to fetch Figure!")
         return
 
 
@@ -212,19 +210,19 @@ def fetch(label: str, key: str):
         file_name, url = file_details
 
         save_path = os.path.join(path_schema.PATH_FIGURE_DIR, file_name)
-        print("save path", save_path)
+        # print("save path in fetching", save_path)
 
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": "Bearer {}".format(user_token),
         }
 
-        print("figure url", url)
+        # print("figure url", url)
 
         # response = requests.get(url, headers=headers)
         response = requests.get(url)
 
-        print(response.status_code)
+        # print(response.status_code)
 
         if response.ok:
             print("[bold green] figure {} has been fetched".format(file_name))
@@ -266,7 +264,7 @@ def fetch(label: str, key: str):
             delayed(fetch_figure)(fig_url) for fig_url in fig_urls
         )
 
-    return res_text
+    # return res_text
 
 
 def give_fig_url(details, key: str):
@@ -274,6 +272,7 @@ def give_fig_url(details, key: str):
     # file_url = None
     source_path = None
     file_url = None
+    # print(details)
 
     if details is not None:
 
@@ -283,7 +282,7 @@ def give_fig_url(details, key: str):
                 source_path = det["key"]
                 file_url = det["data"]
                 source_path = ".".join([source_path, "jpg"])
-                source_path = os.path.join(path_schema.PATH_FIGURE_DIR, source_path)
+                # source_path = os.path.join(path_schema.PATH_FIGURE_DIR, source_path)
                 fig_paths.append([source_path, file_url])
 
                 # print(source_path, file_url)
