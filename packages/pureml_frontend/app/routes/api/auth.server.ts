@@ -22,6 +22,12 @@ export async function fetchMLTools() {
 
   const res = await notion.databases.query({
     database_id: notionDatabaseId,
+    sorts: [
+      {
+        property: "Name",
+        direction: "ascending",
+      },
+    ],
   });
   return res.results;
 }
