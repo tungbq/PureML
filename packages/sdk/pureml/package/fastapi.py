@@ -2,14 +2,40 @@ import os
 import shutil
 import uvicorn
 from fastapi import FastAPI
-from pureml.schema import FastAPISchema, PredictSchema
+from pureml.schema import FastAPISchema, PredictSchema, PathSchema
 from pureml.utils.package import process_input, process_output
 from pureml.utils.version_utils import parse_version_label
-from pureml import predict, pip_requirement
+from pureml import predict, pip_requirement, resources
+from pureml.utils.resources import zip_content, unzip_content
 
 
 prediction_schema = PredictSchema()
 fastapi_schema = FastAPISchema()
+path_schema = PathSchema()
+
+
+def get_resources(label, resources_path):
+    resources.fetch(label=label)
+
+    if not os.path.exists(prediction_schema.PATH_RESOURCES):
+
+        if resources_path is None:
+
+            resources_path = prediction_schema.PATH_RESOURCES_DIR_DEFAULT
+            print("Taking the default resources path: ", resources_path)
+        else:
+            print("Taking the resources path: ", resources_path)
+
+        zip_content(resources_path, prediction_schema.PATH_RESOURCES)
+
+        if os.path.exists(prediction_schema.PATH_RESOURCES):
+            unzip_content(
+                prediction_schema.PATH_RESOURCES, path_schema.PATH_PREDICT_DIR
+            )
+        else:
+            raise Exception(resources_path, "doesnot exists!!!")
+    else:
+        print("Taking the fetched resources file path")
 
 
 def get_predict_file(label, predict_path):
@@ -136,11 +162,11 @@ if __name__ == '__main__':
 
 
 def create_fastapi_file(
-    label,
-    predict_path,
-    requirements_path,
+    label, predict_path=None, requirements_path=None, resources_path=None
 ):
     fastapi_schema = FastAPISchema()
+
+    get_resources(label, resources_path)
 
     get_predict_file(label, predict_path)
 

@@ -22,7 +22,7 @@ def zip_content(src_path, dst_path):
 
     # folder_path = '.'
     # zip_path = '/path/to/zipfile.zip'
-    folders_to_ignore = ["./.pureml", "./.venv"]
+    folders_to_ignore = PredictSchema().folders_to_ignore  # ["./.pureml", "./.venv"]
 
     # Create a zip archive of the folder, excluding the specified folder
     with zipfile.ZipFile(dst_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
