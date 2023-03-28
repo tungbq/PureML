@@ -26,7 +26,9 @@ def load_config():
         config["figure"] = defaultdict()
         config["artifacts"] = defaultdict()
 
-        config["predict"] = defaultdict()
+        config["pred_function"] = defaultdict()
+        config["pip_requirement"] = defaultdict()
+        config["resource"] = defaultdict()
 
         joblib.dump(config, path_schema.PATH_CONFIG)
 

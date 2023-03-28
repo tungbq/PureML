@@ -5,8 +5,7 @@ from pureml.utils.pipeline import (
     load_params_from_config,
     load_figures_from_config,
 )
-from pureml import metrics, params
-from pureml.components import figure
+from pureml import metrics, params, figure
 from pureml.utils.version_utils import parse_version_label, generate_label
 import functools
 

@@ -15,7 +15,7 @@ class Output(BaseModel):
     shape: tuple = None
 
 
-class PredictionSchema(BaseModel):
+class PredictSchema(BaseModel):
     paths: PathSchema = PathSchema().get_instance()
     backend: BackendSchema = BackendSchema().get_instance()
 
@@ -26,6 +26,11 @@ class PredictionSchema(BaseModel):
 
     PATH_PREDICT_USER: str = os.path.join(os.getcwd(), "predict.py")
     PATH_PREDICT_REQUIREMENTS_USER: str = os.path.join(os.getcwd(), "requirements.txt")
+    PATH_RESOURCES: str = os.path.join(paths.PATH_PREDICT_DIR, "resources.zip")
+    PATH_RESOURCES_DIR_DEFAULT: str = os.getcwd()
+    resource_format: str = "zip"
+
+    folders_to_ignore: list = ["./.pureml", "./.venv"]
 
     class Config:
         arbitrary_types_allowed = True
