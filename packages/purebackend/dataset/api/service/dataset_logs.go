@@ -160,13 +160,9 @@ func (api *Api) LogFileDataset(request *models.Request) *models.Response {
 		return models.NewErrorResponse(http.StatusBadRequest, "File is required")
 	}
 	versionUUID := request.GetDatasetBranchVersionUUID()
-	sourceTypeUUID, errresp := api.ValidateAndGetOrCreateSourceType(datasetSourceType, orgId)
+	sourceTypePublicURL, errresp := api.ValidateSourceTypeAndGetPublicURL(datasetSourceType, orgId)
 	if errresp != nil {
 		return errresp
-	}
-	sourceType, err := api.app.Dao().GetSourceTypeByUUID(sourceTypeUUID)
-	if err != nil {
-		return models.NewServerErrorResponse(err)
 	}
 	logs := make(map[string]string)
 	for _, fileHeader := range fileHeaders {
@@ -181,7 +177,7 @@ func (api *Api) LogFileDataset(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		logs[key] = fmt.Sprintf("%s/%s", sourceType.PublicURL, filePath)
+		logs[key] = fmt.Sprintf("%s/%s", sourceTypePublicURL, filePath)
 	}
 	var results []*models.LogResponse
 	for key, data := range logs {
