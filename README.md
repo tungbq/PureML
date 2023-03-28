@@ -285,6 +285,40 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 <br />
 
+## Self-Host on Local Machine
+> _Currently docker-compose is the best way to self-host the official images [puremlhq/pureml_backend](https://hub.docker.com/repository/docker/puremlhq/pureml_backend) and [puremlhq/pureml_frontend](https://hub.docker.com/repository/docker/puremlhq/pureml_frontend)_
+
+### Using [Docker Compose](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/docker-compose.yml)
+
+```docker-compose.yml
+version: "3"
+
+services:
+  backend:
+    image: puremlhq/pureml_backend:local-base
+    environment:
+      - PURE_SITE_BASE_URL=http://localhost:3000
+    ports:
+      - 8080:8080
+    volumes:
+      - pureml-data:/pureml_backend/data
+
+  frontend:
+    image: puremlhq/pureml_frontend:dev
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://backend:8080/api/
+      - NEXT_PUBLIC_AIRTABLE_API_KEY={YOUR_AIRTABLE_API_KEY}
+    ports:.
+      - 3000:3000
+    links:
+      - backend
+
+volumes:
+  pureml-data:
+```
+
+**The PureML UI will be available at http://localhost:3000. For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).**
+
 ## 📍 [Main Features](https://docs.pureml.com/)
 
 |                 |                                                                                                                                                                                                               |
