@@ -1,12 +1,30 @@
 import Airtable from "airtable";
+import { Client } from "@notionhq/client";
 
 // ############################## contactus api ##############################
-const base = new Airtable({
-  endpointUrl: "https://api.airtable.com",
-  apiKey: process.env.NEXT_PUBLIC_AIRTABLE_API_KEY,
-}).base("appAR7Cxhflh7YVe9");
+// const base = new Airtable({
+//   endpointUrl: "https://api.airtable.com",
+//   apiKey: process.env.NEXT_PUBLIC_AIRTABLE_API_KEY,
+// }).base("appAR7Cxhflh7YVe9");
 
-export default base;
+// export default base;
+
+// ############################## ml tools ##############################
+
+export async function fetchMLTools() {
+  const notionSecret = process.env.NOTION_SECRET;
+  const notionDatabaseId = process.env.NOTION_DATABASE_ID;
+
+  const notion = new Client({ auth: notionSecret });
+  if (!notionSecret || !notionDatabaseId) {
+    return null;
+  }
+
+  const res = await notion.databases.query({
+    database_id: notionDatabaseId,
+  });
+  return res.results;
+}
 
 // ###########################################################################
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
