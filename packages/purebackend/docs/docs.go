@@ -953,6 +953,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "secret_name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
                         "name": "storage",
                         "in": "formData"
                     }
@@ -1378,6 +1383,11 @@ const docTemplate = `{
                         "name": "version",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "secret_name",
+                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -2443,6 +2453,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "secret_name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
                         "name": "storage",
                         "in": "formData"
                     }
@@ -2868,6 +2883,11 @@ const docTemplate = `{
                         "name": "version",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "secret_name",
+                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -3411,44 +3431,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/{orgId}/secret/r2": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get secrets for source type r2",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Secret"
-                ],
-                "summary": "Get secrets for source type r2",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/org/{orgId}/secret/r2/connect": {
             "post": {
                 "security": [
@@ -3496,45 +3478,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/{orgId}/secret/r2/delete": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete secrets for source type r2",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Secret"
-                ],
-                "summary": "Delete secrets for source type r2",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/secret/r2/test": {
+        "/org/{orgId}/secret/r2/{secretName}/test": {
             "get": {
                 "security": [
                     {
@@ -3559,42 +3503,11 @@ const docTemplate = `{
                         "name": "orgId",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/secret/s3": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get secrets for source type s3",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Secret"
-                ],
-                "summary": "Get secrets for source type s3",
-                "parameters": [
+                    },
                     {
                         "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
+                        "description": "Secret Name",
+                        "name": "secretName",
                         "in": "path",
                         "required": true
                     }
@@ -3657,7 +3570,97 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/{orgId}/secret/s3/delete": {
+        "/org/{orgId}/secret/s3/{secretName}/test": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Test secrets for source type s3",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret"
+                ],
+                "summary": "Test secrets for source type s3",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Secret Name",
+                        "name": "secretName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/org/{orgId}/secret/{secretName}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get secrets for source type r2",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret"
+                ],
+                "summary": "Get secrets for source type r2",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Secret Name",
+                        "name": "secretName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/org/{orgId}/secret/{secretName}/delete": {
             "delete": {
                 "security": [
                     {
@@ -3682,42 +3685,11 @@ const docTemplate = `{
                         "name": "orgId",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/org/{orgId}/secret/s3/test": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Test secrets for source type s3",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Secret"
-                ],
-                "summary": "Test secrets for source type s3",
-                "parameters": [
+                    },
                     {
                         "type": "string",
-                        "description": "Organization Id",
-                        "name": "orgId",
+                        "description": "Secret Name",
+                        "name": "secretName",
                         "in": "path",
                         "required": true
                     }
@@ -4404,6 +4376,9 @@ const docTemplate = `{
                 },
                 "public_url": {
                     "type": "string"
+                },
+                "secret_name": {
+                    "type": "string"
                 }
             }
         },
@@ -4431,6 +4406,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "bucket_name": {
+                    "type": "string"
+                },
+                "secret_name": {
                     "type": "string"
                 }
             }

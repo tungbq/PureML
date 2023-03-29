@@ -163,6 +163,10 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
 		modelSourceType = strings.ToUpper(request.FormValues["storage"][0])
 	}
+	var modelSourceSecretName string
+	if request.FormValues["secret_name"] != nil && len(request.FormValues["secret_name"]) > 0 {
+		modelSourceSecretName = strings.ToUpper(request.FormValues["secret_name"][0])
+	}
 	var modelIsEmpty bool
 	if request.FormValues["is_empty"] != nil && len(request.FormValues["is_empty"]) > 0 {
 		modelIsEmpty = request.FormValues["is_empty"][0] == "true"
@@ -205,7 +209,7 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	if modelSourceType == "R2" && !api.app.Settings().R2.Enabled {
 		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
 	}
-	modelSourceTypePublicURL, errresp := api.ValidateSourceTypeAndGetPublicURL(modelSourceType, orgId)
+	modelSourceSecrets, errresp := api.ValidateSourceTypeAndGetSourceSecrets(modelSourceType, modelSourceSecretName, orgId)
 	if errresp != nil {
 		return errresp
 	}
@@ -215,12 +219,12 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		filePath, err = api.app.UploadFile(file, fmt.Sprintf("model-registry/%s/models/%s/%s", orgId, modelUUID, modelBranchUUID))
+		filePath, err = api.app.UploadFile(file, fmt.Sprintf("model-registry/%s/models/%s/%s", orgId, modelUUID, modelBranchUUID), modelSourceType, modelSourceSecrets)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
 	}
-	modelVersion, err := api.app.Dao().RegisterModelFile(modelBranchUUID, modelSourceType, modelSourceTypePublicURL, filePath, modelIsEmpty, modelHash, userUUID)
+	modelVersion, err := api.app.Dao().RegisterModelFile(modelBranchUUID, modelSourceType, modelSourceSecrets.PublicURL, filePath, modelIsEmpty, modelHash, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

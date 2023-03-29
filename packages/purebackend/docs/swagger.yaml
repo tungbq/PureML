@@ -129,6 +129,8 @@ definitions:
         type: string
       public_url:
         type: string
+      secret_name:
+        type: string
     type: object
   models.ReadmeRequest:
     properties:
@@ -146,6 +148,8 @@ definitions:
       bucket_location:
         type: string
       bucket_name:
+        type: string
+      secret_name:
         type: string
     type: object
   models.UpdateOrgRequest:
@@ -656,6 +660,9 @@ paths:
         name: lineage
         type: string
       - in: formData
+        name: secret_name
+        type: string
+      - in: formData
         name: storage
         type: string
       produces:
@@ -937,6 +944,9 @@ paths:
         in: path
         name: version
         required: true
+        type: string
+      - in: formData
+        name: secret_name
         type: string
       - in: formData
         name: storage
@@ -1633,6 +1643,9 @@ paths:
         name: is_empty
         type: boolean
       - in: formData
+        name: secret_name
+        type: string
+      - in: formData
         name: storage
         type: string
       produces:
@@ -1914,6 +1927,9 @@ paths:
         in: path
         name: version
         required: true
+        type: string
+      - in: formData
+        name: secret_name
         type: string
       - in: formData
         name: storage
@@ -2334,7 +2350,7 @@ paths:
       summary: Update a user's role in an organization.
       tags:
       - Organization
-  /org/{orgId}/secret/r2:
+  /org/{orgId}/secret/{secretName}:
     get:
       consumes:
       - '*/*'
@@ -2343,6 +2359,11 @@ paths:
       - description: Organization Id
         in: path
         name: orgId
+        required: true
+        type: string
+      - description: Secret Name
+        in: path
+        name: secretName
         required: true
         type: string
       produces:
@@ -2356,6 +2377,64 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get secrets for source type r2
+      tags:
+      - Secret
+  /org/{orgId}/secret/{secretName}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete secrets for source type s3
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Secret Name
+        in: path
+        name: secretName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete secrets for source type s3
+      tags:
+      - Secret
+  /org/{orgId}/secret/r2/{secretName}/test:
+    get:
+      consumes:
+      - '*/*'
+      description: Test secrets for source type r2
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Secret Name
+        in: path
+        name: secretName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Test secrets for source type r2
       tags:
       - Secret
   /org/{orgId}/secret/r2/connect:
@@ -2388,39 +2467,20 @@ paths:
       summary: Add secrets for source type r2
       tags:
       - Secret
-  /org/{orgId}/secret/r2/delete:
-    delete:
-      consumes:
-      - '*/*'
-      description: Delete secrets for source type r2
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete secrets for source type r2
-      tags:
-      - Secret
-  /org/{orgId}/secret/r2/test:
+  /org/{orgId}/secret/s3/{secretName}/test:
     get:
       consumes:
       - '*/*'
-      description: Test secrets for source type r2
+      description: Test secrets for source type s3
       parameters:
       - description: Organization Id
         in: path
         name: orgId
+        required: true
+        type: string
+      - description: Secret Name
+        in: path
+        name: secretName
         required: true
         type: string
       produces:
@@ -2433,31 +2493,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Test secrets for source type r2
-      tags:
-      - Secret
-  /org/{orgId}/secret/s3:
-    get:
-      consumes:
-      - '*/*'
-      description: Get secrets for source type s3
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get secrets for source type s3
+      summary: Test secrets for source type s3
       tags:
       - Secret
   /org/{orgId}/secret/s3/connect:
@@ -2488,54 +2524,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Add secrets for source type s3
-      tags:
-      - Secret
-  /org/{orgId}/secret/s3/delete:
-    delete:
-      consumes:
-      - '*/*'
-      description: Delete secrets for source type s3
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete secrets for source type s3
-      tags:
-      - Secret
-  /org/{orgId}/secret/s3/test:
-    get:
-      consumes:
-      - '*/*'
-      description: Test secrets for source type s3
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Test secrets for source type s3
       tags:
       - Secret
   /org/{orgId}/update:

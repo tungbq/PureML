@@ -289,7 +289,7 @@ func (ds *Datastore) SeedAdminS3SecretsIfNotExists(s3config *settings.S3Config) 
 	if adminDetails == nil {
 		return errors.New("admin details not found in env vars")
 	}
-	if _, err := ds.CreateS3Secrets(adminDetails["uuid"].(uuid.UUID), s3config.AccessKey, s3config.Secret, s3config.Bucket, s3config.Region); err != nil {
+	if _, err := ds.CreateS3Secrets(adminDetails["uuid"].(uuid.UUID), "admin", s3config.AccessKey, s3config.Secret, s3config.Bucket, s3config.Region); err != nil {
 		// secrets already exist
 		return nil
 	}
@@ -301,7 +301,7 @@ func (ds *Datastore) SeedAdminR2SecretsIfNotExists(r2config *settings.R2Config) 
 	if adminDetails == nil {
 		return errors.New("admin details not found in env vars")
 	}
-	if _, err := ds.CreateR2Secrets(adminDetails["uuid"].(uuid.UUID), r2config.AccountId, r2config.AccessKey, r2config.Secret, r2config.Bucket, r2config.Endpoint); err != nil {
+	if _, err := ds.CreateR2Secrets(adminDetails["uuid"].(uuid.UUID), "admin", r2config.AccountId, r2config.AccessKey, r2config.Secret, r2config.Bucket, r2config.Endpoint); err != nil {
 		// secrets already exist
 		return nil
 	}
@@ -2686,20 +2686,24 @@ func (ds *Datastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 
 /////////////////////////////// SECRET API METHODS ///////////////////////////////
 
-func (ds *Datastore) GetSourceSecret(orgId uuid.UUID, source string) (*commonmodels.SourceSecrets, error) {
+func (ds *Datastore) GetSecretByName(orgId uuid.UUID, secretName string) (*commonmodels.SourceSecrets, error) {
 	var secrets []userorgdbmodels.Secret
-	res := ds.DB.Where("org_uuid = ?", orgId).Find(&secrets)
+	res := ds.DB.Where("org_uuid = ? and name = ?", orgId, secretName).Find(&secrets)
 	if res.RowsAffected == 0 {
 		return nil, nil
 	}
 	if res.Error != nil {
 		return nil, res.Error
 	}
+	if len(secrets) == 0 {
+		return nil, fmt.Errorf("no secrets found for secret name %s", secretName)
+	}
 	var sourceSecret commonmodels.SourceSecrets
-	switch strings.ToUpper(source) {
+	secretType := strings.ToUpper(strings.Split(secrets[0].Key, "_")[0])
+	switch secretType {
 	case "S3":
 		for _, secret := range secrets {
-			switch strings.ToUpper(secret.Name) {
+			switch strings.ToUpper(secret.Key) {
 			case "S3_ACCESS_KEY_ID":
 				sourceSecret.AccessKeyId = secret.Value
 			case "S3_ACCESS_KEY_SECRET":
@@ -2718,7 +2722,7 @@ func (ds *Datastore) GetSourceSecret(orgId uuid.UUID, source string) (*commonmod
 		}
 	case "R2":
 		for _, secret := range secrets {
-			switch strings.ToUpper(secret.Name) {
+			switch strings.ToUpper(secret.Key) {
 			case "R2_ACCOUNT_ID":
 				sourceSecret.AccountId = secret.Value
 			case "R2_ACCESS_KEY_ID":
@@ -2738,56 +2742,46 @@ func (ds *Datastore) GetSourceSecret(orgId uuid.UUID, source string) (*commonmod
 	return &sourceSecret, nil
 }
 
-func (ds *Datastore) GetSourcePublicURL(orgId uuid.UUID, source string) (string, error) {
-	sourceSecret, err := ds.GetSourceSecret(orgId, source)
-	if err != nil {
-		return "", err
-	}
-	if sourceSecret == nil {
-		return "", nil
-	}
-	return sourceSecret.PublicURL, nil
-}
-
-func (ds *Datastore) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, endpoint string) (*commonmodels.SourceSecrets, error) {
+func (ds *Datastore) CreateR2Secrets(orgId uuid.UUID, secretName string, accountId string, accessKeyId string, accessKeySecret string, bucketName string, endpoint string) (*commonmodels.SourceSecrets, error) {
 	secret := userorgdbmodels.Secret{
 		Org: userorgdbmodels.Organization{
 			BaseModel: commondbmodels.BaseModel{
 				UUID: orgId,
 			},
 		},
+		Name: secretName,
 	}
 	publicURL := fmt.Sprintf("https://%s", endpoint)
 	err := ds.DB.Transaction(func(tx *gorm.DB) error {
-		secret.Name = "R2_ACCOUNT_ID"
+		secret.Key = "R2_ACCOUNT_ID"
 		secret.Value = accountId
 		err := tx.Create(&secret).Error
 		if err != nil {
 			return err
 		}
 		secret.UUID = uuid.Nil
-		secret.Name = "R2_ACCESS_KEY_ID"
+		secret.Key = "R2_ACCESS_KEY_ID"
 		secret.Value = accessKeyId
 		err = tx.Create(&secret).Error
 		if err != nil {
 			return err
 		}
 		secret.UUID = uuid.Nil
-		secret.Name = "R2_ACCESS_KEY_SECRET"
+		secret.Key = "R2_ACCESS_KEY_SECRET"
 		secret.Value = accessKeySecret
 		err = tx.Create(&secret).Error
 		if err != nil {
 			return err
 		}
 		secret.UUID = uuid.Nil
-		secret.Name = "R2_BUCKET_NAME"
+		secret.Key = "R2_BUCKET_NAME"
 		secret.Value = bucketName
 		err = tx.Create(&secret).Error
 		if err != nil {
 			return err
 		}
 		secret.UUID = uuid.Nil
-		secret.Name = "R2_PUBLIC_URL"
+		secret.Key = "R2_PUBLIC_URL"
 		secret.Value = publicURL
 		err = tx.Create(&secret).Error
 		if err != nil {
@@ -2799,62 +2793,54 @@ func (ds *Datastore) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKe
 		return nil, err
 	}
 	return &commonmodels.SourceSecrets{
-		AccountId:       accountId,
-		AccessKeyId:     accessKeyId,
-		AccessKeySecret: accessKeySecret,
-		BucketName:      bucketName,
-		PublicURL:       publicURL,
+		AccountId: accountId,
+		// AccessKeyId:     accessKeyId,
+		// AccessKeySecret: accessKeySecret,
+		BucketName: bucketName,
+		PublicURL:  publicURL,
 	}, nil
 }
 
-func (ds *Datastore) DeleteR2Secrets(orgId uuid.UUID) error {
-	var secrets []userorgdbmodels.Secret
-	err := ds.DB.Where("org_uuid = ?", orgId).Where("name LIKE ?", "R2_%").Delete(&secrets).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (ds *Datastore) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*commonmodels.SourceSecrets, error) {
+func (ds *Datastore) CreateS3Secrets(orgId uuid.UUID, secretName string, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*commonmodels.SourceSecrets, error) {
 	secret := userorgdbmodels.Secret{
 		Org: userorgdbmodels.Organization{
 			BaseModel: commondbmodels.BaseModel{
 				UUID: orgId,
 			},
 		},
+		Name: secretName,
 	}
 	publicURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com", bucketName, bucketLocation)
 	err := ds.DB.Transaction(func(tx *gorm.DB) error {
-		secret.Name = "S3_ACCESS_KEY_ID"
+		secret.Key = "S3_ACCESS_KEY_ID"
 		secret.Value = accessKeyId
 		err := tx.Create(&secret).Error
 		if err != nil {
 			return err
 		}
 		secret.UUID = uuid.Nil
-		secret.Name = "S3_ACCESS_KEY_SECRET"
+		secret.Key = "S3_ACCESS_KEY_SECRET"
 		secret.Value = accessKeySecret
 		err = tx.Create(&secret).Error
 		if err != nil {
 			return err
 		}
 		secret.UUID = uuid.Nil
-		secret.Name = "S3_BUCKET_NAME"
+		secret.Key = "S3_BUCKET_NAME"
 		secret.Value = bucketName
 		err = tx.Create(&secret).Error
 		if err != nil {
 			return err
 		}
 		secret.UUID = uuid.Nil
-		secret.Name = "S3_BUCKET_LOCATION"
+		secret.Key = "S3_BUCKET_LOCATION"
 		secret.Value = bucketLocation
 		err = tx.Create(&secret).Error
 		if err != nil {
 			return err
 		}
 		secret.UUID = uuid.Nil
-		secret.Name = "S3_PUBLIC_URL"
+		secret.Key = "S3_PUBLIC_URL"
 		secret.Value = publicURL
 		err = tx.Create(&secret).Error
 		if err != nil {
@@ -2866,17 +2852,17 @@ func (ds *Datastore) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, access
 		return nil, err
 	}
 	return &commonmodels.SourceSecrets{
-		AccessKeyId:     accessKeyId,
-		AccessKeySecret: accessKeySecret,
-		BucketName:      bucketName,
-		BucketLocation:  bucketLocation,
-		PublicURL:       publicURL,
+		// AccessKeyId:     accessKeyId,
+		// AccessKeySecret: accessKeySecret,
+		BucketName:     bucketName,
+		BucketLocation: bucketLocation,
+		PublicURL:      publicURL,
 	}, nil
 }
 
-func (ds *Datastore) DeleteS3Secrets(orgId uuid.UUID) error {
+func (ds *Datastore) DeleteSecrets(orgId uuid.UUID, secretName string) error {
 	var secrets []userorgdbmodels.Secret
-	err := ds.DB.Where("org_uuid = ?", orgId).Where("name LIKE ?", "S3_%").Delete(&secrets).Error
+	err := ds.DB.Where("org_uuid = ?", orgId).Where("name = ?", secretName).Delete(&secrets).Error
 	if err != nil {
 		return err
 	}

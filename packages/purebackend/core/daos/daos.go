@@ -341,28 +341,20 @@ func (dao *Dao) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 	return dao.Datastore().DeleteDatasetActivity(activityUUID)
 }
 
-func (dao *Dao) GetSourceSecret(orgId uuid.UUID, source string) (*commonmodels.SourceSecrets, error) {
-	return dao.Datastore().GetSourceSecret(orgId, source)
+func (dao *Dao) GetSecretByName(orgId uuid.UUID, secretName string) (*commonmodels.SourceSecrets, error) {
+	return dao.Datastore().GetSecretByName(orgId, secretName)
 }
 
-func (dao *Dao) GetSourcePublicURL(orgId uuid.UUID, source string) (string, error) {
-	return dao.Datastore().GetSourcePublicURL(orgId, source)
+func (dao *Dao) CreateR2Secrets(orgId uuid.UUID, secretName string, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*commonmodels.SourceSecrets, error) {
+	return dao.Datastore().CreateR2Secrets(orgId, secretName, accountId, accessKeyId, accessKeySecret, bucketName, publicURL)
 }
 
-func (dao *Dao) CreateR2Secrets(orgId uuid.UUID, accountId string, accessKeyId string, accessKeySecret string, bucketName string, publicURL string) (*commonmodels.SourceSecrets, error) {
-	return dao.Datastore().CreateR2Secrets(orgId, accountId, accessKeyId, accessKeySecret, bucketName, publicURL)
+func (dao *Dao) CreateS3Secrets(orgId uuid.UUID, secretName string, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*commonmodels.SourceSecrets, error) {
+	return dao.Datastore().CreateS3Secrets(orgId, secretName, accessKeyId, accessKeySecret, bucketName, bucketLocation)
 }
 
-func (dao *Dao) DeleteR2Secrets(orgId uuid.UUID) error {
-	return dao.Datastore().DeleteR2Secrets(orgId)
-}
-
-func (dao *Dao) CreateS3Secrets(orgId uuid.UUID, accessKeyId string, accessKeySecret string, bucketName string, bucketLocation string) (*commonmodels.SourceSecrets, error) {
-	return dao.Datastore().CreateS3Secrets(orgId, accessKeyId, accessKeySecret, bucketName, bucketLocation)
-}
-
-func (dao *Dao) DeleteS3Secrets(orgId uuid.UUID) error {
-	return dao.Datastore().DeleteS3Secrets(orgId)
+func (dao *Dao) DeleteSecrets(orgId uuid.UUID, secretName string) error {
+	return dao.Datastore().DeleteSecrets(orgId, secretName)
 }
 
 func (dao *Dao) GetModelReadmeVersion(modelUUID uuid.UUID, version string) (*commonmodels.ReadmeVersionResponse, error) {

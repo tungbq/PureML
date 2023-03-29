@@ -22,14 +22,16 @@ type CreateDatasetBranchRequest struct {
 }
 
 type RegisterDatasetRequest struct {
-	Hash    string `json:"hash"`
-	Lineage string `json:"lineage"`
-	Storage string `json:"storage"`
-	IsEmpty bool   `json:"is_empty"`
+	Hash       string `json:"hash"`
+	Lineage    string `json:"lineage"`
+	Storage    string `json:"storage"`
+	SecretName string `json:"secret_name"`
+	IsEmpty    bool   `json:"is_empty"`
 }
 
 type LogFileRequest struct {
-	Storage string `json:"storage"`
+	Storage    string `json:"storage"`
+	SecretName string `json:"secret_name"`
 }
 
 type DatasetReviewRequest struct {

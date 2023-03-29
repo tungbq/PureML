@@ -162,6 +162,10 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
 		datasetSourceType = strings.ToUpper(request.FormValues["storage"][0])
 	}
+	var datasetSourceSecretName string
+	if request.FormValues["secret_name"] != nil && len(request.FormValues["secret_name"]) > 0 {
+		datasetSourceSecretName = strings.ToUpper(request.FormValues["secret_name"][0])
+	}
 	var datasetIsEmpty bool
 	if request.FormValues["is_empty"] != nil && len(request.FormValues["is_empty"]) > 0 {
 		datasetIsEmpty = request.FormValues["is_empty"][0] == "true"
@@ -202,13 +206,7 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	if response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Dataset with this hash already exists")
 	}
-	if datasetSourceType == "S3" && !api.app.Settings().S3.Enabled {
-		return models.NewErrorResponse(http.StatusBadRequest, "S3 source not enabled")
-	}
-	if datasetSourceType == "R2" && !api.app.Settings().R2.Enabled {
-		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
-	}
-	datasetSourceTypePublicURL, errresp := api.ValidateSourceTypeAndGetPublicURL(datasetSourceType, orgId)
+	datasetSourceSecrets, errresp := api.ValidateSourceTypeAndGetSourceSecrets(datasetSourceType, datasetSourceSecretName, orgId)
 	if errresp != nil {
 		return errresp
 	}
@@ -218,12 +216,12 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		filePath, err = api.app.UploadFile(file, fmt.Sprintf("dataset-registry/%s/datasets/%s/%s", orgId, datasetUUID, datasetBranchUUID))
+		filePath, err = api.app.UploadFile(file, fmt.Sprintf("dataset-registry/%s/datasets/%s/%s", orgId, datasetUUID, datasetBranchUUID), datasetSourceType, datasetSourceSecrets)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
 	}
-	datasetVersion, err := api.app.Dao().RegisterDatasetFile(datasetBranchUUID, datasetSourceType, datasetSourceTypePublicURL, filePath, datasetIsEmpty, datasetHash, datasetLineage, userUUID)
+	datasetVersion, err := api.app.Dao().RegisterDatasetFile(datasetBranchUUID, datasetSourceType, datasetSourceSecrets.PublicURL, filePath, datasetIsEmpty, datasetHash, datasetLineage, userUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}

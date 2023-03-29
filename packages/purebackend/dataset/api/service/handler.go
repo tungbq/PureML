@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	coreservice "github.com/PureMLHQ/PureML/packages/purebackend/core/apis/service"
+	commonmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/models"
 	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
@@ -45,17 +46,17 @@ func populateErrorResponse(context echo.Context, response *models.Response, resp
 	}
 }
 
-func (api *Api) ValidateSourceTypeAndGetPublicURL(modelSourceType string, orgId uuid.UUID) (string, *models.Response) {
-	var sourceTypePublicURL string
+func (api *Api) ValidateSourceTypeAndGetSourceSecrets(datasetSourceType string, datasetSourceSecretName string, orgId uuid.UUID) (*commonmodels.SourceSecrets, *models.Response) {
+	var sourceSecrets *commonmodels.SourceSecrets
 	var err error
-	modelSourceType = strings.ToUpper(modelSourceType)
-	if modelSourceType == "PUREML-STORAGE" {
-		sourceTypePublicURL, err = api.app.Dao().GetSourcePublicURL(uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111")), "R2")
+	datasetSourceType = strings.ToUpper(datasetSourceType)
+	if datasetSourceType == "PUREML-STORAGE" {
+		sourceSecrets, err = api.app.Dao().GetSecretByName(uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111")), "admin")
 	} else {
-		sourceTypePublicURL, err = api.app.Dao().GetSourcePublicURL(orgId, modelSourceType)
+		sourceSecrets, err = api.app.Dao().GetSecretByName(orgId, datasetSourceSecretName)
 	}
-	if sourceTypePublicURL == "" || err != nil {
-		return "", models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", modelSourceType))
+	if sourceSecrets == nil || err != nil {
+		return nil, models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", datasetSourceType))
 	}
-	return sourceTypePublicURL, nil
+	return sourceSecrets, nil
 }
