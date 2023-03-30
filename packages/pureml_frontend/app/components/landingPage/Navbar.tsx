@@ -37,7 +37,7 @@ export default function Navbar() {
                   </div>
                   <div className="flex items-center">
                     <a
-                      href="https://docs.pureml.com"
+                      href="https://changelog.pureml.com"
                       target="_blank"
                       rel="noreferrer"
                       className="w-max letterSpaced"
@@ -117,7 +117,7 @@ export default function Navbar() {
               </div>
               <div className="px-4 flex justify-center items-center">
                 <a
-                  href="https://pureml.notion.site/PureML-Changelog-096f7541dd6245c0a3c244e9f216ad31"
+                  href="https://changelog.pureml.com"
                   className="w-full text-lg letterSpaced text-brand-200 hover:underline hover:underline-offset-2"
                   target="_blank"
                   rel="noreferrer"
