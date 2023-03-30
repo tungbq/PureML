@@ -2350,11 +2350,35 @@ paths:
       summary: Update a user's role in an organization.
       tags:
       - Organization
+  /org/{orgId}/secret:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all secretnames of organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all secretnames of organization
+      tags:
+      - Secret
   /org/{orgId}/secret/{secretName}:
     get:
       consumes:
       - '*/*'
-      description: Get secrets for source type r2
+      description: Get secrets for secret name
       parameters:
       - description: Organization Id
         in: path
@@ -2376,14 +2400,14 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get secrets for source type r2
+      summary: Get secrets for secret name
       tags:
       - Secret
   /org/{orgId}/secret/{secretName}/delete:
     delete:
       consumes:
       - '*/*'
-      description: Delete secrets for source type s3
+      description: Delete secrets for secret name
       parameters:
       - description: Organization Id
         in: path
@@ -2405,7 +2429,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Delete secrets for source type s3
+      summary: Delete secrets for secret name
       tags:
       - Secret
   /org/{orgId}/secret/r2/{secretName}/test:

@@ -3431,6 +3431,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/org/{orgId}/secret": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all secretnames of organization",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret"
+                ],
+                "summary": "Get all secretnames of organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Id",
+                        "name": "orgId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/org/{orgId}/secret/r2/connect": {
             "post": {
                 "security": [
@@ -3622,7 +3660,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get secrets for source type r2",
+                "description": "Get secrets for secret name",
                 "consumes": [
                     "*/*"
                 ],
@@ -3632,7 +3670,7 @@ const docTemplate = `{
                 "tags": [
                     "Secret"
                 ],
-                "summary": "Get secrets for source type r2",
+                "summary": "Get secrets for secret name",
                 "parameters": [
                     {
                         "type": "string",
@@ -3667,7 +3705,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Delete secrets for source type s3",
+                "description": "Delete secrets for secret name",
                 "consumes": [
                     "*/*"
                 ],
@@ -3677,7 +3715,7 @@ const docTemplate = `{
                 "tags": [
                     "Secret"
                 ],
-                "summary": "Delete secrets for source type s3",
+                "summary": "Delete secrets for secret name",
                 "parameters": [
                     {
                         "type": "string",

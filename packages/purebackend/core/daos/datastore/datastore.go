@@ -2686,6 +2686,18 @@ func (ds *Datastore) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 
 /////////////////////////////// SECRET API METHODS ///////////////////////////////
 
+func (ds *Datastore) GetOrganizationSecrets(orgId uuid.UUID) ([]string, error) {
+	var secretNames []string
+	res := ds.DB.Model(&userorgdbmodels.Secret{}).Where("org_uuid = ?", orgId).Distinct().Pluck("name", &secretNames)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	return secretNames, nil
+}
+
 func (ds *Datastore) GetSecretByName(orgId uuid.UUID, secretName string) (*commonmodels.SourceSecrets, error) {
 	var secrets []userorgdbmodels.Secret
 	res := ds.DB.Where("org_uuid = ? and name = ?", orgId, secretName).Find(&secrets)

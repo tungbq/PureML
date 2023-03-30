@@ -17,7 +17,7 @@ func BindSecretsApi(app core.App, rg *echo.Group) {
 	api := Api{app: app}
 
 	secretGroup := rg.Group("/org/:orgId/secret", authmiddlewares.RequireAuthContext, orgmiddlewares.ValidateOrg(api.app))
-	// secretGroup.GET("/all", api.DefaultHandler(GetAllSecrets))
+	secretGroup.GET("", api.DefaultHandler(GetAllSecrets))
 	secretGroup.GET("/:secretName", api.DefaultHandler(GetSecret))
 	secretGroup.POST("/r2/connect", api.DefaultHandler(ConnectR2Secret))
 	secretGroup.GET("/r2/:secretName/test", api.DefaultHandler(TestR2Secret))
@@ -26,11 +26,32 @@ func BindSecretsApi(app core.App, rg *echo.Group) {
 	secretGroup.DELETE("/:secretName/delete", api.DefaultHandler(DeleteSecrets))
 }
 
+// GetAllSecrets godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Get all secretnames of organization
+//	@Description	Get all secretnames of organization
+//	@Tags			Secret
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/org/{orgId}/secret [get]
+//	@Param			orgId	path	string	true	"Organization Id"
+func (api *Api) GetAllSecrets(request *models.Request) *models.Response {
+	orgId := request.GetOrgId()
+	result, err := api.app.Dao().GetOrganizationSecrets(orgId)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	response := models.NewDataResponse(http.StatusOK, result, "Organization secrets")
+	return response
+}
+
 // GetSecret godoc
 //
 //	@Security		ApiKeyAuth
-//	@Summary		Get secrets for source type r2
-//	@Description	Get secrets for source type r2
+//	@Summary		Get secrets for secret name
+//	@Description	Get secrets for secret name
 //	@Tags			Secret
 //	@Accept			*/*
 //	@Produce		json
@@ -276,8 +297,8 @@ func (api *Api) TestS3Secret(request *models.Request) *models.Response {
 // DeleteSecrets godoc
 //
 //	@Security		ApiKeyAuth
-//	@Summary		Delete secrets for source type s3
-//	@Description	Delete secrets for source type s3
+//	@Summary		Delete secrets for secret name
+//	@Description	Delete secrets for secret name
 //	@Tags			Secret
 //	@Accept			*/*
 //	@Produce		json
@@ -299,6 +320,7 @@ func (api *Api) DeleteSecrets(request *models.Request) *models.Response {
 	return response
 }
 
+var GetAllSecrets ServiceFunc = (*Api).GetAllSecrets
 var GetSecret ServiceFunc = (*Api).GetSecret
 var ConnectR2Secret ServiceFunc = (*Api).ConnectR2Secret
 var ConnectS3Secret ServiceFunc = (*Api).ConnectS3Secret

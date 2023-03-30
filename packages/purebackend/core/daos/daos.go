@@ -341,6 +341,10 @@ func (dao *Dao) DeleteDatasetActivity(activityUUID uuid.UUID) error {
 	return dao.Datastore().DeleteDatasetActivity(activityUUID)
 }
 
+func (dao *Dao) GetOrganizationSecrets(orgId uuid.UUID) ([]string, error) {
+	return dao.Datastore().GetOrganizationSecrets(orgId)
+}
+
 func (dao *Dao) GetSecretByName(orgId uuid.UUID, secretName string) (*commonmodels.SourceSecrets, error) {
 	return dao.Datastore().GetSecretByName(orgId, secretName)
 }
