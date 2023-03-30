@@ -25,51 +25,10 @@ def callback():
     Use with add, show, delete option
 
     add - Adds new secret for any integration
+    all - Gets all secret names for the organization
     show - Show all secrets of secret name
     delete - Delete secrets under secret name
     """
-
-@app.command()
-def show(secret_name: str = typer.Argument(..., case_sensitive=True)):
-    """
-    Shows the secrets under given secret name
-
-    Usage:
-    pureml secrets show "secret_name"
-    """
-    print()
-    access_token = get_token()
-    org_id = get_org_id()
-    url_path = f"org/{org_id}/secret/{secret_name}"
-    url = urljoin(backend_schema.BASE_URL, url_path)
-
-    headers = {
-        "accept": "application/json",
-        "Authorization": "Bearer {}".format(access_token),
-    }
-
-    response = requests.get(url, headers=headers)
-
-    if response.ok:
-        secrets_all = response.json()["data"]
-        if not secrets_all or len(secrets_all) == 0:
-            print(f"[bold red]No secrets found for {secret_name}[/bold red]")
-            return
-        secrets_all = secrets_all[0]
-
-        print()
-        print(f"[bold green]{secret_name} secrets :")
-        console = Console()
-
-        table = Table("Key", "Value")
-        for key, value in secrets_all.items():
-            table.add_row(key, value)
-
-        console.print(table)
-        print()
-
-    else:
-        print("[bold red]Unable to fetch secrets!")
 
 @app.command()
 def add():
@@ -152,7 +111,88 @@ def add():
 
     else:
         print("[bold red]Unable to fetch secrets!")
-    
+
+
+@app.command()
+def all():
+    """
+    Get all secret names for the organization
+
+    Usage:
+    pureml secrets all
+    """
+    print()
+    access_token = get_token()
+    org_id = get_org_id()
+    url_path = f"org/{org_id}/secret"
+    url = urljoin(backend_schema.BASE_URL, url_path)
+
+    headers = {
+        "accept": "application/json",
+        "Authorization": "Bearer {}".format(access_token),
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.ok:
+        secrets_all = response.json()["data"]
+        if not secrets_all or len(secrets_all) == 0:
+            print("[bold red]No secrets found[/bold red]")
+            return
+        console = Console()
+
+        table = Table("Secret Name")
+        for secret in secrets_all:
+            table.add_row(secret)
+
+        console.print(table)
+        print()
+    else:
+        print("[bold red]Unable to fetch secrets!")
+
+
+@app.command()
+def show(secret_name: str = typer.Argument(..., case_sensitive=True)):
+    """
+    Shows the secrets under given secret name
+
+    Usage:
+    pureml secrets show "secret_name"
+    """
+    print()
+    access_token = get_token()
+    org_id = get_org_id()
+    url_path = f"org/{org_id}/secret/{secret_name}"
+    url = urljoin(backend_schema.BASE_URL, url_path)
+
+    headers = {
+        "accept": "application/json",
+        "Authorization": "Bearer {}".format(access_token),
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.ok:
+        secrets_all = response.json()["data"]
+        if not secrets_all or len(secrets_all) == 0:
+            print(f"[bold red]No secrets found for {secret_name}[/bold red]")
+            return
+        secrets_all = secrets_all[0]
+
+        print()
+        print(f"[bold green]{secret_name} secrets :")
+        console = Console()
+
+        table = Table("Key", "Value")
+        for key, value in secrets_all.items():
+            table.add_row(key, value)
+
+        console.print(table)
+        print()
+
+    else:
+        print("[bold red]Unable to fetch secrets!")
+
 
 @app.command()
 def delete(secret_name: str = typer.Argument(..., case_sensitive=True)):
