@@ -102,7 +102,7 @@ export default function App() {
   const profile = useLoaderData();
   const { prof, gaTrackingId } = useLoaderData();
   useEffect(() => {
-    posthog.init("phc_OEBpTrWiaHEj51DaYM1Q38j2Vn4jRvvSmvoGqRuGqpn", {
+    posthog.init("phc_u5aRMx559YsrAaBkCIWGoxEXepwpQBxvhUncdb9giP5", {
       api_host: "https://app.posthog.com",
     });
   });
