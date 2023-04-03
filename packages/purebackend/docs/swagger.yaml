@@ -49,6 +49,15 @@ definitions:
       handle:
         type: string
     type: object
+  models.CreateSessionRequest:
+    properties:
+      device:
+        type: string
+      device_id:
+        type: string
+      device_location:
+        type: string
+    type: object
   models.DatasetReviewRequest:
     properties:
       description:
@@ -152,6 +161,13 @@ definitions:
       secret_name:
         type: string
     type: object
+  models.SessionTokenRequest:
+    properties:
+      device_id:
+        type: string
+      session_id:
+        type: string
+    type: object
   models.UpdateOrgRequest:
     properties:
       avatar:
@@ -224,6 +240,11 @@ definitions:
   models.UserVerifyTokenRequest:
     properties:
       token:
+        type: string
+    type: object
+  models.VerifySessionRequest:
+    properties:
+      session_id:
         type: string
     type: object
 info:
@@ -2726,6 +2747,29 @@ paths:
       summary: Get all public models
       tags:
       - Model
+  /user/create-session:
+    post:
+      consumes:
+      - '*/*'
+      description: Create empty session flow.
+      parameters:
+      - description: Session details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create Session for CLI.
+      tags:
+      - User
   /user/delete:
     delete:
       consumes:
@@ -2901,6 +2945,29 @@ paths:
       summary: User reset password.
       tags:
       - User
+  /user/session-token:
+    post:
+      consumes:
+      - '*/*'
+      description: Get Session Token if approved for CLI.
+      parameters:
+      - description: Session details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.SessionTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Session Token if approved for CLI.
+      tags:
+      - User
   /user/signup:
     post:
       consumes:
@@ -2971,6 +3038,31 @@ paths:
             additionalProperties: true
             type: object
       summary: User reset password verify token.
+      tags:
+      - User
+  /user/verify-session:
+    post:
+      consumes:
+      - '*/*'
+      description: Verify Session and approve if valid for CLI.
+      parameters:
+      - description: Session details
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifySessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Verify Session and approve if valid for CLI.
       tags:
       - User
 securityDefinitions:

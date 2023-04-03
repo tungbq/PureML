@@ -3,10 +3,14 @@ package impl
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	authdbmodels "github.com/PureMLHQ/PureML/packages/purebackend/auth/dbmodels"
+	authmodels "github.com/PureMLHQ/PureML/packages/purebackend/auth/models"
 	commondbmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/dbmodels"
 	commonmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/models"
 	"github.com/PureMLHQ/PureML/packages/purebackend/core/config"
@@ -27,7 +31,20 @@ import (
 	cgosqlite "gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"gorm.io/gorm/logger"
 )
+
+var gormConfig = &gorm.Config{
+	Logger: logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second * 2, // Slow SQL threshold
+			LogLevel:                  logger.Error,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  true,
+		},
+	),
+}
 
 func NewSQLiteDatastore(optDataDir ...string) *Datastore {
 	var dialector gorm.Dialector
@@ -45,7 +62,7 @@ func NewSQLiteDatastore(optDataDir ...string) *Datastore {
 	} else {
 		dialector = puregosqlite.Open(databasePath)
 	}
-	db, err := gorm.Open(dialector, &gorm.Config{})
+	db, err := gorm.Open(dialector, gormConfig)
 	if err != nil {
 		fmt.Println(err)
 		panic("Error connecting to database")
@@ -72,6 +89,7 @@ func NewSQLiteDatastore(optDataDir ...string) *Datastore {
 		userorgdbmodels.Secret{},
 		commondbmodels.Readme{},
 		commondbmodels.ReadmeVersion{},
+		authdbmodels.Session{},
 	)
 	if err != nil {
 		return &Datastore{}
@@ -84,7 +102,7 @@ func NewSQLiteDatastore(optDataDir ...string) *Datastore {
 func NewPostgresDatastore(databaseUrl string) *Datastore {
 	dsn := databaseUrl
 	// fmt.Println(dsn)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {
 		fmt.Println(err)
 		panic("Error connecting to database")
@@ -111,6 +129,7 @@ func NewPostgresDatastore(databaseUrl string) *Datastore {
 		userorgdbmodels.Secret{},
 		commondbmodels.Readme{},
 		commondbmodels.ReadmeVersion{},
+		authdbmodels.Session{},
 	)
 	if err != nil {
 		return &Datastore{}
@@ -249,7 +268,16 @@ func (ds *Datastore) SeedAdminIfNotExists() error {
 	var user userorgdbmodels.User
 	adminDetails := config.GetAdminDetails()
 	if adminDetails == nil {
-		return errors.New("admin details not found in env vars")
+		// return errors.New("admin details not found in env vars")
+		// fmt.Println("admin details not found in env vars. using default values")
+		adminDetails = map[string]interface{}{
+			"uuid":       uuid.Must(uuid.FromString("99999999-9999-9999-9999-999999999999")),
+			"email":      "admin@admin.com",
+			"password":   "admin",
+			"handle":     "admin",
+			"org_name":   "admin-org",
+			"org_handle": "adminorg",
+		}
 	}
 	err := ds.DB.Where("uuid = ?", adminDetails["uuid"]).First(&user).Error
 	if err == gorm.ErrRecordNotFound {
@@ -1002,6 +1030,85 @@ func (ds *Datastore) UpdateUserPassword(userUUID uuid.UUID, hashedPassword strin
 	return nil
 }
 
+/////////////////////////////// CLI SESSION METHODS /////////////////////////////////
+
+func (ds *Datastore) GetSession(sessionUUID uuid.UUID) (*authmodels.SessionResponse, error) {
+	session := &authdbmodels.Session{
+		BaseModel: commondbmodels.BaseModel{
+			UUID: sessionUUID,
+		},
+	}
+	err := ds.DB.Model(&session).Preload("User").First(&session).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &authmodels.SessionResponse{
+		SessionUUID:    session.UUID,
+		Device:         session.Device,
+		DeviceId:       session.DeviceId,
+		DeviceLocation: session.DeviceLocation,
+		UserUUID:       session.User.UUID,
+		Approved:       session.Approved,
+		Invalid:        session.Invalid,
+		CreatedAt:      session.CreatedAt,
+	}, nil
+}
+
+func (ds *Datastore) CreateSession(deviceData string, deviceId string, deviceLocation string) (*authmodels.CreateSessionResponse, error) {
+	session := authdbmodels.Session{
+		Device:         deviceData,
+		DeviceId:       deviceId,
+		DeviceLocation: deviceLocation,
+	}
+	err := ds.DB.Create(&session).Error
+	if err != nil {
+		return nil, err
+	}
+	return &authmodels.CreateSessionResponse{
+		SessionUUID: session.UUID,
+		CreatedAt:   session.CreatedAt,
+	}, nil
+}
+
+func (ds *Datastore) UpdateSession(sessionUUID uuid.UUID, userUUID uuid.UUID, updatedAttributes map[string]interface{}) (*authmodels.SessionResponse, error) {
+	var session authdbmodels.Session
+	result := ds.DB.Where("uuid = ?", sessionUUID).First(&session)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if updatedAttributes["approved"] != nil {
+		session.Approved = updatedAttributes["approved"].(bool)
+	}
+	if updatedAttributes["invalid"] != nil {
+		session.Invalid = updatedAttributes["invalid"].(bool)
+	}
+	if updatedAttributes["created_at"] != nil {
+		session.CreatedAt = updatedAttributes["created_at"].(time.Time)
+	}
+	session.User = userorgdbmodels.User{
+		BaseModel: commondbmodels.BaseModel{
+			UUID: userUUID,
+		},
+	}
+	result = ds.DB.Save(&session)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &authmodels.SessionResponse{
+		SessionUUID:    session.UUID,
+		Device:         session.Device,
+		DeviceId:       session.DeviceId,
+		DeviceLocation: session.DeviceLocation,
+		UserUUID:       session.User.UUID,
+		Approved:       session.Approved,
+		Invalid:        session.Invalid,
+		CreatedAt:      session.CreatedAt,
+	}, nil
+}
+
 // Helper
 func IncrementVersion(latestVersion string) string {
 	version := strings.Split(latestVersion, "v")
@@ -1011,7 +1118,7 @@ func IncrementVersion(latestVersion string) string {
 	return newVersion
 }
 
-/////////////////////////////// MODEL METHODS/////////////////////////////////
+/////////////////////////////// MODEL METHODS /////////////////////////////////
 
 func (ds *Datastore) GetModelByName(orgId uuid.UUID, modelName string) (*modelmodels.ModelResponse, error) {
 	var model modeldbmodels.Model

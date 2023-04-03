@@ -3,6 +3,7 @@ package daos
 import (
 	"errors"
 
+	authmodels "github.com/PureMLHQ/PureML/packages/purebackend/auth/models"
 	commonmodels "github.com/PureMLHQ/PureML/packages/purebackend/core/common/models"
 	impl "github.com/PureMLHQ/PureML/packages/purebackend/core/daos/datastore"
 	"github.com/PureMLHQ/PureML/packages/purebackend/core/models"
@@ -159,6 +160,18 @@ func (dao *Dao) UpdateUser(email string, updatedAttributes map[string]interface{
 
 func (dao *Dao) UpdateUserPassword(userUUID uuid.UUID, hashedPassword string) error {
 	return dao.Datastore().UpdateUserPassword(userUUID, hashedPassword)
+}
+
+func (dao *Dao) GetSession(sessionUUID uuid.UUID) (*authmodels.SessionResponse, error) {
+	return dao.Datastore().GetSession(sessionUUID)
+}
+
+func (dao *Dao) CreateSession(deviceData string, deviceId string, deviceLocation string) (*authmodels.CreateSessionResponse, error) {
+	return dao.Datastore().CreateSession(deviceData, deviceId, deviceLocation)
+}
+
+func (dao *Dao) UpdateSession(sessionUUID uuid.UUID, userUUID uuid.UUID, updatedAttributes map[string]interface{}) (*authmodels.SessionResponse, error) {
+	return dao.Datastore().UpdateSession(sessionUUID, userUUID, updatedAttributes)
 }
 
 func (dao *Dao) GetLogForModelVersion(modelVersionUUID uuid.UUID) ([]models.LogResponse, error) {
