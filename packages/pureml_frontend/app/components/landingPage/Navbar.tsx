@@ -10,7 +10,7 @@ export default function Navbar() {
           <div className="lg:h-fit w-full md:max-w-screen-xl px-0 md:px-8">
             <div className="sm:px-24">
               <div className="rounded-b-2xl border-b border-slate-200">
-                <div className="flex px-4 py-4 md:px-12 justify-between">
+                <div className="flex px-4 py-5 md:px-12 justify-between items-center">
                   <a href="/">
                     <img
                       src="/PureMLLogoWText.svg"
@@ -71,7 +71,7 @@ export default function Navbar() {
     <div className="flex justify-center">
       <div className="flex justify-center w-full backdrop-blur-sm bg-white/30">
         <div className="lg:h-fit w-full md:max-w-screen-xl px-0 md:px-8">
-          <div className="flex p-4 md:px-0 justify-between w-full">
+          <div className="flex p-4 md:px-0 justify-between items-center w-full">
             <a href="/">
               <img
                 src="/PureMLLogoWText.svg"
@@ -82,16 +82,13 @@ export default function Navbar() {
             </a>
             <div className="md:hidden flex">
               <div className="flex items-center pr-8">
-                {/* <a
-                  className="sm:hidden github-button letterSpaced"
+                <a
                   href="https://github.com/pureml-inc/pureml"
-                  data-color-scheme="no-preference: dark_dimmed; light: light_high_contrast; dark: light;"
-                  data-size="large"
-                  data-show-count="true"
-                  aria-label="Star pureml-inc/pureml on GitHub"
+                  className="flex gap-x-2 border border-slate-950 rounded-full py-2 px-4 text-brand-200 text-lg letterSpaced hover:bg-slate-100"
                 >
-                  STARS
-                </a> */}
+                  <Github className="w-5" />
+                  STAR
+                </a>
               </div>
               <div className="flex justify-center items-center">
                 <Menu
