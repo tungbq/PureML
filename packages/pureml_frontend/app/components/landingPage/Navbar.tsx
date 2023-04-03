@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Github, Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(true);
@@ -20,7 +20,7 @@ export default function Navbar() {
                     />
                   </a>
                   <X
-                    className="sm:hidden text-slate-900 cursor-pointer w-8 h-8"
+                    className="sm:hidden text-slate-950 cursor-pointer w-8 h-8"
                     onClick={() => setOpen(!open)}
                   />
                 </div>
@@ -55,8 +55,10 @@ export default function Navbar() {
                       DOCS
                     </a>
                   </div>
-                  <div className="flex items-center text-brand-200 letterSpaced">
-                    <a href="/auth/signin">SIGN IN</a>
+                  <div className="flex items-center text-brand-200">
+                    <a href="/auth/signin" className="w-max letterSpaced">
+                      SIGN IN
+                    </a>
                   </div>
                 </div>
               </div>
@@ -80,7 +82,7 @@ export default function Navbar() {
             </a>
             <div className="md:hidden flex">
               <div className="flex items-center pr-8">
-                <a
+                {/* <a
                   className="sm:hidden github-button letterSpaced"
                   href="https://github.com/pureml-inc/pureml"
                   data-color-scheme="no-preference: dark_dimmed; light: light_high_contrast; dark: light;"
@@ -89,11 +91,11 @@ export default function Navbar() {
                   aria-label="Star pureml-inc/pureml on GitHub"
                 >
                   STARS
-                </a>
+                </a> */}
               </div>
               <div className="flex justify-center items-center">
                 <Menu
-                  className="sm:hidden text-slate-900 cursor-pointer w-8 h-8"
+                  className="sm:hidden text-slate-950 cursor-pointer w-8 h-8"
                   onClick={() => setOpen(!open)}
                 />
               </div>
@@ -143,15 +145,12 @@ export default function Navbar() {
                   SIGN IN <ArrowUpRight className="text-brand-200 w-5" />
                 </a>
               </div>
-              <div className="px-4 flex justify-center items-center pt-1">
+              <div className="px-4 flex justify-center items-center">
                 <a
-                  className="github-button flex justify-center items-center gap-y-4 text-brand-200 hover:underline hover:underline-offset-2 text-lg letterSpaced"
                   href="https://github.com/pureml-inc/pureml"
-                  data-color-scheme="no-preference: dark_dimmed; light: light_high_contrast; dark: light;"
-                  data-size="large"
-                  data-show-count="true"
-                  aria-label="Star pureml-inc/pureml on GitHub"
+                  className="flex gap-x-2 border border-slate-950 rounded-full py-2 px-4 text-brand-200 text-lg letterSpaced hover:bg-slate-100"
                 >
+                  <Github className="w-5" />
                   STAR
                 </a>
               </div>

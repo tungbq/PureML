@@ -263,30 +263,8 @@ pureml deploy pet_classifier:dev:v1
 
 <br/>
 
-## 💻 Demo
-
-PureML quick start demo in just 2 mins.
-
-#### For models:
-
-[![PureML Demo Video](http://i3.ytimg.com/vi/gqHjN4kPywo/hqdefault.jpg)](https://www.youtube.com/watch?v=gqHjN4kPywo "PureML Demo Video")
-<br/>
-
-#### For datasets:
-
-[![PureML Demo Video](http://i3.ytimg.com/vi/gqHjN4kPywo/hqdefault.jpg)](https://www.youtube.com/watch?v=HSUh66nZbyo "PureML Demo Video")
-
-<sub><i>Click the image to play video</i></sub>
-<br/>
-
-### Live demo
-
-Build and run a PureML project to create data lineage and a model with our <b>[demo colab link](https://colab.research.google.com/drive/1LlrpaKiREwgesaRcnwkJP-w2MPesXf1t?usp=sharing)</b>.
-
-<br />
-
-## Self-Host on Local Machine
-> _Currently docker-compose is the best way to self-host the official images [puremlhq/pureml_backend](https://hub.docker.com/repository/docker/puremlhq/pureml_backend) and [puremlhq/pureml_frontend](https://hub.docker.com/repository/docker/puremlhq/pureml_frontend)_
+## 💻 Self-Host on Local Machine
+> _Currently docker-compose is the best way to self-host the official images [puremlhq/pureml_backend](https://hub.docker.com/r/puremlhq/pureml_backend) and [puremlhq/pureml_frontend](https://hub.docker.com/r/puremlhq/pureml_frontend)_
 
 ### Using [Docker Compose](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/docker-compose.yml)
 
@@ -317,7 +295,33 @@ volumes:
   pureml-data:
 ```
 
-**The PureML UI will be available at http://localhost:3000. For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).**
+The PureML UI will be available at http://localhost:3000.
+
+> For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).
+
+<br />
+
+## 🏁 Demo
+
+PureML quick start demo in just 2 mins.
+
+#### For models:
+
+[![PureML Demo Video](http://i3.ytimg.com/vi/gqHjN4kPywo/hqdefault.jpg)](https://www.youtube.com/watch?v=gqHjN4kPywo "PureML Demo Video")
+<br/>
+
+#### For datasets:
+
+[![PureML Demo Video](http://i3.ytimg.com/vi/gqHjN4kPywo/hqdefault.jpg)](https://www.youtube.com/watch?v=HSUh66nZbyo "PureML Demo Video")
+
+<sub><i>Click the image to play video</i></sub>
+<br/>
+
+### Live demo
+
+Build and run a PureML project to create data lineage and a model with our <b>[demo colab link](https://colab.research.google.com/drive/1LlrpaKiREwgesaRcnwkJP-w2MPesXf1t?usp=sharing)</b>.
+
+<br />
 
 ## 📍 [Main Features](https://docs.pureml.com/)
 
