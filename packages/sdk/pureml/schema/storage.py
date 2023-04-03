@@ -1,11 +1,10 @@
 from pydantic import BaseModel, root_validator
-from .singleton import Singleton_BaseModel
 from .backend import BackendSchema
 import typing
 import os
 
 
-class StorageSchema(Singleton_BaseModel):
+class StorageSchema(BaseModel):
 
     STORAGE: str = "PUREML-STORAGE"
     backend: BackendSchema = BackendSchema().get_instance()
