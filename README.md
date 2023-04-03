@@ -286,7 +286,7 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 <br />
 
 ## Self-Host on Local Machine
-> _Currently docker-compose is the best way to self-host the official images [puremlhq/pureml_backend](https://hub.docker.com/repository/docker/puremlhq/pureml_backend) and [puremlhq/pureml_frontend](https://hub.docker.com/repository/docker/puremlhq/pureml_frontend)_
+> _Currently docker-compose is the best way to self-host the official images [puremlhq/pureml_backend](https://hub.docker.com/r/puremlhq/pureml_backend) and [puremlhq/pureml_frontend](https://hub.docker.com/r/puremlhq/pureml_frontend)_
 
 ### Using [Docker Compose](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/docker-compose.yml)
 
