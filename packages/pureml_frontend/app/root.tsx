@@ -212,7 +212,6 @@ function Document({
         <Links />
       </head>
       <body>
-        <script async defer src="https://buttons.github.io/buttons.js"></script>
         {!gaTrackingId ? null : (
           <>
             <script
