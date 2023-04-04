@@ -4,6 +4,7 @@ from .source_code import get_source_code
 import os
 import shutil
 from .log_utils import update_step_dict
+import time
 
 
 def add_load_data_to_config(name, description=None, func=None, hash=""):
@@ -20,7 +21,8 @@ def add_load_data_to_config(name, description=None, func=None, hash=""):
 
     config["load_data"] = {
         "name": name,
-        "description": description,
+        "desc": str(description),
+        "time": str(time.time()),
         "hash": hash,
         "type": "load_data",
         "code": code,
@@ -56,7 +58,8 @@ def add_transformer_to_config(name, description=None, func=None, hash="", parent
 
     config["transformer"][position] = {
         "name": name,
-        "description": description,
+        "desc": str(description),
+        "time": str(time.time()),
         "hash": hash,
         "type": "transformer",
         "parent": parent,
@@ -90,8 +93,9 @@ def add_dataset_to_config(
 
     config["dataset"] = {
         "name": name,
+        "desc": str(description),
+        "time": str(time.time()),
         "branch": branch,
-        "description": description,
         "hash": hash,
         "type": "dataset",
         "version": version,
@@ -102,7 +106,7 @@ def add_dataset_to_config(
     save_config(config=config)
 
 
-def add_model_to_config(name, branch, func=None, hash="", version=""):
+def add_model_to_config(name, branch, description=None, func=None, hash="", version=""):
     # name = ''
     # hash = ''
     # version = ''
@@ -125,6 +129,8 @@ def add_model_to_config(name, branch, func=None, hash="", version=""):
 
         config["model"][position] = {
             "name": name,
+            "desc": str(description),
+            "time": str(time.time()),
             "branch": branch,
             "hash": hash,
             "version": version,

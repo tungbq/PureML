@@ -39,6 +39,7 @@ def model(label: str):
                 add_model_to_config(
                     name=name,
                     branch=branch,
+                    description=func_description,
                     hash=model_hash,
                     version=model_version,
                     func=func,
@@ -58,7 +59,11 @@ def model(label: str):
 
             else:
                 add_model_to_config(
-                    name=name, branch=branch, hash=model_hash, func=func
+                    name=name,
+                    branch=branch,
+                    description=func_description,
+                    hash=model_hash,
+                    func=func,
                 )
 
             return func_output
