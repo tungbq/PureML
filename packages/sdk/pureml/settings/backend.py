@@ -1,4 +1,4 @@
-from pureml.schema.backend import BackendSchema
+from pureml.schema import BackendSchema
 
 
 def set_backend(backend_url: str) -> None:

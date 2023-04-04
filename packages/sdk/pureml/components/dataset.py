@@ -16,6 +16,7 @@ from pureml.utils.version_utils import parse_version_label
 from pureml.utils.config import reset_config
 
 config_keys = ConfigKeys
+storage = StorageSchema().get_instance()
 
 
 def init_branch(label: str):
@@ -275,13 +276,7 @@ def save_dataset(dataset, name: str):
     return save_path
 
 
-def register(
-    dataset,
-    label: str,
-    lineage,
-    is_empty: bool = False,
-    storage: str = StorageSchema().STORAGE,
-) -> str:
+def register(dataset, label: str, lineage, is_empty: bool = False) -> str:
     """The function takes in a dataset, a name and a version and saves the dataset locally, then uploads the
     dataset to the PureML server
 
@@ -363,7 +358,7 @@ def register(
             "hash": dataset_hash,
             "lineage": lineage,
             "is_empty": is_empty,
-            "storage": storage,
+            "storage": storage.STORAGE,
         }
 
         # data = json.dumps(data)

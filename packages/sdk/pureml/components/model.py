@@ -16,6 +16,7 @@ from pureml.utils.config import reset_config
 
 
 config_keys = ConfigKeys
+storage = StorageSchema().get_instance()
 
 
 def init_branch(label):
@@ -263,7 +264,6 @@ def register(
     model,
     label,
     is_empty: bool = False,
-    storage: str = StorageSchema().STORAGE,
 ):
 
     name, branch, _ = parse_version_label(label)
@@ -321,7 +321,7 @@ def register(
             "branch": branch,
             "hash": model_hash,
             "is_empty": is_empty,
-            "storage": storage,
+            "storage": storage.STORAGE,
         }
 
         response = requests.post(url, files=files, data=data, headers=headers)
