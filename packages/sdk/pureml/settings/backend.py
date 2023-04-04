@@ -17,5 +17,5 @@ def set_storage(storage: str) -> None:
     Args:
         storage (str): The storage key to reference storage details added in secret.
     """
-    backend: BackendSchema = BackendSchema().get_instance()
-    backend.BASE_URL = backend_url
+    storage: StorageSchema = StorageSchema().get_instance()
+    storage.STORAGE = storage
