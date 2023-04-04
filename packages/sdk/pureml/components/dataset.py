@@ -529,10 +529,12 @@ def fetch(label: str):
         print("[bold orange]Dataset file is not registered to the version")
         return
 
-    storage_path = dataset_details["path"]["source_path"]
-    storage_source_type = dataset_details["path"]["source_type"]["public_url"]
+    # storage_path = dataset_details["path"]["source_path"]
+    # storage_source_type = dataset_details["path"]["source_type"]["public_url"]
 
-    dataset_url = urljoin(storage_source_type, storage_path)
+    # dataset_url = urljoin(storage_source_type, storage_path)
+
+    dataset_url = dataset_details["path"]
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",

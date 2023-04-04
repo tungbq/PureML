@@ -471,10 +471,12 @@ def fetch(label: str):
         print("[bold orange]Model file is not registered to the version")
         return
 
-    storage_path = model_details["path"]["source_path"]
-    storage_source_type = model_details["path"]["source_type"]["public_url"]
+    # storage_path = model_details["path"]["source_path"]
+    # storage_source_type = model_details["path"]["source_type"]["public_url"]
 
-    model_url = urljoin(storage_source_type, storage_path)
+    # model_url = urljoin(storage_source_type, storage_path)
+
+    model_url = model_details["path"]
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
