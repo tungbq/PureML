@@ -117,11 +117,39 @@ definitions:
       title:
         type: string
     type: object
+  models.R2SecretRequest:
+    properties:
+      access_key_id:
+        type: string
+      access_key_secret:
+        type: string
+      account_id:
+        type: string
+      bucket_name:
+        type: string
+      public_url:
+        type: string
+      secret_name:
+        type: string
+    type: object
   models.ReadmeRequest:
     properties:
       content:
         type: string
       file_type:
+        type: string
+    type: object
+  models.S3SecretRequest:
+    properties:
+      access_key_id:
+        type: string
+      access_key_secret:
+        type: string
+      bucket_location:
+        type: string
+      bucket_name:
+        type: string
+      secret_name:
         type: string
     type: object
   models.UpdateOrgRequest:
@@ -632,6 +660,9 @@ paths:
         name: lineage
         type: string
       - in: formData
+        name: secret_name
+        type: string
+      - in: formData
         name: storage
         type: string
       produces:
@@ -913,6 +944,9 @@ paths:
         in: path
         name: version
         required: true
+        type: string
+      - in: formData
+        name: secret_name
         type: string
       - in: formData
         name: storage
@@ -1609,6 +1643,9 @@ paths:
         name: is_empty
         type: boolean
       - in: formData
+        name: secret_name
+        type: string
+      - in: formData
         name: storage
         type: string
       produces:
@@ -1890,6 +1927,9 @@ paths:
         in: path
         name: version
         required: true
+        type: string
+      - in: formData
+        name: secret_name
         type: string
       - in: formData
         name: storage
@@ -2310,7 +2350,89 @@ paths:
       summary: Update a user's role in an organization.
       tags:
       - Organization
-  /org/{orgId}/secret/r2/test:
+  /org/{orgId}/secret:
+    get:
+      consumes:
+      - '*/*'
+      description: Get all secretnames of organization
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all secretnames of organization
+      tags:
+      - Secret
+  /org/{orgId}/secret/{secretName}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get secrets for secret name
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Secret Name
+        in: path
+        name: secretName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get secrets for secret name
+      tags:
+      - Secret
+  /org/{orgId}/secret/{secretName}/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete secrets for secret name
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Secret Name
+        in: path
+        name: secretName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete secrets for secret name
+      tags:
+      - Secret
+  /org/{orgId}/secret/r2/{secretName}/test:
     get:
       consumes:
       - '*/*'
@@ -2319,6 +2441,11 @@ paths:
       - description: Organization Id
         in: path
         name: orgId
+        required: true
+        type: string
+      - description: Secret Name
+        in: path
+        name: secretName
         required: true
         type: string
       produces:
@@ -2334,7 +2461,37 @@ paths:
       summary: Test secrets for source type r2
       tags:
       - Secret
-  /org/{orgId}/secret/s3/test:
+  /org/{orgId}/secret/r2/connect:
+    post:
+      consumes:
+      - '*/*'
+      description: Add secrets for source type r2
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Secret
+        in: body
+        name: secret
+        required: true
+        schema:
+          $ref: '#/definitions/models.R2SecretRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add secrets for source type r2
+      tags:
+      - Secret
+  /org/{orgId}/secret/s3/{secretName}/test:
     get:
       consumes:
       - '*/*'
@@ -2343,6 +2500,11 @@ paths:
       - description: Organization Id
         in: path
         name: orgId
+        required: true
+        type: string
+      - description: Secret Name
+        in: path
+        name: secretName
         required: true
         type: string
       produces:
@@ -2356,6 +2518,36 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Test secrets for source type s3
+      tags:
+      - Secret
+  /org/{orgId}/secret/s3/connect:
+    post:
+      consumes:
+      - '*/*'
+      description: Add secrets for source type s3
+      parameters:
+      - description: Organization Id
+        in: path
+        name: orgId
+        required: true
+        type: string
+      - description: Secret
+        in: body
+        name: secret
+        required: true
+        schema:
+          $ref: '#/definitions/models.S3SecretRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add secrets for source type s3
       tags:
       - Secret
   /org/{orgId}/update:
