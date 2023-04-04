@@ -264,11 +264,13 @@ pureml deploy pet_classifier:dev:v1
 <br/>
 
 ## 💻 Self-Host on Local Machine
+
 > _Currently docker-compose is the best way to self-host the official images [puremlhq/pureml_backend](https://hub.docker.com/r/puremlhq/pureml_backend) and [puremlhq/pureml_frontend](https://hub.docker.com/r/puremlhq/pureml_frontend)_
 
 ### Using [Docker Compose](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/docker-compose.yml)
 
-```docker-compose.yml
+Create a new file `docker-compose.yml`
+```yml
 version: "3"
 
 services:
@@ -286,7 +288,7 @@ services:
     environment:
       - NEXT_PUBLIC_BACKEND_URL=http://backend:8080/api/
       - NEXT_PUBLIC_AIRTABLE_API_KEY={YOUR_AIRTABLE_API_KEY}
-    ports:.
+    ports:
       - 3000:3000
     links:
       - backend
@@ -295,9 +297,14 @@ volumes:
   pureml-data:
 ```
 
-The PureML UI will be available at http://localhost:3000.
+### Running the containers
 
-> For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).
+Check out the [official documentation](https://docs.docker.com/compose/gettingstarted/) for more information on running docker compose
+```bash
+docker compose up
+```
+
+> **The PureML UI will be available at http://localhost:3000. For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).**
 
 <br />
 
