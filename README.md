@@ -265,11 +265,18 @@ pureml deploy pet_classifier:dev:v1
 
 ## 💻 Self-Host on Local Machine
 
+### Requirements
+
+A subsystem with docker-engine installed. [Installation guidelines](https://docs.docker.com/engine/install/).
+
 > _Currently docker-compose is the best way to self-host the official images [puremlhq/pureml_backend](https://hub.docker.com/r/puremlhq/pureml_backend) and [puremlhq/pureml_frontend](https://hub.docker.com/r/puremlhq/pureml_frontend)_
 
 ### Using [Docker Compose](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/docker-compose.yml)
 
-Create a new file `docker-compose.yml`
+1. Create a new file `docker-compose.yml`
+
+2. Add the following content from our [official docker-compose example file](https://raw.githubusercontent.com/PuremlHQ/PureML/main/packages/pureml_docker/docker-compose.yml).
+
 ```yml
 version: "3"
 
@@ -287,7 +294,6 @@ services:
     image: puremlhq/pureml_frontend:dev
     environment:
       - NEXT_PUBLIC_BACKEND_URL=http://backend:8080/api/
-      - NEXT_PUBLIC_AIRTABLE_API_KEY={YOUR_AIRTABLE_API_KEY}
     ports:
       - 3000:3000
     links:
@@ -300,11 +306,16 @@ volumes:
 ### Running the containers
 
 Check out the [official documentation](https://docs.docker.com/compose/gettingstarted/) for more information on running docker compose
+
 ```bash
 docker compose up
 ```
 
-> **The PureML UI will be available at http://localhost:3000. For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).**
+> Additionally, to run the containers in background you can use the command `docker compose up -d` or `docker compose up --detach`.
+
+The PureML UI will be available at http://localhost:3000. For more information about supported environment variables, please consult the documentation for [Environment Variables](https://github.com/PureMLHQ/PureML/blob/main/packages/pureml_docker/README.md).
+
+For further information, go through this [self hosting PureML docs](https://pureml.mintlify.app/self-hosting).
 
 <br />
 
