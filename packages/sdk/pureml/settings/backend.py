@@ -11,11 +11,11 @@ def set_backend(backend_url: str) -> None:
     backend.BASE_URL = backend_url
 
 
-def set_storage(storage: str) -> None:
+def set_storage(storage_key: str) -> None:
     """Set the storage key.
 
     Args:
         storage (str): The storage key to reference storage details added in secret.
     """
     storage: StorageSchema = StorageSchema().get_instance()
-    storage.STORAGE = storage
+    storage.STORAGE = storage_key
