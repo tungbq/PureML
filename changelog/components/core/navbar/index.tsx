@@ -42,7 +42,7 @@ export default function Navbar() {
                   </div>
                   <div className="flex items-center">
                     <a
-                      href="https://docs.pureml.com"
+                      href="https://pureml.mintlify.app"
                       target="_blank"
                       rel="noreferrer"
                       className="w-max letterSpaced"
@@ -117,7 +117,7 @@ export default function Navbar() {
               </div>
               <div className="px-4 flex justify-center items-center">
                 <a
-                  href="https://docs.pureml.com"
+                  href="https://pureml.mintlify.app"
                   className="w-full text-lg letterSpaced text-brand-200 hover:underline hover:underline-offset-2"
                   target="_blank"
                   rel="noreferrer"

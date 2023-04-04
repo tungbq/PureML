@@ -66,7 +66,7 @@ export default function VersionSection() {
                   </h2>
                 </div>
                 <a
-                  href="https://docs.pureml.com"
+                  href="https://pureml.mintlify.app"
                   target="_blank"
                   rel="noreferrer"
                 >

@@ -95,7 +95,7 @@ def load_data(img_folder = "PetImages"):
 
 <br/>
 
-For managing models we have to use `@model` decorator. We have some other features built in such as data lineage and branching. For more information refer [docs](https://docs.pureml.com).
+For managing models we have to use `@model` decorator. We have some other features built in such as data lineage and branching. For more information refer [docs](https://pureml.mintlify.app/core-concepts/model).
 
 ```python
 from tensorflow.keras.applications.inception_v3
@@ -233,7 +233,7 @@ pureml.model.evaluate("pet_classifier:dev:v1", "petdata:dev:v1")
 
 ![Review](/assets/ReviewModel.png)
 
-For more detailed explanation, please visit our [Documentation](https://docs.pureml.com) for more reference.
+For more detailed explanation, please visit our [Documentation](https://pureml.mintlify.app) for more reference.
 
 ### 3. PureML-package
 
@@ -330,7 +330,7 @@ Build and run a PureML project to create data lineage and a model with our <b>[d
 
 <br />
 
-## 📍 [Main Features](https://docs.pureml.com/)
+## 📍 [Main Features](https://pureml.mintlify.app)
 
 |                 |                                                                                                                                                                                                               |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -372,12 +372,12 @@ Lets build this together. If you have faced this issue or have worked out a simi
 
 ## 🧮 Tutorials
 
-- [Registering Data lineage](https://docs.pureml.com/docs/data/register_data_pipeline)
-- [Registering models](https://docs.pureml.com/docs/models/register_models)
+- [Registering Data lineage](https://pureml.mintlify.app/core-concepts/lineage)
+- [Registering models](https://pureml.mintlify.app/version/version-model#register-models)
 - [Quick Start: Tabular](https://docs.pureml.com/docs/get-started/quickstart_tabular)
 - [Quick Start: Computer Vision](https://docs.pureml.com/docs/get-started/quickstart_cv)
 - [Quick Start: NLP](https://docs.pureml.com/docs/get-started/quickstart_nlp)
-- [Logging](https://docs.pureml.com/docs/log/overview)
+- [Logging](https://pureml.mintlify.app/core-concepts/log)
 
 <br />
 
