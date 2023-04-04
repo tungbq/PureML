@@ -5,19 +5,26 @@ from urllib.parse import urljoin
 import numpy as np
 import requests
 from joblib import Parallel, delayed
-from PIL import Image
 
 from pureml.utils.pipeline import add_pip_req_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
+from pureml.schema import (
+    PathSchema,
+    BackendSchema,
+    StorageSchema,
+    LogSchema,
+    ConfigKeys,
+)
 from rich import print
 from . import get_org_id, get_token
 
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
 
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 post_key_pip_req = LogSchema().key.requirements.value
+config_keys = ConfigKeys
 
 
 def post_pip_requirement(
@@ -59,6 +66,7 @@ def post_pip_requirement(
 
     if response.ok:
         print(f"[bold green]pip_requirement Function has been registered!")
+        reset_config(key=config_keys.pip_requirement.value)
 
     else:
         print(f"[bold red]pip_requirement Function has not been registered!")
