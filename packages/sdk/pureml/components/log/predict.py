@@ -75,7 +75,7 @@ def post_predict(
 def add(
     label: str = None,
     paths: dict = None,
-    storage: str = StorageSchema().STORAGE,
+    storage: str = StorageSchema().get_instance().STORAGE,
 ) -> str:
 
     model_name, model_branch, model_version = parse_version_label(label)

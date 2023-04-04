@@ -106,7 +106,7 @@ def add(
     label: str = None,
     figure: dict = None,
     file_paths: dict = None,
-    storage: str = StorageSchema().STORAGE,
+    storage: str = StorageSchema().get_instance().STORAGE,
 ) -> str:
     """`add` function takes in the path of the figure, name of the figure and the model name and
     registers the figure

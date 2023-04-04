@@ -78,7 +78,7 @@ def post_resource(
 def add(
     label: str = None,
     path: str = None,
-    storage: str = StorageSchema().STORAGE,
+    storage: str = StorageSchema().get_instance().STORAGE,
 ) -> str:
 
     model_name, model_branch, model_version = parse_version_label(label)

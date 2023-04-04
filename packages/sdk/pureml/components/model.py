@@ -263,7 +263,7 @@ def register(
     model,
     label,
     is_empty: bool = False,
-    storage: str = StorageSchema().STORAGE,
+    storage: str = StorageSchema().get_instance().STORAGE,
 ):
 
     name, branch, _ = parse_version_label(label)

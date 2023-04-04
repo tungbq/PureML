@@ -280,7 +280,7 @@ def register(
     label: str,
     lineage,
     is_empty: bool = False,
-    storage: str = StorageSchema().STORAGE,
+    storage: str = StorageSchema().get_instance().STORAGE,
 ) -> str:
     """The function takes in a dataset, a name and a version and saves the dataset locally, then uploads the
     dataset to the PureML server
