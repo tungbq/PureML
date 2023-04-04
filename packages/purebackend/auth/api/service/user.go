@@ -32,6 +32,10 @@ func BindUserApi(app core.App, rg *echo.Group) {
 	userGroup.POST("/forgot-password", api.DefaultHandler(UserForgotPassword))
 	userGroup.POST("/verify-reset-password", api.DefaultHandler(UserVerifyResetPassword))
 	userGroup.POST("/reset-password", api.DefaultHandler(UserResetPassword))
+
+	userGroup.POST("/create-session", api.DefaultHandler(CreateSession))
+	userGroup.POST("/session-token", api.DefaultHandler(GetSessionToken))
+	userGroup.POST("/verify-session", api.DefaultHandler(VerifySession), authmiddlewares.RequireAuthContext)
 }
 
 // UserSignUp godoc
@@ -1084,6 +1088,181 @@ func (api *Api) DeleteProfile(request *models.Request) *models.Response {
 	return nil
 }
 
+// CreateSession godoc
+//
+//	@Summary		Create Session for CLI.
+//	@Description	Create empty session flow.
+//	@Tags			User
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/user/create-session [post]
+//	@Param			org	body	models.CreateSessionRequest	true	"Session details"
+func (api *Api) CreateSession(request *models.Request) *models.Response {
+	request.ParseJsonBody()
+	device := request.GetParsedBodyAttribute("device")
+	var deviceData string
+	if device == nil {
+		deviceData = ""
+	} else {
+		deviceData = device.(string)
+	}
+	deviceId := request.GetParsedBodyAttribute("device_id")
+	var deviceIdData string
+	if deviceId == nil {
+		deviceIdData = ""
+	} else {
+		deviceIdData = deviceId.(string)
+	}
+	if deviceIdData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Device Id is required")
+	}
+	deviceLoc := request.GetParsedBodyAttribute("device_location")
+	var deviceLocData string
+	if deviceLoc == nil {
+		deviceLocData = ""
+	} else {
+		deviceLocData = deviceLoc.(string)
+	}
+	session, err := api.app.Dao().CreateSession(deviceIdData, deviceData, deviceLocData)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, session, "Session created")
+}
+
+// GetSessionToken godoc
+//
+//	@Summary		Get Session Token if approved for CLI.
+//	@Description	Get Session Token if approved for CLI.
+//	@Tags			User
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/user/session-token [post]
+//	@Param			org	body	models.SessionTokenRequest	true	"Session details"
+func (api *Api) GetSessionToken(request *models.Request) *models.Response {
+	request.ParseJsonBody()
+	sessionId := request.GetParsedBodyAttribute("session_id")
+	var sessionIdData uuid.UUID
+	if sessionId == nil {
+		sessionIdData = uuid.Nil
+	} else {
+		sessionIdData = uuid.FromStringOrNil(sessionId.(string))
+	}
+	if sessionIdData == uuid.Nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "Session Id is required")
+	}
+	deviceId := request.GetParsedBodyAttribute("device_id")
+	var deviceIdData string
+	if deviceId == nil {
+		deviceIdData = ""
+	} else {
+		deviceIdData = deviceId.(string)
+	}
+	if deviceIdData == "" {
+		return models.NewErrorResponse(http.StatusBadRequest, "Device Id is required")
+	}
+	session, err := api.app.Dao().GetSession(sessionIdData)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if session == nil {
+		return models.NewErrorResponse(http.StatusNotFound, "Session not found")
+	}
+	if !session.Approved {
+		return models.NewErrorResponse(http.StatusUnauthorized, "Session not approved")
+	}
+	if session.Invalid {
+		return models.NewErrorResponse(http.StatusForbidden, "Session invalid")
+	}
+	if session.DeviceId != deviceIdData {
+		return models.NewErrorResponse(http.StatusForbidden, "Session invalid device")
+	}
+	userDb, err := api.app.Dao().GetUserByUUID(session.UserUUID)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"uuid":   userDb.UUID,
+		"email":  userDb.Email,
+		"handle": userDb.Handle,
+	})
+	signedString, err := token.SignedString([]byte(api.app.Settings().AdminAuthToken.Secret))
+	if err != nil {
+		panic(err)
+	}
+	// Set session as invalid hence cannot be reused to get token.
+	_, err = api.app.Dao().UpdateSession(sessionIdData, userDb.UUID, map[string]interface{}{
+		"invalid": true,
+	})
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	data := []map[string]string{
+		{
+			"email":       userDb.Email,
+			"accessToken": signedString,
+		},
+	}
+	return models.NewDataResponse(http.StatusOK, data, "Session Token created")
+}
+
+// VerifySession godoc
+//
+//	@Security		ApiKeyAuth
+//	@Summary		Verify Session and approve if valid for CLI.
+//	@Description	Verify Session and approve if valid for CLI.
+//	@Tags			User
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/user/verify-session [post]
+//	@Param			org	body	models.VerifySessionRequest	true	"Session details"
+func (api *Api) VerifySession(request *models.Request) *models.Response {
+	request.ParseJsonBody()
+	sessionId := request.GetParsedBodyAttribute("session_id")
+	var sessionIdData uuid.UUID
+	if sessionId == nil {
+		sessionIdData = uuid.Nil
+	} else {
+		sessionIdData = uuid.FromStringOrNil(sessionId.(string))
+	}
+	if sessionIdData == uuid.Nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "Session Id is required")
+	}
+	session, err := api.app.Dao().GetSession(sessionIdData)
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	if session == nil {
+		return models.NewErrorResponse(http.StatusNotFound, "Session not found")
+	}
+	if session.Approved {
+		return models.NewErrorResponse(http.StatusBadRequest, "Session already approved")
+	}
+	if session.Invalid {
+		return models.NewErrorResponse(http.StatusForbidden, "Session invalid")
+	}
+	userUUID := request.GetUserUUID()
+	if session.CreatedAt.Unix() < time.Now().Add(-time.Minute*10).Unix() {
+		_, err = api.app.Dao().UpdateSession(sessionIdData, userUUID, map[string]interface{}{
+			"invalid": true,
+		})
+		if err != nil {
+			return models.NewServerErrorResponse(err)
+		}
+		return models.NewErrorResponse(http.StatusForbidden, "Session expired")
+	}
+	_, err = api.app.Dao().UpdateSession(sessionIdData, userUUID, map[string]interface{}{
+		"approved": true,
+	})
+	if err != nil {
+		return models.NewServerErrorResponse(err)
+	}
+	return models.NewDataResponse(http.StatusOK, nil, "Session approved")
+}
+
 var UserSignUp ServiceFunc = (*Api).UserSignUp
 var UserLogin ServiceFunc = (*Api).UserLogin
 var UserVerifyEmail ServiceFunc = (*Api).UserVerifyEmail
@@ -1095,3 +1274,7 @@ var GetProfile ServiceFunc = (*Api).GetProfile
 var GetProfileByHandle ServiceFunc = (*Api).GetProfileByHandle
 var UpdateProfile ServiceFunc = (*Api).UpdateProfile
 var DeleteProfile ServiceFunc = (*Api).DeleteProfile
+
+var CreateSession ServiceFunc = (*Api).CreateSession
+var GetSessionToken ServiceFunc = (*Api).GetSessionToken
+var VerifySession ServiceFunc = (*Api).VerifySession

@@ -3838,6 +3838,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/create-session": {
+            "post": {
+                "description": "Create empty session flow.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create Session for CLI.",
+                "parameters": [
+                    {
+                        "description": "Session details",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateSessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/user/delete": {
             "delete": {
                 "security": [
@@ -4107,6 +4142,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/session-token": {
+            "post": {
+                "description": "Get Session Token if approved for CLI.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Session Token if approved for CLI.",
+                "parameters": [
+                    {
+                        "description": "Session details",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SessionTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/user/signup": {
             "post": {
                 "description": "User sign up with email, name, handle and password. The user will receive an email with a verification link if enabled from backend.\nResponse status code 202 means that the user has been created but the email verification is pending.\nResponse status code 200 means that the user has been created and no verification of email is needed.",
@@ -4211,6 +4281,46 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/verify-session": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Verify Session and approve if valid for CLI.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Verify Session and approve if valid for CLI.",
+                "parameters": [
+                    {
+                        "description": "Session details",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.VerifySessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -4288,6 +4398,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "handle": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateSessionRequest": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "device_location": {
                     "type": "string"
                 }
             }
@@ -4451,6 +4575,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.SessionTokenRequest": {
+            "type": "object",
+            "properties": {
+                "device_id": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpdateOrgRequest": {
             "type": "object",
             "properties": {
@@ -4562,6 +4697,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.VerifySessionRequest": {
+            "type": "object",
+            "properties": {
+                "session_id": {
                     "type": "string"
                 }
             }
