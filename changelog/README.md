@@ -8,6 +8,12 @@
 
 This folder contains a record of changes made to the project. For more details check [PureML Changelog](https://changelog.pureml.com).
 
+To the changelog locally,
+
+1. Install the packages through `yarn install`
+2. Run locally, `npm run dev`
+3. Go to [`localhost:3000`](http://localhost:3000).
+
 <br />
 
 ## Changelog Format

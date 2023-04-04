@@ -8,16 +8,24 @@ from joblib import Parallel, delayed
 from PIL import Image
 
 from pureml.utils.pipeline import add_figures_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
+from pureml.schema import (
+    PathSchema,
+    BackendSchema,
+    StorageSchema,
+    LogSchema,
+    ConfigKeys,
+)
 from rich import print
 from . import get_org_id, get_token
 
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
 
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 post_key_figure = LogSchema().key.figure.value
+config_keys = ConfigKeys
 
 
 def save_images(figure):
@@ -84,6 +92,7 @@ def post_figures(
 
     if response.ok:
         print(f"[bold green]Figures have been registered!")
+        reset_config(key=config_keys.figure.value)
 
     else:
         print(f"[bold red]Figures have not been registered!")

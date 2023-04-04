@@ -1,11 +1,14 @@
 import {
   Form,
+  Outlet,
   useActionData,
   useLoaderData,
+  useLocation,
+  useMatches,
   useNavigate,
 } from "@remix-run/react";
 import { Suspense, useEffect, useState } from "react";
-import { Check, ChevronDown, ChevronUp, MoreVertical } from "lucide-react";
+import { Check } from "lucide-react";
 import Tabbar from "~/components/Tabbar";
 import { useSubmit } from "@remix-run/react";
 import {
@@ -15,25 +18,29 @@ import {
 } from "~/routes/api/models.server";
 import { getSession } from "~/session";
 import Loader from "~/components/ui/Loading";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import AvatarIcon from "~/components/ui/Avatar";
 import Select from "~/components/ui/Select";
 import Breadcrumbs from "~/components/Breadcrumbs";
 import { toast } from "react-toastify";
-import ComparisionTable from "~/components/ComparisionTable";
+import VersionContext from "./versionContext";
+import {
+  fetchDatasetBranch,
+  fetchDatasetVersions,
+  submitDatasetReview,
+} from "~/routes/api/datasets.server";
 
 export async function loader({ params, request }: any) {
   const session = await getSession(request.headers.get("Cookie"));
-  const allBranch = await fetchModelBranch(
+  const allBranch = await fetchDatasetBranch(
     session.get("orgId"),
-    params.modelId,
+    params.datasetId,
     session.get("accessToken")
   );
-  const versions = await fetchModelVersions(
+  const versions = await fetchDatasetVersions(
     session.get("orgId"),
-    params.modelId,
-    allBranch.at(0).value,
+    params.datasetId,
+    params.branchId,
     session.get("accessToken")
   );
   return {
@@ -49,20 +56,19 @@ export async function action({ params, request }: any) {
   const session = await getSession(request.headers.get("Cookie"));
   if (option._action === "changeBranch") {
     let branch = formData.get("branch");
-    const versions = await fetchModelVersions(
+    const versions = await fetchDatasetVersions(
       session.get("orgId"),
-      params.modelId,
+      params.datasetId,
       branch,
       session.get("accessToken")
     );
     return {
-      _action: "changeBranch",
       versions: versions,
     };
   } else if (option._action === "submitReview") {
-    const submitReview = await submitModelReview(
+    const submitReview = await submitDatasetReview(
       session.get("orgId"),
-      params.modelId,
+      params.datasetId,
       option.fromBranch,
       option.version,
       session.get("accessToken")
@@ -84,13 +90,12 @@ function isJson(item: string | object) {
   return typeof value === "object" && value !== null;
 }
 
-export default function ModelMetrics() {
+export default function BranchId() {
   const data = useLoaderData();
   const adata = useActionData();
   const submit = useSubmit();
+  const matches = useMatches();
   const navigate = useNavigate();
-  const [metrics, setMetrics] = useState(true);
-  const [params, setParams] = useState(true);
   const [ver1, setVer1] = useState("");
   const [ver2, setVer2] = useState("");
   const [submitReviewVersion, setSubmitReviewVersion] = useState("");
@@ -111,90 +116,6 @@ export default function ModelMetrics() {
     setVer2("");
   }, [versionData]);
 
-  // ##### fetching & displaying latest version data #####
-  useEffect(() => {
-    if (!versionData) return;
-
-    const tempDict = {};
-    versionData.forEach((version: { version: any }) => {
-      // @ts-ignore
-      tempDict[version.version] = version;
-    });
-    setDataVersion(tempDict);
-    const tt = dataVersion[ver1];
-    // console.log('tt=', tt);
-    if (tt) {
-      if (tt.logs === null) {
-        setVer1Logs({});
-        setCommonMetrics([]);
-        return;
-      } else {
-        const tempDictv1 = {};
-        tt.logs.forEach((log: { key: string; data: any }) => {
-          if (isJson(log.data)) {
-            tempDictv1[log.key] = JSON.parse(log.data);
-            if (!commonMetrics.includes(log.key)) {
-              setCommonMetrics((prev) => [...prev, log.key]);
-            }
-          }
-        });
-        setVer1Logs(tempDictv1);
-        // console.log(tt.logs);
-      }
-    }
-  }, [ver1, versionData]);
-  // ##### comparing versions #####
-  useEffect(() => {
-    if (!versionData) return;
-
-    const t1 = dataVersion[ver1];
-    // console.log('t1=', t1);
-    if (t1) {
-      if (t1.logs === null) {
-        setCommonMetrics([]);
-      } else {
-        t1.logs.forEach((log: { key: string; data: any }) => {
-          if (isJson(log.data)) {
-            if (!commonMetrics.includes(log.key)) {
-              setCommonMetrics((prev) => [...prev, log.key]);
-            }
-          }
-        });
-      }
-    }
-    if (ver2 === "") {
-      setVer2Logs({});
-      // console.log('ver2 is empty');
-
-      return;
-    }
-    const tt = dataVersion[ver2];
-    // console.log('tt2=', tt);
-    if (tt) {
-      if (tt.logs === null) {
-        setVer2Logs({});
-        return;
-      } else {
-        const tempDictv2 = {};
-        // console.log('tt.logs=', tt.logs);
-
-        tt.logs.forEach((log: { data: any }) => {
-          try {
-            tempDictv2[log.key] = JSON.parse(log.data);
-            if (!commonMetrics.includes(log.key)) {
-              setCommonMetrics((prev) => [...prev, log.key]);
-            }
-          } catch {
-            console.log("Invalid log.key=", log.key);
-          }
-        });
-        // console.log(tempDictv2);
-
-        setVer2Logs(tempDictv2);
-      }
-    }
-  }, [ver2, versionData]);
-
   // ##### submit review functionality #####
   useEffect(() => {
     if (adata === null || adata === undefined) {
@@ -203,12 +124,15 @@ export default function ModelMetrics() {
     if (adata._action === "submitReview") {
       toast.success(adata.submitReview.message);
       navigate(
-        `/org/${data.params.orgId}/models/${data.params.modelId}/review`
+        `/org/${data.params.orgId}/datasets/${data.params.datasetId}/review`
       );
     } else {
+      const pathname = matches[4].pathname;
+      const url = decodeURI(pathname.slice(1)).split("/");
       setVersionData(adata.versions);
+      navigate(`../versions/${branch}/${url[6]}`);
     }
-  }, [adata]);
+  }, [adata, branch, data.params.modelId, data.params.orgId, navigate]);
 
   function branchChange(event: any) {
     setBranch(event.target.value);
@@ -224,50 +148,32 @@ export default function ModelMetrics() {
       <div className="flex justify-center sticky top-0 bg-slate-50 w-full border-b border-slate-200">
         <div className="flex justify-between px-12 2xl:pr-0 w-full max-w-screen-2xl">
           <Breadcrumbs />
-          <Tabbar intent="primaryModelTab" tab="versions" fullWidth={false} />
+          <Tabbar intent="primaryDatasetTab" tab="versions" fullWidth={false} />
         </div>
       </div>
       <div className="flex justify-center w-full">
         <div className="bg-slate-50 flex flex-col h-screen overflow-hidden w-full 2xl:max-w-screen-2xl">
           <div className="flex justify-between h-full">
             <div className="w-4/5">
-              <Tabbar intent="modelTab" tab="metrics" />
-              <div className="px-12 pt-2 pb-8 h-[70vh] overflow-auto">
-                {/* ##### version section ##### */}
-                {commonMetrics.length !== 0 && versionData !== null ? (
-                  <>
-                    {commonMetrics.map((key) => {
-                      return (
-                        <ComparisionTable
-                          metric={key}
-                          ver1={ver1}
-                          ver2={ver2}
-                          dataVer1={
-                            ver1Logs[key] as unknown as {
-                              [key: string]: string;
-                            }
-                          }
-                          dataVer2={
-                            ver2Logs[key] as unknown as {
-                              [key: string]: string;
-                            }
-                          }
-                        />
-                      );
-                    })}
-                  </>
-                ) : null}
-              </div>
+              <Tabbar intent="datasetTab" tab="metrics" />
+              <VersionContext.Provider value={{ ver1, ver2 }}>
+                <Outlet />
+              </VersionContext.Provider>
             </div>
             {/* ##### versions list right sidebar ##### */}
             <aside className="bg-slate-50 border-l-2 border-slate-100 h-full w-1/4 max-w-[400px] py-8 px-12 z-10">
+              {/* {console.log(data.params.branchId)} */}
               <Form
                 method="post"
                 onChange={branchChange}
                 className="flex justify-end"
               >
                 <input name="_action" value="changeBranch" type="hidden" />
-                <Select intent="primary" name="branch" title={branch}>
+                <Select
+                  intent="primary"
+                  name="branch"
+                  title={data.params.branchId}
+                >
                   {branchData.map((branch: any, index: number) => (
                     <SelectPrimitive.Item
                       key={`${branch}-${index}`}
@@ -332,7 +238,7 @@ export default function ModelMetrics() {
                           </div>
                         </div>
                       </div>
-                      {branch !== "main" && (
+                      {data.params.branchId !== "main" && (
                         <Form
                           method="post"
                           onChange={submitReview}
@@ -381,14 +287,20 @@ export default function ModelMetrics() {
 
 // ############################ error boundary ###########################
 
-export function ErrorBoundary() {
+export function ErrorBoundary({ error }: { error: Error }) {
   return (
-    <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
-      <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
-      <div className="text-3xl text-slate-600 font-medium">
-        Something went wrong :(
+    <div className="p-12">
+      <span className="text-3xl font-medium">Error</span>
+      <p>{error.message}</p>
+      <div className="text-xl pt-8 font-medium">The stack trace is:</div>
+      <pre className="whitespace-pre-wrap">{error.stack}</pre>
+      <div className="flex flex-col h-screen justify-center items-center bg-slate-50">
+        <div className="text-3xl text-slate-600 font-medium">Oops!!</div>
+        <div className="text-3xl text-slate-600 font-medium">
+          Something went wrong :(
+        </div>
+        <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
       </div>
-      <img src="/error/ErrorFunction.gif" alt="Error" width="500" />
     </div>
   );
 }
