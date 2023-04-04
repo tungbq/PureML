@@ -16,7 +16,7 @@ from .components.log import predict
 from .components.log import pip_requirement
 from .components.log import resources
 
-from .settings.backend import set_backend, set_storage
+from .settings import set_backend, set_storage
 
 from .evaluate import grader, eval
 

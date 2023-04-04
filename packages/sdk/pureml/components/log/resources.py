@@ -28,11 +28,10 @@ predict_schema = PredictSchema()
 backend_schema = BackendSchema().get_instance()
 post_key_resources = LogSchema().key.resources.value
 config_keys = ConfigKeys
+storage = StorageSchema().get_instance()
 
 
-def post_resource(
-    path, model_name: str, model_branch: str, model_version: str, storage: str
-):
+def post_resource(path, model_name: str, model_branch: str, model_version: str):
     user_token = get_token()
     org_id = get_org_id()
 
@@ -58,7 +57,7 @@ def post_resource(
     data = {
         "data": file_paths,
         "key": post_key_resources,
-        "storage": storage,
+        "storage": storage.STORAGE,
     }
 
     # data = json.dumps(data)
@@ -78,7 +77,6 @@ def post_resource(
 def add(
     label: str = None,
     path: str = None,
-    storage: str = StorageSchema().get_instance().STORAGE,
 ) -> str:
 
     model_name, model_branch, model_version = parse_version_label(label)
@@ -100,7 +98,6 @@ def add(
             model_name=model_name,
             model_branch=model_branch,
             model_version=model_version,
-            storage=storage,
         )
 
         # print(response.text)

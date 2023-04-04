@@ -1,4 +1,4 @@
-from pureml.schema import BackendSchema, StorageSchema
+from pureml.schema import BackendSchema
 
 
 def set_backend(backend_url: str) -> None:
@@ -9,13 +9,3 @@ def set_backend(backend_url: str) -> None:
     """
     backend: BackendSchema = BackendSchema().get_instance()
     backend.BASE_URL = backend_url
-
-
-def set_storage(storage_key: str) -> None:
-    """Set the storage key.
-
-    Args:
-        storage (str): The storage key to reference storage details added in secret.
-    """
-    storage: StorageSchema = StorageSchema().get_instance()
-    storage.STORAGE = storage_key
