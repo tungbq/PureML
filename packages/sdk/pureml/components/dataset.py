@@ -6,13 +6,16 @@ import joblib
 import pandas as pd
 import requests
 
-from pureml.schema import DatasetSchema, StorageSchema
+from pureml.schema import DatasetSchema, StorageSchema, ConfigKeys
 from pureml.utils.hash import generate_hash_for_file
 from pureml.utils.readme import load_readme
 from rich import print
 
 from . import get_org_id, get_token
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
+
+config_keys = ConfigKeys()
 
 
 def init_branch(label: str):
@@ -378,6 +381,8 @@ def register(
                     print(f"[bold green]Lineage has been registered!")
                 else:
                     print(f"[bold green]Dataset and lineage have been registered!")
+
+                reset_config(key=config_keys.dataset.value)
 
             except Exception as e:
                 print(

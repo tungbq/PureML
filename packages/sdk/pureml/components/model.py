@@ -5,13 +5,17 @@ import os
 import json
 
 from . import get_token, get_org_id
-from pureml.schema import ModelSchema, StorageSchema
+from pureml.schema import ModelSchema, StorageSchema, ConfigKeys
 from pureml import save_model, load_model
 from urllib.parse import urljoin
 import joblib
 from pureml.utils.hash import generate_hash_for_file
 from pureml.utils.readme import load_readme
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
+
+
+config_keys = ConfigKeys()
 
 
 def init_branch(label):
@@ -327,6 +331,8 @@ def register(
 
             model_version = response.json()["data"][0]["version"]
             print("Model Version: ", model_version)
+
+            reset_config(key=config_keys.model.value)
 
             return True, model_hash, model_version
 

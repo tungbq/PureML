@@ -2,17 +2,19 @@ import json
 from urllib.parse import urljoin
 
 import requests
-from pureml.schema.log import BackendSchema, LogSchema
+from pureml.schema import BackendSchema, LogSchema, ConfigKeys
 from pureml.utils.log_utils import merge_step_with_value
 from pureml.utils.pipeline import add_metrics_to_config
 from rich import print
 
 from . import convert_values_to_string, get_org_id, get_token
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
 
 
 backend_schema = BackendSchema().get_instance()
 post_key_predict = LogSchema().key.metrics.value
+config_keys = ConfigKeys()
 
 
 def post_metrics(metrics, model_name: str, model_branch: str, model_version: str):
@@ -40,6 +42,7 @@ def post_metrics(metrics, model_name: str, model_branch: str, model_version: str
 
     if response.ok:
         print(f"[bold green]Metrics have been registered!")
+        reset_config(key=config_keys.metrics.value)
 
     else:
         print(f"[bold red]Metrics have not been registered!")

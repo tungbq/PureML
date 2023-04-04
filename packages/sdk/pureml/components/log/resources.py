@@ -5,7 +5,6 @@ from urllib.parse import urljoin
 import numpy as np
 import requests
 from joblib import Parallel, delayed
-from PIL import Image
 
 from pureml.utils.pipeline import add_resource_to_config
 from pureml.utils.resources import zip_content, unzip_content
@@ -15,17 +14,20 @@ from pureml.schema import (
     StorageSchema,
     LogSchema,
     PredictSchema,
+    ConfigKeys,
 )
 from rich import print
 from . import get_org_id, get_token
 
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
 
 
 path_schema = PathSchema().get_instance()
 predict_schema = PredictSchema()
 backend_schema = BackendSchema().get_instance()
 post_key_resources = LogSchema().key.resources.value
+config_keys = ConfigKeys()
 
 
 def post_resource(
@@ -65,6 +67,7 @@ def post_resource(
 
     if response.ok:
         print(f"[bold green]resource has been registered!")
+        reset_config(key=config_keys.resource.value)
 
     else:
         print(f"[bold red]resource has not been registered!")
