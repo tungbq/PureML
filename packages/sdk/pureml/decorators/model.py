@@ -8,6 +8,11 @@ from pureml.utils.pipeline import (
 from pureml import metrics, params, figure
 from pureml.utils.version_utils import parse_version_label, generate_label
 import functools
+from pureml.utils.config import reset_config
+from pureml.schema import ConfigKeys
+
+
+config_keys = ConfigKeys()
 
 
 def model(label: str):
@@ -48,14 +53,17 @@ def model(label: str):
                 metric_values = load_metrics_from_config()
                 if len(metric_values) != 0:
                     metrics.add(metrics=metric_values, label=label_new)
+                    reset_config(key=config_keys.metrics.value)
 
                 param_values = load_params_from_config()
                 if len(param_values) != 0:
                     params.add(params=param_values, label=label_new)
+                    reset_config(key=config_keys.params.value)
 
                 figure_file_paths = load_figures_from_config()
                 if len(figure_file_paths) != 0:
                     figure.add(file_paths=figure_file_paths, label=label_new)
+                    reset_config(key=config_keys.figure.value)
 
             else:
                 add_model_to_config(
