@@ -17,6 +17,7 @@ path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 app = typer.Typer()
 
+
 @app.callback()
 def callback():
     """
@@ -29,6 +30,7 @@ def callback():
     show - Show all secrets of secret name
     delete - Delete secrets under secret name
     """
+
 
 @app.command()
 def add():
@@ -52,13 +54,13 @@ def add():
     if integration_id not in backend_schema.INTEGRATIONS.keys():
         print(f"[bold red]Invalid integration id {integration_id}[/bold red]")
         return
-    
+
     # Get secret name
     secret_name: str = typer.prompt("Enter the secret name")
     if not secret_name:
         print("[bold red]Invalid secret name[/bold red]")
         return
-    
+
     # Get secret keys and values according to integration
     secret_keys = backend_schema.INTEGRATIONS[integration_id]["secrets"]
     user_secrets = {}
@@ -68,35 +70,37 @@ def add():
             print(f"[bold red]Invalid value for {secret_key}[/bold red]")
             return
         user_secrets[secret_key] = secret_value
-    
+
     # Add secret
     access_token = get_token()
     org_id = get_org_id()
 
     data = {}
     url_path = ""
-    
-    match integration_id:
-        case "s3":
-            data = {
-                "access_key_id": user_secrets["access_key_id"],
-                "access_key_secret": user_secrets["access_key_secret"],
-                "bucket_location": user_secrets["bucket_location"],
-                "bucket_name": user_secrets["bucket_name"],
-                "secret_name": secret_name,
-            }
-            url_path = f"org/{org_id}/secret/s3/connect"
-        case "r2":
-            data = {
-                "access_key_id": user_secrets["access_key_id"],
-                "access_key_secret": user_secrets["access_key_secret"],
-                "account_id": user_secrets["account_id"],
-                "bucket_name": user_secrets["bucket_name"],
-                "public_url": user_secrets["public_url"],
-                "secret_name": secret_name,
-            }
-            url_path = f"org/{org_id}/secret/r2/connect"
-    
+
+    # match integration_id:
+    if integration_id == "s3":
+        # case "s3":
+        data = {
+            "access_key_id": user_secrets["access_key_id"],
+            "access_key_secret": user_secrets["access_key_secret"],
+            "bucket_location": user_secrets["bucket_location"],
+            "bucket_name": user_secrets["bucket_name"],
+            "secret_name": secret_name,
+        }
+        url_path = f"org/{org_id}/secret/s3/connect"
+        # case "r2":
+    elif integration_id == "r2":
+        data = {
+            "access_key_id": user_secrets["access_key_id"],
+            "access_key_secret": user_secrets["access_key_secret"],
+            "account_id": user_secrets["account_id"],
+            "bucket_name": user_secrets["bucket_name"],
+            "public_url": user_secrets["public_url"],
+            "secret_name": secret_name,
+        }
+        url_path = f"org/{org_id}/secret/r2/connect"
+
     url = urljoin(backend_schema.BASE_URL, url_path)
 
     headers = {
@@ -204,16 +208,18 @@ def delete(secret_name: str = typer.Argument(..., case_sensitive=True)):
     """
     # Ask for confirmation
     print()
-    confirm = typer.confirm(f"Are you sure you want to delete the {secret_name} secrets?")
+    confirm = typer.confirm(
+        f"Are you sure you want to delete the {secret_name} secrets?"
+    )
     if not confirm:
         return
-    
+
     # Delete secret
     access_token = get_token()
     org_id = get_org_id()
     url_path = f"org/{org_id}/secret/{secret_name}"
     url = urljoin(backend_schema.BASE_URL, url_path)
-    
+
     headers = {
         "accept": "application/json",
         "Authorization": "Bearer {}".format(access_token),
