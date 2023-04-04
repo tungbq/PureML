@@ -24,7 +24,7 @@ from pureml.utils.config import reset_config
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 post_key_pip_req = LogSchema().key.requirements.value
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def post_pip_requirement(

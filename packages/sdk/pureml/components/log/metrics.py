@@ -14,7 +14,7 @@ from pureml.utils.config import reset_config
 
 backend_schema = BackendSchema().get_instance()
 post_key_predict = LogSchema().key.metrics.value
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def post_metrics(metrics, model_name: str, model_branch: str, model_version: str):

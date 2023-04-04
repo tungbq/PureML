@@ -13,7 +13,7 @@ from pureml.utils.config import reset_config
 
 backend_schema = BackendSchema().get_instance()
 post_key_params = LogSchema().key.params.value
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def post_params(params, model_name: str, model_branch: str, model_version: str):

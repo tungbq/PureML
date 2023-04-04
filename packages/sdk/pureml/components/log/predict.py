@@ -26,7 +26,7 @@ backend_schema = BackendSchema().get_instance()
 post_key_predict = LogSchema().key.predict.value
 post_key_requirements = LogSchema().key.requirements.value
 post_key_resources = LogSchema().key.resources.value
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def post_predict(

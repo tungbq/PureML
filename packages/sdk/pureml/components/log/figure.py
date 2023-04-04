@@ -25,7 +25,7 @@ from pureml.utils.config import reset_config
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 post_key_figure = LogSchema().key.figure.value
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def save_images(figure):

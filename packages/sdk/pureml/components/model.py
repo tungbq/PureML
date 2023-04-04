@@ -15,7 +15,7 @@ from pureml.utils.version_utils import parse_version_label
 from pureml.utils.config import reset_config
 
 
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def init_branch(label):
@@ -332,7 +332,7 @@ def register(
             model_version = response.json()["data"][0]["version"]
             print("Model Version: ", model_version)
 
-            reset_config(key=config_keys.model.value)
+            # reset_config(key=config_keys.model.value)
 
             return True, model_hash, model_version
 

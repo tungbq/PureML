@@ -5,7 +5,7 @@ from pureml.schema import PathSchema, ConfigKeys
 
 
 path_schema = PathSchema().get_instance()
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def load_config():

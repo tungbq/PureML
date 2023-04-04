@@ -7,7 +7,7 @@ from .log_utils import update_step_dict
 import time
 from pureml.schema import ConfigKeys
 
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def add_load_data_to_config(name, description=None, func=None, hash=""):

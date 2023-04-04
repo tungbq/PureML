@@ -27,7 +27,7 @@ path_schema = PathSchema().get_instance()
 predict_schema = PredictSchema()
 backend_schema = BackendSchema().get_instance()
 post_key_resources = LogSchema().key.resources.value
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def post_resource(

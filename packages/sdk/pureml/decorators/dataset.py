@@ -6,7 +6,7 @@ import functools
 from pureml.utils.config import reset_config
 from pureml.schema import ConfigKeys
 
-config_keys = ConfigKeys()
+config_keys = ConfigKeys
 
 
 def dataset(label: str, parent: str = None, upload=False):
