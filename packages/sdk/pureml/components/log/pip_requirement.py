@@ -5,23 +5,31 @@ from urllib.parse import urljoin
 import numpy as np
 import requests
 from joblib import Parallel, delayed
-from PIL import Image
 
 from pureml.utils.pipeline import add_pip_req_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
+from pureml.schema import (
+    PathSchema,
+    BackendSchema,
+    StorageSchema,
+    LogSchema,
+    ConfigKeys,
+)
 from rich import print
 from . import get_org_id, get_token
 
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
 
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 post_key_pip_req = LogSchema().key.requirements.value
+config_keys = ConfigKeys
+storage = StorageSchema().get_instance()
 
 
 def post_pip_requirement(
-    file_paths, model_name: str, model_branch: str, model_version: str, storage: str
+    file_paths, model_name: str, model_branch: str, model_version: str
 ):
     user_token = get_token()
     org_id = get_org_id()
@@ -50,7 +58,7 @@ def post_pip_requirement(
     data = {
         "data": file_paths,
         "key": post_key_pip_req,
-        "storage": storage,
+        "storage": storage.STORAGE,
     }
 
     # data = json.dumps(data)
@@ -59,6 +67,7 @@ def post_pip_requirement(
 
     if response.ok:
         print(f"[bold green]pip_requirement Function has been registered!")
+        reset_config(key=config_keys.pip_requirement.value)
 
     else:
         print(f"[bold red]pip_requirement Function has not been registered!")
@@ -66,11 +75,7 @@ def post_pip_requirement(
     return response
 
 
-def add(
-    label: str = None,
-    path: str = None,
-    storage: str = StorageSchema().STORAGE,
-) -> str:
+def add(label: str = None, path: str = None) -> str:
 
     model_name, model_branch, model_version = parse_version_label(label)
 
@@ -93,7 +98,6 @@ def add(
             model_name=model_name,
             model_branch=model_branch,
             model_version=model_version,
-            storage=storage,
         )
 
         print(response.text)

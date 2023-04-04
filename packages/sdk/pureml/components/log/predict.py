@@ -5,15 +5,20 @@ from urllib.parse import urljoin
 import numpy as np
 import requests
 from joblib import Parallel, delayed
-from PIL import Image
 
 from pureml.utils.pipeline import add_pred_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
+from pureml.schema import (
+    PathSchema,
+    BackendSchema,
+    StorageSchema,
+    LogSchema,
+    ConfigKeys,
+)
 from rich import print
-from . import get_org_id, get_token
+from . import get_org_id, get_token, pip_requirement, resources
 import shutil
 from pureml.utils.version_utils import parse_version_label
-from . import pip_requirement, resources
+from pureml.utils.config import reset_config
 
 
 path_schema = PathSchema().get_instance()
@@ -21,11 +26,11 @@ backend_schema = BackendSchema().get_instance()
 post_key_predict = LogSchema().key.predict.value
 post_key_requirements = LogSchema().key.requirements.value
 post_key_resources = LogSchema().key.resources.value
+config_keys = ConfigKeys
+storage = StorageSchema().get_instance()
 
 
-def post_predict(
-    file_paths, model_name: str, model_branch: str, model_version: str, storage: str
-):
+def post_predict(file_paths, model_name: str, model_branch: str, model_version: str):
     user_token = get_token()
     org_id = get_org_id()
 
@@ -49,7 +54,7 @@ def post_predict(
     data = {
         "data": file_paths,
         "key": post_key_predict,
-        "storage": storage,
+        "storage": storage.STORAGE,
     }
 
     # data = json.dumps(data)
@@ -58,6 +63,7 @@ def post_predict(
 
     if response.ok:
         print(f"[bold green]Predict Function has been registered!")
+        reset_config(key=config_keys.pred_function.value)
 
     else:
         print(f"[bold red]Predict Function has not been registered!")
@@ -65,11 +71,7 @@ def post_predict(
     return response
 
 
-def add(
-    label: str = None,
-    paths: dict = None,
-    storage: str = StorageSchema().STORAGE,
-) -> str:
+def add(label: str = None, paths: dict = None) -> str:
 
     model_name, model_branch, model_version = parse_version_label(label)
 
@@ -100,7 +102,6 @@ def add(
             model_name=model_name,
             model_branch=model_branch,
             model_version=model_version,
-            storage=storage,
         )
 
         print(response.text)

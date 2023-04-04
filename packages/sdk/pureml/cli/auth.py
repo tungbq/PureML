@@ -20,7 +20,7 @@ backend_schema = BackendSchema().get_instance()
 app = typer.Typer()
 
 
-def save_auth(org_id: str = None, access_token: str = None, email=None):
+def save_auth(org_id: str = None, access_token: str = None, email: str = None):
     token_path = path_schema.PATH_USER_TOKEN
 
     token_dir = os.path.dirname(token_path)
@@ -60,7 +60,7 @@ def callback():
 
 
 @app.command()
-def signup():
+def signup(backend_url: str = typer.Option("", "--backend-url", "-b", help="Backend URL for self-hosted or custom pureml backend instance")):
     print("\n[bold]Create a new account[/bold]\n")
     email: str = typer.prompt("Enter new email")
     handle: str = typer.prompt("Enter new user handle")
@@ -73,7 +73,8 @@ def signup():
     data = {"email": email, "password": password, "handle": handle, "name": name}
 
     url_path_1 = "user/signup"
-    url = urljoin(backend_schema.BASE_URL, url_path_1)
+    base_url = backend_schema.BASE_URL if backend_url == "" else backend_url
+    url = urljoin(base_url, url_path_1)
 
     response = requests.post(url, json=data)
 
@@ -85,10 +86,10 @@ def signup():
     )
 
 
-def list_org(access_token):
+def list_org(access_token: str, base_url: str):
 
     url_path = "org"
-    url = urljoin(backend_schema.BASE_URL, url_path)
+    url = urljoin(base_url, url_path)
 
     headers = {
         "accept": "application/json",
@@ -115,12 +116,12 @@ def list_org(access_token):
         print("[bold red]Unable to fetch existing Organizations!")
 
 
-def check_org_status(access_token):
+def check_org_status(access_token: str, base_url: str):
 
     org_id: str = typer.prompt("Enter your Org Id")
 
     url_path = "org/id/{}".format(org_id)
-    url = urljoin(backend_schema.BASE_URL, url_path)
+    url = urljoin(base_url, url_path)
 
     headers = {
         "accept": "application/json",
@@ -138,7 +139,7 @@ def check_org_status(access_token):
 
 
 @app.command()
-def login():
+def login(backend_url: str = typer.Option("", "--backend-url", "-b", help="Backend URL for self-hosted or custom pureml backend instance")):
 
     print(f"\n[bold]Enter your credentials to login[/bold]\n")
     email: str = typer.prompt("Enter your email")
@@ -146,7 +147,8 @@ def login():
     data = {"email": email, "password": password}
 
     url_path = "user/login"
-    url = urljoin(backend_schema.BASE_URL, url_path)
+    base_url = backend_schema.BASE_URL if backend_url == "" else backend_url
+    url = urljoin(base_url, url_path)
 
     response = requests.post(url, json=data)
 
@@ -157,9 +159,9 @@ def login():
         access_token = token["accessToken"]
         email = token["email"]
 
-        list_org(access_token=access_token)
+        list_org(access_token, base_url)
 
-        org_id = check_org_status(access_token=access_token)
+        org_id = check_org_status(access_token, base_url)
 
         if org_id is not None:
 

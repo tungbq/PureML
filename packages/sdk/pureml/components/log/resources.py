@@ -5,7 +5,6 @@ from urllib.parse import urljoin
 import numpy as np
 import requests
 from joblib import Parallel, delayed
-from PIL import Image
 
 from pureml.utils.pipeline import add_resource_to_config
 from pureml.utils.resources import zip_content, unzip_content
@@ -15,22 +14,24 @@ from pureml.schema import (
     StorageSchema,
     LogSchema,
     PredictSchema,
+    ConfigKeys,
 )
 from rich import print
 from . import get_org_id, get_token
 
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
 
 
 path_schema = PathSchema().get_instance()
 predict_schema = PredictSchema()
 backend_schema = BackendSchema().get_instance()
 post_key_resources = LogSchema().key.resources.value
+config_keys = ConfigKeys
+storage = StorageSchema().get_instance()
 
 
-def post_resource(
-    path, model_name: str, model_branch: str, model_version: str, storage: str
-):
+def post_resource(path, model_name: str, model_branch: str, model_version: str):
     user_token = get_token()
     org_id = get_org_id()
 
@@ -56,7 +57,7 @@ def post_resource(
     data = {
         "data": file_paths,
         "key": post_key_resources,
-        "storage": storage,
+        "storage": storage.STORAGE,
     }
 
     # data = json.dumps(data)
@@ -65,6 +66,7 @@ def post_resource(
 
     if response.ok:
         print(f"[bold green]resource has been registered!")
+        reset_config(key=config_keys.resource.value)
 
     else:
         print(f"[bold red]resource has not been registered!")
@@ -75,7 +77,6 @@ def post_resource(
 def add(
     label: str = None,
     path: str = None,
-    storage: str = StorageSchema().STORAGE,
 ) -> str:
 
     model_name, model_branch, model_version = parse_version_label(label)
@@ -97,7 +98,6 @@ def add(
             model_name=model_name,
             model_branch=model_branch,
             model_version=model_version,
-            storage=storage,
         )
 
         # print(response.text)

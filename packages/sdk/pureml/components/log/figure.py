@@ -8,16 +8,25 @@ from joblib import Parallel, delayed
 from PIL import Image
 
 from pureml.utils.pipeline import add_figures_to_config
-from pureml.schema import PathSchema, BackendSchema, StorageSchema, LogSchema
+from pureml.schema import (
+    PathSchema,
+    BackendSchema,
+    StorageSchema,
+    LogSchema,
+    ConfigKeys,
+)
 from rich import print
 from . import get_org_id, get_token
 
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
 
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 post_key_figure = LogSchema().key.figure.value
+config_keys = ConfigKeys
+storage = StorageSchema().get_instance()
 
 
 def save_images(figure):
@@ -45,9 +54,7 @@ def save_images(figure):
     return figure_paths
 
 
-def post_figures(
-    figure_paths, model_name: str, model_branch: str, model_version: str, storage: str
-):
+def post_figures(figure_paths, model_name: str, model_branch: str, model_version: str):
     user_token = get_token()
     org_id = get_org_id()
 
@@ -73,7 +80,7 @@ def post_figures(
     data = {
         "data": figure_paths,
         "key": "figure",
-        "storage": storage,
+        "storage": storage.STORAGE,
     }
 
     # data = json.dumps(data)
@@ -84,6 +91,7 @@ def post_figures(
 
     if response.ok:
         print(f"[bold green]Figures have been registered!")
+        reset_config(key=config_keys.figure.value)
 
     else:
         print(f"[bold red]Figures have not been registered!")
@@ -93,12 +101,7 @@ def post_figures(
     #     return
 
 
-def add(
-    label: str = None,
-    figure: dict = None,
-    file_paths: dict = None,
-    storage: str = StorageSchema().STORAGE,
-) -> str:
+def add(label: str = None, figure: dict = None, file_paths: dict = None) -> str:
     """`add` function takes in the path of the figure, name of the figure and the model name and
     registers the figure
 
@@ -144,7 +147,6 @@ def add(
             model_name=model_name,
             model_branch=model_branch,
             model_version=model_version,
-            storage=storage,
         )
 
         # print(response.text)

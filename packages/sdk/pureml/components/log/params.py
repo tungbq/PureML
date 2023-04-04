@@ -2,16 +2,18 @@ import json
 from urllib.parse import urljoin
 
 import requests
-from pureml.schema.log import BackendSchema, LogSchema
+from pureml.schema import BackendSchema, LogSchema, ConfigKeys
 from pureml.utils.log_utils import merge_step_with_value
 from pureml.utils.pipeline import add_params_to_config
 from rich import print
 
 from . import convert_values_to_string, get_org_id, get_token
 from pureml.utils.version_utils import parse_version_label
+from pureml.utils.config import reset_config
 
 backend_schema = BackendSchema().get_instance()
 post_key_params = LogSchema().key.params.value
+config_keys = ConfigKeys
 
 
 def post_params(params, model_name: str, model_branch: str, model_version: str):
@@ -38,6 +40,7 @@ def post_params(params, model_name: str, model_branch: str, model_version: str):
 
     if response.ok:
         print(f"[bold green]Params have been registered!")
+        reset_config(key=config_keys.params.value)
 
     else:
         print(f"[bold red]Params have not been registered!")
