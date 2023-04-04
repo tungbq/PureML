@@ -159,13 +159,9 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Hash is required")
 	}
-	var modelSourceType string
-	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
-		modelSourceType = strings.ToUpper(request.FormValues["storage"][0])
-	}
 	var modelSourceSecretName string
-	if request.FormValues["secret_name"] != nil && len(request.FormValues["secret_name"]) > 0 {
-		modelSourceSecretName = strings.ToUpper(request.FormValues["secret_name"][0])
+	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
+		modelSourceSecretName = request.FormValues["storage"][0]
 	}
 	var modelIsEmpty bool
 	if request.FormValues["is_empty"] != nil && len(request.FormValues["is_empty"]) > 0 {
@@ -178,16 +174,6 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	modelBranchName := request.GetPathParam("branchName")
 	if modelBranchName == "main" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Cannot register model directly to main branch")
-	}
-	sourceValid := false
-	for source := range commonmodels.SupportedSources {
-		if commonmodels.SupportedSources[source] == modelSourceType {
-			sourceValid = true
-			break
-		}
-	}
-	if !sourceValid {
-		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model storage")
 	}
 	versions, err := api.app.Dao().GetModelBranchAllVersions(modelBranchUUID, true)
 	if err != nil {
@@ -203,15 +189,28 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 	if response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Model with this hash already exists")
 	}
-	if modelSourceType == "S3" && !api.app.Settings().S3.Enabled {
-		return models.NewErrorResponse(http.StatusBadRequest, "S3 source not enabled")
+	var modelSourceType string
+	var modelSourceSecrets *commonmodels.SourceSecrets
+	var errresp *models.Response
+	if strings.ToUpper(modelSourceSecretName) != "LOCAL" {
+		modelSourceSecrets, errresp = api.ValidateSourceTypeAndGetSourceSecrets(modelSourceSecretName, orgId)
+		if errresp != nil {
+			return errresp
+		}
+		modelSourceType = modelSourceSecrets.SourceType
+	} else {
+		modelSourceType = "LOCAL"
+		modelSourceSecrets.SourceType = "LOCAL"
 	}
-	if modelSourceType == "R2" && !api.app.Settings().R2.Enabled {
-		return models.NewErrorResponse(http.StatusBadRequest, "R2 source not enabled")
+	sourceValid := false
+	for source := range commonmodels.SupportedSources {
+		if commonmodels.SupportedSources[source] == modelSourceType {
+			sourceValid = true
+			break
+		}
 	}
-	modelSourceSecrets, errresp := api.ValidateSourceTypeAndGetSourceSecrets(modelSourceType, modelSourceSecretName, orgId)
-	if errresp != nil {
-		return errresp
+	if !sourceValid {
+		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model storage")
 	}
 	var filePath string
 	if !modelIsEmpty {
@@ -219,7 +218,7 @@ func (api *Api) RegisterModel(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		filePath, err = api.app.UploadFile(file, fmt.Sprintf("model-registry/%s/models/%s/%s", orgId, modelUUID, modelBranchUUID), modelSourceType, modelSourceSecrets)
+		filePath, err = api.app.UploadFile(file, fmt.Sprintf("model-registry/%s/models/%s/%s", orgId, modelUUID, modelBranchUUID), modelSourceSecrets)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}

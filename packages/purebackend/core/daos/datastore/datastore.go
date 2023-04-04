@@ -2858,6 +2858,7 @@ func (ds *Datastore) GetSecretByName(orgId uuid.UUID, secretName string) (*commo
 			return nil, fmt.Errorf("r2 secrets not found or invalid")
 		}
 	}
+	sourceSecret.SourceType = secretType
 	return &sourceSecret, nil
 }
 

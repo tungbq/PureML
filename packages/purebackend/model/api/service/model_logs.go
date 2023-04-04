@@ -141,14 +141,20 @@ func (api *Api) LogFileModel(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	modelUUID := request.GetModelUUID()
 	modelBranchUUID := request.GetModelBranchUUID()
-	var modelSourceType string
-	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
-		modelSourceType = strings.ToUpper(request.FormValues["storage"][0])
-	}
 	var modelSourceSecretName string
-	if request.FormValues["secret_name"] != nil && len(request.FormValues["secret_name"]) > 0 {
-		modelSourceSecretName = strings.ToUpper(request.FormValues["secret_name"][0])
+	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
+		modelSourceSecretName = strings.ToUpper(request.FormValues["storage"][0])
 	}
+	fileHeaders := request.GetFormMultipleFiles("file")
+	if fileHeaders == nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "File is required")
+	}
+	versionUUID := request.GetModelBranchVersionUUID()
+	sourceSecrets, errresp := api.ValidateSourceTypeAndGetSourceSecrets(modelSourceSecretName, orgId)
+	if errresp != nil {
+		return errresp
+	}
+	modelSourceType := sourceSecrets.SourceType
 	sourceValid := false
 	for source := range commonmodels.SupportedSources {
 		if commonmodels.SupportedSources[source] == modelSourceType {
@@ -159,15 +165,6 @@ func (api *Api) LogFileModel(request *models.Request) *models.Response {
 	if !sourceValid {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported model storage")
 	}
-	fileHeaders := request.GetFormMultipleFiles("file")
-	if fileHeaders == nil {
-		return models.NewErrorResponse(http.StatusBadRequest, "File is required")
-	}
-	versionUUID := request.GetModelBranchVersionUUID()
-	sourceSecrets, errresp := api.ValidateSourceTypeAndGetSourceSecrets(modelSourceType, modelSourceSecretName, orgId)
-	if errresp != nil {
-		return errresp
-	}
 	logs := make(map[string]string)
 	for _, fileHeader := range fileHeaders {
 		name := fileHeader.Filename
@@ -177,7 +174,7 @@ func (api *Api) LogFileModel(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		filePath, err := api.app.UploadFile(file, fmt.Sprintf("model-registry/%s/models/%s/%s/logs", orgId, modelUUID, modelBranchUUID), modelSourceType, sourceSecrets)
+		filePath, err := api.app.UploadFile(file, fmt.Sprintf("model-registry/%s/models/%s/%s/logs", orgId, modelUUID, modelBranchUUID), sourceSecrets)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
