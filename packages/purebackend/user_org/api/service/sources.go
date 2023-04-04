@@ -228,7 +228,7 @@ func (api *Api) TestR2Secret(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	fs, err := api.app.NewFilesystem("R2", sourceSecrets)
+	fs, err := api.app.NewFilesystem(sourceSecrets)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "Failed to initialize the R2 storage. Raw error: \n"+err.Error())
 	}
@@ -272,7 +272,7 @@ func (api *Api) TestS3Secret(request *models.Request) *models.Response {
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
-	fs, err := api.app.NewFilesystem("S3", sourceSecrets)
+	fs, err := api.app.NewFilesystem(sourceSecrets)
 	if err != nil {
 		return models.NewErrorResponse(http.StatusBadRequest, "Failed to initialize the S3 storage. Raw error: \n"+err.Error())
 	}

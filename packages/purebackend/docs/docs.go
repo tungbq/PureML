@@ -953,11 +953,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "secret_name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
                         "name": "storage",
                         "in": "formData"
                     }
@@ -1383,11 +1378,6 @@ const docTemplate = `{
                         "name": "version",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "secret_name",
-                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -2453,11 +2443,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "secret_name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
                         "name": "storage",
                         "in": "formData"
                     }
@@ -2883,11 +2868,6 @@ const docTemplate = `{
                         "name": "version",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "secret_name",
-                        "in": "formData"
                     },
                     {
                         "type": "string",

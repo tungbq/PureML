@@ -681,9 +681,6 @@ paths:
         name: lineage
         type: string
       - in: formData
-        name: secret_name
-        type: string
-      - in: formData
         name: storage
         type: string
       produces:
@@ -965,9 +962,6 @@ paths:
         in: path
         name: version
         required: true
-        type: string
-      - in: formData
-        name: secret_name
         type: string
       - in: formData
         name: storage
@@ -1664,9 +1658,6 @@ paths:
         name: is_empty
         type: boolean
       - in: formData
-        name: secret_name
-        type: string
-      - in: formData
         name: storage
         type: string
       produces:
@@ -1948,9 +1939,6 @@ paths:
         in: path
         name: version
         required: true
-        type: string
-      - in: formData
-        name: secret_name
         type: string
       - in: formData
         name: storage

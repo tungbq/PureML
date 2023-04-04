@@ -141,14 +141,20 @@ func (api *Api) LogFileDataset(request *models.Request) *models.Response {
 	orgId := request.GetOrgId()
 	datasetUUID := request.GetDatasetUUID()
 	datasetBranchUUID := request.GetDatasetBranchUUID()
-	var datasetSourceType string
-	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
-		datasetSourceType = strings.ToUpper(request.FormValues["storage"][0])
-	}
 	var datasetSourceSecretName string
-	if request.FormValues["secret_name"] != nil && len(request.FormValues["secret_name"]) > 0 {
-		datasetSourceSecretName = strings.ToUpper(request.FormValues["secret_name"][0])
+	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
+		datasetSourceSecretName = strings.ToUpper(request.FormValues["storage"][0])
 	}
+	fileHeaders := request.GetFormMultipleFiles("file")
+	if fileHeaders == nil {
+		return models.NewErrorResponse(http.StatusBadRequest, "File is required")
+	}
+	versionUUID := request.GetDatasetBranchVersionUUID()
+	sourceSecrets, errresp := api.ValidateSourceTypeAndGetSourceSecrets(datasetSourceSecretName, orgId)
+	if errresp != nil {
+		return errresp
+	}
+	datasetSourceType := sourceSecrets.SourceType
 	sourceValid := false
 	for source := range commonmodels.SupportedSources {
 		if commonmodels.SupportedSources[source] == datasetSourceType {
@@ -159,15 +165,6 @@ func (api *Api) LogFileDataset(request *models.Request) *models.Response {
 	if !sourceValid {
 		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported dataset storage")
 	}
-	fileHeaders := request.GetFormMultipleFiles("file")
-	if fileHeaders == nil {
-		return models.NewErrorResponse(http.StatusBadRequest, "File is required")
-	}
-	versionUUID := request.GetDatasetBranchVersionUUID()
-	sourceSecrets, errresp := api.ValidateSourceTypeAndGetSourceSecrets(datasetSourceType, datasetSourceSecretName, orgId)
-	if errresp != nil {
-		return errresp
-	}
 	logs := make(map[string]string)
 	for _, fileHeader := range fileHeaders {
 		name := fileHeader.Filename
@@ -177,7 +174,7 @@ func (api *Api) LogFileDataset(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		filePath, err := api.app.UploadFile(file, fmt.Sprintf("dataset-registry/%s/datasets/%s/%s/logs", orgId, datasetUUID, datasetBranchUUID), datasetSourceType, sourceSecrets)
+		filePath, err := api.app.UploadFile(file, fmt.Sprintf("dataset-registry/%s/datasets/%s/%s/logs", orgId, datasetUUID, datasetBranchUUID), sourceSecrets)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}

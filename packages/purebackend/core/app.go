@@ -31,10 +31,10 @@ type App interface {
 	//
 	// NB! Make sure to call `Close()` on the returned result
 	// after you are done working with it.
-	NewFilesystem(sourceType string, sourceSecrets *commonmodels.SourceSecrets) (*filesystem.System, error)
+	NewFilesystem(sourceSecrets *commonmodels.SourceSecrets) (*filesystem.System, error)
 
 	// UploadFile uploads a file to the app storage.
-	UploadFile(file *filesystem.File, basePath string, sourceType string, sourceSecrets *commonmodels.SourceSecrets) (string, error)
+	UploadFile(file *filesystem.File, basePath string, sourceSecrets *commonmodels.SourceSecrets) (string, error)
 
 	// NewSearchClient creates and returns a configured search.SearchClient instance.
 	NewSearchClient() *search.SearchClient
