@@ -941,11 +941,6 @@
                     },
                     {
                         "type": "string",
-                        "name": "secret_name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
                         "name": "storage",
                         "in": "formData"
                     }
@@ -1371,11 +1366,6 @@
                         "name": "version",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "secret_name",
-                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -2441,11 +2431,6 @@
                     },
                     {
                         "type": "string",
-                        "name": "secret_name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
                         "name": "storage",
                         "in": "formData"
                     }
@@ -2871,11 +2856,6 @@
                         "name": "version",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "secret_name",
-                        "in": "formData"
                     },
                     {
                         "type": "string",

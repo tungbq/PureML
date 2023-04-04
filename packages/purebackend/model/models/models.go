@@ -24,7 +24,6 @@ type CreateModelBranchRequest struct {
 type RegisterModelRequest struct {
 	Hash       string `json:"hash"`
 	Storage    string `json:"storage"`
-	SecretName string `json:"secret_name"`
 	IsEmpty    bool   `json:"is_empty"`
 }
 

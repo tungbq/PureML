@@ -46,17 +46,17 @@ func populateErrorResponse(context echo.Context, response *models.Response, resp
 	}
 }
 
-func (api *Api) ValidateSourceTypeAndGetSourceSecrets(datasetSourceType string, datasetSourceSecretName string, orgId uuid.UUID) (*commonmodels.SourceSecrets, *models.Response) {
+func (api *Api) ValidateSourceTypeAndGetSourceSecrets(datasetSourceSecretName string, orgId uuid.UUID) (*commonmodels.SourceSecrets, *models.Response) {
 	var sourceSecrets *commonmodels.SourceSecrets
 	var err error
-	datasetSourceType = strings.ToUpper(datasetSourceType)
-	if datasetSourceType == "PUREML-STORAGE" {
+	if strings.ToUpper(datasetSourceSecretName) == "PUREML-STORAGE" {
 		sourceSecrets, err = api.app.Dao().GetSecretByName(uuid.Must(uuid.FromString("11111111-1111-1111-1111-111111111111")), "admin")
+		sourceSecrets.SourceType = "PUREML-STORAGE"
 	} else {
 		sourceSecrets, err = api.app.Dao().GetSecretByName(orgId, datasetSourceSecretName)
 	}
 	if sourceSecrets == nil || err != nil {
-		return nil, models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", datasetSourceType))
+		return nil, models.NewErrorResponse(http.StatusBadRequest, fmt.Sprintf("Source %s not connected properly to organization", datasetSourceSecretName))
 	}
 	return sourceSecrets, nil
 }

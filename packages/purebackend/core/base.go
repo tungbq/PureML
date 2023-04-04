@@ -203,9 +203,8 @@ func (app *BaseApp) Settings() *settings.Settings {
 //
 // NB! Make sure to call `Close()` on the returned result
 // after you are done working with it.
-func (app *BaseApp) NewFilesystem(sourceType string, sourceSecrets *commonmodels.SourceSecrets) (*filesystem.System, error) {
-	sourceType = strings.ToUpper(sourceType)
-	switch sourceType {
+func (app *BaseApp) NewFilesystem(sourceSecrets *commonmodels.SourceSecrets) (*filesystem.System, error) {
+	switch strings.ToUpper(sourceSecrets.SourceType) {
 	case "S3":
 		return filesystem.NewS3(
 			app.settings.S3.Bucket,
@@ -231,8 +230,8 @@ func (app *BaseApp) NewFilesystem(sourceType string, sourceSecrets *commonmodels
 }
 
 // UploadFile uploads a file to the app storage.
-func (app *BaseApp) UploadFile(file *filesystem.File, basePath string, sourceType string, sourceSecrets *commonmodels.SourceSecrets) (string, error) {
-	fs, err := app.NewFilesystem(sourceType, sourceSecrets)
+func (app *BaseApp) UploadFile(file *filesystem.File, basePath string, sourceSecrets *commonmodels.SourceSecrets) (string, error) {
+	fs, err := app.NewFilesystem(sourceSecrets)
 	if err != nil {
 		return "", err
 	}

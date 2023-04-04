@@ -158,13 +158,9 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	} else {
 		return models.NewErrorResponse(http.StatusBadRequest, "Hash is required")
 	}
-	var datasetSourceType string
-	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
-		datasetSourceType = strings.ToUpper(request.FormValues["storage"][0])
-	}
 	var datasetSourceSecretName string
-	if request.FormValues["secret_name"] != nil && len(request.FormValues["secret_name"]) > 0 {
-		datasetSourceSecretName = strings.ToUpper(request.FormValues["secret_name"][0])
+	if request.FormValues["storage"] != nil && len(request.FormValues["storage"]) > 0 {
+		datasetSourceSecretName = request.FormValues["storage"][0]
 	}
 	var datasetIsEmpty bool
 	if request.FormValues["is_empty"] != nil && len(request.FormValues["is_empty"]) > 0 {
@@ -182,16 +178,6 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	if datasetBranchName == "main" {
 		return models.NewErrorResponse(http.StatusBadRequest, "Cannot register dataset directly to main branch")
 	}
-	sourceValid := false
-	for source := range commonmodels.SupportedSources {
-		if commonmodels.SupportedSources[source] == datasetSourceType {
-			sourceValid = true
-			break
-		}
-	}
-	if !sourceValid {
-		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported dataset storage")
-	}
 	versions, err := api.app.Dao().GetDatasetBranchAllVersions(datasetBranchUUID)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
@@ -206,9 +192,28 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 	if response {
 		return models.NewErrorResponse(http.StatusBadRequest, "Dataset with this hash already exists")
 	}
-	datasetSourceSecrets, errresp := api.ValidateSourceTypeAndGetSourceSecrets(datasetSourceType, datasetSourceSecretName, orgId)
-	if errresp != nil {
-		return errresp
+	var datasetSourceType string
+	var datasetSourceSecrets *commonmodels.SourceSecrets
+	var errresp *models.Response
+	if strings.ToUpper(datasetSourceSecretName) != "LOCAL" {
+		datasetSourceSecrets, errresp = api.ValidateSourceTypeAndGetSourceSecrets(datasetSourceSecretName, orgId)
+		if errresp != nil {
+			return errresp
+		}
+		datasetSourceType = datasetSourceSecrets.SourceType
+	} else {
+		datasetSourceType = "LOCAL"
+		datasetSourceSecrets.SourceType = "LOCAL"
+	}
+	sourceValid := false
+	for source := range commonmodels.SupportedSources {
+		if commonmodels.SupportedSources[source] == datasetSourceType {
+			sourceValid = true
+			break
+		}
+	}
+	if !sourceValid {
+		return models.NewErrorResponse(http.StatusBadRequest, "Unsupported dataset storage")
 	}
 	var filePath string
 	if !datasetIsEmpty {
@@ -216,7 +221,7 @@ func (api *Api) RegisterDataset(request *models.Request) *models.Response {
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
-		filePath, err = api.app.UploadFile(file, fmt.Sprintf("dataset-registry/%s/datasets/%s/%s", orgId, datasetUUID, datasetBranchUUID), datasetSourceType, datasetSourceSecrets)
+		filePath, err = api.app.UploadFile(file, fmt.Sprintf("dataset-registry/%s/datasets/%s/%s", orgId, datasetUUID, datasetBranchUUID), datasetSourceSecrets)
 		if err != nil {
 			return models.NewServerErrorResponse(err)
 		}
