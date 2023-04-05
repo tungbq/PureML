@@ -114,7 +114,7 @@ export default function NavBar(props: Props) {
           </li>
           {props.intent === "loggedOut" ? (
             <li className="flex">
-              <div className="w-full flex justify-center items-center px-5">
+              <div className="w-full flex justify-center items-center px-5 font-medium text-slate-500">
                 <a href="/auth/signin" className="w-max">
                   Sign in
                 </a>
@@ -224,7 +224,7 @@ export default function NavBar(props: Props) {
           </a>
           {props.intent === "loggedOut" ? (
             <li className="flex">
-              <div className="w-full flex justify-center items-center px-5">
+              <div className="w-full flex justify-center items-center px-5 font-medium text-slate-500">
                 <a href="/auth/signin" className="w-max">
                   Sign in
                 </a>

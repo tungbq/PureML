@@ -96,6 +96,22 @@ export async function fetchVerifyEmail(token: string | undefined) {
   return res;
 }
 
+export async function fetchVerifySession(
+  accessToken: string,
+  sessionId: string
+) {
+  const url = makeUrl(`user/verify-session/${sessionId}`);
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application / json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((res) => res.json());
+  return res;
+}
+
 export async function fetchForgotPassword(email: string) {
   const url = makeUrl(`user/forgot-password`);
   const res = await fetch(url, {
