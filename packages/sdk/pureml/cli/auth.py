@@ -17,15 +17,11 @@ import json
 from pureml.schema import BackendSchema, PathSchema
 import platform
 import ipapi
-from dotenv import load_dotenv
 
 
 path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 app = typer.Typer()
-load_dotenv()
-
-IPAPI_KEY = os.getenv("IPAPI_KEY")
 
 def save_auth(org_id: str = None, access_token: str = None, email: str = None):
     token_path = path_schema.PATH_USER_TOKEN
@@ -161,15 +157,14 @@ def check_org_status(access_token: str, base_url: str):
 
 def get_location():
     try:
-        response = ipapi.location(output="json", key=IPAPI_KEY)
+        response = ipapi.location(output="json")
     except:
         try:
-            print("Getting device details...")
-            response = requests.get(f'https://api64.ipify.org?format=json&key={IPAPI_KEY}').json()
-            response = requests.get(f"https://ipapi.co/{response['ip']}/json/?key={IPAPI_KEY}", headers={
+            # print("Getting device details...")
+            response = requests.get(f'https://api64.ipify.org?format=json').json()
+            response = requests.get(f"https://ipapi.co/{response['ip']}/json/", headers={
                     "User-Agent": "pureml-cli"
                 }).json()
-            print(response)
         except:
             response = {
                 "ip": socket.gethostbyname(socket.gethostname()),
@@ -302,7 +297,7 @@ def login(
                         print(f"[red]Session expired or invalid device! Please try again later")
                         return
 
-                if time() - start_time > 60 * 1:
+                if time() - start_time > 60 * 10:
                     print(f"[red]Session timed out!")
                     return
                 
