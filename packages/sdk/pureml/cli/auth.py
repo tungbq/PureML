@@ -23,6 +23,7 @@ path_schema = PathSchema().get_instance()
 backend_schema = BackendSchema().get_instance()
 app = typer.Typer()
 
+
 def save_auth(org_id: str = None, access_token: str = None, email: str = None):
     token_path = path_schema.PATH_USER_TOKEN
 
