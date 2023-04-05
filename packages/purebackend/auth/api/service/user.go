@@ -1124,7 +1124,7 @@ func (api *Api) CreateSession(request *models.Request) *models.Response {
 	} else {
 		deviceLocData = deviceLoc.(string)
 	}
-	session, err := api.app.Dao().CreateSession(deviceIdData, deviceData, deviceLocData)
+	session, err := api.app.Dao().CreateSession(deviceData, deviceIdData, deviceLocData)
 	if err != nil {
 		return models.NewServerErrorResponse(err)
 	}
