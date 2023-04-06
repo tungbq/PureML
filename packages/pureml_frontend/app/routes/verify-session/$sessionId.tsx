@@ -17,36 +17,37 @@ export const meta: MetaFunction = () => ({
 export async function loader({ params, request }: any) {
   const session = await getSession(request.headers.get("Cookie"));
   const accesstoken = session.get("accessToken");
+  const sessionId = params.sessionId;
   if (accesstoken) {
     const orgId = session.get("orgId");
     if (!orgId) return null;
     const profile = await fetchUserSettings(accesstoken);
     const orgDetails = await fetchOrgDetails(orgId, session.get("accessToken"));
-    const sessionId = params.sessionId;
     const verifySession = await fetchVerifySession(accesstoken, sessionId);
-    return { profile, orgDetails, verifySession };
+    return { profile, orgDetails, verifySession, sessionId };
   }
-  return null;
+  return sessionId;
 }
 
-export default function VerifyEmail() {
+export default function VerifySession() {
   const data = useLoaderData();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!data) {
+    if (!data.verifySession) {
       const timer = setTimeout(async () => {
-        if (data === null) {
-          toast.info("User not logged in. Proceeding to signin!");
-          navigate("/auth/signin");
-        }
+        toast.info("User not logged in. Proceeding to signin!");
+        navigate(`/auth/signin?sessionid=${data}`);
       }, 2000);
       return () => clearTimeout(timer);
     }
   }, [data, navigate]);
 
-  if (data) {
-    if (data.status === 200)
+  if (data.verifySession) {
+    if (
+      data.status === 200 ||
+      data.verifySession.message === "Session already approved"
+    )
       return (
         <Suspense fallback={<Loader />}>
           <div className="h-screen">
