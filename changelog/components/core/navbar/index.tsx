@@ -21,12 +21,12 @@ export default function Navbar() {
                 </div>
                 <div className="flex flex-col gap-y-4 p-4 font-medium text-brand-200">
                   <div className="flex items-center">
-                    <a href="/whypureml" className="w-max letterSpaced">
+                    <a href="https://pureml.com/whypureml" className="w-max letterSpaced">
                       WHY PUREML
                     </a>
                   </div>
                   <div className="flex items-center">
-                    <a href="/mltools" className="w-max letterSpaced">
+                    <a href="https://pureml.com/mltools" className="w-max letterSpaced">
                       MLOPS TOOLS
                     </a>
                   </div>
@@ -51,7 +51,7 @@ export default function Navbar() {
                     </a>
                   </div>
                   <div className="flex items-center text-brand-200 letterSpaced">
-                    <a href="/auth/signin">SIGN IN</a>
+                    <a href="https://pureml.com/auth/signin">SIGN IN</a>
                   </div>
                 </div>
               </div>
@@ -91,7 +91,7 @@ export default function Navbar() {
             <div className="hidden sm:flex flex font-medium">
               <div className="px-4 flex justify-center items-center">
                 <a
-                  href="/whypureml"
+                  href="https://pureml.com/whypureml"
                   className="w-full text-lg letterSpaced text-brand-200 hover:underline hover:underline-offset-2"
                 >
                   WHY PUREML
@@ -99,7 +99,7 @@ export default function Navbar() {
               </div>
               <div className="px-4 flex justify-center items-center">
                 <a
-                  href="/mltools"
+                  href="https://pureml.com/mltools"
                   className="w-full text-lg letterSpaced text-brand-200 hover:underline hover:underline-offset-2"
                 >
                   MLOPS TOOLS
@@ -127,7 +127,7 @@ export default function Navbar() {
               </div>
               <div className="px-4 flex justify-center items-center">
                 <a
-                  href="/auth/signin"
+                  href="https://pureml.com/auth/signin"
                   className="flex justify-center items-center gap-y-4 text-brand-200 hover:underline hover:underline-offset-2 text-lg letterSpaced"
                 >
                   SIGN IN <ArrowUpRight className="text-brand-200 w-5" />
