@@ -11,7 +11,7 @@ export default function Navbar() {
             <div className="sm:px-24">
               <div className="rounded-b-2xl border-b border-slate-200">
                 <div className="flex px-4 py-4 md:px-12 justify-between">
-                  <a href="/">
+                  <a href="https://pureml.com">
                     <img src="/PureMLLogoWText.svg" alt="PureMLLogo" width="96" height="96" />
                   </a>
                   <X
@@ -65,7 +65,7 @@ export default function Navbar() {
       <div className="flex justify-center w-full backdrop-blur-sm bg-white/30">
         <div className="lg:h-fit w-full md:max-w-screen-xl px-0 md:px-8">
           <div className="flex p-4 md:px-0 justify-between w-full">
-            <a href="/">
+            <a href="https://pureml.com">
               <img src="/PureMLLogoWText.svg" alt="PureMLLogo" width="96" height="96" />
             </a>
             <div className="md:hidden flex">
