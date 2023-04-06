@@ -45,7 +45,7 @@ export default function VerifySession() {
 
   if (data.verifySession) {
     if (
-      data.status === 200 ||
+      data.verifySession.status === 200 ||
       data.verifySession.message === "Session already approved"
     )
       return (
