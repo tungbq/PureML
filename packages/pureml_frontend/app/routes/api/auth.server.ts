@@ -100,7 +100,7 @@ export async function fetchVerifySession(
   accessToken: string,
   sessionId: string
 ) {
-  const url = makeUrl(`user/verify-session/${sessionId}`);
+  const url = makeUrl(`user/verify-session`);
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -108,6 +108,9 @@ export async function fetchVerifySession(
       Accept: "application / json",
       Authorization: `Bearer ${accessToken}`,
     },
+    body: JSON.stringify({
+      session_id: sessionId,
+    }),
   }).then((res) => res.json());
   return res;
 }
