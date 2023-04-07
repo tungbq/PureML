@@ -6,14 +6,18 @@ import { getArticleSlugs } from "lib/get-articles-slugs";
 
 const ARTICLES_PER_PAGE = 4;
 
-const Page = ({ slugs }) => {
+const Page = ({ slugs, articlesLenght }) => {
   const router = useRouter();
   const page = parseInt(router.query.page as string);
 
   const Articles = slugs.map((slug) => dynamic(() => import(`../changelogs/${slug}.mdx`)));
 
   return (
-    <PaginatedArticles page={page}>
+    <PaginatedArticles
+      page={page}
+      articlesLenght={articlesLenght}
+      ARTICLES_PER_PAGE={ARTICLES_PER_PAGE}
+    >
       {Articles.map((Article, index) => (
         <Article key={index} hideLayout={true} hideHead={true} hideAuthors={true} />
       ))}
@@ -29,7 +33,7 @@ export async function getStaticPaths() {
   return {
     paths: numbers.map((number) => ({
       params: {
-        page: number.toString(),
+        page: (number + 1).toString(),
       },
     })),
     fallback: false,
@@ -58,7 +62,7 @@ export async function getStaticProps({ params }) {
   const recents = meta.slice(start, end).map((item) => item.slug);
 
   return {
-    props: { slugs: recents },
+    props: { slugs: recents, articlesLenght: meta.length },
     revalidate: 1,
   };
 }

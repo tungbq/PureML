@@ -9,9 +9,16 @@ import { Box, Button, Container, Divider, Heading, HStack, Text, VStack } from "
 export interface PaginatedArticlesProps {
   page: number;
   children: ReactNode;
+  articlesLenght?: number;
+  ARTICLES_PER_PAGE?: number;
 }
 
-export const PaginatedArticles = ({ page, children }: PaginatedArticlesProps) => {
+export const PaginatedArticles = ({
+  page,
+  children,
+  articlesLenght,
+  ARTICLES_PER_PAGE,
+}: PaginatedArticlesProps) => {
   const metaTitle = `${page > 0 ? `Page ${page} -` : ""} PureML Changelog`;
 
   return (
@@ -63,17 +70,19 @@ export const PaginatedArticles = ({ page, children }: PaginatedArticlesProps) =>
               ) : (
                 <HStack justifyContent="center" spacing={4}>
                   {page > 0 && (
-                    <Link href={`/page/${page - 1}`}>
+                    <Link href={page === 1 ? "/" : `/page/${page - 1}`}>
                       <Button variant="landingOutline" size="landingLg">
                         Previous page
                       </Button>
                     </Link>
                   )}
-                  <Link href={`/page/${page + 1}`}>
-                    <Button variant="landingOutline" size="landingLg">
-                      Next page
-                    </Button>
-                  </Link>
+                  {articlesLenght / ARTICLES_PER_PAGE - 1 > page ? (
+                    <Link href={`/page/${page + 1}`}>
+                      <Button variant="landingOutline" size="landingLg">
+                        Next page
+                      </Button>
+                    </Link>
+                  ) : null}
                 </HStack>
               )}
             </VStack>
