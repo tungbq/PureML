@@ -90,7 +90,7 @@ export default function Footer() {
                 Roadmap
               </a>
               <a
-                href="https://pureml.notion.site/PureML-Changelog-096f7541dd6245c0a3c244e9f216ad31"
+                href="https://changelog.pureml.com"
                 target="_blank"
                 rel="noreferrer"
                 className="underline text-lg xl:text-xl"
