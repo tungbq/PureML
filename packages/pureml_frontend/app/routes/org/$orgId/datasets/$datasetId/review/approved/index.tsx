@@ -54,7 +54,7 @@ export default function DatasetReview() {
                                 key={index}
                                 onClick={() => {
                                   navigate(
-                                    `/org/${reviewData.params.orgId}/datasets/${reviewData.params.datasetId}/versions/datalineage`
+                                    `/org/${reviewData.params.orgId}/datasets/${reviewData.params.datasetId}/versions/main/datalineage`
                                   );
                                 }}
                               >
