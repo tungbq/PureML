@@ -54,7 +54,7 @@ export default function ModelReview() {
                                 key={index}
                                 onClick={() => {
                                   navigate(
-                                    `/org/${reviewData.params.orgId}/models/${reviewData.params.modelId}/versions/logs`
+                                    `/org/${reviewData.params.orgId}/models/${reviewData.params.modelId}/versions/main/logs`
                                   );
                                 }}
                               >
