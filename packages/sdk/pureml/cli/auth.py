@@ -8,6 +8,7 @@ import requests
 import typer
 from rich import print
 from rich.syntax import Syntax
+from .orgs import select
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from pureml.components import get_org_id, get_token
 from rich.console import Console
@@ -215,8 +216,7 @@ def login(
             print(f"[green]Successfully logged in as {email}!")
 
             # Select organization
-            list_org(access_token, base_url)
-            org_id = check_org_status(access_token, base_url)
+            org_id = select()
             if org_id is not None:
                 save_auth(org_id=org_id, access_token=access_token, email=email)
                 print(f"[green]Successfully linked to organization {org_id}!")
@@ -306,8 +306,7 @@ def login(
         print(f"[green]Successfully logged in as {email}!")
         
         # Select organization
-        list_org(access_token, base_url)
-        org_id = check_org_status(access_token, base_url)
+        org_id = select()
         if org_id is not None:
             save_auth(org_id=org_id, access_token=access_token, email=email)
             print(f"[green]Successfully linked to organization {org_id}!")
